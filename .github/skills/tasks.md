@@ -203,15 +203,89 @@ for each task in active list:
 
 ## Messaging System
 
+### TaskMessageType Enum (kknd.h)
+
+All message IDs live in a contiguous 1497–1551 range, plus a few 0xFFFFFFxx special values:
+
+| ID | Name | Category | Payload |
+|----|------|----------|--------|
+| 1497 | `TaskMessage_Attacked` | Combat | Attacker Unit* |
+| 1498 | `TaskMessage_MissionFailed` | Mission | — |
+| 1499 | `TaskMessage_Crushed` | Combat | — |
+| 1500 | `TaskMessage_DestroyAttachment` | Lifecycle | — |
+| 1503 | `TaskMessage_ReceiveDamage` | Combat | Damage params |
+| 1505 | `TaskMessage_GainExperience` | Combat | XP amount |
+| 1506 | `TaskMessage_Sabotage` | Combat | — |
+| 1507 | `TaskMessage_EscortBegin` | Orders | Unit* |
+| 1508 | `TaskMessage_EscortRetaliate` | Orders | — |
+| 1509 | `TaskMessage_EscortEnd` | Orders | — |
+| 1510 | `TaskMessage_RepairTick` | Economy | — |
+| 1511 | `TaskMessage_UnitSelected` | UI | — |
+| 1512 | `TaskMessage_UnitDeselected` | UI/Lifecycle | — |
+| 1513 | `TaskMessage_1513_sidebar` | UI | — |
+| 1514 | `TaskMessage_1514_sidebar` | UI | — |
+| 1515 | `TaskMessage_ShowHint` | UI | — |
+| 1516 | `TaskMessage_HideHint` | UI | — |
+| 1517 | `TaskMessage_Destroy` | Lifecycle | — |
+| 1518 | `TaskMessage_1518` | Unknown | — |
+| 1519 | `TaskMessage_AirstrikeSetTargetingMode` | Orders | — |
+| 1520 | `TaskMessage_AirstrikeClearTargetingMode` | Orders | — |
+| 1521 | `TaskMessage_UnitCreated` | Lifecycle | Unit* |
+| 1522 | `TaskMessage_BuildingPlacementModeBegin` | UI | — |
+| 1523 | `TaskMessage_AttackOrder` | Orders | Target Unit* |
+| 1524 | `TaskMessage_MoveOrder` | Orders | Position/Unit* |
+| 1525 | `TaskMessage_1525` | Orders | — |
+| 1526 | `TaskMessage_Infiltrate` | Orders | Target Unit* |
+| 1527 | `TaskMessage_Follow` | Orders | Target Unit* |
+| 1528 | `TaskMessage_Retreat` | Orders | — |
+| 1529 | `TaskMessage_AdvanceConstructionStage` | Building | Stage int |
+| 1530 | `TaskMessage_ToggleIngameMenu` | UI | — |
+| 1531 | `TaskMessage_MissionOutcomePopup` | Mission | — |
+| 1532 | `TaskMessage_PauseGame` | System | — |
+| 1533 | `TaskMessage_ResumeGame` | System | — |
+| 1535 | `TaskMessage_UnitReady` | Production | Unit type |
+| 1537 | `TaskMessage_BuildingComplete` | Building | — |
+| 1538 | `TaskMessage_BroadcastBuildingComplete` | Building | — |
+| 1539 | `TaskMessage_PowerPlantDown` | Economy | — |
+| 1540 | `TaskMessage_DrillrigDown` | Economy | — |
+| 1541 | `TaskMessage_TankerAssignedNewPowerPlant` | Economy | Unit* |
+| 1542 | `TaskMessage_TankerAssignedNewDrillrig` | Economy | Unit* |
+| 1543 | `TaskMessage_UpgradeComplete` | Building | — |
+| 1544 | `TaskMessage_UpgradeStarted` | Building | — |
+| 1545 | `TaskMessage_UpgradeCancelled` | Building | — |
+| 1546 | `TaskMessage_RepairBayAssigned` | Economy | — |
+| 1547 | `TaskMessage_TechnicianAssigned` | Economy | — |
+| 1548 | `TaskMessage_SidebarRefreshOptions` | UI | — |
+| 1549 | `TaskMessage_SpawnTanker` | Economy | — |
+| 1551 | `TaskMessage_TowerReady` | Building | — |
+| 0xFFFFFFFB | `TaskMessage_SoundPanTransitionComplete` | Sound | — |
+| 0xFFFFFFFC | `TaskMessage_SoundVolumeTransitionComplete` | Sound | — |
+| 0xFFFFFFFD | `TaskMessage_SoundCleanupComplete` | Sound | — |
+| 0xFFFFFFFE | `TaskMessage_MouseHover` | UI | — |
+
+**Note**: IDs 1526–1528 are aliased by menu code as `OpenBriefing/RestartLevel/CloseDialog` — same numeric values reused in different contexts.
+
 ### Point-to-Point: TASK_send_message (kknd.c:36110)
 
 ```c
 BOOL TASK_send_message(Task *sender, TaskMessageType msg, void *payload, Task *receiver);
 ```
 
-- **If receiver is Callback** and has `message_handler`: calls handler **synchronously inline**. No queue.
-- **If receiver is Coroutine** (or Callback without handler): allocates message from pool, pushes onto `receiver->message_queue`.
-- Sets wake flag `0x40000000` (Task_Wait) on receiver's `flags_20` and `flags_24`.
+Delivery is **split by task kind**:
+
+```c
+if (receiver->kind == TaskKind_Callback && receiver->message_handler != NULL) {
+    // SYNCHRONOUS: call handler inline, right now, in sender's context
+    receiver->message_handler(receiver, sender, msg, payload);
+} else {
+    // QUEUED: allocate TaskMessage from pool, push onto receiver->message_queue
+    // Set wake flag 0x40000000 on receiver->flags_20 and flags_24
+}
+```
+
+**Critical implication**: For Callbacks, the message handler runs inside `TASK_send_message` — the sender is still on the call stack. If the handler sends a message back, you get nested synchronous delivery. This is used intentionally (e.g., BuildingDefault calling `unit_on_damage_ex` which may broadcast `UnitDeselected`).
+
+For Coroutines (or Callbacks without a handler), messages queue up. The coroutine pops them after `TASK_yield` resumes.
 
 ### Broadcast: TASK_broadcast_message (kknd.c:36149)
 
@@ -230,6 +304,132 @@ TaskMessage *TASK_pop_message(Task *task);
 ```
 
 Pops head of `task->message_queue`. Caller must `task_message_recycle(msg)` after processing.
+
+---
+
+## Message Handlers — Complete Reference
+
+All MessageHandlers share the signature:
+```c
+void __fastcall HandlerName(Task *receiver, Task *sender, TaskMessageType message, void *payload);
+```
+
+They are stored on `task->message_handler` and called **synchronously** by `TASK_send_message` for Callback tasks.
+
+### Handler Hierarchy
+
+Building handlers follow an inheritance pattern — most delegate unhandled messages to `MessageHandler_BuildingDefault`:
+
+```
+MessageHandler_BuildingDefault              ← base handler for all buildings
+├── MessageHandler_Outpost                  ← adds UnitReady spawn, UpgradeComplete
+│   └── MessageHandler_OutpostUpgrades      ← upgrade level progression
+├── MessageHandler_MachineShop              ← adds vehicle UnitReady spawn
+│   └── MessageHandler_MachineShopUpgrades  ← vehicle unlock progression
+├── MessageHandler_Clanhall                 ← adds beast UnitReady spawn
+│   └── MessageHandler_ClanhallUpgrades     ← mutant unit unlock progression
+├── MessageHandler_BeastEnclosure           ← beast UnitReady + inlined upgrades
+├── MessageHandler_Blacksmith               ← vehicle UnitReady + inlined upgrades
+│   └── MessageHandler_BlacksmithUpgrades   ← (duplicate of inlined logic)
+├── MessageHandler_PowerStation             ← adds SpawnTanker broadcast
+├── MessageHandler_Drillrig                 ← ignores AttackOrder, special death
+├── MessageHandler_RepairBuilding           ← UpgradeComplete only
+├── MessageHandler_RepairBuilding_2         ← sends UpgradeComplete to target building
+├── MessageHandler_Prison                   ← level-specific death modes
+└── MessageHandler_Hut                      ← special death mode (unit_mode_hut_on_death)
+
+MessageHandler_Tower                        ← standalone, NO BuildingDefault fallback
+└── MessageHandler_TowerTurret              ← AttackOrder only
+```
+
+### MessageHandler_BuildingDefault (kknd.c:7362) — Base Building Handler
+
+Handles the common message set all buildings share:
+
+| Message | Action |
+|---------|--------|
+| `AdvanceConstructionStage` | Drive construction FSM: stage 1 → stage 2 → complete (set `mode = mode_arrive`) |
+| `Attacked` | Call `unit_on_attacked_default()`, play warning sound |
+| `ReceiveDamage` | Call `unit_on_damage_ex()`, update healthbar |
+| `Sabotage` | Call `unit_on_sabotage()` |
+| `EscortBegin/End` | Escort list management |
+| `UnitSelected/Deselected` | Selection UI handling |
+| `ShowHint` | Tooltip display |
+| `Destroy` | Set hitpoints=0, mode=`unit_mode_building_on_death`, destroyed=1 |
+| `UnitReady` | Spawn produced unit at rally point, play "Unit Ready" |
+
+### Combat Unit Handlers
+
+| Handler | Line | Handles | Special Behavior |
+|---------|------|---------|------------------|
+| `MessageHandler_Scout` | 27072 | Attacked, Crushed, ReceiveDamage, GainExperience, Escort*, Selected/Deselected, ShowHint, AttackOrder, MoveOrder, Infiltrate, Follow | Full combat unit — veterancy, infiltrate, escort retaliation |
+| `MessageHandler_Bomber` | 5845 | ReceiveDamage, Selected/Deselected, ShowHint | Minimal — custom death mode `unit_mode_bomber_on_death` |
+| `MessageHandler_TankerConvoy` | 9539 | Attacked, ReceiveDamage, Escort*, Selected/Deselected, ShowHint | Standard non-combat unit, no move orders |
+| `MessageHandler_MobileDerrick` | 11053 | Same as TankerConvoy + MoveOrder | Can be ordered to move |
+| `MessageHandler_MobileBase` | 40083 | Attacked, ReceiveDamage, Escort*, Selected/Deselected, ShowHint, MoveOrder, BuildingPlacementModeBegin | Building placement sends `UnitDeselected` to `g_game_update_loop_task` |
+
+### Movement/Order Handlers (unnamed)
+
+These handle units in specific movement states. They temporarily replace the normal handler:
+
+| Handler | Line | Rename Suggestion | Handles | Purpose |
+|---------|------|-------------------|---------|---------|
+| `MessageHandler_419CA0` | 27242 | `MessageHandler_UnitMoving` | ReceiveDamage, Selected/Deselected, ShowHint | Basic unit in transit — no orders accepted |
+| `MessageHandler_419DF0` | 27323 | `MessageHandler_UnitMovingWithOrders` | Same + MoveOrder | Moving unit that can receive redirect |
+| `MessageHandler_419E80` | 27358 | `MessageHandler_UnitRepairing` | ReceiveDamage, Selected/Deselected, ShowHint | Unit being repaired — uses `sub_41A510` for damage |
+
+### Special Handlers
+
+| Handler | Line | Purpose |
+|---------|------|---------|
+| `EventHandler_Passive` | 27274 | Passive units (tankers in transit). Handles ReceiveDamage + queues MoveOrder/AttackOrder as `next_order` instead of executing immediately. |
+| `MessageHandler_Dummy` | 285 | **No body** — forward declaration only. Used as null sink to swallow all messages. Assigned to MobileBase after planting. |
+| `MessageHandler_TurretCleanup` | 69521 | Handles only `MissionFailed` → entity remove + task terminate. Assigned during cleanup. |
+| `MessageHandler_Turret` | 72383 | Handles only `DestroyAttachment` → sets `turret->mode = turret_mode_destroyed`. |
+| `MessageHandler_UpgradeProcess` | 53722 | Handles only `UpgradeCancelled` → sets cancelled flag. No BuildingDefault fallback. |
+| `MessageHandler_TechBunker` | 11514 | Same as Hut — ReceiveDamage + selection, special death `unit_mode_tech_bunker_on_death`. |
+| `MessageHandler_Tower` | 68267 | **Standalone** (no BuildingDefault). Full message set + AdvanceConstructionStage creates turret on completion. Sends `TowerReady` broadcast + forwards `AttackOrder` to turret task. |
+| `MessageHandler_TowerTurret` | 68967 | `AttackOrder` only → sets turret to attack mode with target. |
+| `MessageHandler_448EF0` | 69539 | `UnitDeselected` only → linked list removal (ownership tracking). |
+
+### AI Controller Handlers
+
+| Handler | Line | Channel | Messages |
+|---------|------|---------|----------|
+| `MessageHandler_AiController_General` | 12522 | `TaskChannel_UnitLifecycle` | `UnitCreated`, `UnitDeselected` — tracks all units by type (tankers, drillrigs, factories, attackers, wanderers). Uses `diplomacy_is_enemy()` to classify friend vs foe. |
+| `MessageHandler_AiController_Mute05_Ambush` | 45372 | `TaskChannel_UnitLifecycle` | Same — simplified for ambush mission |
+| `MessageHandler_AiController_Mute08_SmashTheConvoy` | 44949 | `TaskChannel_UnitLifecycle` | Same — convoy formation AI |
+
+AI handlers receive `UnitCreated`/`UnitDeselected` via broadcast on `TaskChannel_UnitLifecycle (0x9876)`. Every unit spawn and death fires on this channel, giving AI controllers a real-time census of the battlefield.
+
+### UI / Sidebar Handlers
+
+| Handler | Line | Messages |
+|---------|------|----------|
+| `MessageHandler_401B80_sidebar_payload` | 6319 | `UnitSelected/Deselected`, `1514_sidebar`, `SidebarRefreshOptions` — manages sidebar selection counts and mode switching |
+| `MessageHandler_444D60` (Tanker) | 65803 | Full tanker logistics: ReceiveDamage, Escort, MoveOrder, Retreat, `BroadcastBuildingComplete`, `PowerPlantDown`, `DrillrigDown`, `TankerAssignedNew*`, `RepairBayAssigned` — handles all economic unit relationships |
+
+### Handler Stash/Restore Pattern
+
+Units temporarily override their message handler during special modes (movement, repair). The Unit struct has a backup field:
+
+```c
+// Unit struct (kknd.h:2491)
+KKND::MessageHandler message_handler;   // backup of normal handler
+```
+
+**Stash** (before entering special mode):
+```c
+unit->message_handler = unit->task->message_handler;   // backup
+unit->task->message_handler = MessageHandler_419E80;    // install temp handler
+```
+
+**Restore** (when special mode ends):
+```c
+unit->task->message_handler = unit->message_handler;   // restore from backup
+```
+
+This lets units accept a reduced message set during movement/repair (no attack orders while repairing) then return to their full handler when done. The `EventHandler_Passive` handler is a common "reduced" handler that queues orders as `next_order` instead of executing them.
 
 ---
 

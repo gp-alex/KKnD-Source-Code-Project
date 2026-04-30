@@ -243,25 +243,45 @@ Tracks production buildings. `remaining_cost`/`base_cost`/`cost_per_tick` for on
 - `_ai_stru26C_node_8`: creature_id (maps to unit type via `g_464DD0` table)
 - Circular linked list; `_ai_controller_274` is current pointer.
 
-### AiController_struC (0x134 bytes)
-Used in convoy/ambush AI. Contains its own attacker linked list (`_strucC_C`) and squad pointer (`_strucC_0`). Large struct with many int fields — likely stores per-convoy-group state.
+### AiController_struC — PHANTOM STRUCT (decompiler bug)
+**Does not exist.** The decompiler created this 0x134-byte struct because `_ai_controller_C` was mistyped as `AiController_struC*` instead of `Ai_stru160_Node*`. All `_ai_controller_strucC_*` field accesses are actually `Ai_stru160_Node` (0x44 bytes) fields:
+
+| strucC field | Offset | Actual Ai_stru160_Node field | Meaning |
+|---|---|---|---|
+| `_strucC_0` | 0x00 | `next` | Next squad in list |
+| `_strucC_4` | 0x04 | `prev` | Prev squad in list |
+| `_strucC_C` | 0x0C | `_ai_stru160_node_C` | Escort member head |
+| `_strucC_10` | 0x10 | `_ai_stru160_node_10` | Escort member tail |
+| `_strucC_1C` | 0x1C | `_ai_stru160_node_1C` | Escort member count |
+
+**Proof**: allocated from `_ai_controller_160_free` (squad pool). Pool = `malloc(0x880)` / 32 entries = **0x44 bytes per entry**. The 77 extra `int` fields (0x44–0x130) never exist in memory — they'd overflow into adjacent pool entries.
+
+### Ai_stru10_Node — Convoy Vehicle Node (0x10 bytes)
+Tracks convoy tanker vehicles (`UnitType_TankerConvoy = 25`). Convoy-only.
+```
+0x00  next/prev  — linked into AiController's intrusive list (reuses ai->next/prev chain!)
+0x08  unit       — the convoy tanker Unit*
+0x0C  _ai_stru10_node_C  → escort_squad (Ai_stru160_Node* for this vehicle's bodyguards)
+```
+When vehicle created: `escort_squad = nullptr`. Squad allocated on-demand when first escort assigned.
 
 ## AI_init (line 15192, ~648 lines)
 
 ### Pool Sizes
-| Pool | General | Convoy/Ambush | Count | Alloc Size |
-|------|---------|---------------|-------|------------|
-| Enemy | ✓ | ✓ | 599 | 0x1C14 |
-| Wanderer (×2 pools) | ✓ | ✓ | 599 each | 0x2570 each |
-| Attacker | ✓ | ✓ | `_2B0+16` | 16×count |
-| Squad (Ai_stru160) | ✓ | ✓ | 32 | 0x880 |
-| Build | ✓ only | — | 32 | 0x380 |
-| Drillrig | ✓ only | — | 16 | 0x380 |
-| Tanker | ✓ only | — | 32 | 0x200 |
-| PowerPlant | ✓ only | — | 16 | 0xC0 |
-| MobileDerrick | ✓ only | — | 64 | 0x900 |
-| BuildOrder | ✓ only | — | 32 | 0x180 |
-| Ai_stru10 | — | Convoy only | 599 | 0x2570 |
+| Pool | General | Convoy | Ambush | Count | Alloc Size |
+|------|---------|--------|--------|-------|------------|
+| Enemy | ✓ | ✓ | ✓ | 599 | 0x1C14 |
+| Wanderer (×2 pools) | ✓ | ✓ | ✓ | 599 each | 0x2570 each |
+| Attacker (unassigned) | ✓ | ✓ | ✓ | `_2B0+16` | 16×count |
+| Squad (Ai_stru160) | ✓ | ✓ | ✓ | 32 | 0x880 |
+| Escort Attacker (`_70`) | — | ✓ | — | `_2B0+16` | 16×count |
+| Convoy Vehicle (`_10`) | — | ✓ | — | 599 | 0x2570 |
+| Build | ✓ | — | — | 32 | 0x380 |
+| Drillrig | ✓ | — | — | 16 | 0x380 |
+| Tanker | ✓ | — | — | 32 | 0x200 |
+| PowerPlant | ✓ | — | — | 16 | 0xC0 |
+| MobileDerrick | ✓ | — | — | 64 | 0x900 |
+| BuildOrder | ✓ | — | — | 32 | 0x180 |
 
 ### Key Initialization
 - `_ai_controller_2B0 = 549 / (num_ai_players + 1)` — per-AI attacker cap
@@ -475,26 +495,258 @@ Reset formula: `(rng_min + rand(rng_max)) >> 2`
 | `ai_40B020_send_attack_order` | `ai_squad_send_attack` |
 | `ai_409650` | `ai_pair_drillrigs_powerplants` |
 | `ai_update_base_area` | `ai_expand_base_bounds` |
+| `AiController_struC` | **DELETE** — phantom struct, use `Ai_stru160_Node*` |
+| `_ai_controller_C` | `escort_squad` (convoy) — actually `Ai_stru160_Node*` |
+| `Ai_stru10_Node` | `AiConvoyVehicleNode` |
+| `_ai_stru10_node_C` | `escort_squad` |
+| `_ai_controller_10_pool` | `convoy_vehicle_pool` |
+| `_ai_controller_10_free` | `convoy_vehicle_free` |
+| `_ai_controller_70` (convoy) | `escort_attacker_pool` |
+| `_ai_controller_74` (convoy) | `escort_attacker_free` |
+| `_ai_controller_58_head` (ambush) | `neutral_head` (dormant hidden units) |
+| `_ai_stru160_node_20` | `dead_member_free` (per-squad dead escort recycling) |
+| `ai_task_42DA90` | `ai_convoy_tick` |
+| `ai_task_42DE80` | `ai_ambush_tick` |
+| `ai_task_42DC70_mute_08_smash_the_convoy` | `ai_convoy_entry` |
+| `ai_task_42DF20_mute_05_ambush` | `ai_ambush_entry` |
+| `unit_425820` | `unit_find_nearest_player_in_range` |
+| `unit_4258C0` | `unit_change_owner` |
 
 ## Decompilation Issues
 
 1. **ai_40B020**: `attack_order.player_num` stores `AiController*` pointer, then used as `int` for comparison at offset 700 (`_2BC`). Decompiler confused variable reuse in register.
 2. **AiController struct offsets**: Header shows `_ai_controller_58_head` at what should be offset 0x48. Likely misaligned struct layout or padding confusion.
-3. **AiController_struC**: 0x134 bytes with mostly unnamed int fields. Used only in convoy/ambush AI. Needs separate investigation.
+3. **AiController_struC**: **PHANTOM STRUCT** — doesn't exist. `_ai_controller_C` should be `Ai_stru160_Node*`. Pool allocates 0x44 bytes per entry, not 0x134. All `_ai_controller_strucC_*` fields map to `Ai_stru160_Node` fields at matching offsets. The 77 extra int fields past offset 0x44 are fabricated.
 4. **`_ai_controller_8` field**: Overloaded — used as `Unit*` in `_1B4` list iteration but as generic pointer elsewhere.
 5. **`char _ai_controller_38[8]`** and similar padding gaps: likely contain list sentinel data that decompiler couldn't resolve.
+6. **`_ai_controller_30_head`** typed as `AiWandererNode*` but convoy code casts to `AiAttackerNode*`. Both node types are 0x10 bytes with same layout `{next, prev, extra, unit}`. Decompiler chose wrong type for one context.
+7. **`_ai_stru160_node_20`** in convoy: used as per-squad free list for dead escort members. Dead attacker nodes pushed here but never returned to global pool — potential memory leak or intentional squad-scoped recycling.
 
 ## TODO
 
-- [ ] Investigate mission-specific AIs (Mute_05 ambush, Mute_08 convoy) in detail
-- [ ] Map AiController_struC fields from convoy AI usage
+- [x] ~~Investigate mission-specific AIs (Mute_05 ambush, Mute_08 convoy) in detail~~
+- [x] ~~Map AiController_struC fields from convoy AI usage~~ → PHANTOM STRUCT, doesn't exist
 - [ ] Trace `sub_40AB60` — placement validation function
 - [ ] Map `_ai_controller_D0`, `_ai_controller_E4/E8`, `_ai_controller_FC` fields
 - [ ] Investigate `_ai_controller_200` list purpose (4th squad state?)
+- [ ] Verify `_ai_stru160_node_20` leak in convoy (dead escorts never returned to global pool)
 
 ---
 
-## Strategic Decision Logic (Deep Dive)
+## Convoy AI — Mute_08_SmashTheConvoy (Deep Dive)
+
+### Architecture
+Convoy AI protects tanker vehicles being escorted across the map. Uses the general `AiController` (0x364) struct but with a **different unit classification** scheme and **no squad-level attack decisions**.
+
+Key difference from general AI: `AiController.next/prev` forms an intrusive linked list of **convoy vehicles** (via `Ai_stru10_Node`), not an AI player chain. Self-referencing sentinel (`ai->next = ai->prev = ai` initially) marks empty list.
+
+### Pools Allocated (Convoy Init, line ~15430)
+
+| Pool | Type | Count | Size | Purpose |
+|------|------|-------|------|---------|
+| Enemy | AiEnemyNode | 599 | 0x1C14 | Track hostile units |
+| Squad | Ai_stru160_Node | 32 | 0x880 | Escort squads per vehicle |
+| Escort Attacker | AiAttackerNode | `_2B0+16` | 16×count | Bodyguard nodes |
+| Neutral Attacker | AiAttackerNode | `_2B0+16` | 16×count | Pre-placed neutral units |
+| Convoy Vehicle | Ai_stru10_Node | 599 | 0x2570 | Tanker tracking nodes |
+| Wanderer | AiWandererNode | 599×2 | 0x2570×2 | Pre-placed combat units |
+
+### Unit Classification (Message Handler, line 44949)
+
+On `TaskMessage_UnitCreated`:
+
+| Condition | Pool/List | Node Type | Notes |
+|-----------|-----------|-----------|-------|
+| Enemy unit | `enemy_pool` → `enemy_tail` | AiEnemyNode | Standard |
+| `unit->type == 25` (TankerConvoy) | `_10_free` → `ai->next` chain | Ai_stru10_Node | `escort_squad = NULL` |
+| `cplc_spawn_param > 1` | `_28_free` → `_18_head` | AiWandererNode | Pending wanderer |
+| `cplc_spawn_param == 1` | `_74` (escort pool) → `_60_head` | AiAttackerNode | Rallying escort, sets `path_flags |= 0x200` |
+| `player_num == 0` | `_58_free` → `_58_head` | AiAttackerNode | Neutral unit |
+
+On `TaskMessage_UnitDeselected` (death):
+
+| Condition | Action |
+|-----------|--------|
+| `unit->type == 25` (convoy vehicle dies) | 1. Detach ALL escorts from vehicle's squad → move to `_30` (active wanderers), clear orders. 2. Free escort squad → `_160_free`. 3. Free vehicle node → `_10_free` |
+| `path_flags & 0x80` (wanderer) | Free to `_40_free` |
+| `path_flags & 0x200` (escort) + has squad | Find self in squad member list, remove, push to squad's `_stru160_node_20` (per-squad dead pool) |
+| `path_flags & 0x200` (escort) + no squad | Free to `_74` (escort pool) |
+| Neutral (no special flags) | Free to `_58_free` |
+| Enemy | Free to `enemy_free` |
+
+### Main Tick — ai_task_42DA90 (line 45248)
+
+```
+for each rallying attacker in _60 list:
+    find nearest non-destroyed convoy vehicle (iterate ai->next chain)
+    if vehicle found:
+        if vehicle has no escort squad:
+            allocate Ai_stru160_Node from _160_free
+            link into _11C (idle squad list)
+            init empty member sentinel: _C = _10 = &self._C
+            set member_count (_1C) = 0
+        assign attacker to vehicle's escort squad:
+            send TaskMessage_Follow(player_num, vehicle_unit) to vehicle task
+            unlink from _60 list
+            link into squad's member list (_C)
+
+call ai_42E070_attack_order()  ← process wanderers
+sleep 60
+```
+
+**Key insight:** Convoy AI assigns escorts to **individual vehicles**, not to strategic targets. Each vehicle accumulates its own squad. No attack confidence evaluation — escorts just follow their vehicle. When a vehicle dies, its escorts become free wanderers that attack nearest enemy.
+
+### Flowchart
+
+```
+Unit spawns → message handler classifies:
+  Enemy → enemy list
+  TankerConvoy → vehicle list (no escort initially)
+  cplc_spawn_param > 1 → pending wanderer (countdown)
+  cplc_spawn_param == 1 → rallying escort
+  player_num == 0 → neutral (unused in convoy?)
+
+Every 60 frames:
+  For each rallying escort:
+    Find nearest convoy vehicle
+    Create/reuse escort squad for that vehicle
+    Attach escort, send Follow order
+
+  Wanderer attack logic (shared with general AI)
+
+Vehicle dies:
+  Escorts → active wanderers (attack nearest enemy)
+  Squad freed
+
+Escort dies:
+  Removed from vehicle's squad (recycled to squad dead pool)
+```
+
+---
+
+## Ambush AI — Mute_05_Ambush (Deep Dive)
+
+### Architecture
+Ambush AI implements a **one-shot trigger** mechanic. Hidden (neutral) units lie dormant until an enemy approaches, then all spring to life simultaneously.
+
+Simpler than convoy. Three unit categories, **no convoy vehicle tracking**, no escort mechanics.
+
+### Pools Allocated (Ambush Init, line ~15280)
+
+| Pool | Type | Count | Size | Purpose |
+|------|------|-------|------|---------|
+| Enemy | AiEnemyNode | 599 | 0x1C14 | Track hostile units |
+| Squad | Ai_stru160_Node | 32 | 0x880 | Unused in ambush (allocated but no code references them) |
+| Neutral | AiAttackerNode | `_2B0+16` | 16×count | Dormant hidden units |
+| Wanderer | AiWandererNode | 599×2 | 0x2570×2 | Active combat units |
+
+**Not allocated** (set to NULL): `_ai_controller_70` (escort pool), `_ai_controller_10_pool` (convoy pool).
+
+### Unit Classification (Message Handler, line 45390)
+
+On `TaskMessage_UnitCreated`:
+
+| Condition | Pool/List | Notes |
+|-----------|-----------|-------|
+| Enemy | `enemy_pool` → `enemy_tail` | Standard |
+| `player_num != 0` (own unit) | `_28_free` → `_18_head` | Wanderer, sets `cplc_spawn_param = 2` |
+| `player_num == 0` (neutral) | `_58_free` → `_58_head` | Dormant hidden unit |
+
+On `TaskMessage_UnitDeselected`:
+
+| Condition | Action |
+|-----------|--------|
+| `player_num == ai->player_num` | Free wanderer to `_40_free` |
+| `player_num != 0 && != ai` | Free enemy |
+| `player_num == 0` | Free neutral to `_58_free` |
+
+### Main Tick — ai_task_42DE80 (line 45497)
+
+```
+if neutral list (_58) not empty:
+    check = unit_425820(first_neutral->unit, 76800)
+    if any player unit within 76800 manhattan distance:
+        === AMBUSH TRIGGERED ===
+        for each neutral in _58 list:
+            unit_4258C0(unit, g_player_num)  ← change ownership to player
+            broadcast TaskMessage_UnitCreated  ← re-classifies as wanderer
+            unit_mode_415540(unit)             ← activate unit AI
+            free neutral node to _58_free
+
+call ai_42E070_attack_order()  ← process wanderers
+sleep 60
+```
+
+### Trigger Mechanics
+
+1. **Detection**: Only checks the **first** neutral unit's proximity to player units. If first neutral is far from action, ambush won't trigger even if other neutrals are close.
+2. **Radius 76800**: Manhattan distance (~3 screen widths in game coordinates).
+3. **All-or-nothing**: When triggered, **every** neutral converts simultaneously. No partial activation.
+4. **Re-classification**: Converted neutrals broadcast `TaskMessage_UnitCreated`. The same message handler receives this, sees `player_num != 0`, classifies them as wanderers with `cplc_spawn_param = 2`.
+5. **Post-trigger**: Wanderer attack logic (`ai_42E070_attack_order`) handles the rest — countdown from 2, then attack nearest enemy.
+
+### `unit_425820` — Find Nearest Player Unit In Range (line 38004)
+
+Iterates global `g_unit_list_head`. For each non-destroyed unit belonging to `g_player_num`: manhattan distance check against `radius`. Returns first unit within range, or NULL.
+
+### `unit_4258C0` — Change Unit Ownership (line 38062)
+
+Changes unit's player affiliation. Updates `g_num_player_units` / `g_num_ai_units` counters. Resets entity sprite/palette for new owner.
+
+### Flowchart
+
+```
+Map loads → units classified:
+  Neutral (player_num=0) → _58 list (dormant)
+  Own units → wanderer pending list (_18)
+  Enemies → enemy list
+
+Every 60 frames:
+  If neutrals exist AND player unit within 76800 of first neutral:
+    ╔═══════════════════════════╗
+    ║    AMBUSH TRIGGERED!      ║
+    ╚═══════════════════════════╝
+    All neutrals → convert to player units → wanderers
+
+  Wanderer attack logic:
+    Pending: countdown cplc_spawn_param (starts at 2)
+    Active: attack nearest enemy
+
+Post-ambush: pure wanderer combat, no further neutral checks
+```
+
+---
+
+## Shared Convoy/Ambush: ai_42E070_attack_order (line 45657)
+
+Used by all three AI variants. Two-phase wanderer processing:
+
+### Phase 1: Pending Wanderers (`_18` list)
+```
+for each wanderer in pending list:
+    if cplc_spawn_param > 0:
+        if (cplc_spawn_param & 1) AND ai_42DF40 finds enemy within 51200:
+            reset cplc_spawn_param = 1  ← triggers next tick
+        decrement cplc_spawn_param
+        if now 0 AND type != Warlord:
+            move to active list (_30)
+```
+
+**Alert mechanism**: On odd ticks, checks for nearby enemies. If found within 51200, fast-tracks activation by resetting countdown to 1. This means wanderers "notice" approaching enemies and activate early.
+
+**Warlord exception**: `UnitType_Mute_Warlord` units never join the active attack list. They remain in pending forever (countdown reaches 0 but skipped). Likely because Warlords have their own AI or are cinematic units.
+
+### Phase 2: Active Wanderers (`_30` list)
+```
+for each wanderer in active list:
+    if unit has no locked_target AND no order_target, OR mode == idle:
+        enemy = ai_42DF40(ai, unit)  ← find nearest enemy
+        if enemy found:
+            send TaskMessage_AttackOrder
+```
+
+### ai_42DF40 — Find Nearest Enemy (line 45567)
+Manhattan distance scan of entire enemy list. Skips destroyed units and units with same `player_num`. **Warlord units return NULL** (never attack). Outputs distance via `int* a3` parameter.
 
 ### Target Selection Algorithm (`ai_40B020_send_attack_order`)
 

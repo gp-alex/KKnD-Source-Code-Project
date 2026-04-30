@@ -5,8 +5,9 @@
 */
 
 #include <windows.h>
-#include <math.h>
 #include <defs.h>
+
+#include <stdarg.h>
 
 
 //-------------------------------------------------------------------------
@@ -14,759 +15,225 @@
 
 #define __thiscall __cdecl // Test compile in C mode
 
-void aircraft_list_free();
+BOOL aircraft_list_init();
+void __fastcall mode_turret_4010C0(KKND::Turret *turret);
+void __fastcall mode_turret_4010E0(KKND::Turret *turret);
+void __cdecl TASK_ExecuteAsync(KKND::Coroutine *coroutine);
 BOOL __fastcall unit_402AC0(KKND::Unit *unit);
-BOOL __fastcall buildings_tracker_check_limits(KKND::UnitType type);
-int get_clanhall_max_level();
-BOOL __fastcall is_tower_available(KKND::UnitType type);
-BOOL __fastcall is_building_available(KKND::UnitType type);
-int __fastcall unit_show_hint(KKND::Unit *unit);
-void __fastcall unit_4054D0(KKND::Unit *unit);
+int __fastcall ui_string_4059C0(KKND::UiString *str, int a2, int a3);
+KKND::stru8 *__fastcall ui_string_405A20(KKND::UiString *str, int a2, int y);
+char __fastcall ui_string_405A60(KKND::UiString *str, _BYTE *a2, int a3, int a4);
 BOOL __fastcall CPLC_select(int id);
-void cplc_4060F0();
-void __fastcall cplc_4062E0(KKND::CplcEntityInViewport *view);
-KKND::CplcEntity *cplc_406320();
-KKND::OilPatch *__fastcall oil_patch_407040_find(int x, int y);
-int __fastcall oil_patch_subtract(KKND::OilPatch *patch, int amount);
-void palette_408410_dim();
-void palette_408460();
+void __fastcall CPLC_viewport_remove(KKND::CplcEntityInViewport *view);
+KKND::CplcEntity *CPLC_viewport_update();
+int sub_408400();
 void FADE_Reset();
 unsigned int __thiscall FADE_4084A0(KKND::Task *this);
 void __fastcall FADE_408500(KKND::Task *task);
-void __fastcall FADE_Start(KKND::RenderViewport *ctx, int start, int end, int length);
-void __fastcall entity_408800_play_sound(KKND::Entity *entity, KKND::SoundId sound_id, int volume, int unused);
-BOOL sub_40CAE0();
-BOOL __fastcall MOVIE_load(const char *filename, int x, int y, int z);
-BOOL MOVIE_do_frame();
-void __fastcall MOVIE_play_sound(KKND::Movie *movie);
-void MOVIE_cleanup();
-BOOL MOVIE_is_null();
-int __fastcall MOVIE_load_mission_briefing(const char *filename, KKND::RenderViewport *viewport_main, KKND::RenderViewport *viewport_screen, KKND::UiString *str, int main_width, int main_height, int z);
-void __fastcall sub_40D430(KKND::UiString *str);
-void __fastcall sub_40D450(const char *str, int len);
-BOOL __fastcall TIME_init(int fps);
+BOOL FILE_init();
 void TIME_tick();
-int __fastcall unit_40D600(KKND::Unit *unit, int x, int y, int a4);
-int __fastcall unit_40D6F0(KKND::Unit *unit, int x, int y, int a4);
-BOOL __fastcall entity_is_in_radius(KKND::Entity *a, KKND::Entity *b, int radius);
-int __fastcall entity_40D8B0(KKND::Entity *entity, int radius);
-KKND::BoxdPathingClassification __fastcall BOXD_40DA90(KKND::Unit *unit);
-int __thiscall unit_40DBF0(KKND::Unit *unit);
-int __thiscall unit_build_40DD00(KKND::Unit *unit);
-void __fastcall unit_build_40DDD0(KKND::Unit *unit);
-int __fastcall BOXD_40DE80(KKND::Unit *unit, int x, int y, KKND::UnitTilePosition a4);
-void __fastcall BOXD_remove_unit(KKND::Unit *unit, int map_x, int map_y, KKND::UnitTilePosition pos);
+void __fastcall entity_apply_aoe_damage(KKND::Entity *entity, int radius);
+KKND::BoxdPathingClassification __fastcall BOXD_update_tile_on_move(KKND::Unit *unit);
 void __fastcall BOXD_40DF50(KKND::Unit *a1, BOOL a2);
-int __fastcall BOXD_40E000(KKND::Unit *unit, int scan_x, int scan_y);
-KKND::BoxdPathingClassification __fastcall BOXD_40E1B0(KKND::Unit *unit, int x, int y, KKND::UnitTilePosition a4);
-int sub_40E2A0();
-int sub_40E390();
+KKND::BoxdPathingClassification __fastcall BOXD_classify_area_for_pathing(KKND::Unit *unit, int scan_x, int scan_y);
 const char *__cdecl sub_40E3E0();
-void __fastcall palette_40E400(KKND::PaletteEntry *pal);
-KKND::PaletteEntry *__fastcall sub_40E430(unsigned int a1);
-int sub_40E530();
-int sub_40E560();
-int sub_40E6B0();
-void BOXD_terrain_cleanup();
-KKND::BoxdPathingClassification __fastcall BOX_classify_tile_for_pathing(KKND::Unit *unit, int map_x, int map_y, KKND::TerrainTile *tile);
-int __fastcall BOXD_40ED00(KKND::Unit *unit, KKND::TerrainTile *tile);
-BOOL __fastcall BOXD_40EDF0(KKND::TerrainTile *tile, KKND::Unit *a2, KKND::Unit *a3);
-KKND::Unit *__fastcall BOXD_40EE10(int map_x, int map_y);
-BOOL __fastcall BOXD_40EE70(int map_x, int map_y);
-KKND::UnitTilePosition __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, int map_y, KKND::UnitTilePosition pos);
+void __fastcall PAL_apply(KKND::PaletteEntry *pal);
+BOOL LVL_terrain_init();
+KKND::BoxdPathingClassification __fastcall BOXD_classify_tile_for_pathing(KKND::Unit *unit, int map_x, int map_y, KKND::TerrainTile *tile);
+KKND::BoxdPathingClassification __fastcall BOXD_classify_tile_simple(KKND::Unit *unit, KKND::TerrainTile *tile);
 int __fastcall BOXD_adjust_unit_position_x(KKND::Unit *unit, KKND::UnitTilePosition position);
 int __fastcall BOXD_adjust_unit_position_y(KKND::Unit *unit, KKND::UnitTilePosition position);
-void __fastcall BOXD_remove_unit_from_tile(KKND::Unit *unit, int map_x, int map_y, KKND::UnitTilePosition pos);
-void __fastcall BOXD_40F230(KKND::Unit *a1, int map_x, int map_y, KKND::UnitTilePosition a4, BOOL a5);
-int __fastcall kknd_rand_1(const char *file, int line);
-int kknd_rand_2();
-int __fastcall kknd_rand_ai_airstrike(int a1);
 BOOL sidebar_init();
-void __cdecl __noreturn task_sidebar(KKND::Task *task); // weak
-KKND::Sidebar *__fastcall sidebar_create(KKND::Entity *entity, KKND::Task *task, int margin_right, int y, BOOL is_horizontal);
-void __fastcall sidebar_4102D0(KKND::Sidebar *sidebar, KKND::SidebarButton *button);
-KKND::Sidebar *__thiscall sidebar_410340(KKND::Sidebar *sidebar);
-void sidebar_cleanup();
-BOOL stru2_4104A0();
-void stru2_4104E0();
-void __fastcall unit_building_update_healthbar(KKND::Unit *unit);
-__int16 __fastcall unit_update_healthbar_tanker(KKND::Unit *unit);
+BOOL stru2_init();
+KKND::stru2 *__fastcall stru2_create(int hunk);
 unsigned __int32 __thiscall unit_update_healthbar_basic(KKND::Unit *unit);
-int __fastcall unit_tanker_healthbar_update_oil_bar(KKND::Unit *unit);
-void __fastcall unit_building_update_sabotage_bar(KKND::Unit *unit);
-void __fastcall unit_410950(KKND::Unit *unit, int a2);
-void __fastcall unit_4109A0_healthbar(KKND::Unit *unit);
-int __thiscall unit_410B00_drillrig(KKND::Unit *unit);
-void __fastcall unit_410BE0_healthbar(KKND::Unit *unit);
-void __fastcall unit_on_selected(KKND::Unit *unit);
-void __fastcall unit_on_deselected(KKND::Unit *unit);
-void __fastcall unit_410CF0_aircraft(KKND::Unit *unit);
-void __fastcall unit_rendering_default(KKND::Unit *unit);
-int sub_411040();
-void sub_4113D0();
-int __stdcall WndProc(HWND hWnd, UINT Msg, int wParam, LPARAM lParam);
 BOOL __fastcall REND_create_window(int width, int height, int bpp, int a4, int a5);
-BOOL REND_direct_draw_init();
-BOOL REND_RateLimiter();
-KKND::RenderViewport *__fastcall REND_viewport_create(int flags, int x, int y, int w, int h);
-KKND::RenderViewport *__thiscall REND_viewport_free(KKND::RenderViewport *viewport);
-HRESULT sub_4122B0();
-void __fastcall REND_DrawList(KKND::DrawList *list);
-int __fastcall REND_get_width(KKND::RenderCommand *cmd);
-int __fastcall REND_get_height(KKND::RenderCommand *cmd);
-int __fastcall render_mode_sprt_draw(KKND::RenderCommand *cmd, int mode);
 int render_mode_scrl_setup();
-int __fastcall render_movie_frame(KKND::RenderCommand *cmd, int mode);
-void __fastcall unit_init_default(KKND::Unit *unit);
-BOOL __fastcall unit_is_in_firing_range(KKND::Unit *unit, KKND::Unit *target, int unit_id);
-void __fastcall sub_4133D0(KKND::Unit *unit);
 BOOL __fastcall unit_4135E0(KKND::Unit *unit);
-BOOL __fastcall BOXD_413860(KKND::Unit *unit);
-BOOL __fastcall BOXD_413A90(KKND::Unit *unit);
-KKND::BoxdPathingClassification __thiscall sub_413C10(KKND::Unit *unit);
 BOOL __fastcall unit_413D10(KKND::Unit *unit);
 void __fastcall BOXD_adjust_xl_movement_destination(KKND::Unit *unit, int *out_x, int *out_y);
-BOOL __fastcall unit_414520(KKND::Unit *unit);
 void __fastcall unit_scan_for_target_of_opportunity(KKND::Unit *unit);
-int __fastcall sub_414870(KKND::Unit *unit);
-void __fastcall unit_4149A0(KKND::Unit *unit);
-BOOL __fastcall unit_414AD0(KKND::Unit *unit);
 void __fastcall unit_414C30(KKND::Unit *unit);
 void __fastcall unit_414E80(KKND::Unit *unit);
-BOOL __fastcall unit_415400(KKND::Unit *unit);
-void __fastcall unit_mode_415540(KKND::Unit *unit);
 void __fastcall unit_mode_idle(KKND::Unit *unit);
-unsigned int __thiscall sub_4157F0(int this);
+void __fastcall unit_mode_4157F0(KKND::Unit *unit);
 void __fastcall unit_4158B0(KKND::Unit *unit);
-void __fastcall unit_mode_415980(KKND::Unit *unit);
-int __thiscall sub_415A20(int this);
-void __fastcall unit_mode_415A60(KKND::Unit *unit);
 void __fastcall unit_mode_attack_move(KKND::Unit *unit);
 void __fastcall unit_mode_415D30(KKND::Unit *unit);
 void __fastcall unit_mode_path_around_obstacles(KKND::Unit *unit);
 void __fastcall unit_mode_4165C0(KKND::Unit *unit);
 void __fastcall unit_mode_416790(KKND::Unit *unit);
-void __fastcall unit_mode_416A70(KKND::Unit *unit);
-void __fastcall unit_mode_416CD0(KKND::Unit *unit);
-void __fastcall unit_mode_416EB0(KKND::Unit *unit);
-void __fastcall unit_mode_417100(KKND::Unit *unit);
-void __fastcall unit_4172D0(KKND::Unit *unit);
-void __fastcall unit_mode_417360(KKND::Unit *unit);
-int __thiscall sub_417550(int this);
-void __thiscall sub_417670(int this);
-void __thiscall sub_417810(KKND::Unit *this);
-void __thiscall sub_417980(KKND::Unit *this);
-void __fastcall unit_mode_417A20(KKND::Unit *unit);
-void __fastcall unit_mode_417BD0(KKND::Unit *unit);
-unsigned int __fastcall unit_417E60(KKND::Unit *unit);
-void __fastcall unit_mode_attack_move_2(KKND::Unit *unit);
-char __thiscall sub_417F60(int this);
-void __fastcall unit_mode_417FC0(KKND::Unit *unit);
-void __fastcall unit_418120(KKND::Unit *unit);
-int __thiscall sub_418170(int this);
+void __fastcall unit_417550(KKND::Unit *unit);
+void __fastcall unit_mode_417E60(KKND::Unit *unit);
 void __fastcall unit_mode_4181B0(KKND::Unit *unit);
-void __fastcall unit_418290(KKND::Unit *unit);
-void __fastcall unit_mode_418550(KKND::Unit *unit);
-void __fastcall unit_mode_attack(KKND::Unit *unit);
-void __fastcall unit_mode_4187F0(KKND::Unit *unit);
 void __fastcall unit_mode_418B30_technician_repair(KKND::Unit *unit);
-void __fastcall unit_mode_418D20(KKND::Unit *unit);
-void __fastcall unit_mode_418E90(KKND::Unit *unit);
-void __fastcall unit_mode_418FE0(KKND::Unit *unit);
-void __fastcall unit_mode_419180(KKND::Unit *unit);
 void __fastcall unit_mode_419230(KKND::Unit *unit);
-void __fastcall unit_4192F0(KKND::Unit *unit);
-void __fastcall unit_mode_tanker_419390(KKND::Unit *unit);
 void __fastcall unit_mode_419420(KKND::Unit *unit);
 void __fastcall unit_mode_419560(KKND::Unit *unit);
-void __fastcall unit_mode_419720(KKND::Unit *unit);
-void __fastcall unit_mode_destroy(KKND::Unit *unit);
-void __fastcall unit_mode_destroyed(KKND::Unit *unit);
-void __fastcall MessageHandler_Scout(KKND::Task *receiver, KKND::Task *sender, KKND::TaskMessageType message, void *payload);
-void __fastcall EventHandler_Passive(KKND::Task *receiver, KKND::Task *sender, KKND::TaskMessageType message, void *payload);
-void __fastcall MessageHandler_419DF0(KKND::Task *receiver, KKND::Task *sender, KKND::TaskMessageType message, void *payload);
-void __fastcall MessageHandler_419E80(KKND::Task *receiver, KKND::Task *sender, KKND::TaskMessageType message, void *payload);
-void __fastcall sub_419F00(KKND::Unit *a1, int a2);
-void __fastcall sub_41A060(KKND::Unit *unit, _DWORD *a2);
-void __fastcall unit_xl_on_move(KKND::Unit *a1, _DWORD *a2);
-void __fastcall unit_on_technician_assigned(KKND::Unit *unit, KKND::Unit *);
-void __fastcall sub_41A470(KKND::Unit *unit, KKND::Unit *a2);
+void __fastcall unit_419F00(KKND::Unit *unit, int a2);
+void __fastcall unit_on_technician_assigned(KKND::Unit *unit, KKND::Unit *a2);
+void __fastcall unit_41A470(KKND::Unit *unit, KKND::Unit *a2);
+void __fastcall unit_41A510(KKND::Unit *victim, KKND::Entity *a2);
 void __fastcall unit_on_damage(KKND::Unit *unit, KKND::Entity *attacker);
-void __fastcall unit_on_attacked_default(KKND::Unit *unit, KKND::Unit *attacker);
-void __fastcall unit_on_escort_begin(KKND::Unit *unit, KKND::Unit *a2);
-void __fastcall unit_on_retreat(KKND::Unit *unit);
-void __fastcall unit_on_escort_end(KKND::Unit *unit, KKND::Unit *a2);
-void __fastcall sub_41A9B0(KKND::Unit *a1, int **a2);
-int INPUT_ProcessKeyboard();
+void __fastcall unit_41A9B0(KKND::Unit *a1, int **a2);
+BOOL sub_41AAA0();
 BOOL __fastcall INPUT_get_keyboard_state(KKND::KeyboardState *state);
 _BOOL2 __fastcall sub_41AC50(char *a1, unsigned __int16 a2, void (__fastcall *a3)(char *, unsigned int), int a4, KKND::Task *a5);
-int __fastcall sub_41B000(int a1, int a2, int a3, int a4, int a5);
-int __fastcall sub_41B020(void *payload, int a2, int a3, int a4, int a5);
-int __fastcall sub_41B070(_DWORD *payload, int a2, int a3, int a4, int a5);
+BOOL __fastcall collider_ui_41B000(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, ___remove__KKND::BoxdCollisionState *, ___remove__KKND::BoxdCollisionState *);
 BOOL LVL_SysInit();
 KKND::LevelHunk *__fastcall LVL_LoadLevel(const char *filename);
 BOOL __fastcall LVL_RunLevel(KKND::LevelHunk *lvl);
 void LVL_cleanup();
-void __fastcall kknd_mfree(void *p);
 void LVL_SysCleanup();
 void *__fastcall LVL_FindSection(const char *name);
 BOOL __fastcall LVL_SubstHunk(KKND::LevelHunk *dst, KKND::LevelHunk *src, const char *name);
-BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b);
 KKND::BoxdRaycastResult __fastcall BOXD_pathing_bresenham_raycast(KKND::Unit *unit, int target_x, int target_y);
-int __fastcall sub_41C060(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8);
-BOOL __fastcall BOXD_41C130(int x1, int y1, int x2, int y2, KKND::Unit *unit);
+BOOL __fastcall BOXD_line_of_sight_check(int x1, int y1, int x2, int y2, KKND::Unit *unit);
 BOOL GAME_IsLoading();
-int sub_41CAD0();
-int __fastcall sub_41CAE0(const char *a1, KKND::LevelId a2);
-int __fastcall sub_41CB30(const char *a1, KKND::LevelId a2);
-KKND::LevelId GAME_GetSaveLoadLevelId();
+int __fastcall sub_41CAE0(const char *, KKND::LevelId);
+int __fastcall sub_41CB30(const char *, KKND::LevelId);
 int *__thiscall sub_41CB90(size_t *this);
-int __fastcall sub_41CCE0(int a1, int a2, int a3);
-int __fastcall sub_41DA20(_DWORD *a1, _DWORD *a2);
+BOOL __fastcall GAME_load_oil(KKND::OilPatchSaveStruct *oil);
+int __fastcall sub_41CCE0(KKND::Unit *unit, int a2, int a3);
+int __fastcall sub_41DA20(KKND::Entity *a1, KKND::MobdId *a2);
+BOOL __fastcall GAME_load_unit(KKND::Unit *unit, const KKND::UnitSaveStruct *data);
 _DWORD *__thiscall sub_41E9B0(size_t *this);
 int __thiscall GAME_load_production(int *data);
 int __fastcall sub_41ED90(_DWORD *a1, _DWORD *a2);
+KKND::AiSquadNode *__fastcall sub_41EE20(KKND::AiController *ai, const KKND::AiPlayersSaveStruct *data, KKND::AiSquadNode *node);
 _DWORD *__thiscall sub_41EF20(size_t *this);
+BOOL __fastcall GAME_load_ai_players(const KKND::AiPlayersSaveStruct *data);
 _BYTE *__thiscall sub_420A90(signed int *this);
 int *__thiscall sub_420B30(_DWORD *this);
-int sub_4211D0();
+BOOL __fastcall GAME_load_meta(char *data);
+int GAME_save();
+BOOL GAME_load();
 KKND::Task *sub_421D40();
 void __cdecl sub_421D60(KKND::Task *a1);
-BOOL is_machine_shop_maxed();
-FILE *sub_4224B0();
-void GAME_ReadConfig();
-BOOL GAME_WaitScreen();
-KKND::CplcEntity *__fastcall GAME_PrepareSuperLvl(KKND::MenuId mapd_id);
-BOOL __fastcall MOVIE_Play(int type);
-BOOL sub_423320();
-BOOL __fastcall TASK_send_message(KKND::Task *sender, KKND::TaskMessageType message, void *payload, KKND::Task *receiver);
-BOOL __fastcall TASK_broadcast_message(KKND::Task *task, KKND::TaskMessageType message, void *payload, KKND::TaskChannel channel);
-KKND::TaskMessage *__fastcall TASK_pop_message(KKND::Task *task);
-void __fastcall task_message_recycle(KKND::TaskMessage *msg);
-void GAME_SetPlayerSideFromLevel();
-char GAME_ParseCommandLine();
+void sub_4224B0();
+void GAME_mission_load();
+BOOL __fastcall TSK_send_message(KKND::Task *sender, KKND::TaskMessageType message, void *payload, KKND::Task *receiver);
+KKND::TaskMessage *__fastcall TSK_pop_message(KKND::Task *task);
+void __fastcall TSK_message_recycle(KKND::TaskMessage *msg);
+void __cdecl sub_423A70(KKND::Task *task);
+int __thiscall sub_423C60(void *this);
+void cplc_init_all();
+void cplc_init_subset();
 FILE *__thiscall sub_4240E0(const char *this);
 FILE *__fastcall sub_424270(char *FileName, _WORD *a2, _WORD *a3);
 FILE *__thiscall sub_4243C0(const char *this);
+int __thiscall sub_424560(char *FileName); // idb
 void __cdecl sub_424B90(KKND::Task *task);
 void __cdecl sub_424BF0(KKND::Task *task);
 void sub_424CA0();
-void __cdecl __noreturn sub_424CE0(int task);
+void sub_424CC0();
+void __cdecl __noreturn task_424CE0(KKND::Task *task);
 int sub_424EC0();
 int sub_424FD0();
 int sub_4250E0();
 int sub_4251B0();
+BOOL __fastcall sub_4252C0(KKND::Task *task, int a2);
 void __cdecl sub_425400(KKND::Task *task);
-void sub_425660();
 void __fastcall mission_check_on_death_victory_conditions(KKND::Unit *victim);
-KKND::Unit *__fastcall unit_425820(KKND::Unit *unit, int radius);
-void __fastcall unit_mode_scout_init(KKND::Unit *unit);
-void __fastcall unit_scout_425A50(KKND::Unit *unit, int a2, int a3);
-void __cdecl UNIT_Handler_Scout(KKND::Task *task);
 void __cdecl sub_425BE0(KKND::Task *task);
-KKND::Unit *__fastcall sub_425F20(int a1, int a2);
 int __cdecl sub_425F50(KKND::Task *task);
-void __cdecl __noreturn task_draw_x_mark(KKND::Task *task);
-KKND::Entity *__fastcall sub_4267F0(int a1, int a2, int a3, int a4);
-void __thiscall sub_426860(void *this);
-unsigned int __thiscall sub_4268B0(void *this);
-int __cdecl sub_4269B0(KKND::Task *a1);
 KKND::Entity *__fastcall entity_create(KKND::MobdId mobd_id, KKND::Task *task, KKND::Entity *parent);
 KKND::Entity *__fastcall entity_create_ex(KKND::MobdId mobd_id, KKND::Entity *parent, KKND::TaskFn task_entry, KKND::TaskKind task_kind, KKND::MobdPoint *parent_anchor);
 void __fastcall entity_remove(KKND::Entity *entity);
-KKND::Entity *__thiscall sub_426F90(KKND::Entity *this);
+void __fastcall entity_remove_with_task(KKND::Entity *entity);
+KKND::Entity *__fastcall entity_find_by_mobd_id(KKND::MobdId mobd_id);
 void GAME_AdvanceEntityPositions();
-void __fastcall entity_anim_load(KKND::Entity *entity, ptrdiff_t offset);
-void __fastcall entity_anim_start(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t idx);
-void __fastcall entity_anim_switch_direction(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t idx);
-void __fastcall entity_anim_clear(KKND::Entity *entity);
+void __fastcall entity_anim_init(KKND::Entity *entity, ptrdiff_t offset);
+void __fastcall entity_anim_init_directional(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t direction);
 void __fastcall entity_anim_tick(KKND::Entity *entity);
 void GAME_AdvanceEntityAnimations();
-void __fastcall MessageHandler_Dummy(KKND::Task *receiver, KKND::Task *sender, KKND::TaskMessageType message, void *payload);
-void __fastcall unit_mobile_base_plant(KKND::Unit *unit);
-unsigned int __thiscall sub_427BB0(int this);
-unsigned int __thiscall sub_427BF0(int this);
-void __fastcall unit_mode_427C30(KKND::Unit *unit);
-void __fastcall enqueue_infantry_ex(int *cash, KKND::ProductionSharedState *state, int base_cost, int bandwidth, KKND::Task *notification_task, KKND::SidebarFactoryProductionOption *notification_arg, int key);
-void __fastcall add_cash(int *a1, int a2);
-void sub_428080();
-unsigned int __cdecl sub_4280A0(KKND::Task *sender);
-BOOL sub_428310();
-BOOL __fastcall INPUT_set_mouse_pos(__int16 x, __int16 y);
-int __fastcall sub_428470(__int16 a1);
-BOOL __fastcall INPUT_get_mouse_state(KKND::MouseState *state);
-int INPUT_ProcessMouse();
+BOOL sub_427CA0();
 int sub_4287B0();
 int __thiscall sub_4287D0(KKND::BuildingConstructionStage *this);
-BOOL __fastcall is_building_or_tower_available(KKND::UnitType type);
-void __cdecl __noreturn task_game_update_loop(KKND::Task *task); // weak
-GameEventNode *__thiscall sub_429770(_DWORD *this);
-int __fastcall cursor_select_control_group(void *cursor, int group);
-void __fastcall cursor_load_mobd(KKND::CursorState *cursor, int offset);
-BOOL __thiscall cursor_429C40(KKND::CursorState *cursor);
-KKND::UnitType __fastcall cursor_429D40(KKND::CursorState *a1, KKND::Unit *a2);
-void __fastcall cursor_group_orders(KKND::CursorState *cursor);
-void __fastcall cursor_42AFD0(KKND::CursorState *cursor, KKND::Unit *unit);
-void __thiscall sub_42B230(KKND::CursorState *cursor);
-char __thiscall sub_42B600(KKND::CursorState *this);
-void __fastcall game_process_events(KKND::CursorState *cursor, BOOL process_ui_events);
-int __fastcall sub_42C810(KKND::Entity **a1, int a2, int a3, int a4, int a5, int a6, int a7);
-void __thiscall sub_42C9C0(KKND::Entity **this);
-void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y);
-void __cdecl __noreturn sub_42D030(KKND::Task *task); // weak
-char __thiscall sub_42D220(char *this);
-char __fastcall sub_42D260(_DWORD *a1, char *a2, int a3);
-void __cdecl sub_42D390(KKND::Task *task);
-KKND::GameEvent *sub_42D500();
-int sub_42D540();
+void __fastcall cursor_anim_set(KKND::CursorState *cursor, ptrdiff_t offset);
 __int16 __cdecl vec2_orientation(int x, int y);
-int __cdecl MATH_vec2_length(int x, int y);
-KKND::Unit *__fastcall ai_42DF40(KKND::AiController *ai, KKND::Unit *unit, int *a3);
-KKND::Unit *__fastcall sub_42E030(KKND::AiController *a1, KKND::Unit *a2);
-BOOL __fastcall sub_42E170(int, const char *);
-// int __usercall sub_42E390@<eax>(int a1@<eax>);
-void *__thiscall sub_42E400(void *this);
-char *__fastcall sub_42E410(int a1);
-BOOL __fastcall sub_42E430(int a1);
-// int __usercall sub_42E450@<eax>(int a1@<eax>, char a2@<dl>, char a3@<cl>);
-// int __usercall sub_42E690@<eax>(int a1@<eax>, char a2@<cl>);
-int sub_42E7B0();
-int sub_42E7F0();
-int __thiscall sub_42E820(int this);
 // int _cfltcvt_init(void); weak
-// int sub_42F650(void); weak
-int __stdcall sub_42F820(int a1, int a2);
-int __fastcall NETZ_Init(int a1, int a2, int (__thiscall *a3)(_DWORD));
-int __thiscall sub_42F8C0(void *this);
-int __thiscall sub_42F8E0(void *this);
-int __fastcall sub_42F930(unsigned int a1);
-void sub_42F980();
+// int __usercall sub_42F650@<eax>(int a1@<eax>);
 void sub_42F9A0();
-int __fastcall sub_42F9C0(unsigned int a1, void *a2);
-int __thiscall sub_42F9E0(void *this);
-int __fastcall sub_42FA00(int a1, char a2, const void *a3, unsigned int a4, int a5);
-int __thiscall sub_42FAC0(const char *this);
-BOOL __fastcall sub_42FB10(int, int);
-int sub_42FB20();
-int __thiscall sub_42FB40(void *this);
-int sub_42FB50(void); // weak
-int __thiscall sub_42FB60(char *this);
-void sub_42FCA0();
-void __thiscall sub_42FD30(void *this);
-BOOL __fastcall sub_42FF10(int a1, char a2, const void *a3, unsigned int a4, int a5);
-BOOL __fastcall sub_42FFB0(int a1, int a2);
-int __thiscall sub_4300C0(void *this);
-int __fastcall sub_4301E0(int a1);
-int sub_430340();
-int sub_430610();
-int __thiscall sub_430670(void *this);
-int sub_430690();
-int __stdcall sub_4306C0(_DWORD *a1, const char *a2, int a3, int a4, int a5);
-int __thiscall sub_430780(void *this);
-int sub_430910();
-int __stdcall sub_4309A0(int a1, int a2, char a3, int a4);
-int __stdcall sub_430A70(int a1, int a2, int a3, char a4, int a5);
-int __fastcall sub_430B10(int a1, int *a2);
-int sub_430CE0();
-int sub_430D10();
-int __fastcall sub_430D70(int a1);
-int __fastcall sub_430DA0(unsigned int a1);
-char *__fastcall NETZ_ErrorString(int);
-int sub_431000();
-BOOL is_outpost_maxed();
-void sub_431920();
-int __thiscall sub_431980(char *this);
-HPALETTE __fastcall sub_431B60(_BYTE *a1, int a2);
-void __cdecl __noreturn sub_431E60(KKND::Task *sender); // weak
-void __cdecl sub_431F10(KKND::Task *task); // idb
-KKND::Entity *__thiscall sub_4321A0(KKND::Task *this);
-void __thiscall sub_4322D0(KKND::Task *this);
-void __thiscall sub_432400(KKND::Entity **this);
-KKND::Entity *__thiscall sub_432510(KKND::Entity **this);
-BOOL __thiscall sub_4325B0(KKND::Task *task);
-KKND::Entity *__thiscall sub_432620(KKND::Task *this);
-void __cdecl sub_432730(KKND::Task *task); // idb
-void __cdecl sub_432800(KKND::Task *sender);
-KKND::Entity *__fastcall sub_4328F0(char *a1, unsigned __int16 a2);
-void __fastcall __noreturn sub_432990(int a1, int a2, int a3);
-void __cdecl __noreturn sub_432F00(KKND::Task *task);
-void __cdecl __noreturn sub_432F20(KKND::Task *task);
-void __cdecl __noreturn sub_432F30(KKND::Task *task);
-KKND::Entity *__cdecl sub_432F40(KKND::Task *task);
-void __cdecl __noreturn sub_433060(KKND::Task *sender);
-KKND::Entity *__fastcall sub_433640(_DWORD *a1, int a2, int a3, int a4, int a5);
-KKND::Entity *__fastcall sub_4336E0(_DWORD *a1, int a2, int a3, int a4, int a5);
-void __cdecl sub_433780(KKND::Task *task); // idb
-void __cdecl sub_433810(KKND::Task *task); // idb
-void __cdecl sub_433880(KKND::Task *task); // idb
-void __cdecl sub_4338F0(KKND::Task *task); // idb
-void __cdecl sub_433960(KKND::Task *task); // idb
-void __cdecl sub_4339F0(KKND::Task *task); // idb
-void __cdecl sub_433A60(KKND::Task *task); // idb
-void __cdecl sub_433AF0(KKND::Task *task); // idb
-void __cdecl sub_433BA0(KKND::Task *task); // idb
-void __cdecl sub_433C30(KKND::Task *task); // idb
-void __cdecl sub_433C90(KKND::Task *task); // idb
-void __cdecl sub_433D20(KKND::Task *task); // idb
-void __cdecl sub_433DB0(KKND::Task *task); // idb
-void __cdecl sub_433E60(KKND::Task *task); // idb
-void __cdecl sub_433ED0(KKND::Task *task); // idb
-void __cdecl sub_433F40(KKND::Task *task); // idb
-void __cdecl sub_433FB0(KKND::Task *task); // idb
-void __cdecl sub_434040(KKND::Task *task); // idb
-void __cdecl sub_4340B0(KKND::Task *task); // idb
-void __cdecl sub_434120(KKND::Task *task); // idb
-void __cdecl sub_434190(KKND::Task *task); // idb
-void __cdecl sub_434220(KKND::Task *task); // idb
-void __cdecl sub_4342A0(KKND::Task *task); // idb
-void __cdecl sub_434310(KKND::Task *task); // idb
-void __cdecl sub_434390(KKND::Task *task); // idb
-void __cdecl sub_434460(KKND::Task *task); // idb
-BOOL __fastcall sub_434500(KKND::Task *task, ptrdiff_t a2, ptrdiff_t a3, int a4);
-int __fastcall sub_434710(int a1, int a2, int a3, int a4);
-int __stdcall sub_434740(int *a1, int a2, int a3);
-// int __usercall sub_434790@<eax>(int@<eax>, int@<ecx>);
-int sub_434890();
-BOOL __fastcall sub_4348B0(_DWORD *a1, _DWORD *a2, int *a3, int *a4, int *a5, int *a6);
-void __fastcall sub_4349A0(char *a1, int a2, int a3);
-int __fastcall sub_4349D0(_BYTE *a1, int a2, int a3);
-int __fastcall sub_434A00(_BYTE *a1, int a2, __int16 a3, unsigned __int16 a4, __int16 a5);
-BOOL __fastcall sub_434A90(int a1, int a2, int a3, int a4, int a5, int a6);
-int __fastcall sub_434AD0(_BYTE *a1, int a2, __int16 a3, int a4, __int16 a5);
-int __fastcall sub_434B70(int a1, int a2, int a3, int a4, int a5, int a6);
-int __fastcall sub_434BD0(unsigned __int8 *a1, int a2, __int16 a3, __int16 a4, unsigned __int16 a5, __int16 a6);
-int __fastcall sub_434C60(_BYTE *a1, int a2, __int16 a3, __int16 a4, int a5, __int16 a6);
-void __fastcall sub_434D00(char *a1, int a2, int a3, int a4, int a5);
-void __fastcall sub_434EA0(_BYTE *a1, int a2, int a3, unsigned int a4, int a5);
-char __fastcall sub_4351A0(int a1, int a2, int a3, int a4, int a5);
-int __fastcall sub_435320(int a1, int a2, int a3, int a4, int a5);
-int __fastcall sub_4354A0(_BYTE *a1, int a2, int a3, int a4, int a5);
-void __fastcall sub_435D40(KKND::Entity *param, int a2);
-int __cdecl sub_4368B0(KKND::Task *a1);
-int __cdecl sub_436FB0(KKND::Task *a1);
-void __cdecl sub_4370D0(KKND::Task *task); // idb
-int __cdecl sub_437110(KKND::Task *sender);
-int __cdecl sub_437690(KKND::Task *a1);
-int sub_438630();
+int __fastcall sub_430D70(int);
+BOOL __fastcall HUNK_FixPointers(KKND::LevelHunk *data, KKND::LevelHunk *rllc);
 int sub_438740();
 int sub_438840();
-void __cdecl sub_438C20(KKND::Task *task); // idb
-void __fastcall unit_438D90(KKND::Unit *unit);
-KKND::Entity *__thiscall unit_explode_1(KKND::Unit *unit);
+void __fastcall MAPD_camera_follow_target(KKND::MapdCamera *camera, KKND::Entity *target);
+void __fastcall MAPD_render_mapd(KKND::MapdRenderNode *mapd, KKND::RenderNode *node);
+BOOL LVL_mapd_init();
 KKND::MapdRenderNode *__fastcall MAPD_Draw(KKND::MenuId mapd_id, int image_id, int z);
 void __fastcall MAPD_RemoveRenderable(KKND::MapdRenderNode *node);
-void GAME_UpdateCamera();
+BOOL SOUND_init();
 int __thiscall sub_439610(const char *this);
 int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, unsigned int a6);
 int __fastcall sub_439AA0(const char *, int, int, int, int);
 char __thiscall sub_43A2B0(void *this);
-void sub_43A320();
-void SOUND_ProcessSounds();
-int __fastcall sub_43A710(_DWORD *a1, _DWORD *a2, _DWORD *a3, unsigned int *a4);
-void __fastcall sub_43A800(int a1);
-void __thiscall sub_43A850(int this);
-int __cdecl sub_43A910(_BYTE *a1, unsigned __int16 a2, unsigned __int16 a3, unsigned __int16 a4, __int16 a5, __int16 a6, int a7, unsigned __int16 a8, unsigned __int16 a9, unsigned __int16 a10);
-int __cdecl sub_43A9E7(_BYTE *a1, unsigned __int16 a2, unsigned __int16 a3, unsigned __int16 a4, __int16 a5, __int16 a6, int a7, __int16 a8, unsigned __int16 a9, unsigned __int16 a10);
-// int __usercall sub_43AAD2@<eax>(unsigned int a1@<ebx>, _BYTE *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, unsigned __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-// int __usercall sub_43ABDE@<eax>(unsigned int a1@<ebx>, _BYTE *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, unsigned __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-// int __usercall sub_43ACF6@<eax>(unsigned int a1@<ebx>, _BYTE *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, unsigned __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-// int __usercall sub_43AE53@<eax>(unsigned int a1@<ebx>, unsigned __int8 *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, unsigned __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-// int __usercall sub_43AFAA@<eax>(unsigned int a1@<ebx>, _BYTE *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-// int __usercall sub_43B0BF@<eax>(unsigned int a1@<ebx>, _BYTE *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-// int __usercall sub_43B1E0@<eax>(unsigned int a1@<ebx>, _BYTE *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-// int __usercall sub_43B346@<eax>(unsigned int a1@<ebx>, unsigned __int8 *a2, unsigned __int16 a3, unsigned __int16 a4, unsigned __int16 a5, unsigned __int16 a6, __int16 a7, int a8, __int16 a9, unsigned __int16 a10, unsigned __int16 a11, unsigned __int16 a12, unsigned __int16 a13);
-int __cdecl sub_43B4A6(unsigned __int8 *a1, unsigned __int16 a2, unsigned __int16 a3, unsigned __int16 a4, __int16 a5, int a6, __int16 a7, int a8, unsigned __int16 a9, unsigned __int16 a10, unsigned __int16 a11);
-int __cdecl sub_43B59F(_BYTE *a1, unsigned __int16 a2, unsigned __int16 a3, unsigned __int16 a4, __int16 a5, int a6, __int16 a7, int a8, __int16 a9, unsigned __int16 a10, unsigned __int16 a11);
-int sub_43B6B0();
 KKND::RenderNode *__fastcall REND_AddNode(void *payload, KKND::RenderStateUpdater renderer);
 BOOL REND_DoFrame();
-int sub_43B836();
-void __fastcall REND_UpdateDrawList(KKND::DrawList *list);
-void __fastcall REND_SortDrawList(KKND::DrawList *list);
-void sub_43B910();
-int __fastcall sub_43BA40(KKND::Task *a1, ptrdiff_t a2, int (*a3)(void), ptrdiff_t a4);
-void __cdecl sub_43BA70(KKND::Task *task);
-KKND::Task *sub_43BA90();
-// int __setargv(void); weak
-BOOL __thiscall sub_43BAB0(_DWORD *this);
-void __cdecl __noreturn sub_43C310(KKND::Task *task); // weak
-void __cdecl sub_43C430(KKND::Task *task); // idb
-void __cdecl sub_43C630(KKND::Task *task); // idb
-void __cdecl sub_43C820(KKND::Task *task); // idb
-void __cdecl sub_43CA10(KKND::Task *task);
-void __cdecl sub_43CC00(KKND::Task *task);
-void __cdecl sub_43CD20(KKND::Task *task);
-void __cdecl sub_43CE30(KKND::Task *task);
-void __cdecl sub_43CF50(KKND::Task *task);
-void __cdecl sub_43D090(KKND::Task *task);
-void __cdecl sub_43D271(int a1);
-void __cdecl sub_43D431(int a1);
-// void __usercall sub_43D5F0(int a1@<eax>, KKND::Task *task);
-void __cdecl sub_43D740(KKND::Task *task);
-KKND::Entity *__fastcall sub_43D9E0(char *a1, unsigned __int16 a2);
-void __cdecl __noreturn sub_43DA80(KKND::Task *task);
-KKND::Entity *__fastcall sub_43DCF0(char *a1, unsigned __int16 a2);
-void __cdecl __noreturn sub_43DD90(KKND::Task *task);
-void __cdecl __noreturn sub_43E010(KKND::Task *task);
-int __fastcall sub_43E110(int a1, char *a2, ptrdiff_t a3);
+void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task);
+int __fastcall sub_43E110(int, char *, ptrdiff_t);
 void __cdecl sub_43E230(KKND::Task *task);
 void __cdecl sub_43E470(KKND::Task *task);
-void __cdecl sub_43E670(KKND::Task *task);
-int __cdecl sub_43E7B0(int a1);
-int __cdecl sub_43E820(int a1);
-void __cdecl __noreturn sub_43E890(KKND::Task *task);
-void __cdecl __noreturn sub_43EA90(KKND::Task *task);
-void __cdecl __noreturn sub_43EB80(KKND::Task *task);
-void __cdecl __noreturn sub_43EC70(KKND::Task *task);
 void __cdecl __noreturn sub_43ED60(int a1);
-void __cdecl sub_43EE90(KKND::Task *task);
-void __cdecl sub_43F0E0(KKND::Task *task);
-void __cdecl sub_43F330(KKND::Task *task);
-void __cdecl sub_43F520(KKND::Task *task);
-void __cdecl sub_43F670(KKND::Task *task);
-void __cdecl __noreturn sub_43F7C0(KKND::Task *task); // weak
-void __cdecl __noreturn sub_43F9E0(KKND::Task *task);
-void __cdecl __noreturn sub_43FAD0(KKND::Task *task); // weak
-void __cdecl sub_43FDE0(KKND::Task *task);
-void __cdecl sub_43FF30(KKND::Task *task);
-void __cdecl sub_4402A0(KKND::Task *task);
-void __cdecl sub_4404D0(KKND::Task *task);
-KKND::Entity *__fastcall sub_440770(char *a1, unsigned __int16 a2);
-void __cdecl __noreturn sub_440810(KKND::Task *task);
-void __cdecl __noreturn sub_440CA0(KKND::Task *task);
-void __cdecl __noreturn sub_440ED0(KKND::Task *task);
-void __cdecl __noreturn sub_441050(KKND::Task *task); // idb
-void __cdecl __noreturn sub_441150(KKND::Task *task);
-BOOL sub_441240();
-void __cdecl __noreturn sub_441260(KKND::Task *task); // idb
-void __cdecl __noreturn sub_441340(KKND::Task *task);
-void __cdecl __noreturn sub_441470(KKND::Task *task); // idb
-void __cdecl __noreturn sub_441550(KKND::Task *task);
-int __thiscall sub_441630(KKND::UnitType type);
-void __cdecl __noreturn sub_441680(KKND::Task *task); // idb
-void __cdecl __noreturn sub_441780(KKND::Task *task);
-void __cdecl sub_441940(KKND::Task *task);
-void __cdecl sub_441CE0(int a1);
-int __thiscall sub_441EF0(int *this);
-void __cdecl __noreturn sub_441F10(KKND::Task *task); // weak
-void __cdecl __noreturn sub_441FC0(KKND::Task *task); // idb
-void __cdecl __noreturn sub_4421F0(KKND::Task *task); // idb
-void __cdecl sub_442580(KKND::Task *task);
-void __cdecl sub_4426D0(KKND::Task *task);
-void __cdecl sub_4428C0(KKND::Task *task);
-void __cdecl __noreturn sub_442BB0(KKND::Task *task); // weak
-void __cdecl sub_443000(KKND::Task *task);
-void __cdecl sub_443140(KKND::Task *task);
-void __cdecl __noreturn sub_443290(KKND::Task *task); // weak
-int __fastcall sub_443380(KKND::Task *task, ptrdiff_t a2, int a3);
-int __fastcall sub_443570(KKND::Task *task, ptrdiff_t a2, int a3, ptrdiff_t a4);
-int __fastcall sub_443780(KKND::Task *task, ptrdiff_t a2, int a3, ptrdiff_t a4);
-int sub_443980();
-int *__fastcall sub_4439F0(_DWORD *a1, int a2, int a3, int a4, int a5);
-int *__thiscall sub_443AE0(void *this);
-void sub_443B10();
+int __fastcall sub_443780(KKND::Task *task, ptrdiff_t, int, ptrdiff_t);
+int *__fastcall sub_4439F0(_DWORD *, int, int, int, int);
 void __thiscall sub_443B40(KKND::Task *this);
-int *sub_443BF0();
-void __fastcall sub_443C40(KKND::Task *task, KKND::MenuId a1);
-void __cdecl sub_443D40(KKND::Task *task);
-int __thiscall sub_443D60(char *this);
-int __fastcall sub_443D80(_DWORD *a1, char *a2, int a3);
-int __fastcall sub_443EE0(int a1, int a2, int a3);
-char sub_443F10();
-void __fastcall sub_444080(void *this);
-void __fastcall unit_mode_4444D0(KKND::Unit *unit);
-void __fastcall unit_mode_4446A0(KKND::Unit *unit);
-void __fastcall unit_mode_tanker_4446B0_load_oil(KKND::Unit *unit);
-void __fastcall unit_mode_4447C0(KKND::Unit *unit);
-void __fastcall unit_mode_4448C0(KKND::Unit *unit);
-void __fastcall unit_mode_444AB0(KKND::Unit *unit);
-void __fastcall unit_mode_444B40(KKND::Unit *);
-KKND::Unit *__thiscall sub_444BE0(KKND::Unit *unit);
-KKND::Unit *__thiscall sub_444CC0(KKND::Unit *this);
-KKND::Unit *__thiscall sub_444D10(KKND::Unit *this);
-void __fastcall MessageHandler_444D60(KKND::Task *receiver, KKND::Task *sender, KKND::TaskMessageType message, void *payload);
+void __fastcall MAPD_animated_overlay_init(KKND::MenuId id);
 KKND::Task *__fastcall TASK_CreateFiber(KKND::TaskChannel chan, KKND::TaskFn fn, size_t stack_size);
-void __fastcall task_445310(KKND::Task *task);
+void __fastcall TASK_terminate(KKND::Task *task);
 unsigned int __cdecl TASK_yield(KKND::Task *a1, KKND::TaskYieldFlags yield_flags, int a3);
-void *__fastcall TASK_Alloc(KKND::Task *a1, size_t size);
-void __fastcall TASK_FreeLocal(KKND::Task *task, void *mem);
 void __fastcall TASK_Terminate(KKND::Task *task);
 void TASK_ExecuteScheduledTasks();
 void __fastcall sub_445770(_DWORD *, unsigned __int8 *, int);
 KKND::UiString *__fastcall ui_string_create(KKND::RenderViewport *, KKND::LevelMobdSurface *, char *, int, int, int, int, int, int);
 void __fastcall ui_string_free(KKND::UiString *str);
 int __thiscall sub_445AE0(_DWORD *this);
-void __fastcall sub_445B30(KKND::stru8 **p_next);
 int __fastcall ui_string_445C00(const char *a1, int a2);
 int __fastcall ui_string_445C80(const char *a1, int a2);
-BOOL __fastcall sub_445D40(int a1, int a2);
-void sub_446E90();
+BOOL GAME_sidebar_init();
 BOOL is_player_evolved();
-int sub_4471E0();
-KKND::Entity *sub_447310();
-BOOL __fastcall sidebar_toggle_help_airstrike(int button_id);
-void __fastcall turret_mode_447E20(KKND::Turret *turret);
-unsigned int __thiscall sub_447F50(int *this);
-void __fastcall turret_mode_447FA0(KKND::Turret *);
-void __thiscall sub_448110(KKND::Turret *this);
-void __fastcall turret_mode_448160(KKND::Turret *turret);
-void __fastcall turret_mode_4482D0_missile_battery(KKND::Turret *turret);
-void __fastcall mode_null(void *_);
-KKND::MapdRenderNode *__fastcall sub_448360(int a1, _DWORD *a2);
-KKND::MapdRenderNode *__fastcall sub_448390(int a1, _DWORD *a2);
+KKND::MapdRenderNode *__fastcall MAPD_render_shroud(void *_, KKND::RenderNode *n);
+KKND::MapdRenderNode *__fastcall MAPD_448390(int a1, KKND::RenderNode *n);
 void __fastcall render_state_handler_ui(KKND::Entity *entity, KKND::RenderNode *node);
-void __fastcall render_state_handler_cursor(KKND::Entity *entity, KKND::RenderNode *node);
-void __fastcall render_state_handler_explosion(KKND::Entity *entity, KKND::RenderNode *node);
-void __fastcall render_state_handler_aircraft_unit(KKND::Unit *unit, KKND::RenderNode *node);
-BOOL __fastcall sub_4488F0(KKND::Unit *a, KKND::Unit *b, int a3);
-void __thiscall sub_4489B0(int this);
-void __thiscall sub_448B40(int this);
-void __thiscall sub_448BF0(int this);
-void __thiscall sub_448C40(int this);
-void __thiscall sub_448E90(int this);
-void __cdecl sub_448F30(KKND::Task *sender);
-void sub_449800();
-BOOL __fastcall sub_449E00(_DWORD *a1, unsigned int a2, int a3);
-char sub_449FF0();
-char __fastcall sub_44A160(char a1, const void *a2, unsigned int a3);
-int __fastcall sub_44A220(char a1, const void *a2, unsigned int a3);
-unsigned int __fastcall sub_44A2A0(char a1, const void *a2, unsigned int a3);
-void __cdecl __noreturn sub_44A500(KKND::Task *task);
-KKND::Entity *__fastcall sub_44A6B0(int a1, int a2);
-KKND::Entity *__thiscall sub_44A700(KKND::Task *this);
-int sub_44AE30();
-BOOL __fastcall sub_44B0D0(int x, int y);
-int __fastcall unit_reveal_fog_of_war(KKND::Unit *unit);
-void sub_44BC00();
-int __fastcall sub_44BC80(int a1, int a2, int a3, int a4);
-int sub_44BD50();
-void sub_44C1D0();
-void sub_44C5C0();
-KKND::Unit *__thiscall unit_create(KKND::Task *task);
-KKND::Unit *__fastcall unit_44C890(KKND::Unit *unit);
-KKND::Entity *__fastcall entity_create_by_unit_type(KKND::UnitType type, int x, int y, int player_num);
-KKND::Unit *__fastcall sub_44C970(int a1, int a2, int a3, int a4);
-KKND::Task *sub_44C9A0();
-KKND::Unit *__thiscall sub_44CA30(void *this);
-BOOL __fastcall unit_is_surv(KKND::UnitType type);
+_BYTE *GAME_load_fog_of_war();
+void MAPD_enable_tile_blending();
+int sub_44C010();
+int GAME_InitUnits();
 BOOL __fastcall show_message_unit(KKND::Unit *unit, const char *text);
-BOOL __fastcall show_message(const char *text);
-ptrdiff_t __fastcall entity_anim_advance_rotation(ptrdiff_t *src_orientation, KKND::MobdOrientation dst_orientation, ptrdiff_t step);
-BOOL is_at_units_limit();
 BOOL __fastcall diplomacy_is_enemy(int player_num, KKND::Unit *a2);
-BOOL __fastcall unit_is_ally(int player_num, KKND::Unit *unit);
-int __fastcall sub_44D000(KKND::Unit *unit);
-int __fastcall sub_44D250(_DWORD *a1, _DWORD *a2, int a3, KKND::Unit *unit, int *a5);
-int __fastcall sub_44D340(_DWORD *a1, _DWORD *a2, int a3, KKND::Unit *unit, int *a5);
-void OS_MessagePump();
 // void *__cdecl malloc(size_t Size);
 // void __cdecl free(void *Block);
 // int sprintf(char *const Buffer, const char *const Format, ...);
 // int __cdecl fclose(FILE *Stream);
 // int fscanf(FILE *const Stream, const char *const Format, ...);
 // FILE *__cdecl fopen(const char *FileName, const char *Mode);
-size_t __cdecl sub_44DB80(void *Buffer, size_t ElementSize, size_t ElementCount, FILE *Stream);
-// size_t __cdecl fwrite(const void *Buffer, size_t ElementSize, size_t ElementCount, FILE *Stream);
+size_t __cdecl kknd_fread(void *Buffer, size_t ElementSize, size_t ElementCount, FILE *Stream);
+size_t __cdecl kknd_fwrite(void *Buffer, size_t ElementSize, size_t ElementCount, FILE *Stream);
 // void *__cdecl memcpy(void *, const void *Src, size_t Size);
-// char *__cdecl strchr(const char *Str, int Val);
 // int __cdecl strncmp(const char *Str1, const char *Str2, size_t MaxCount);
 // void __cdecl __noreturn exit(int Code);
 // int printf(const char *const Format, ...);
 // void __cdecl srand(unsigned int Seed);
 // int __cdecl rand();
-// int __cdecl isalpha(int C);
-// int __cdecl isdigit(int C);
-int __cdecl sub_44E570(FILE *Stream, int a2, int a3); // idb
+// int fprintf(FILE *Stream, const char *a2, ...);
+// int __cdecl atoi(const char *String);
+// char *__cdecl strtok(char *String, const char *Delimiter);
+// char *__cdecl fgets(char *Buffer, int MaxCount, FILE *Stream);
 // clock_t __cdecl clock();
-int sub_44E840();
-// char *__cdecl strncpy(char *Destination, const char *Source, size_t Count);
-// _DWORD __cdecl _lock(_DWORD); weak
-// _DWORD __cdecl _unlock(_DWORD); weak
 // void __cdecl _lock_file(FILE *Stream);
 // void __cdecl _unlock_file(FILE *Stream);
 // int __cdecl _output(FILE *File, int, int); idb
-int __cdecl sub_452610(int a1);
+// int __cdecl va_start(int);
 // _DWORD __cdecl _ftbuf(_DWORD, _DWORD); weak
-DWORD __cdecl sub_4528F0(void **Block);
-// int __cdecl _isctype(int C, int Type);
-// _DWORD __cdecl _ftime(_DWORD); weak
-// void *__cdecl calloc(size_t Count, size_t Size);
-int __cdecl sub_453570(int a1);
-// _DWORD __cdecl getSystemCP(_DWORD); weak
-// _DWORD __cdecl CPtoLCID(_DWORD); weak
-// int setSBCS(void); weak
-unsigned int sub_453870();
 // int __cdecl _isatty(int FileHandle);
-int __cdecl sub_454D40(int C); // idb
-// _DWORD __cdecl _ld12cvt(_DWORD, _DWORD, _DWORD); weak
-int __cdecl sub_4552A0(int a1, int a2);
-int __cdecl sub_4552C0(int a1, int a2);
-int __cdecl sub_4552E0(int a1, int a2);
-int __cdecl sub_455320(int a1, int a2);
-int __cdecl sub_455790(DWORD dwInfoType, LPCSTR lpSrcStr, int cchSrc, LPWORD lpCharType, UINT CodePage, LCID Locale, int a7); // idb
-BOOL __cdecl sub_455E70(_DWORD *a1);
-// _DWORD __cdecl cvtdate(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD); weak
-int __cdecl sub_4562A0(LCID Locale, DWORD dwMapFlags, LPCSTR lpSrcStr, LPCWCH lpWideCharStr, LPSTR lpDestStr, int cchDest, UINT CodePage, int a8); // idb
-int sub_456560();
-// _DWORD __cdecl __strgtold12(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD); weak
-// char *__cdecl _itoa(int Value, char *Buffer, int Radix);
-// int __cdecl _strcmpi(const char *String1, const char *String2);
-// _DWORD __cdecl strncnt(_DWORD, _DWORD); weak
-int __cdecl sub_459A40(LCID Locale, LCTYPE LCType, LPSTR lpLCData, int cchData, UINT CodePage); // idb
-// int __stdcall DPLAYX_1(_DWORD, _DWORD, _DWORD); weak
-// int __stdcall DPLAYX_2(_DWORD, _DWORD); weak
-KKND::Movie *__cdecl MOVIE_read_file(const char *filename);
-void __cdecl MOVIE_free_buffers(KKND::Movie *movie);
-__int16 __cdecl MOVIE_45A070(KKND::Movie *movie);
-int __cdecl kknd_fclose(FILE *Stream);
-// int __usercall sub_45A3C4@<eax>(int a1@<ecx>, _DWORD *a2@<esi>);
-// int __usercall sub_45A3E7@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD *a3@<esi>);
-// __int16 __usercall sub_45A43F@<ax>(int a1@<eax>, int a2@<ecx>, _BYTE *a3@<ebx>, _DWORD *a4@<esi>);
-// char __usercall sub_45A460@<al>(__int16 a1@<dx>, int a2@<ecx>, unsigned __int8 *a3@<ebx>, _DWORD *a4@<edi>, _DWORD *a5@<esi>);
-// int __usercall sub_45D108@<eax>(int a1@<ecx>, _DWORD *a2@<esi>);
-// int __usercall sub_45D147@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD *a3@<esi>);
-// __int16 __usercall sub_45D25B@<ax>(int a1@<eax>, int a2@<ecx>, _WORD *a3@<ebx>, _DWORD *a4@<esi>);
-void sub_45D288();
-void sub_45D2A4();
-// __int16 __usercall sub_45D2C1@<ax>(int a1@<edx>, int a2@<ecx>, unsigned __int8 *a3@<ebx>, char *a4@<edi>, _DWORD *a5@<esi>);
-// __int16 __usercall sub_45D2FE@<ax>(int a1@<edx>, int a2@<ecx>, unsigned __int8 *a3@<ebx>, char *a4@<edi>, _DWORD *a5@<esi>);
-// __int16 __usercall sub_45D35B@<ax>(int a1@<edx>, int a2@<ecx>, unsigned __int8 *a3@<ebx>, char *a4@<edi>, _DWORD *a5@<esi>);
-int __cdecl sub_4620C0(int C); // idb
 
 //-------------------------------------------------------------------------
 // Data declarations
 
-const INT dword_463008 = 0; // idb
 _UNKNOWN unk_463070; // weak
 _DWORD dword_4630AC[15] = { 77, 24, 84, 36, 20, 43, 72, 20, 5, 89, 189, 233, 91, 21, 13 }; // weak
 int dword_4630E8 = -2021503296; // weak
-const CHAR String1[4] = { '\0', '\0', '\0', '\0' }; // idb
-const WCHAR SrcStr = 0u; // idb
-_UNKNOWN unk_463DE0; // weak
-KKND::BoxdCollisionHandler g_unit_collision_handlers[20] =
-{
-  { 1, 2, NULL, NULL },
-  { 0, 1, NULL, &BOXD_collide_solid },
-  { 0, 1, NULL, &BOXD_collide_floor },
-  { 0, 1, NULL, &BOXD_collide_ramp_ltr },
-  { 0, 1, NULL, &BOXD_collide_ramp_rtl },
-  { 0, 1, NULL, &BOXD_collide_slope_left },
-  { 0, 1, NULL, &BOXD_collide_slope_right },
-  { 0, 1, NULL, &BOXD_collide_floor },
-  { 0, 1, NULL, &BOXD_collide_solid },
-  { 0, 1, NULL, &BOXD_collide_solid },
-  { 0, 1, NULL, &BOXD_collide_solid },
-  { 0, 1, NULL, &BOXD_collide_solid },
-  { 0, 1, NULL, &BOXD_collide_solid },
-  { 0, 1, NULL, &BOXD_collide_corner_right },
-  { 0, 1, NULL, &BOXD_collide_corner_left },
-  { 0, 1, NULL, &BOXD_collide_solid },
-  { 0, 0, NULL, NULL },
-  { 5, 0, NULL, NULL },
-  { 2, 0, &BOXD_collide_cursor, NULL },
-  { 0, 4, NULL, &BOXD_collide_solid }
-};
-const char asc_464DA8[] = "r";
 char dword_465084[] = { 'w', 'b', '\0', '\0' }; // idb
 void *g_script_handlers[352] =
 {
@@ -791,7 +258,7 @@ void *g_script_handlers[352] =
   &UNIT_Handler_Tower,
   &UNIT_Handler_Tower,
   &sub_433060,
-  &sub_424CE0,
+  &task_424CE0,
   &sub_425400,
   &UNIT_Handler_General,
   &UNIT_Handler_TankerConvoy,
@@ -908,10 +375,10 @@ void *g_script_handlers[352] =
   &UNIT_Handler_Infantry,
   &unit_mode_415540,
   &unit_mode_idle,
-  &sub_4157F0,
+  &unit_mode_4157F0,
   &unit_4158B0,
   &unit_mode_415980,
-  &sub_415A20,
+  &unit_415A20,
   &unit_mode_415A60,
   &unit_mode_attack_move,
   &unit_mode_415D30,
@@ -924,18 +391,18 @@ void *g_script_handlers[352] =
   &unit_mode_417100,
   &unit_4172D0,
   &unit_mode_417360,
-  &sub_417550,
-  &sub_417670,
-  &sub_417810,
-  &sub_417980,
+  &unit_417550,
+  &unit_mode_417670,
+  &unit_417810,
+  &unit_417980,
   &unit_mode_417A20,
   &unit_mode_417BD0,
-  &unit_417E60,
+  &unit_mode_417E60,
   &unit_mode_attack_move_2,
-  &sub_417F60,
+  &unit_417F60,
   &unit_mode_417FC0,
   &unit_418120,
-  &sub_418170,
+  &unit_418170,
   &unit_mode_4181B0,
   &unit_418290,
   &unit_mode_418550,
@@ -972,7 +439,7 @@ void *g_script_handlers[352] =
   &sub_424BF0,
   &sub_424CA0,
   &sub_424CC0,
-  &sub_424CE0,
+  &task_424CE0,
   &sub_4250E0,
   &sub_4251B0,
   &sub_4252C0,
@@ -1123,96 +590,7 @@ void *g_script_handlers[352] =
   &turret_mode_destroyed,
   &MessageHandler_Turret
 };
-int g_veterancy_damage_mod[3] = { 0, 51, 102 };
-int dword_465630[4] = { 0, 1200, 600, 0 }; // weak
-int g_veterancy_accuracy_bonus[3] = { 0, 10, 20 };
-int dword_465680 = 1; // weak
-KKND::UnitTilePosition g_next_infantry_slot[32] =
-{
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot4,
-  UnitPosition_Slot3,
-  UnitPosition_Slot3,
-  UnitPosition_Slot3,
-  UnitPosition_Slot3,
-  UnitPosition_Slot3,
-  UnitPosition_Slot3,
-  UnitPosition_Slot3,
-  UnitPosition_Slot3,
-  UnitPosition_Slot2,
-  UnitPosition_Slot2,
-  UnitPosition_Slot2,
-  UnitPosition_Slot2,
-  UnitPosition_Slot1,
-  UnitPosition_Slot1,
-  UnitPosition_Slot0,
-  UnitTilePosition_Invalid
-};
-int dword_465708[8] = { 0, 1, 1, 1, 0, -1, -1, -1 }; // weak
-int dword_465728[40] =
-{
-  -1,
-  -1,
-  0,
-  1,
-  1,
-  1,
-  0,
-  -1,
-  0,
-  0,
-  1,
-  1,
-  1,
-  1,
-  1,
-  0,
-  0,
-  0,
-  -1,
-  -1,
-  -1,
-  -1,
-  -1,
-  0,
-  -1,
-  -1,
-  -1,
-  0,
-  0,
-  0,
-  1,
-  1,
-  1,
-  1,
-  1,
-  0,
-  0,
-  0,
-  -1,
-  -1
-}; // weak
-char dword_4657F0[8] = { '\x91', '\x92', '\xAD', '\xAC', '\xAF', '\0', '\0', '\0' }; // weak
-char dword_4657F8[8] = { '\x90', '\x91', '\xEF', '\xDF', '\xAE', '\0', '\0', '\0' }; // weak
-char byte_465800[4] = { '\xA6', '\xAA', '\x91', '\xAC' }; // weak
-char byte_465804[4] = { '\xA4', '\xA9', '\x91', '\xDF' }; // weak
 KKND::RenderViewport *g_default_draw_ctx = &g_default_viewport;
-int dword_46580C = 1; // weak
-_UNKNOWN unk_465810; // weak
 int dword_465948[16] =
 {
   0,
@@ -1232,18 +610,17 @@ int dword_465948[16] =
   -2896,
   -1567
 }; // weak
-KKND::SoundId sound_id[5] = { SoundId_174, SoundId_175, SoundId_176, SoundId_177, SoundId_178 }; // weak
-int dword_465FE8[] = { -1 }; // weak
 KKND::BoxdCollisionHandler g_ui_collision_handlers[7] =
 {
   { 0, 5, NULL, NULL },
   { 0, 2, NULL, NULL },
-  { 1, 0, &sub_41B000, NULL },
-  { 2, 0, &sub_41B020, NULL },
-  { 4, 0, &sub_41B070, NULL },
+  { 1, 0, &collider_ui_41B000, NULL },
+  { 2, 0, &collider_ui_41B020, NULL },
+  { 4, 0, &collider_ui_41B070, NULL },
   { 0, 0, NULL, NULL },
   { 0, 0, NULL, NULL }
 };
+char *off_4660A8[5] = { "surv.slv", "mute.slv", "surv_01.lvl", "surv2.wav", "heads01.vbc" }; // weak
 KKND::LevelDesc g_lvl_desc[68] =
 {
   {
@@ -2267,276 +1644,114 @@ KKND::LevelDesc g_lvl_desc[68] =
     { 0, 0, 0u, 0u }
   }
 };
-char *off_46725C[2] = { "unknown error", "non-specific" }; // weak
-char *off_467260 = "non-specific"; // weak
-char aMemory[7] = "memory"; // weak
-char aBadUpgradeTask[17] = "bad upgrade task"; // weak
+const char off_46725C[] = { 't', 'r', 'F', '\0' };
+const char off_467260[] = { 'd', 'r', 'F', '\0' };
 char aUnknownMessage[24] = "unknown message handler"; // weak
-char aUnknownTurnRet[25] = "unknown turn-return mode"; // weak
-char aUnknownReturnM[20] = "unknown return mode"; // weak
-char aUnknownAttacke[22] = "unknown attacked mode"; // weak
-char aUnknownArriveM[20] = "unknown arrive mode"; // weak
-char aUnknownIdleMod[18] = "unknown idle mode"; // weak
-char aUnknownMode[13] = "unknown mode"; // weak
-char aUnknownTurretM[20] = "unknown turret mode"; // weak
-char aTaskIsWrongTyp[19] = "task is wrong type"; // weak
-char aCouldNotSaveUn[32] = "Could not save unit information"; // weak
-char aCouldnTWriteTo[33] = "couldn't write to save-game file"; // weak
-char aCouldnTOpenSav[29] = "couldn't open save-game file"; // weak
-char aCouldNotSaveMi[41] = "Could not save miscellaneous information"; // weak
-char aCouldNotSaveMa[31] = "Could not save map information"; // weak
-char aCouldNotSavePr[38] = "Could not save production information"; // weak
-char aCouldNotSaveCp[38] = "Could not save cpu player information"; // weak
-char aCouldNotAlloca[36] = "Could not allocate buffer for units"; // weak
-char aCouldNotSaveOi[31] = "Could not save oil information"; // weak
-char aCouldnTAllocat[35] = "Couldn't allocate temporary buffer"; // weak
-KKND::LevelId g_prev_level_id = LevelId_Invalid;
-char a03d[] = "%03d"; // idb
-char aW[] = "w"; // idb
-_UNKNOWN *off_468410 = &unk_4681F8; // weak
-int dword_468414[] = { 6000 }; // weak
-int dword_468418[] = { 1000 }; // weak
-int dword_46841C[] = { 1 }; // weak
-_UNKNOWN unk_468560; // weak
-_UNKNOWN unk_468620; // weak
-_UNKNOWN unk_4686E0; // weak
-_UNKNOWN unk_4687D0; // weak
-char aCKScriptsMissi[] = "C:\\k\\Scripts\\Mission.cpp"; // idb
-int dword_468980 = -1; // weak
-int g_last_assigned_control_group = -1; // weak
-KKND::SoundId dword_468988[4] = { SoundId_69, SoundId_53, SoundId_51, SoundId_50 };
-KKND::SoundId dword_468998[4] = { SoundId_139, SoundId_116, SoundId_142, SoundId_140 };
-KKND::SoundId g_futuristic_units_recall[2] = { SoundId_FuturisticUnit_Recall_1, SoundId_FuturisticUnit_Recall_2 };
-int dword_4689B0[4] = { 179, 180, 185, 0 }; // weak
-int dword_4689C0[22] =
+char aBadConstructs[15] = "bad constructs"; // weak
+KKND::LevelId g_last_loaded_level_id = LevelId_Invalid;
+char *off_467738[40] =
 {
-  182,
-  183,
-  184,
-  182,
-  183,
-  184,
-  182,
-  183,
-  184,
-  182,
-  183,
-  184,
-  182,
-  183,
-  184,
-  182,
-  183,
-  184,
-  182,
-  183,
-  184,
-  186
+  &off_46C4F0,
+  "mb_m01.wav",
+  &off_46C520,
+  "mb_m02.wav",
+  &off_46C548,
+  "mb_m03.wav",
+  &off_46C578,
+  "mb_m04.wav",
+  &off_46C598,
+  "mb_m05.wav",
+  &off_46C5C0,
+  "mb_m06.wav",
+  &off_46C5F8,
+  "mb_m07.wav",
+  &off_46C630,
+  "mb_m08.wav",
+  &off_46C658,
+  "mb_m09.wav",
+  &off_46C688,
+  "mb_m10.wav",
+  &off_46C6B0,
+  "mb_s01.wav",
+  &off_46C6D0,
+  "mb_s02.wav",
+  &off_46C6F0,
+  "mb_s03.wav",
+  &off_46C738,
+  "mb_s04.wav",
+  &off_46C778,
+  "mb_s05.wav",
+  &off_46C7B8,
+  "mb_s06.wav",
+  &off_46C7F0,
+  "mb_s07.wav",
+  &off_46C828,
+  "mb_s08.wav",
+  &off_46C860,
+  "mb_s09.wav",
+  &off_46C888,
+  "mb_s10.wav"
 }; // weak
-int dword_468A18[] = { 78 }; // weak
-int dword_468A20[] = { 156 }; // weak
-int dword_468A28[4] = { 68, 49, 43, 0 }; // weak
-int dword_468A38[4] = { 133, 131, 91, 0 }; // weak
-int dword_468A48[] = { 76 }; // weak
-int dword_468A50[] = { 154 }; // weak
-char byte_468A58 = 'E'; // weak
+char *off_46773C[39] =
+{
+  "mb_m01.wav",
+  &off_46C520,
+  "mb_m02.wav",
+  &off_46C548,
+  "mb_m03.wav",
+  &off_46C578,
+  "mb_m04.wav",
+  &off_46C598,
+  "mb_m05.wav",
+  &off_46C5C0,
+  "mb_m06.wav",
+  &off_46C5F8,
+  "mb_m07.wav",
+  &off_46C630,
+  "mb_m08.wav",
+  &off_46C658,
+  "mb_m09.wav",
+  &off_46C688,
+  "mb_m10.wav",
+  &off_46C6B0,
+  "mb_s01.wav",
+  &off_46C6D0,
+  "mb_s02.wav",
+  &off_46C6F0,
+  "mb_s03.wav",
+  &off_46C738,
+  "mb_s04.wav",
+  &off_46C778,
+  "mb_s05.wav",
+  &off_46C7B8,
+  "mb_s06.wav",
+  &off_46C7F0,
+  "mb_s07.wav",
+  &off_46C828,
+  "mb_s08.wav",
+  &off_46C860,
+  "mb_s09.wav",
+  &off_46C888,
+  "mb_s10.wav"
+}; // weak
+char *off_4678D0 = "UNIT_SURV_INFANTRY"; // weak
+char aW[] = "w"; // idb
+char aDamageToBuildi[20] = "damage to buildings"; // weak
+char aDamageToVehicl[19] = "damage to vehicles"; // weak
+char aDamageToInfant[19] = "damage to infantry"; // weak
+char aAccuracy[9] = "accuracy"; // weak
+char aFiringVisualRa[20] = "firing/visual range"; // weak
+char aTurningSpeed[14] = "turning speed"; // weak
+char aVolleySize[12] = "volley size"; // weak
 int dword_468B50 = 1; // weak
 int dword_468B54 = -1; // weak
 int dword_468B58 = -1; // weak
 BOOL g_is_single_player = 1;
-int dword_468B60 = 1; // weak
 int dword_468B68 = -1; // weak
-char *off_468B74[2] = { "DirectX IPX", "DirectX IPX" }; // weak
-int dword_468B7C[] = { 0 }; // weak
-char aDirectxModem[14] = "DirectX modem"; // weak
-char aDirectxSerial[15] = "DirectX serial"; // weak
-char aDirectxIpx[12] = "DirectX IPX"; // weak
-char *off_468CD8[2] = { "Oct 23 1997", "17:00:00" }; // weak
-char *off_468CDC = "17:00:00"; // weak
-CHAR dword_468CE0[] = { 'P', 'L', 'A', 'Y' }; // idb
-int dword_468CE4 = 21061; // weak
-int dword_468CE8 = 0; // weak
-int dword_468CF0 = 1750844416; // weak
-int dword_468CF4 = 298818860; // weak
-int dword_468CF8 = -1442787927; // weak
-int dword_468CFC = -477730816; // weak
-int dword_468D00 = 1156228960; // weak
-int dword_468D04 = 298830696; // weak
-int dword_468D08 = -1610592612; // weak
-int dword_468D0C = 1581385161; // weak
-int dword_468D10 = 253585504; // weak
-int dword_468D14 = 298813657; // weak
-int dword_468D18 = -1610592612; // weak
-int dword_468D1C = 1581385161; // weak
-int dword_468D20 = -1; // weak
-char aS_1[2] = "S"; // weak
-char aC_0[2] = "C"; // weak
-char aUnknown[8] = "Unknown"; // weak
-char aNoFreeLinks[14] = "no free links"; // weak
-int dword_468FD4 = 1; // weak
-int dword_468FD8 = 2; // weak
-int dword_468FDC = 3; // weak
-char *off_469030[30] =
-{
-  "THE NEXT GENERATION\nThe surface is currently owned by the\nmutants.   To start reclaiming the land,\nwe must destroy all mutants in the\nsurrounding area.",
-  "    BUILD AN OUTPOST\nProtect the Outpost and build a Power\nStation.  Don't let any buildings fall.\nEstablish a drill site with the Oil\nDerrick, and use the Power Station's\ntanker to collect at least 5000\nResource Units.",
-  "WITHSTAND THE RAIDING PARTY\nRecently built camp is targetted for\nenemy attack.  Protect all buildings,\ndon't let any fall.",
-  "    RESCUE THE SCOUT\nA scout has gone missing while\nmapping the area.  Locate him and\nbring him home, alive.",
-  "        TOLL GATE\nA mutant base has been discovered on\na ruined highway north of a ruined\ncity.   The base protects a supply\nroute along the road.  Set up a base\nto rupture the supply line, then\ndestroy all mutants and their base.",
-  "EXTERMINATE THE VILLAGE\nA Survivor force has drawn mutants\naway from their camp.  They will not be\ngone long. While they are away, get\ninto their camp, destroy their 4 oil\nrigs and the surrounding buildings,\nthen return to where you started.",
-  "PROTECT THE CONVOY\nA convoy of six Survivor vehicles is\nmaking its way to another Survivor\ncamp.   Protect them as they travel,\nand ensure that at least four of the\nsix arrive at the other camp intact.",
-  "   BACK TO THE BEACH\nTake the beach in the name of the\nSurvivors.  Establish a base there,\nbuild it up, then destroy all mutants\nin the area.",
-  "RESCUE THE COMMANDER\nA Survivor Commander has been\ncaptured and his regiment destroyed.\nWe believe he's been taken to the\nmutant camp he was trying to destroy.\nLocate the camp, rescue the Commander,\nthen destroy the camp entirely.\nEnsure his safety.",
-  "     OCCUPATION FORCE\nThe mutants have set up a stronghold in\nthe H7 Hills.  The area is limited in \nresources.  Secure the oil sites and\nbreak up the mutant supply lines, then\ndestroy their stronghold.",
-  "    GIVE ME LIBERTY\nA rich oil deposit has been discovered\nnear the fallen city of Mareindad.\nBuild up your forces and destroy\nall mutants and mutant buildings.",
-  "   SURGICAL STRIKE\nThe mutant chieftain is preparing to\nshare his battle plans with the mutant\nwarlords.  Kill the chieftain before\nthe other leaders get there, and keep\na low profile.",
-  "   HOLD THE BRIDGE\nThe mutants are headed over the\nbridges.  Prevent the mutants from\ncrossing either bridge, kill any who\nmake it through.  Then push forward\nand kill all remaining mutants in the\narea.",
-  "   THE ROUT/RETREAT\nThe mutants are spearheading their\nforces and headed towards our main\nbunker.  Hold off the mutants for half\nan hour from our left flank while we\nwithdraw all forces to protect the\nbunker.",
-  "      BESIEGED\nThe mutants have our main bunker\nunder siege, but have left their own\nbases virtually undefended.  Protect\nthe base as you work your way through\nthe enemy.  Then push through them and\ndestroy their base.",
-  "  RETURN OF THE SLUGS\nThe Chieftain has a feeling the\nSymmetrics are actually alive and some\nmay have broken through to the surface.\nHunt them down and kill them.",
-  "       REPEL THEM!\nThe Symmetrics are congregating near\none of our villages.  They are trying\nto establish themselves on the surface.\nStop them.",
-  "       BUBBLIN' CRUDE\nOur Mekaniks have reconstructed a rig.\nTake a mobile derrick to the hills and\nset it up over an Earth Blood deposit.\nCreate a Power Station, and use its\ntanker to transport the Earth Blood.\nClear all Symmetrics from the area.",
-  "    RAID THE FORT\nOur raids have left a Symmetric\nsupply post very much under-defended.\nTake a party and some Monster Trucks\nand steal their abandoned tankers.\nEscape west with at least two\ntankers.",
-  "       AMBUSH\nA Symmetric attack party heads for\nthe village of Granbretan.  We have\nlost contact with our original ambush\nparty near the southern bridge.\nRegain contact with our ambush\nparty, band together and prevent all\nSymmetrics from crossing the bridges.",
-  "       SIEGE\nOne of our camps has come under\nsiege.  We are cut off from our\nsupply of Earth Blood.  Clear a safe\npath through the Symmetrics for our\nEarth Blood, then wipe out all\nSymmetrics and their camp.",
-  "  RELEASE THE PRISIONERS\nThe Symmetrics have raided another\nvillage, taking our people to their\nnests.  Rescue the innocents, enlist\ntheir help, then destroy the Symmetric\ncamp.",
-  "  SMASH THE CONVOY\nA Symmetric convoy are protected and\nmoving north.  We suspect they're\nheading for a Symmetric camp.  Stop\nthem from getting anywhere near it.",
-  "FIGHT FOR TERRITORY\nA leader of the Evolved is in trouble.\nHis battle with a Symmetric base goes\npoorly, and his base will soon fall.\nRepair his base, then destroy the\nSymmetric base entirely.",
-  "  CLOSE ENCOUNTERS\nThe Symmetrics are headed towards\none of our forbidden sites.  Find\nout if the Symmetrics have located\nold technology.  Whether they have\nor not, destroy them all.",
-  "IT'S THE END OF THE WORLD\nThe Symmetrics have a rich source of\nwar materials, which we need. \nEstablish a base for the Evolved, take\nover or destroy their stealing of the\nEarth Blood, and eradicate them.",
-  "  THE BIG ATTACK\nWe have been blessed with fruitful\nbreeding grounds.  Prevent a Symmetric\nwar party from destroying what we have\nmade, then destroy the Symmetrics\nthemselves.",
-  "BATTLE FOR THE ISLANDS\nWe want to take the area around the\nSouthern Barl river delta.  Take the\nruined highway to the nearby Evolved\ncamp. Build up your forces, then remove\nall Symmetrics from the area.",
-  "  THE FINAL ASSAULT\nSix of our Warlords head to the hills\nto meet with our Chieftain and discuss\nthe final battle.  The Symmetrics will\ntry to break up the meeting.  Protect\nall seven leaders from Symmetric\nattack.",
-  "    COUNTER ATTACK\nThe Symmetrics have been forced back\nto their main base. Destroy them,\ndestroy their base, and win the war\nfor the surface."
-}; // weak
 int g_4690A8_sfx_volume = 16;
 int dword_4690AC = 16; // weak
-int dword_4690B0 = 16; // weak
-int dword_4690B4 = 24576; // weak
-char asc_46BB14[18] = "                 "; // weak
-char aD_2[] = "%d:"; // idb
-char aD_1[5] = " %d:"; // weak
-_UNKNOWN unk_46BB40; // weak
-KKND::SoundId dword_46BB80[2] = { SoundId_9, SoundId_10 }; // weak
-char aSlotDSD[] = "Slot %d = %s %d\n"; // idb
-char aActiveslotD[] = "ActiveSlot=%d\n"; // idb
-int g_blood_x_speeds[8] = { 60, 40, -10, -30, -45, -35, 0, 30 };
-int g_blood_y_speeds[8] = { 10, -45, -55, -35, 0, 25, 35, 40 };
-int dword_46BC60[9] = { 0, 40, 80, 120, 292, 448, 620, 660, 700 }; // weak
-char Str1[] = "SOUN"; // idb
-char filename[] = "sound.slv"; // idb
-int dword_46BD04 = 0; // weak
-__int16 word_46BD08 = 0; // weak
-int dword_46BD0A = 0; // weak
-__int16 word_46BD0E = 0; // weak
-char aEvol[7] = "-EVOL-"; // weak
-char aSurv[7] = "-SURV-"; // weak
-char aEvol_0[5] = "EVOL"; // weak
-char aSurv_0[5] = "SURV"; // weak
-char aNoMoneyToStart[27] = "No Money to start building"; // weak
-char *off_46C318[15] =
-{
-  "Blue",
-  "Red",
-  "Orange",
-  "Yellow",
-  "Green",
-  "Aqua",
-  "Purple",
-  "HotPink",
-  "DkBlue",
-  "Pink",
-  "Brown",
-  "White",
-  "Black",
-  "Gold",
-  "Bronze"
-}; // weak
-char *off_46C358[15] =
-{
-  "Urbane Assault",
-  "War is Heck",
-  "Highland Jig",
-  "Bridge Too Far",
-  "Napalm Death",
-  "No Future",
-  "Seas of Blood",
-  "Crabs of Fury",
-  "Scorched Earth",
-  "Desert Storm",
-  "Ground Zero",
-  "No Mans Land",
-  "City State",
-  "Hardware War",
-  "Black Ice"
-}; // weak
-_UNKNOWN unk_46C3A4; // weak
-_UNKNOWN *off_46C3A8 = &unk_46464F; // weak
-char *off_46C3B0[11] =
-{
-  "RESOURCES",
-  "MAP",
-  "OPTIONS",
-  "INFORMATION",
-  "INFANTRY",
-  "VEHICLES",
-  "BUILDINGS",
-  "DEFENCES",
-  "AIRCRAFT",
-  "AIRSTRIKE",
-  "DECONSTRUCT"
-}; // weak
-char aSfxVolumeMusic[28] = " SFX VOLUME\n\n\n\nMUSIC VOLUME"; // weak
-char aAreYouSureYouW_0[34] = "Are you sure\nYou want to\n   quit?"; // weak
-char aAreYouSureYouW[35] = "Are you sure\nYou want to\n restart?"; // weak
-int dword_46E3F0 = -2; // weak
-int dword_46E3F8 = 2; // weak
-int dword_46E3FC = 3; // weak
-int dword_46E404 = 0; // weak
-int Value[6] = { 9600, 19200, 38400, 57600, 115200, 0 }; // weak
-char *off_46E420 = "5000 "; // idb
-int dword_46E440[16] = { 180, 192, 204, 216, 228, 240, 252, 264, 276, 288, 300, 312, 324, 336, 348, 0 }; // weak
-int dword_46E480[16] = { 0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 0 }; // weak
-int dword_46E4C0[12] = { 492, 504, 516, 528, 540, 552, 564, 576, 588, 600, 0, 0 }; // weak
-int dword_46E4F0[11] = { 372, 384, 396, 408, 420, 432, 444, 456, 468, 480, 0 }; // weak
-char aNameSPhoneSBau[30] = "name=%s . phone=%s . baud=%d\n"; // weak
 char aModemLst[] = "modem.lst"; // idb
-char byte_4701B8[] = { '\x92' }; // weak
-KKND::BuildingBlueprint g_building_blueprints[28] =
-{
-  { UnitType_Surv_Drillrig, 3, 2, 300, 15, 3758096384u },
-  { UnitType_Surv_Outpost, 4, 3, 1000, 25, 1845493760u },
-  { UnitType_Surv_MachineShop, 4, 4, 1000, 25, 4278190080u },
-  { UnitType_Surv_PowerStation, 4, 3, 300, 15, 3959422976u },
-  { UnitType_Surv_RepairBay, 4, 4, 300, 15, 4278190080u },
-  { UnitType_Surv_ResearchLab, 4, 3, 25, 25, 1845493760u },
-  { UnitType_Surv_GuardTower, 2, 2, 200, 5, 3221225472u },
-  { UnitType_SurvCannonTower, 2, 2, 200, 5, 3221225472u },
-  { UnitType_Surv_MissileBattery, 2, 2, 300, 10, 3221225472u },
-  { UnitType_TechBunker, 3, 2, 30, 5, 3758096384u },
-  { UnitType_Wall1, 1, 1, 50, 5, 4294967295u },
-  { UnitType_Wall3, 1, 1, 100, 10, 4294967295u },
-  { UnitType_Surv_DetentionCenter, 4, 3, 500, 15, 4294967295u },
-  { UnitType_Mute_HoldingPens, 4, 3, 500, 15, 4294967295u },
-  { UnitType_Mute_Drillrig, 3, 2, 300, 15, 3758096384u },
-  { UnitType_Mute_Clanhall, 5, 4, 1000, 25, 867696640u },
-  { UnitType_Mute_Blacksmith, 5, 3, 500, 25, 4026531840u },
-  { UnitType_Mute_BeastEnclosure, 5, 4, 500, 25, 2009071616u },
-  { UnitType_Mute_PowerStation, 4, 3, 300, 15, 3925868544u },
-  { UnitType_Mute_Menagerie, 4, 4, 300, 15, 1845493760u },
-  { UnitType_Surv_AlchemyHall, 3, 2, 500, 25, 3758096384u },
-  { UnitType_Mute_MachinegunNest, 2, 2, 200, 5, 3221225472u },
-  { UnitType_Mute_GrapeshotTower, 2, 2, 200, 5, 3221225472u },
-  { UnitType_Mute_RotaryCannon, 2, 2, 300, 10, 3221225472u },
-  { UnitType_Hut, 2, 2, 30, 5, 3221225472u },
-  { UnitType_Wall2, 1, 1, 50, 5, 4294967295u },
-  { UnitType_Wall4, 1, 1, 100, 10, 4294967295u },
-  { UnitType_Invalid, 0, 0, 0, 0, 0u }
-};
 int g_player_num = 1;
-int dword_47050C = -1; // weak
-int dword_470510[8] = { 2, 2, 2, 2, 2, 2, 2, 2 };
-char aCouldnTCreateN[29] = "Couldn't create new building"; // weak
 KKND::UnitStats g_unit_stats[89] =
 {
   {
@@ -4979,751 +4194,168 @@ int dword_4731C8[32] =
   237,
   251
 }; // weak
-FILE File = { NULL, 0, NULL, 2, 1, 0, 0, NULL }; // idb
-_UNKNOWN unk_4755F0; // weak
-DWORD dwTlsIndex = 4294967295u; // idb
-_UNKNOWN *off_475838 = (_UNKNOWN *)0x475842; // weak
-size_t SrcSizeInBytes = 1u; // idb
-_UNKNOWN unk_475A50; // weak
-char byte_475AE8[8] = { '\x01', '\x02', '\x04', '\b', '\0', '\0', '\0', '\0' }; // weak
-_UNKNOWN unk_475AF0; // weak
-int dword_475AF4[] = { -2105965984 }; // weak
-int dword_475AF8[] = { 33 }; // weak
-_UNKNOWN unk_475B00; // weak
-_DWORD dword_475BE0[10] = { -1, 2560, 0, 0, 0, 0, 0, 0, 0, 0 }; // weak
-_UNKNOWN unk_475CA0; // weak
-_UNKNOWN unk_475CB8; // weak
-int dword_475CD4 = 1; // weak
-int dword_475D68 = -1; // weak
-int dword_475D6C = 0; // weak
-int dword_475D70 = 0; // weak
-int dword_475D78 = -1; // weak
-int dword_475D7C = 0; // weak
-int dword_475D80 = 0; // weak
-int dword_476AC0 = 0; // weak
-int dword_476AC4 = 0; // weak
-int dword_476DD8 = 0; // weak
-int dword_476DDC = 0; // weak
-__int16 word_476DE0[256] =
-{
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0
-}; // weak
-int dword_476FE0 = 0; // weak
+KKND::BuildingLevelsTracker g_beast_enclosure_levels = { { 0, 0, 0, 0, 0 }, 0, 0, 0, 0, 0 };
 int dword_477340 = 0; // weak
 int dword_477344 = 0; // weak
 int dword_47734C = 0; // weak
-KKND::Coroutine *dword_477350 = NULL;
-KKND::OilPatch *g_oil_patch_list_head;
-int g_camera_shake_vel_x;
-int g_camera_shake_vel_y;
-int g_camera_shake_x; // weak
-int g_camera_shake_y; // weak
+KKND::Coroutine *g_coroutine_free_head = NULL;
+KKND::BuildingLevelsTracker g_clanhall_levels = { { 0, 0, 0, 0, 0 }, 0, 0, 0, 0, 0 };
+KKND::LevelCplcSurface *g_current_lvl_cplc_layer;
+KKND::CplcEntity *g_current_lvl_cplc_layer_x_sorted_right;
+KKND::CplcEntity *g_current_lvl_cplc_layer_x_sorted_base;
+KKND::CplcEntityInViewport *g_cplc_viewport_active_head;
+KKND::CplcEntityInViewport *g_cplc_viewport_pool;
+KKND::CplcEntityInViewport *g_cplc_viewport_active_head2;
+KKND::OilPatch *g_oil_patch_head;
 KKND::Task *g_ai_players_tasks[7];
 _UNKNOWN unk_4778EC; // weak
-int dword_477940; // weak
-int dword_477944; // weak
-KKND::MovieFrameImage g_main_movie_img;
-KKND::RenderNode *g_main_movie_rn;
-WAVEFORMATEX stru_477980;
-KKND::MovieFrameImage g_secondary_movie_img;
-KKND::RenderNode *g_secondary_movie_rn;
-int dword_477DC4; // weak
-int dword_477DC8; // weak
-DSBUFFERDESC1 stru_477DD0;
-IDirectSoundBuffer *g_dsb_477DE4;
-KKND::Movie *g_movie;
-BOOL g_movie_sound_initialized;
-int dword_477DF0; // weak
-int dword_477DF4; // weak
-char byte_477DF8[756]; // weak
-int dword_4780EC; // weak
-int dword_4780F0; // weak
-int dword_4780F4; // weak
-KKND::UiString *g_4780F8_movie_str;
-BOOL g_time_next_tick_time_dirty;
-int g_time_fixed_dt_step; // weak
-int g_time_next_tick_time; // weak
-int dword_478108[300]; // weak
+KKND::Unit *g_aoe_dedup[300];
 int dword_4785B8; // weak
-int dword_4785BC; // weak
-KKND::PaletteEntry *g_pal_4785C0;
-int (__thiscall *dword_4785C8)(_DWORD); // weak
-int dword_4785CC; // weak
-int (__stdcall *dword_4785D8)(_DWORD, _DWORD, _DWORD); // weak
-KKND::PaletteEntry *g_pal_4785DC;
-int (__fastcall *dword_4785E0)(_DWORD, _DWORD, _DWORD); // weak
-int (__fastcall *dword_4785E4)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
-_UNKNOWN unk_4785F0; // weak
-int (__fastcall *dword_4789F0)(_DWORD, _DWORD, _DWORD, _DWORD); // weak
-int (__fastcall *dword_4789F8)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
-int (__fastcall *dword_4789FC)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
-int (__stdcall *dword_478A04)(_DWORD, _DWORD, _DWORD); // weak
-int (__fastcall *dword_478A08)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
-int dword_478A0C; // weak
-int (__fastcall *dword_478A10)(_DWORD, _DWORD, _DWORD); // weak
-int dword_478A14; // weak
-COLORREF aRgbValues; // idb
-int (__fastcall *dword_478A7C)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
-int dword_478A84; // weak
+int g_display_height; // weak
 int g_screen_height; // weak
 int g_screen_width; // weak
-int (__fastcall *dword_478A90)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
-int dword_478A94; // weak
-int dword_478A98; // weak
-int dword_478AA0; // weak
+int g_display_width; // weak
 KKND::TerrainTile *g_terrain;
 int g_map_num_tiles_y; // weak
-int dword_478BE8[8]; // weak
 int g_map_num_tiles_x; // weak
-int g_rand_seed; // weak
-int dword_479534; // weak
 int dword_479538; // weak
 int g_opportunity_timer; // weak
-KKND::Sidebar *g_siderbar_active_list_head;
-KKND::Sidebar *g_siderbar_active_list_tail;
-KKND::Sidebar *g_sidebar_pool;
-KKND::Sidebar *g_sidebar_free_list_head;
-KKND::SidebarButton *g_sidebar_button_active_list_head;
-KKND::SidebarButton *g_sidebar_button_active_list_tail;
-KKND::SidebarButton *g_sidebar_button_pool;
-KKND::SidebarButton *g_sidebar_button_free_list_head;
-int g_sidebar_default_v_spacing; // weak
-int g_sidebar_default_h_spacing; // weak
-KKND::stru2 *g_4795E8_tail;
-KKND::stru2 *g_4795E8_pool;
-int dword_4795F0[27]; // weak
-KKND::MobdImageData *dword_47965C;
-int dword_479740[11]; // weak
-struct tagRECT g_window_rect; // idb
-int dword_4797E0; // weak
-DWORD g_window_style; // idb
-int g_window_bpp; // weak
-int dword_479810; // weak
-DDSURFACEDESC g_479818;
-KKND::RenderViewport g_default_viewport;
-int dword_4798AC; // weak
-int dword_4798B0; // weak
-KKND::RenderViewport *g_viewports_free;
-int g_window_height; // idb
-DWORD g_window_ex_style; // idb
-KKND::RenderViewport *g_viewports_pool;
-int dword_4798C4; // weak
-int g_window_width; // idb
-BOOL g_render_window_initialized;
-IDirectDraw *g_pdd;
-IDirectDrawSurface *g_pdds;
-IDirectDrawSurface *g_pdds2;
-IDirectDrawPalette *g_ddpal;
-int dword_4798E4; // weak
-HWND g_hwnd; // idb
+KKND::stru2 *g_blitter_active_head;
+KKND::stru2 *g_blitter_pool;
+char byte_479B00[88]; // idb
 int dword_479B90; // weak
+int dword_479B98[]; // weak
+int dword_479B9C[]; // weak
+int dword_479C60[]; // weak
+int dword_479C64[]; // weak
 KKND::KeyboardState g_input_last_keyboard_state;
-KKND::BoxdCollisionHandler g_null_collision;
+int dword_479D3C; // weak
+KKND::LevelHunkSection *g_current_lvl_sections;
+KKND::LevelHunk *g_current_lvl;
+BOOL g_window_initialized;
+__int16 word_479DF4; // weak
 char g_current_savegame_filename[256];
 char byte_479EF8[64]; // idb
 char byte_479F38[128]; // idb
-KKND::LevelId g_saveload_level_id;
 BOOL g_is_game_loading;
 int dword_479FC0; // weak
 KKND::BuildingLevelsTracker g_machineshop_levels;
 char g_app_root[20]; // idb
 KKND::LevelHunk *g_level;
 char g_game_path_drive_letter; // weak
-KKND::MapdRenderNode *node[3];
+KKND::MapdRenderNode *dword_47A010[3];
 int dword_47A01C; // weak
-char byte_47A020[80]; // idb
+_UNKNOWN g_level_base_path; // idb
 char g_game_path[256];
-KKND::LevelHunk *g_wait_lvl;
+BOOL g_is_minimum_install;
 KKND::LevelHunk *g_supspr_lvl;
 KKND::MissionOutcome g_mission_outcome;
-int dword_47A18C; // weak
+int dword_47A198; // weak
+int dword_47A19C; // weak
+int dword_47A1A0; // weak
+int dword_47A1A4; // weak
+int dword_47A1A8; // weak
+int dword_47A1AC; // weak
+int dword_47A1B0; // weak
 KKND::GameState g_game_state;
-int dword_47A2C8; // weak
 KKND::LevelId g_current_lvl_id;
 __int16 g_current_mute_level; // weak
 __int16 g_current_surv_level; // weak
 int dword_47A2E4; // weak
-BOOL g_nocd;
-int dword_47A2F0; // weak
 int dword_47A2F8; // weak
 int dword_47A2FC[]; // weak
 int dword_47A300[]; // weak
-int dword_47A304[27]; // weak
 int dword_47A370; // weak
 int dword_47A378[]; // weak
 int dword_47A37C[]; // weak
 int dword_47A380[]; // weak
-_DWORD dword_47A3C0[3]; // weak
 KKND::Task *g_47A3CC; // idb
+int dword_47A3D0; // weak
 int g_num_convoy_tankers_destroyed; // weak
+int g_num_convoy_tankers_en_route; // weak
 int dword_47A3DC; // weak
 KKND::Unit *g_scout;
 int dword_47A3E4; // weak
 int dword_47A3E8; // weak
-KKND::LevelMobd *g_current_lvl_mobd;
+KKND::LevelMobd *g_mobd;
 KKND::Entity *g_entity_free_pool_head;
 KKND::Entity g_default_entity;
-KKND::Entity *g_entity_head;
-KKND::FactoryProduction *g_47A4B0;
-void *dword_47A4F4; // idb
-KKND::FactoryProduction *g_47A4F8;
-void *dword_47A52C; // idb
-KKND::FactoryProductionOption *g_47A530;
-int dword_47A538; // weak
-_UNKNOWN unk_47A540; // weak
-int dword_47A560; // weak
-KKND::MouseState g_input_last_mouse_state;
-int dword_47A588; // weak
-int dword_47A58C; // weak
-__int16 word_47A590; // weak
-BOOL g_input_mouse_window_losing_focus_reset_to_defaults;
-int dword_47A598; // weak
-int dword_47A59C; // weak
-int dword_47A5A0; // weak
-char text; // idb
-char byte_47A5A9[55]; // weak
-KKND::MouseState g_game_mouse_state;
+BOOL g_mobd_active;
 KKND::Task *g_game_update_loop_task; // idb
 int g_num_units_in_group[11];
-KKND::BuildingConstruction *g_construction_active_list_head;
-KKND::GameEvent g_47A660[10];
-KKND::CursorState *g_cursor;
-GameEventNode *g_game_event_pool;
-GameEventNode *g_game_event_free_pool;
-KKND::KeyboardDosScancodes g_key_modifier;
-KKND::KeyboardState g_game_keyboard_state; // idb
-GameEventNode g_game_event_queue;
-int dword_47A728; // weak
-int g_47A660_num_items; // weak
-KKND::UiString *dword_47A730; // idb
-KKND::Task *receiver; // idb
-int dword_47A738; // weak
-char byte_47A740; // idb
-char byte_47A741[37]; // weak
-char byte_47A766[]; // weak
+_UNKNOWN unk_47A767; // weak
 int dword_47A778; // weak
-int dword_47A77C; // weak
 char byte_47A780[]; // weak
 char byte_47A781[]; // weak
 char byte_47A782[]; // weak
 char byte_47A783[13]; // weak
-int dword_47A790[]; // weak
-int dword_47A794[]; // weak
 int dword_47A798[36]; // weak
 int dword_47A828; // weak
 BOOL g_netz_is_game_started;
-int dword_47A830; // weak
-BOOL g_netz_is_game_host;
-int (__thiscall *dword_47A838)(_DWORD); // weak
-int dword_47A83C; // weak
 int dword_47A840; // weak
-int dword_47A844; // weak
-int dword_47A848; // weak
-char byte_47A84C[12]; // weak
-char byte_47A858[16]; // weak
-int dword_47A868; // weak
-int dword_47A86C; // weak
-int dword_47A870; // weak
-char byte_47A874[12]; // weak
-char byte_47A880[12]; // weak
-void *dword_47A88C; // idb
-int dword_47A890; // weak
-int dword_47A898; // weak
-int dword_47A89C; // weak
-int dword_47A8A0; // weak
-int dword_47A8A4; // weak
-int dword_47A8A8; // weak
-int dword_47A8DC; // weak
-void *dword_47A8E0; // idb
-int dword_47A8E4; // weak
-int dword_47A8E8; // weak
-int dword_47A8EC; // weak
-int dword_47A8F0; // weak
-int dword_47A8F4; // weak
-int dword_47A8F8; // weak
-int dword_47A8FC; // weak
-int dword_47A900; // weak
-int dword_47A904; // weak
-int dword_47A908; // weak
-int dword_47A90C; // weak
-int dword_47A914; // weak
-int dword_47A924; // weak
-int dword_47A934; // weak
-char byte_47A938; // weak
-int dword_47A940[]; // weak
-int dword_47A964[]; // weak
-int dword_47A968[78]; // weak
-char byte_47AAA0[]; // weak
-char byte_47AAA1[]; // weak
-_UNKNOWN unk_47AAA2; // weak
-char byte_47AAA3[]; // weak
-_UNKNOWN unk_47AAA4; // weak
-int dword_47AAC4; // weak
-int dword_47AAC8[61]; // weak
-int dword_47ABBC[505]; // weak
-int dword_47B3A0; // weak
-int dword_47B3B0; // weak
-KKND::SidebarFactoryProduction *g_sidebar_tower_prod; // idb
+KKND::Unit *g_player_bases[4];
 KKND::SidebarFactoryProduction *g_sidebar_buildings_prod; // idb
-KKND::SidebarFactoryProduction *g_sidebar_aircraft_prod; // idb
+int dword_47B3D8; // weak
 KKND::BuildingLevelsTracker g_outpost_levels;
-char byte_47B408[1024]; // weak
-PALETTEENTRY stru_47B808[256];
-HDC g_window_hdc; // idb
-HGDIOBJ ho; // idb
-HPALETTE dword_47C014; // idb
-int dword_47C018; // weak
-KKND::Task *dword_47C024; // idb
 KKND::Task *g_task_47C028; // idb
-int dword_47C030; // weak
-int dword_47C034; // weak
-int dword_47C038; // weak
-int dword_47C03C; // weak
-int dword_47C040; // weak
-int dword_47C044; // weak
-int g_num_active_projectiles; // weak
 char byte_47C050[20]; // weak
 int dword_47C064[]; // weak
-char byte_47C080[192]; // weak
-char byte_47C140[240]; // weak
 char byte_47C230[256]; // idb
 int dword_47C330; // idb
-int g_num_explosions_2; // weak
+KKND::MapdRenderNode *g_mapd_render_node_pool;
+KKND::MapdRenderNode *g_mapd_render_node_head;
+KKND::MapdRenderNode *g_mapd_render_node_tail;
+void (__fastcall *MAPD_camera_controller)(KKND::MapdCamera *camera, struct Entity *target);
+KKND::MapdRenderNode *g_mapd_render_node_next_free;
+void (__fastcall *MAPD_render)(void *, KKND::RenderNode *n);
+int g_current_lvl_mapd_num_layers; // weak
 KKND::MapdCamera g_mapd_camera;
-KKND::stru7_sound *dword_47C398;
-KKND::stru7_sound *g_sounds_head;
-int dword_47C4E0; // weak
-LPDIRECTSOUND g_ds; // idb
-int dword_47C4E8; // weak
-int g_sound_volumes[16]; // weak
-KKND::stru7_sound *g_sounds_free;
-int g_sound_pans[16]; // weak
-KKND::stru7_sound *g_sounds_pool;
-int dword_47C5C0; // weak
-void *dword_47C5C8; // idb
-BOOL g_sounds_initialized;
-int dword_47C5D4; // weak
-KKND::DrawList g_draw_list_primary;
-KKND::DrawList g_draw_list_staging;
-void *dword_47C5F0; // idb
-int dword_47C5F8; // weak
-int dword_47C5FC; // weak
-char byte_47C600; // weak
-int dword_47C604; // weak
-int dword_47C608; // weak
+BOOL g_mapd_active;
+struct Entity *g_mapd_camera_target;
+KKND::LevelMapd *g_mapd;
 int dword_47C610; // weak
 int dword_47C614; // weak
 void *dword_47C620; // idb
 int dword_47C624; // weak
 int dword_47C628; // weak
 int dword_47C650; // weak
-char byte_47C654; // weak
-char g_demo_faction; // weak
+_UNKNOWN byte_47C654; // weak
 KKND::UiString *dword_47C65C;
-int dword_47C660; // weak
 KKND::Entity *dword_47C664; // idb
-int dword_47C668[10]; // weak
-int dword_47C690[10]; // weak
-int dword_47C6B8; // weak
 int dword_47C6BC; // weak
 int dword_47C6C0; // weak
-int dword_47C6C4; // weak
 int dword_47C6C8; // weak
 int dword_47C6CC; // weak
 int dword_47C6D0; // weak
 int dword_47C6D4; // weak
 BOOL g_is_demo_build;
-BOOL g_level_loading_lock;
 KKND::Task *g_47C6E0_mobd79_task;
-int dword_47C6E4; // weak
-int dword_47C6E8; // weak
-int dword_47C6EC; // weak
-int dword_47C6F4; // weak
-int dword_47C6F8; // weak
-int dword_47C700; // weak
 KKND::Coroutine *volatile g_coroutine_current;
 KKND::Coroutine *g_coroutine_list_head;
 __int16 g_netz_synchronized_lockstep_mode; // weak
-int dword_47C76C; // weak
-int dword_47C770; // weak
-void *dword_47C774; // idb
-KKND::stru8 *dword_47C778;
-void *dword_47C77C; // idb
-KKND::UiString *dword_47C780;
-KKND::UiString *dword_47C784;
 KKND::SidebarFactoryProduction g_factory_production_heads[5];
 KKND::Sidebar *g_sidebar;
-KKND::SidebarFactoryProduction *g_prod_pool;
-KKND::SidebarFactoryProduction *g_prod_free_list;
-KKND::Entity *dword_47C96C; // idb
 KKND::Task *g_47C970_sidebar_task; // idb
+int g_sidebar_color_bars[6];
 KKND::MissionCashTable g_cash;
-KKND::SidebarFactoryProductionOption *g_prod_options_pool;
-KKND::SidebarFactoryProductionOption *g_prod_options_free_list;
-KKND::UiString *g_sidebar_cash_string;
-KKND::SidebarButton *g_help_button;
-KKND::SidebarButton *g_airstrike_button;
-KKND::SidebarButton *g_sidebar_button_minimap;
-KKND::SidebarButton *g_production_buttons[5];
-_UNKNOWN unk_47CA73; // weak
-char byte_47CA80[96]; // weak
-KKND::GameEvent g_47CAE0;
-KKND::Task *g_47CAF0[7];
-int dword_47CB0C; // weak
-int dword_47CB10; // weak
-int dword_47CB14; // weak
-int dword_47CB18; // weak
-int dword_47CB1C; // weak
-int dword_47CB20; // weak
-KKND::MapdScrlImage *g_fog_of_war_scrl_2;
-int g_minimap_height; // idb
-KKND::MapdScrlImageTile *g_fog_of_war_tile1;
-KKND::MapdScrlImage *g_fog_of_war_scrl;
-int dword_47CB4C; // weak
-char byte_47CB50[]; // weak
-KKND::Entity *g_minimap_entity; // idb
-int dword_47CB68; // weak
-int dword_47CB6C; // weak
-void *g_minimap_revealed_pixels;
-int g_minimap_width; // weak
-int g_fog_of_war_num_tiles_x; // weak
-void *g_minimap_unrevealed_pixels;
-void *dword_47CB8C; // idb
-int dword_47CB98; // weak
-int dword_47CBAC; // weak
-KKND::MapdRenderNode *g_fog_of_war; // idb
+int dword_47CA2C; // weak
+KKND::MapdScrlImage *g_shroud_backup;
+KKND::MapdScrlImage *g_shroud;
 KKND::MapdScrlImageTile *g_fog_of_war_tile0;
 int dword_47CFC8[255]; // weak
 int g_angle_to_orientation[256];
 KKND::MissionDiplomacyTable g_diplomacy;
-int dword_47D98C; // weak
-int dword_47D994; // weak
-int dword_47D998; // weak
-int dword_47D9A0; // weak
 KKND::Unit *g_unit_list_head;
+KKND::Unit *g_unit_list_tail;
+KKND::Unit *g_unit_free_head;
 int dword_47DC68; // weak
-KKND::UnitEscortNode *g_escort_free_list_head;
-unsigned __int8 *g_tint_palettes_per_player[7];
-KKND::Unit *dword_47DCA4;
-int g_palette_idx_per_player[7];
+int g_next_entity_id; // weak
 int g_num_player_units; // weak
-_UNKNOWN g_num_ai_units; // weak
+int g_num_ai_units; // weak
 int g_num_towers; // weak
-HINSTANCE g_hinstance; // idb
-int dword_47DD48; // weak
-int dword_47DDD0[]; // weak
-int dword_47DDD8; // weak
-_UNKNOWN unk_47DEF0; // weak
-char byte_47DEF1[263]; // weak
-_UNKNOWN unk_47DFF0; // weak
-char byte_47DFF8[256]; // weak
-UINT CodePage; // idb
-LCID Locale; // idb
-int dword_47E100; // weak
-int dword_47E104; // weak
-int dword_47E108; // weak
-int dword_47E10C; // weak
-int dword_47E11C; // weak
-int dword_47E120; // weak
-struct _TIME_ZONE_INFORMATION TimeZoneInformation; // idb
-LCID dword_47E1E8; // idb
-UINT dword_47E1F8; // idb
-int dword_47E200; // weak
-int dword_47E2E0; // weak
-// extern BOOL (__stdcall *GetUserNameA)(LPSTR lpBuffer, LPDWORD pcbBuffer);
-// extern HGDIOBJ (__stdcall *GetStockObject)(int i);
-// extern UINT (__stdcall *RealizePalette)(HDC hdc);
-// extern HPALETTE (__stdcall *CreatePalette)(const LOGPALETTE *plpal);
-// extern HPALETTE (__stdcall *SelectPalette)(HDC hdc, HPALETTE hPal, BOOL bForceBkgd);
-// extern BOOL (__stdcall *DeleteObject)(HGDIOBJ ho);
 // extern BOOL (__stdcall *SetFileAttributesA)(LPCSTR lpFileName, DWORD dwFileAttributes);
-// extern HLOCAL (__stdcall *LocalAlloc)(UINT uFlags, SIZE_T uBytes);
-// extern HLOCAL (__stdcall *LocalFree)(HLOCAL hMem);
-// extern BOOL (__stdcall *TlsSetValue)(DWORD dwTlsIndex, LPVOID lpTlsValue);
-// extern LPVOID (__stdcall *TlsGetValue)(DWORD dwTlsIndex);
-// extern int (__stdcall *MultiByteToWideChar)(UINT CodePage, DWORD dwFlags, LPCCH lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar);
-// extern int (__stdcall *WideCharToMultiByte)(UINT CodePage, DWORD dwFlags, LPCWCH lpWideCharStr, int cchWideChar, LPSTR lpMultiByteStr, int cbMultiByte, LPCCH lpDefaultChar, LPBOOL lpUsedDefaultChar);
-// extern BOOL (__stdcall *GetCPInfo)(UINT CodePage, LPCPINFO lpCPInfo);
-// extern BOOL (__stdcall *GetStringTypeW)(DWORD dwInfoType, LPCWCH lpSrcStr, int cchSrc, LPWORD lpCharType);
-// extern int (__stdcall *LCMapStringA)(LCID Locale, DWORD dwMapFlags, LPCSTR lpSrcStr, int cchSrc, LPSTR lpDestStr, int cchDest);
-// extern int (__stdcall *LCMapStringW)(LCID Locale, DWORD dwMapFlags, LPCWSTR lpSrcStr, int cchSrc, LPWSTR lpDestStr, int cchDest);
-// extern int (__stdcall *GetLocaleInfoA)(LCID Locale, LCTYPE LCType, LPSTR lpLCData, int cchData);
-// extern int (__stdcall *GetLocaleInfoW)(LCID Locale, LCTYPE LCType, LPWSTR lpLCData, int cchData);
-// extern BOOL (__stdcall *GetStringTypeA)(LCID Locale, DWORD dwInfoType, LPCSTR lpSrcStr, int cchSrc, LPWORD lpCharType);
-// extern HICON (__stdcall *LoadIconA)(HINSTANCE hInstance, LPCSTR lpIconName);
-// extern int (__stdcall *ShowCursor)(BOOL bShow);
-// extern HWND (__stdcall *FindWindowA)(LPCSTR lpClassName, LPCSTR lpWindowName);
-// extern HWND (__stdcall *GetActiveWindow)();
-// extern ATOM (__stdcall *RegisterClassExA)(const WNDCLASSEXA *);
-// extern SHORT (__stdcall *GetAsyncKeyState)(int vKey);
+// extern DWORD (__stdcall *GetTickCount)();
 // extern int (*wsprintfA)(LPSTR, LPCSTR, ...);
-// extern BOOL (__stdcall *ScreenToClient)(HWND hWnd, LPPOINT lpPoint);
-// extern int (__stdcall *GetSystemMetrics)(int nIndex);
-// extern BOOL (__stdcall *AdjustWindowRect)(LPRECT lpRect, DWORD dwStyle, BOOL bMenu);
-// extern HDC (__stdcall *GetDC)(HWND hWnd);
-// extern BOOL (__stdcall *ClientToScreen)(HWND hWnd, LPPOINT lpPoint);
-// extern BOOL (__stdcall *SetForegroundWindow)(HWND hWnd);
-// extern DWORD (__stdcall *GetSysColor)(int nIndex);
-// extern BOOL (__stdcall *SetSysColors)(int cElements, const INT *lpaElements, const COLORREF *lpaRgbValues);
-// extern HWND (__stdcall *CreateWindowExA)(DWORD dwExStyle, LPCSTR lpClassName, LPCSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
-// extern BOOL (__stdcall *UpdateWindow)(HWND hWnd);
-// extern BOOL (__stdcall *GetCursorPos)(LPPOINT lpPoint);
-// extern DWORD (__stdcall *timeGetTime)();
 
 
 //----- (00401000) --------------------------------------------------------
@@ -5736,15 +4368,15 @@ BOOL aircraft_list_init()
   g_aircraft_pool = v0;
   if ( !v0 )
     return 0;
-  g_aircraft_free_list_head = v0;
+  g_aircraft_free_head = v0;
   for ( i = 0; i < 59; ++i )
   {
     v0[i].next = &v0[i + 1];
     v0 = g_aircraft_pool;
   }
   g_aircraft_pool[59].next = nullptr;
-  g_aircraft_list_head = (KKND::Aircraft *)&g_aircraft_list_head;
-  g_aircraft_list_tail = (KKND::Aircraft *)&g_aircraft_list_head;
+  g_aircraft_head = (KKND::Aircraft *)&g_aircraft_head;
+  g_aircraft_tail = (KKND::Aircraft *)&g_aircraft_head;
   return 1;
 }
 
@@ -5759,18 +4391,18 @@ void __fastcall aircraft_add(KKND::Unit *unit)
 {
   KKND::Aircraft *v1; // eax
 
-  v1 = g_aircraft_free_list_head;
-  if ( g_aircraft_free_list_head )
-    g_aircraft_free_list_head = g_aircraft_free_list_head->next;
+  v1 = g_aircraft_free_head;
+  if ( g_aircraft_free_head )
+    g_aircraft_free_head = g_aircraft_free_head->next;
   else
     v1 = nullptr;
   if ( v1 )
   {
     v1->unit = unit;
-    v1->next = g_aircraft_list_head;
-    v1->prev = (KKND::Aircraft *)&g_aircraft_list_head;
-    g_aircraft_list_head->prev = v1;
-    g_aircraft_list_head = v1;
+    v1->next = g_aircraft_head;
+    v1->prev = (KKND::Aircraft *)&g_aircraft_head;
+    g_aircraft_head->prev = v1;
+    g_aircraft_head = v1;
   }
 }
 
@@ -5787,13 +4419,16 @@ void __fastcall mode_turret_4010C0(KKND::Turret *turret)
 
   orientation = turret->owner->orientation;
   turret->current_mobd_frame = orientation;
-  entity_anim_start(turret->entity, turret->attachment->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);
+  entity_anim_init_directional(
+    turret->entity,
+    turret->attachment->mobd_lookup_offset_idle,
+    g_angle_to_orientation[orientation]);
 }
 
 //----- (004010E0) --------------------------------------------------------
 void __fastcall mode_turret_4010E0(KKND::Turret *turret)
 {
-  entity_anim_start(
+  entity_anim_init_directional(
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[turret->current_mobd_frame]);
@@ -5908,23 +4543,23 @@ void __cdecl UNIT_Handler_Bomber(KKND::Task *task)
   unit = (KKND::Unit *)task->ctx;
   if ( !unit )
   {
-    cmd = &node[0]->job->cmd;
+    cmd = &dword_47A010[0]->job->cmd;
     taska = kknd_rand_1("C:\\k\\Scripts\\Aircraft.cpp", 227) & 3;
     unit = unit_create(task);
-    v4 = g_aircraft_free_list_head;             // INLINED unit_bomber_init
-    if ( g_aircraft_free_list_head )
-      g_aircraft_free_list_head = g_aircraft_free_list_head->next;
+    v4 = g_aircraft_free_head;                  // INLINED unit_bomber_init
+    if ( g_aircraft_free_head )
+      g_aircraft_free_head = g_aircraft_free_head->next;
     else
       v4 = nullptr;
     if ( v4 )
     {
       v4->unit = unit;
-      v4->next = g_aircraft_list_head;
-      v4->prev = (KKND::Aircraft *)&g_aircraft_list_head;
-      g_aircraft_list_head->prev = v4;
-      g_aircraft_list_head = v4;
+      v4->next = g_aircraft_head;
+      v4->prev = (KKND::Aircraft *)&g_aircraft_head;
+      g_aircraft_head->prev = v4;
+      g_aircraft_head = v4;
     }
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     entity = unit->entity;
     unit->order_next_waypoint_x = entity->x;
     unit->order_next_waypoint_y = entity->y;
@@ -5946,9 +4581,9 @@ void __cdecl UNIT_Handler_Bomber(KKND::Task *task)
       else
         v8 = (REND_get_height(cmd) + 32) << 8;
     }
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     unit->entity->x = v7;
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     unit->entity->y = v8;
     unit->entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_aircraft;
     unit->entity->z = 46080;
@@ -5975,12 +4610,12 @@ void __fastcall unit_mode_401480(KKND::Unit *unit)
   if ( entity->z <= 0 )
   {
     entity->z = 255;
-    entity_408800_play_sound(entity, SoundId_9, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_9, g_4690A8_sfx_volume, 0);
     entity->mobd_id = MobdId_Explosions;
-    entity_anim_load(entity, 0);
+    entity_anim_init(entity, 0);
     entity->anim_speed = 0x20000000;
     entity->z = 768;
-    entity_40D8B0(entity);
+    entity_apply_aoe_damage(entity);
     task = unit->task;
     unit->mode = unit_mode_bomber_401600;
     TASK_yield(task, Task_Sleep, 20);
@@ -6009,15 +4644,15 @@ void __fastcall unit_401530_bomber(KKND::Unit *unit, int a2)
   task = unit->task;
   unit->destroyed = 1;
   task->flags_24 &= ~0x10000000u;
-  TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
   turret = unit->turret;
   if ( turret )
   {
     entity_remove(turret->entity);
-    task_445310(unit->turret->task);
+    TASK_terminate(unit->turret->task);
     TASK_FreeLocal(unit->task, unit->turret);
   }
-  TASK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+  TSK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   unit->task->channel = TaskChannel_None;
   unit->entity->z_speed = 0;
   unit->entity->z_speed_limit = 512;
@@ -6042,20 +4677,20 @@ void __fastcall unit_mode_401600(KKND::Unit *unit)
   KKND::Aircraft *v1; // eax
   KKND::UnitType type; // ecx
 
-  v1 = g_aircraft_list_head;
+  v1 = g_aircraft_head;
   type = unit->type;
-  if ( g_aircraft_list_head != (KKND::Aircraft *)&g_aircraft_list_head )
+  if ( g_aircraft_head != (KKND::Aircraft *)&g_aircraft_head )
   {
     while ( v1->unit->unit_id != type )
     {
       v1 = v1->next;
-      if ( v1 == (KKND::Aircraft *)&g_aircraft_list_head )
+      if ( v1 == (KKND::Aircraft *)&g_aircraft_head )
         goto LABEL_6;
     }
     v1->next->prev = v1->prev;
     v1->prev->next = v1->next;
-    v1->next = g_aircraft_free_list_head;
-    g_aircraft_free_list_head = v1;
+    v1->next = g_aircraft_free_head;
+    g_aircraft_free_head = v1;
   }
 LABEL_6:
   entity_remove(unit->entity);
@@ -6078,7 +4713,7 @@ void __fastcall unit_mode_401670(KKND::Unit *unit)
 //----- (00401680) --------------------------------------------------------
 void __fastcall unit_mode_bomber_401680(KKND::Unit *this)
 {
-  this->order_next_waypoint_x = (REND_get_width(&node[0]->job->cmd) + 32) << 8;
+  this->order_next_waypoint_x = (REND_get_width(&dword_47A010[0]->job->cmd) + 32) << 8;
 }
 
 //----- (004016B0) --------------------------------------------------------
@@ -6113,7 +4748,7 @@ void __fastcall unit_mode_bomber_4016B0(KKND::Unit *unit)
       mobd_lookup_offset_travel = projectile->mobd_lookup_offset_travel;
       v6 = v4;
       if ( mobd_lookup_offset_travel != -1 )
-        entity_anim_load(v4, mobd_lookup_offset_travel);
+        entity_anim_init(v4, mobd_lookup_offset_travel);
       rend = v6->rend;
       v6->z = unit->entity->z;
       rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_aircraft_turret;
@@ -6161,7 +4796,7 @@ void __fastcall unit_mode_bomber_401800(KKND::Unit *unit)
 
   v2 = vec2_orientation(unit->order_next_waypoint_x - unit->entity->x, unit->order_next_waypoint_y - unit->entity->y);
   entity_anim_advance_rotation((ptrdiff_t *)&unit->orientation, (KKND::MobdOrientation)(v2 & 0xF0), 5);
-  entity_anim_switch_direction(
+  entity_anim_change_direction(
     unit->entity,
     unit->stats->mobd_lookup_offset_move,
     g_angle_to_orientation[unit->orientation]);
@@ -6196,7 +4831,7 @@ void __fastcall unit_mode_bomber_401800(KKND::Unit *unit)
       if ( v10 == -2 )
         TASK_yield(unit->task, Task_Sleep, 40);
       if ( unit->multi_purpose_field_1 == -1 )
-        unit->order_next_waypoint_x = (REND_get_width(&node[0]->job->cmd) + 32) << 8;// inlined
+        unit->order_next_waypoint_x = (REND_get_width(&dword_47A010[0]->job->cmd) + 32) << 8;// inlined
       else
         unit_401530_bomber(unit, 0);
     }
@@ -6229,9 +4864,9 @@ void __fastcall sidebar_mode_4019A0(KKND::SidebarPayload *payload)
         payload->_sidebar_payload_8->rend->flags &= ~0x40000000u;
         v2 = payload->_sidebar_payload_4;
         if ( v2 <= 9 )
-          entity_anim_start(payload->_sidebar_payload_8, 2276, v2 - 1);
+          entity_anim_init_directional(payload->_sidebar_payload_8, 2276, v2 - 1);
         else
-          entity_anim_start(payload->_sidebar_payload_8, 2276, 8);
+          entity_anim_init_directional(payload->_sidebar_payload_8, 2276, 8);
       }
     }
     else
@@ -6270,9 +4905,9 @@ void __fastcall sidebar_mode_401A80(KKND::SidebarPayload *payload)
       payload->_sidebar_payload_8->rend->flags &= ~0x40000000u;
       v2 = payload->_sidebar_payload_4;
       if ( v2 <= 9 )
-        entity_anim_start(payload->_sidebar_payload_8, 2276, v2 - 1);
+        entity_anim_init_directional(payload->_sidebar_payload_8, 2276, v2 - 1);
       else
-        entity_anim_start(payload->_sidebar_payload_8, 2276, 8);
+        entity_anim_init_directional(payload->_sidebar_payload_8, 2276, 8);
     }
   }
   else
@@ -6303,9 +4938,9 @@ void __fastcall sidebar_mode_401AF0(KKND::SidebarPayload *payload)
       payload->_sidebar_payload_8->rend->flags &= ~0x40000000u;
       v2 = payload->_sidebar_payload_4;
       if ( v2 <= 9 )
-        entity_anim_start(payload->_sidebar_payload_8, 2276, v2 - 1);
+        entity_anim_init_directional(payload->_sidebar_payload_8, 2276, v2 - 1);
       else
-        entity_anim_start(payload->_sidebar_payload_8, 2276, 8);
+        entity_anim_init_directional(payload->_sidebar_payload_8, 2276, 8);
     }
   }
   else
@@ -6386,18 +5021,18 @@ void __cdecl __noreturn sidebar_task_401C30(KKND::Task *task)
       task->message_handler = MessageHandler_401B80_sidebar_payload;
       is_player_evolved();
       v3->x = 155648;
-      v3->is_on_collision_grid = 1;
+      v3->is_collidable = 1;
       v3->y = 73728;
       v3->z = 2;
       rend = entity->rend;
       entity->x = 156672;
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       entity->y = 79872;
       entity->z = 3;
       rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
       entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
       entity->rend->flags |= 0x10000000u;
-      entity_anim_start(entity, 2276, 0);
+      entity_anim_init_directional(entity, 2276, 0);
     }
   }
   ((void (__thiscall *)(KKND::SidebarPayload *))ctx->mode)(ctx);
@@ -6429,13 +5064,13 @@ void __fastcall nuke_mode_401D30(KKND::Nuke *nuke)
   if ( proj->mobd_lookup_offset_impact != -1 )
   {
     entity->z = 255;
-    entity_408800_play_sound(entity, SoundId_10, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_10, g_4690A8_sfx_volume, 0);
     entity->mobd_id = MobdId_Explosions;
-    entity_anim_load(entity, proj->mobd_lookup_offset_impact);
+    entity_anim_init(entity, proj->mobd_lookup_offset_impact);
     entity->anim_speed = 0x20000000;
     entity->z = 768;
     sub_439180(entity);
-    entity_40D8B0(entity, proj->radius);
+    entity_apply_aoe_damage(entity, proj->radius);
   }
   task = nuke->task;
   nuke->mode = nuke_mode_finalize;
@@ -6459,7 +5094,7 @@ void __fastcall nuke_mode_init(KKND::Nuke *nuke)
   entity->z_speed = 512;
   entity->z_speed_limit = 512;
   entity->z_acceleration = -34;
-  entity_408800_play_sound(entity, SoundId_163, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_163, g_4690A8_sfx_volume, 0);
   nuke->mode = nuke_mode_401DC0;
 }
 
@@ -6522,7 +5157,7 @@ void __fastcall MessageHandler_BeastEnclosure(
         unit_destroy(unit, unit_mode_beast_enclosure_on_death);
         return;
       case TaskMessage_UnitReady:
-        unit->entity->is_on_collision_grid = 1;
+        unit->entity->is_collidable = 1;
         if ( entity_create_by_unit_type(
                (KKND::UnitType)payload,
                unit->mobd_anchors.rally->x + unit->entity->x,
@@ -6613,7 +5248,7 @@ void __fastcall unit_mode_beast_enclosure_402150(KKND::Unit *this)
 
   state = (KKND::BuildingState *)this->state;
   state->same_building_count = 0;
-  TASK_broadcast_message(this->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_BeastEnclosure);
+  TSK_broadcast_message(this->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_BeastEnclosure);
   if ( !state->same_building_count )
   {
     memset(&g_beast_enclosure_levels, 0, 0x24u);
@@ -6641,7 +5276,7 @@ void __cdecl UNIT_Handler_BeastEnclosure(KKND::Task *task)
         unit_mode_beast_enclosure_on_completed);
       state = (KKND::BuildingState *)unit->state;
       state->same_building_count = 0;
-      TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_BeastEnclosure);
+      TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_BeastEnclosure);
       if ( !state->same_building_count )
       {
         g_beast_enclosure_levels.max_level = 1;
@@ -6674,7 +5309,7 @@ void __fastcall unit_mode_beast_enclosure_on_completed(KKND::Unit *unit)
     if ( unit->mode_arrive == unit_mode_beast_enclosure_on_completed )
     {
       state->same_building_count = 0;
-      TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_BeastEnclosure);
+      TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_BeastEnclosure);
       if ( !state->same_building_count )
       {
         g_beast_enclosure_levels.max_level = 1;
@@ -6872,7 +5507,7 @@ void __fastcall MessageHandler_Blacksmith(
         unit_destroy(unit, unit_mode_blacksmith_on_death);
         break;
       case TaskMessage_UnitReady:
-        unit->entity->is_on_collision_grid = 1;
+        unit->entity->is_collidable = 1;
         if ( entity_create_by_unit_type(
                (KKND::UnitType)payload,
                unit->mobd_anchors.rally->x + unit->entity->x,
@@ -7039,7 +5674,7 @@ BOOL TASK_coroutine_init()
     }
     g_coroutine_pool[1999].next = nullptr;
     g_coroutine_list_head = g_coroutine_pool;
-    dword_477350 = g_coroutine_pool + 1;
+    g_coroutine_free_head = g_coroutine_pool + 1;
     return 1;
   }
   return result;
@@ -7054,11 +5689,11 @@ KKND::Coroutine *__fastcall TASK_coroutine_create(void (*starter)(), size_t stac
   int v7; // esi
   _DWORD *v8; // ecx
 
-  v2 = dword_477350;
-  if ( !dword_477350 )
+  v2 = g_coroutine_free_head;
+  if ( !g_coroutine_free_head )
     return nullptr;
-  p_next = &dword_477350->next;
-  dword_477350 = dword_477350->next;
+  p_next = &g_coroutine_free_head->next;
+  g_coroutine_free_head = g_coroutine_free_head->next;
   result = (KKND::Coroutine *)malloc(stack_size);
   v2->context = (int)result;
   if ( result )
@@ -7074,8 +5709,8 @@ KKND::Coroutine *__fastcall TASK_coroutine_create(void (*starter)(), size_t stac
   }
   else
   {
-    *p_next = dword_477350;
-    dword_477350 = v2;
+    *p_next = g_coroutine_free_head;
+    g_coroutine_free_head = v2;
   }
   return result;
 }
@@ -7087,8 +5722,8 @@ void __fastcall coroutine_list_remove(KKND::Coroutine *coroutine)
   {
     if ( coroutine->context )
       free((void *)coroutine->context);
-    coroutine->next = dword_477350;
-    dword_477350 = coroutine;
+    coroutine->next = g_coroutine_free_head;
+    g_coroutine_free_head = coroutine;
   }
 }
 
@@ -7103,7 +5738,7 @@ void TASK_coroutine_cleanup()
 {
   free(g_coroutine_pool);
   g_coroutine_pool = nullptr;
-  dword_477350 = nullptr;
+  g_coroutine_free_head = nullptr;
 }
 
 //----- (00402A60) --------------------------------------------------------
@@ -7181,9 +5816,9 @@ void __fastcall unit_402BB0(KKND::Unit *unit, KKND::UnitMode arrive_mode)
   KKND::MobdPoint *id; // eax
   int i; // ecx
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, 0);
+  entity_anim_init_directional(unit->entity, unit->stats->mobd_lookup_offset_attack, 0);
   if ( unit->player_num == g_player_num )
-    TASK_send_message(unit->task, TaskMessage_AdvanceConstructionStage, unit, g_game_update_loop_task);
+    TSK_send_message(unit->task, TaskMessage_AdvanceConstructionStage, unit, g_game_update_loop_task);
   entity = unit->entity;
   unit->mode_arrive = arrive_mode;
   id = (KKND::MobdPoint *)entity->anim_current_frame->points[0].id;
@@ -7341,7 +5976,7 @@ void __fastcall unit_on_damage_ex(KKND::Unit *unit, KKND::Entity *attacker, KKND
           {
             task = attacker_unit->task;
             if ( task )
-              TASK_send_message(unit->task, TaskMessage_GainExperience, (void *)damage, task);
+              TSK_send_message(unit->task, TaskMessage_GainExperience, (void *)damage, task);
           }
         }
       }
@@ -7384,11 +6019,11 @@ void __fastcall MessageHandler_BuildingDefault(
     {
       if ( payload == (void *)1 )
       {
-        entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, 1);
+        entity_anim_init_directional(unit->entity, unit->stats->mobd_lookup_offset_attack, 1);
       }
       else if ( payload == (void *)BuildingConstructionStage_2 )
       {
-        entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, 2);
+        entity_anim_init_directional(unit->entity, unit->stats->mobd_lookup_offset_attack, 2);
       }
       else if ( payload == (void *)BuildingConstructionStage_Complete )
       {
@@ -7444,7 +6079,7 @@ void __fastcall MessageHandler_BuildingDefault(
           }
           break;
         case TaskMessage_UnitReady:
-          unit->entity->is_on_collision_grid = 1;
+          unit->entity->is_collidable = 1;
           rally = unit->mobd_anchors.rally;
           entity = unit->entity;
           v8 = entity->x + rally->x;
@@ -7472,7 +6107,7 @@ void __fastcall MessageHandler_BuildingDefault(
           break;
         case TaskMessage_BuildingComplete:
           if ( sender != receiver && unit2->player_num == unit->player_num )
-            TASK_send_message(receiver, TaskMessage_BroadcastBuildingComplete, nullptr, sender);
+            TSK_send_message(receiver, TaskMessage_BroadcastBuildingComplete, nullptr, sender);
           break;
         case TaskMessage_BroadcastBuildingComplete:
           ++*((_WORD *)unit->state + 6);
@@ -7493,14 +6128,14 @@ void __cdecl __noreturn task_explosion_4(KKND::Task *task)
 
   entity = task->entity;
   entity->collider = &g_null_collision;
-  entity_408800_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
-  entity->is_on_collision_grid = 1;
+  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity->is_collidable = 1;
   v2 = kknd_rand_1("C:\\k\\Scripts\\Building.cpp", 372);
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   entity->x = (v2 & 0x3FFF) - 0x2000 + x;
   entity->y += (kknd_rand_1("C:\\k\\Scripts\\Building.cpp", 373) & 0x3FFF) - 0x2000;
-  entity_anim_load(entity, 220);
+  entity_anim_init(entity, 220);
   entity->z = 0x4000;
   TASK_yield(task, Task_Yield_10000000, 0);
   explosion_finished();
@@ -7517,10 +6152,10 @@ void __cdecl __noreturn task_explosion_3(KKND::Task *task)
   entity = task->entity;
   entity->collider = &g_null_collision;
   TASK_yield(task, Task_Sleep, 130);
-  entity_408800_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
-  entity_anim_load(entity, 0);
+  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_anim_init(entity, 0);
   v2 = entity->y + 2048;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   entity->y = v2;
   entity->anim_speed = 0x20000000;
   TASK_yield(task, Task_Yield_10000000, 0);
@@ -7571,7 +6206,7 @@ void __cdecl __noreturn task_explosion_2(KKND::Task *task)
   TASK_yield(task, Task_Sleep, v6);
   if ( v1 )
     v1->z = task->entity->z + 1024;
-  task->entity->is_on_collision_grid = 1;
+  task->entity->is_collidable = 1;
   entity = task->entity;
   x = entity->x;
   y = entity->y;
@@ -7588,7 +6223,7 @@ void __cdecl __noreturn task_explosion_2(KKND::Task *task)
       {
         do
         {
-          sub_4389A0(v10, y);
+          SCAR_apply(v10, y);
           y += 0x2000;
         }
         while ( y <= v12 );
@@ -7609,10 +6244,10 @@ void __fastcall unit_mode_4034B0(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  unit->entity->is_on_collision_grid = 1;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->x = ((unit->mobd_anchors.grid->x + unit->entity->x) & 0xFFFFE000) - unit->mobd_anchors.grid->x + 4096;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->y = ((unit->mobd_anchors.grid->y + unit->entity->y) & 0xFFFFE000) - unit->mobd_anchors.grid->y + 4096;
   unit_build_40DD00(unit);
   task = unit->task;
@@ -7629,7 +6264,7 @@ void __fastcall unit_mode_403540(KKND::Unit *unit)
     unit_4258C0(unit, g_player_num);
     buildings_tracker_increment(unit->type);
     unit_410BE0_healthbar(unit);
-    TASK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
+    TSK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
     unit->mode = unit->mode_arrive;
   }
   TASK_yield(unit->task, Task_Sleep, 1);
@@ -7640,10 +6275,10 @@ void __fastcall unit_mode_4035C0(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  unit->entity->is_on_collision_grid = 1;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->x = ((unit->mobd_anchors.grid->x + unit->entity->x) & 0xFFFFE000) - unit->mobd_anchors.grid->x + 4096;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->y = ((unit->mobd_anchors.grid->y + unit->entity->y) & 0xFFFFE000) - unit->mobd_anchors.grid->y + 4096;
   unit_build_40DD00(unit);
   task = unit->task;
@@ -7666,16 +6301,22 @@ void __fastcall unit_mode_403650(KKND::Unit *unit)
     if ( unit->hitpoints >= stats->hitpoints / 3
       || (mobd_lookup_offset_4 = stats->mobd_lookup_offset_4, mobd_lookup_offset_4 == -1) )
     {
-      entity_anim_start(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+      entity_anim_init_directional(
+        unit->entity,
+        stats->mobd_lookup_offset_idle,
+        g_angle_to_orientation[unit->orientation]);
     }
     else
     {
-      entity_anim_start(unit->entity, mobd_lookup_offset_4, g_angle_to_orientation[unit->orientation]);
+      entity_anim_init_directional(unit->entity, mobd_lookup_offset_4, g_angle_to_orientation[unit->orientation]);
     }
   }
   else
   {
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_idle,
+      g_angle_to_orientation[unit->orientation]);
     unit->mode = unit_mode_4035C0;
   }
   cplc_spawn_param = unit->cplc_spawn_param;
@@ -7736,17 +6377,17 @@ void __fastcall unit_mode_building_on_death(KKND::Unit *unit)
   {
     turret->entity->ctx = nullptr;
     entity_remove(unit->turret->entity);
-    task_445310(unit->turret->task);
+    TASK_terminate(unit->turret->task);
     TASK_FreeLocal(unit->task, unit->turret);
   }
-  TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
-  TASK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+  TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   v6 = unit->task;
   if ( v6->channel == TaskChannel_PowerPlant )
-    TASK_broadcast_message(v6, TaskMessage_PowerPlantDown, unit, TaskChannel_Tanker);
+    TSK_broadcast_message(v6, TaskMessage_PowerPlantDown, unit, TaskChannel_Tanker);
   v7 = unit->task;
   if ( v7->channel == TaskChannel_Drillrig )
-    TASK_broadcast_message(v7, TaskMessage_DrillrigDown, unit, TaskChannel_Tanker);
+    TSK_broadcast_message(v7, TaskMessage_DrillrigDown, unit, TaskChannel_Tanker);
   unit->task->channel = TaskChannel_None;
   entity = unit->entity;
   unit->unit_id = 0;
@@ -7809,15 +6450,15 @@ BOOL buildings_tracker_init()
   g_buildings_tracker_pool = v0;
   if ( !v0 )
     return 0;
-  g_buildings_tracker_ = v0;
+  g_buildings_tracker_free_head = v0;
   for ( i = 0; i < 19; ++i )
   {
     v0[i].next = &v0[i + 1];
     v0 = g_buildings_tracker_pool;
   }
   g_buildings_tracker_pool[19].next = nullptr;
-  g_buildings_tracker_list_head = (KKND::BuildingsTracker *)&g_buildings_tracker_list_head;
-  g_buildings_tracker_list_tail = (KKND::BuildingsTracker *)&g_buildings_tracker_list_head;
+  g_buildings_tracker_head = (KKND::BuildingsTracker *)&g_buildings_tracker_head;
+  g_buildings_tracker_tail = (KKND::BuildingsTracker *)&g_buildings_tracker_head;
   return 1;
 }
 
@@ -7826,13 +6467,13 @@ int __fastcall buildings_tracker_get_count(KKND::UnitType type)
 {
   KKND::BuildingsTracker *v1; // eax
 
-  v1 = g_buildings_tracker_list_head;
-  if ( g_buildings_tracker_list_head == (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+  v1 = g_buildings_tracker_head;
+  if ( g_buildings_tracker_head == (KKND::BuildingsTracker *)&g_buildings_tracker_head )
     return 0;
   while ( v1->type != type )
   {
     v1 = v1->next;
-    if ( v1 == (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+    if ( v1 == (KKND::BuildingsTracker *)&g_buildings_tracker_head )
       return 0;
   }
   return v1->num_buildings_of_this_type;
@@ -7845,13 +6486,13 @@ BOOL __fastcall buildings_tracker_check_limits(KKND::UnitType type)
 
   if ( type != UnitType_Surv_Drillrig && type != UnitType_Mute_Drillrig )
   {
-    v1 = g_buildings_tracker_list_head;
-    if ( g_buildings_tracker_list_head != (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+    v1 = g_buildings_tracker_head;
+    if ( g_buildings_tracker_head != (KKND::BuildingsTracker *)&g_buildings_tracker_head )
     {
       while ( v1->type != type )
       {
         v1 = v1->next;
-        if ( v1 == (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+        if ( v1 == (KKND::BuildingsTracker *)&g_buildings_tracker_head )
           return 1;
       }
       if ( type == UnitType_Surv_ResearchLab || type == UnitType_Surv_AlchemyHall )
@@ -7878,28 +6519,28 @@ BOOL __fastcall buildings_tracker_increment(KKND::UnitType type)
 
   if ( type == UnitType_Surv_Drillrig || type == UnitType_Mute_Drillrig )
     return 1;
-  v1 = g_buildings_tracker_list_head;
-  if ( g_buildings_tracker_list_head == (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+  v1 = g_buildings_tracker_head;
+  if ( g_buildings_tracker_head == (KKND::BuildingsTracker *)&g_buildings_tracker_head )
   {
 LABEL_6:
-    v2 = g_buildings_tracker_;
-    if ( g_buildings_tracker_ )
-      g_buildings_tracker_ = g_buildings_tracker_->next;
+    v2 = g_buildings_tracker_free_head;
+    if ( g_buildings_tracker_free_head )
+      g_buildings_tracker_free_head = g_buildings_tracker_free_head->next;
     else
       v2 = nullptr;
     v2->num_buildings_of_this_type = 1;
     v2->type = type;
-    v3 = g_buildings_tracker_list_head;
-    v2->prev = (KKND::BuildingsTracker *)&g_buildings_tracker_list_head;
+    v3 = g_buildings_tracker_head;
+    v2->prev = (KKND::BuildingsTracker *)&g_buildings_tracker_head;
     v2->next = v3;
-    g_buildings_tracker_list_head->prev = v2;
-    g_buildings_tracker_list_head = v2;
+    g_buildings_tracker_head->prev = v2;
+    g_buildings_tracker_head = v2;
     return 1;
   }
   while ( v1->type != type )
   {
     v1 = v1->next;
-    if ( v1 == (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+    if ( v1 == (KKND::BuildingsTracker *)&g_buildings_tracker_head )
       goto LABEL_6;
   }
   ++v1->num_buildings_of_this_type;
@@ -7916,8 +6557,8 @@ void __fastcall buildings_tracker_decrement(KKND::Unit *unit)
   type = unit->type;
   if ( type != UnitType_Surv_Drillrig && type != UnitType_Mute_Drillrig )
   {
-    v2 = g_buildings_tracker_list_head;
-    if ( g_buildings_tracker_list_head != (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+    v2 = g_buildings_tracker_head;
+    if ( g_buildings_tracker_head != (KKND::BuildingsTracker *)&g_buildings_tracker_head )
     {
       while ( 1 )
       {
@@ -7929,16 +6570,16 @@ void __fastcall buildings_tracker_decrement(KKND::Unit *unit)
             break;
         }
         v2 = v2->next;
-        if ( v2 == (KKND::BuildingsTracker *)&g_buildings_tracker_list_head )
+        if ( v2 == (KKND::BuildingsTracker *)&g_buildings_tracker_head )
           goto LABEL_9;
       }
       v2->next->prev = v2->prev;
       v2->prev->next = v2->next;
-      v2->next = g_buildings_tracker_;
-      g_buildings_tracker_ = v2;
+      v2->next = g_buildings_tracker_free_head;
+      g_buildings_tracker_free_head = v2;
     }
 LABEL_9:
-    if ( g_buildings_tracker_list_head == (KKND::BuildingsTracker *)&g_buildings_tracker_list_head
+    if ( g_buildings_tracker_head == (KKND::BuildingsTracker *)&g_buildings_tracker_head
       && unit->player_num == g_player_num )
     {
       mode_null((void *)g_player_num);
@@ -8031,9 +6672,9 @@ void __fastcall MessageHandler_ClanhallUpgrades(
   if ( unit->player_num == g_player_num )
   {
     v9 = 0;
-    *(&g_buildings_tracker_ + state->upgrade_level) = (KKND::BuildingsTracker *)((char *)*(&g_buildings_tracker_
-                                                                                         + state->upgrade_level)
-                                                                               - 1);// BUG -1 index
+    *(&g_buildings_tracker_free_head + state->upgrade_level) = (KKND::BuildingsTracker *)((char *)*(&g_buildings_tracker_free_head
+                                                                                                  + state->upgrade_level)
+                                                                                        - 1);// BUG -1 index
     ++g_clanhall_levels.num_buildings_by_level[state->upgrade_level];
     if ( state->upgrade_level > g_clanhall_levels.max_level )
     {
@@ -8126,7 +6767,7 @@ void __fastcall MessageHandler_Clanhall(
       }
       else
       {
-        unit->entity->is_on_collision_grid = 1;
+        unit->entity->is_collidable = 1;
         if ( entity_create_by_unit_type(
                (KKND::UnitType)payload,
                unit->mobd_anchors.rally->x + unit->entity->x,
@@ -8165,7 +6806,7 @@ void __fastcall unit_mode_clanhall_set_default_prod(KKND::Unit *unit)
   {
     state = (KKND::BuildingState *)unit->state;
     state->same_building_count = 0;
-    TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Clanhall);
+    TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Clanhall);
     if ( !state->same_building_count )
     {
       if ( !dword_47B3D8 && !g_sidebar_buildings_prod )
@@ -8338,7 +6979,7 @@ LABEL_17:
         sub_447250();
         goto LABEL_17;
     }
-    v7 = *(&g_buildings_tracker_ + upgrade_level--);// BUG -- g_clanhall_levels.num_buildings_by_level[upgrade_level-1]
+    v7 = *(&g_buildings_tracker_free_head + upgrade_level--);// BUG -- g_clanhall_levels.num_buildings_by_level[upgrade_level-1]
   }
   while ( !v7 && upgrade_level > 0 );
   v1 = unit;
@@ -8438,12 +7079,12 @@ BOOL __fastcall BOXD_collide_solid(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
-  int y1; // eax
+  int min_x; // eax
   BOOL result; // eax
-  int y2; // edx
+  int max_y; // edx
   int v8; // esi
   KKND::Task *task; // eax
   int v10; // esi
@@ -8452,14 +7093,14 @@ BOOL __fastcall BOXD_collide_solid(
   int v13; // esi
   KKND::Task *v14; // eax
   int v15; // edx
-  int z1; // eax
-  int z2; // edx
+  int min_y; // eax
+  int max_z; // edx
   int v18; // esi
   int v19; // eax
   int v20; // edx
   int v21; // esi
-  int x2; // eax
-  int x1; // edx
+  int max_x; // eax
+  int min_z; // edx
   int v24; // esi
   int v25; // eax
   int v26; // edx
@@ -8467,14 +7108,14 @@ BOOL __fastcall BOXD_collide_solid(
 
   switch ( axis )
   {
-    case BoxCollisionDirection_NegativeX:
-      y1 = a4->y1;
-      if ( a3->y1 < y1 )
+    case BoxCollisionAxis_NegX:
+      min_x = a4->min_x;
+      if ( a3->min_x < min_x )
       {
-        y2 = a3->y2;
-        if ( y2 < a4->y2 )
+        max_y = a3->max_x;
+        if ( max_y < a4->max_x )
         {
-          v8 = y1 - y2 + a->x;
+          v8 = min_x - max_y + a->x;
           task = a->task;
           a->x = v8;
           if ( !task )
@@ -8489,12 +7130,12 @@ BOOL __fastcall BOXD_collide_solid(
         result = 0;
       }
       break;
-    case BoxCollisionDirection_PositiveX:
-      v11 = a4->y2;
-      if ( a3->y2 > v11 )
+    case BoxCollisionAxis_PosX:
+      v11 = a4->max_x;
+      if ( a3->max_x > v11 )
       {
-        v12 = a3->y1;
-        if ( v12 > a4->y1 )
+        v12 = a3->min_x;
+        if ( v12 > a4->min_x )
         {
           v13 = v11 - v12 + a->x;
           v14 = a->task;
@@ -8511,14 +7152,14 @@ BOOL __fastcall BOXD_collide_solid(
         result = 0;
       }
       break;
-    case BoxCollisionDirection_NegativeY:
-      z1 = a4->z1;
-      if ( a3->z1 < z1 )
+    case BoxCollisionAxis_NegY:
+      min_y = a4->min_y;
+      if ( a3->min_y < min_y )
       {
-        z2 = a3->z2;
-        if ( z2 < a4->z2 )
+        max_z = a3->max_y;
+        if ( max_z < a4->max_y )
         {
-          v18 = z1 - z2 + a->y;
+          v18 = min_y - max_z + a->y;
           task = a->task;
           a->y = v18;
           a->y_speed = 0;
@@ -8534,12 +7175,12 @@ BOOL __fastcall BOXD_collide_solid(
         result = 0;
       }
       break;
-    case BoxCollisionDirection_PositiveY:
-      v19 = a4->z2;
-      if ( a3->z2 > v19 )
+    case BoxCollisionAxis_PosY:
+      v19 = a4->max_y;
+      if ( a3->max_y > v19 )
       {
-        v20 = a3->z1;
-        if ( v20 > a4->z1 )
+        v20 = a3->min_y;
+        if ( v20 > a4->min_y )
         {
           v21 = v19 - v20 + a->y;
           v14 = a->task;
@@ -8557,14 +7198,14 @@ BOOL __fastcall BOXD_collide_solid(
         result = 0;
       }
       break;
-    case BoxCollisionDirection_NegativeZ:
-      x2 = a4->x2;
-      if ( a3->x2 < x2 )
+    case BoxCollisionAxis_NegZ:
+      max_x = a4->min_z;
+      if ( a3->min_z < max_x )
       {
-        x1 = a3[1].x1;
-        if ( x1 < a4[1].x1 )
+        min_z = a3->?;
+        if ( min_z < a4->? )
         {
-          v24 = x2 - x1 + a->z;
+          v24 = max_x - min_z + a->z;
           task = a->task;
           a->z = v24;
           if ( !task )
@@ -8585,12 +7226,12 @@ LABEL_32:
         result = 0;
       }
       break;
-    case BoxCollisionDirection_PositiveZ:
-      v25 = a4[1].x1;
-      if ( a3[1].x1 > v25 )
+    case BoxCollisionAxis_PosZ:
+      v25 = a4->?;
+      if ( a3->? > v25 )
       {
-        v26 = a3->x2;
-        if ( v26 > a4->x2 )
+        v26 = a3->min_z;
+        if ( v26 > a4->min_z )
         {
           v27 = v25 - v26 + a->z;
           v14 = a->task;
@@ -8624,26 +7265,26 @@ BOOL __fastcall BOXD_collide_floor(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   int x; // edx
   int z1; // edx
   int z2; // esi
   KKND::Task *task; // eax
 
-  if ( axis != BoxCollisionDirection_NegativeY )
+  if ( axis != BoxCollisionAxis_NegY )
     return 0;
   x = a->x;
-  if ( x > a4->y2 )
+  if ( x > a4->max_x )
     return 0;
-  if ( x < a4->y1 )
+  if ( x < a4->min_x )
     return 0;
-  z1 = a4->z1;
-  if ( a3->z1 >= z1 )
+  z1 = a4->min_y;
+  if ( a3->min_y >= z1 )
     return 0;
-  z2 = a3->z2;
-  if ( z2 >= a4->z2 || z2 >= z1 + 2048 )
+  z2 = a3->max_y;
+  if ( z2 >= a4->max_y || z2 >= z1 + 2048 )
     return 0;
   task = a->task;
   a->y = z1;
@@ -8661,8 +7302,8 @@ BOOL __fastcall BOXD_collide_ramp_ltr(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   int x; // edx
   int y2; // esi
@@ -8671,19 +7312,19 @@ BOOL __fastcall BOXD_collide_ramp_ltr(
   int v9; // eax
   KKND::Task *task; // eax
 
-  if ( axis == BoxCollisionDirection_PositiveX )
+  if ( axis == BoxCollisionAxis_PosX )
     return 0;
   x = a->x;
-  y2 = a4->y2;
+  y2 = a4->max_x;
   if ( x > y2 )
     return 0;
-  y1 = a4->y1;
+  y1 = a4->min_x;
   if ( x < y1 )
     return 0;
-  z2 = a4->z2;
-  if ( a3->z2 > z2 + 2048 )
+  z2 = a4->max_y;
+  if ( a3->max_y > z2 + 2048 )
     return 0;
-  v9 = z2 + (x - y1) * (a4->z1 - z2) / (y2 - y1);
+  v9 = z2 + (x - y1) * (a4->min_y - z2) / (y2 - y1);
   if ( v9 >= a->y )
     return 0;
   a->y = v9;
@@ -8702,8 +7343,8 @@ BOOL __fastcall BOXD_collide_ramp_rtl(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   int x; // edx
   int y2; // edi
@@ -8712,19 +7353,19 @@ BOOL __fastcall BOXD_collide_ramp_rtl(
   int v9; // eax
   KKND::Task *task; // eax
 
-  if ( axis == BoxCollisionDirection_NegativeX )
+  if ( axis == BoxCollisionAxis_NegX )
     return 0;
   x = a->x;
-  y2 = a4->y2;
+  y2 = a4->max_x;
   if ( x > y2 )
     return 0;
-  y1 = a4->y1;
+  y1 = a4->min_x;
   if ( x < y1 )
     return 0;
-  z2 = a4->z2;
-  if ( a3->z2 > z2 + 2048 )
+  z2 = a4->max_y;
+  if ( a3->max_y > z2 + 2048 )
     return 0;
-  v9 = z2 + (x - y2) * (a4->z1 - z2) / (y1 - y2);
+  v9 = z2 + (x - y2) * (a4->min_y - z2) / (y1 - y2);
   if ( v9 >= a->y )
     return 0;
   a->y = v9;
@@ -8743,8 +7384,8 @@ BOOL __fastcall BOXD_collide_slope_left(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   int z1; // edi
   int v6; // eax
@@ -8753,16 +7394,16 @@ BOOL __fastcall BOXD_collide_slope_left(
   int v10; // eax
   KKND::Task *task; // eax
 
-  z1 = a3->z1;
-  v6 = a4->z1;
+  z1 = a3->min_y;
+  v6 = a4->min_y;
   if ( z1 < v6 - 2048 )
     return 0;
-  y1 = a3->y1;
-  v9 = a4->y1;
+  y1 = a3->min_x;
+  v9 = a4->min_x;
   if ( y1 < v9 )
   {
-    a->y += a4->z2 - z1;
-    if ( (int)axis > (int)BoxCollisionDirection_PositiveX )
+    a->y += a4->max_y - z1;
+    if ( (int)axis > (int)BoxCollisionAxis_PosX )
       a->y_speed = 0;
     if ( !a )
       return 1;
@@ -8771,11 +7412,11 @@ BOOL __fastcall BOXD_collide_slope_left(
       return 1;
     goto LABEL_15;
   }
-  v10 = a4->z2 + (y1 - v9) * (v6 - a4->z2) / (a4->y2 - v9);
+  v10 = a4->max_y + (y1 - v9) * (v6 - a4->max_y) / (a4->max_x - v9);
   if ( v10 <= z1 )
     return 0;
   a->y += v10 - z1;
-  if ( (int)axis > (int)BoxCollisionDirection_PositiveX )
+  if ( (int)axis > (int)BoxCollisionAxis_PosX )
     a->y_speed = 0;
   if ( a )
   {
@@ -8795,8 +7436,8 @@ BOOL __fastcall BOXD_collide_slope_right(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   int z1; // edi
   int v6; // eax
@@ -8805,16 +7446,16 @@ BOOL __fastcall BOXD_collide_slope_right(
   int v10; // eax
   KKND::Task *task; // eax
 
-  z1 = a3->z1;
-  v6 = a4->z1;
+  z1 = a3->min_y;
+  v6 = a4->min_y;
   if ( z1 < v6 - 2048 )
     return 0;
-  y2 = a3->y2;
-  v9 = a4->y2;
+  y2 = a3->max_x;
+  v9 = a4->max_x;
   if ( y2 > v9 )
   {
-    a->y += a4->z2 - z1;
-    if ( (int)axis > (int)BoxCollisionDirection_PositiveX )
+    a->y += a4->max_y - z1;
+    if ( (int)axis > (int)BoxCollisionAxis_PosX )
       a->y_speed = 0;
     if ( !a )
       return 1;
@@ -8823,11 +7464,11 @@ BOOL __fastcall BOXD_collide_slope_right(
       return 1;
     goto LABEL_15;
   }
-  v10 = a4->z2 + (y2 - v9) * (v6 - a4->z2) / (a4->y1 - v9);
+  v10 = a4->max_y + (y2 - v9) * (v6 - a4->max_y) / (a4->min_x - v9);
   if ( v10 <= z1 )
     return 0;
   a->y += v10 - z1;
-  if ( (int)axis > (int)BoxCollisionDirection_PositiveX )
+  if ( (int)axis > (int)BoxCollisionAxis_PosX )
     a->y_speed = 0;
   if ( a )
   {
@@ -8847,8 +7488,8 @@ BOOL __fastcall BOXD_collide_corner_right(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   int z1; // eax
   KKND::Task *task; // eax
@@ -8857,14 +7498,14 @@ BOOL __fastcall BOXD_collide_corner_right(
   int v10; // esi
   KKND::Task *v11; // eax
 
-  if ( axis != BoxCollisionDirection_PositiveX )
+  if ( axis != BoxCollisionAxis_PosX )
   {
-    if ( axis == BoxCollisionDirection_NegativeY && a->x >= a4->y1 )
+    if ( axis == BoxCollisionAxis_NegY && a->x >= a4->min_x )
     {
-      z1 = a4->z1;
-      if ( a3->z1 >= z1 )
+      z1 = a4->min_y;
+      if ( a3->min_y >= z1 )
         return 0;
-      if ( a3->z2 >= a4->z2 )
+      if ( a3->max_y >= a4->max_y )
         return 0;
       a->y = z1;
       task = a->task;
@@ -8879,11 +7520,11 @@ BOOL __fastcall BOXD_collide_corner_right(
     }
     return 0;
   }
-  y2 = a4->y2;
-  if ( a3->y2 <= y2 )
+  y2 = a4->max_x;
+  if ( a3->max_x <= y2 )
     return 0;
-  y1 = a3->y1;
-  if ( y1 <= a4->y1 )
+  y1 = a3->min_x;
+  if ( y1 <= a4->min_x )
     return 0;
   v10 = y2 - y1 + a->x;
   v11 = a->task;
@@ -8901,8 +7542,8 @@ BOOL __fastcall BOXD_collide_corner_left(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   int z1; // eax
   KKND::Task *task; // eax
@@ -8913,12 +7554,12 @@ BOOL __fastcall BOXD_collide_corner_left(
 
   if ( axis )
   {
-    if ( axis == BoxCollisionDirection_NegativeY && a->x <= a4->y2 )
+    if ( axis == BoxCollisionAxis_NegY && a->x <= a4->max_x )
     {
-      z1 = a4->z1;
-      if ( a3->z1 >= z1 )
+      z1 = a4->min_y;
+      if ( a3->min_y >= z1 )
         return 0;
-      if ( a3->z2 >= a4->z2 )
+      if ( a3->max_y >= a4->max_y )
         return 0;
       a->y = z1;
       task = a->task;
@@ -8933,11 +7574,11 @@ BOOL __fastcall BOXD_collide_corner_left(
     }
     return 0;
   }
-  y1 = a4->y1;
-  if ( a3->y1 >= y1 )
+  y1 = a4->min_x;
+  if ( a3->min_x >= y1 )
     return 0;
-  y2 = a3->y2;
-  if ( y2 >= a4->y2 )
+  y2 = a3->max_x;
+  if ( y2 >= a4->max_x )
     return 0;
   v10 = y1 - y2 + a->x;
   v11 = a->task;
@@ -8955,14 +7596,14 @@ BOOL __fastcall BOXD_collide_cursor(
         KKND::Entity *a,
         KKND::Entity *b,
         KKND::BoxCollisionAxis axis,
-        KKND::BoxdCollisionState *a3,
-        KKND::BoxdCollisionState *a4)
+        ___remove__KKND::BoxdCollisionState *a3,
+        ___remove__KKND::BoxdCollisionState *a4)
 {
   KKND::Task *task; // eax
 
   task = a->task;
   if ( task && (task->wait_flags & 0x40000000) != 0 )
-    TASK_send_message(nullptr, TaskMessage_MouseHover, b, a->task);
+    TSK_send_message(nullptr, TaskMessage_MouseHover, b, a->task);
   return 0;
 }
 
@@ -8971,25 +7612,25 @@ BOOL BOXD_collisions_init()
 {
   BOOL result; // eax
 
-  g_current_lvl_boxd_verified = 0;
-  g_current_lvl_boxd = (KKND::LevelBoxd *)LVL_FindSection("BOXD");
-  if ( !g_current_lvl_boxd )
+  g_boxd_active = 0;
+  g_boxd = (KKND::LevelBoxd *)LVL_FindSection("BOXD");
+  if ( !g_boxd )
     return 1;
   result = (BOOL)malloc(0x17700u);              // 8000
-  g_tile_collisions_pool = (KKND::BoxdCollisionBucket *)result;
+  g_tile_collisions_pool = (BoxdSpatialHashEntry *)result;
   if ( result )
   {
     g_tile_collisions = nullptr;
-    g_tile_collisions_pool_size = g_current_lvl_boxd->layers[0]->max_collision_buckets;
-    g_world_to_tile_x = g_current_lvl_boxd->layers[0]->world_to_tile_x;
-    g_world_to_tile_y = g_current_lvl_boxd->layers[0]->world_to_tile_y;
-    g_tiles_num_x = g_current_lvl_boxd->layers[0]->num_tiles_x;
-    g_tiles_num_y = g_current_lvl_boxd->layers[0]->num_tiles_y;
-    g_tiles = g_current_lvl_boxd->layers[0]->tiles;
-    g_tile_collisions = (KKND::BoxdCollisionBucket **)malloc(4 * g_tile_collisions_pool_size);
+    g_tile_collisions_pool_size = g_boxd->grid[0]->max_collision_buckets;
+    g_world_to_cgrid_x = g_boxd->grid[0]->world_to_tile_x;
+    g_world_to_cgrid_y = g_boxd->grid[0]->world_to_tile_y;
+    g_collision_grid_width = g_boxd->grid[0]->num_tiles_x;
+    g_collision_grid_height = g_boxd->grid[0]->num_tiles_y;
+    g_collision_grid = g_boxd->grid[0]->tiles;
+    g_tile_collisions = (BoxdSpatialHashEntry **)malloc(4 * g_tile_collisions_pool_size);
     if ( g_tile_collisions )
     {
-      g_current_lvl_boxd_verified = 1;
+      g_boxd_active = 1;
       return 1;
     }
     else
@@ -9015,7 +7656,7 @@ void __fastcall BOXD_rebuild_collision_grid(KKND::Entity **entity_list)
   KKND::Task *task; // eax
   __int16 can_action; // cx
   KKND::BoxdCollisionShape *shape; // eax
-  KKND::BoxdCollisionBox *box; // esi
+  KKND::BoxdAabb *box; // esi
   int type; // eax
   int x_speed; // ebx
   int x; // eax
@@ -9029,15 +7670,15 @@ void __fastcall BOXD_rebuild_collision_grid(KKND::Entity **entity_list)
   int v17; // eax
   int v18; // esi
   int v19; // esi
-  KKND::BoxdCollisionBucket **v20; // edx
-  KKND::BoxdCollisionBucket **v21; // eax
+  BoxdSpatialHashEntry **v20; // edx
+  BoxdSpatialHashEntry **v21; // eax
   int v22; // ecx
   int y_speed; // [esp+10h] [ebp-Ch]
   int v24; // [esp+10h] [ebp-Ch]
   KKND::BoxdCollisionShape *v25; // [esp+14h] [ebp-8h]
 
   v1 = entity_list;
-  if ( g_current_lvl_boxd_verified )
+  if ( g_boxd_active )
   {
     if ( g_tile_collisions && g_tile_collisions_pool_size )
       memset(g_tile_collisions, 0, 4 * g_tile_collisions_pool_size);
@@ -9064,47 +7705,47 @@ void __fastcall BOXD_rebuild_collision_grid(KKND::Entity **entity_list)
 LABEL_16:
               x_speed = entity->x_speed;
               x = entity->x;
-              v10 = box->x;
+              v10 = box->min_x;
               if ( x_speed < 0 )
               {
-                v11 = g_world_to_tile_x;
-                v12 = (x_speed + x + v10) >> g_world_to_tile_x;
+                v11 = g_world_to_cgrid_x;
+                v12 = (x_speed + x + v10) >> g_world_to_cgrid_x;
                 if ( v12 < 0 )
                   v12 = 0;
-                v13 = box->z + x - 1;
+                v13 = box->max_x + x - 1;
               }
               else
               {
-                v11 = g_world_to_tile_x;
-                v12 = (x + v10) >> g_world_to_tile_x;
+                v11 = g_world_to_cgrid_x;
+                v12 = (x + v10) >> g_world_to_cgrid_x;
                 if ( v12 < 0 )
                   v12 = 0;
-                v13 = x + box->z + x_speed - 1;
+                v13 = x + box->max_x + x_speed - 1;
               }
               v14 = (v13 >> v11) - v12;
-              if ( v12 + v14 >= g_tiles_num_x )
-                v14 = g_tiles_num_x - v12 - 1;
+              if ( v12 + v14 >= g_collision_grid_width )
+                v14 = g_collision_grid_width - v12 - 1;
               y = entity->y;
               y_speed = entity->y_speed;
-              v16 = box->y;
+              v16 = box->min_y;
               if ( y_speed < 0 )
               {
-                v17 = (entity->y_speed + y + v16) >> g_world_to_tile_y;
+                v17 = (entity->y_speed + y + v16) >> g_world_to_cgrid_y;
                 if ( v17 < 0 )
                   v17 = 0;
-                v18 = box->w + y - 1;
+                v18 = box->max_y + y - 1;
               }
               else
               {
-                v17 = (y + v16) >> g_world_to_tile_y;
+                v17 = (y + v16) >> g_world_to_cgrid_y;
                 if ( v17 < 0 )
                   v17 = 0;
-                v18 = y + box->w + y_speed - 1;
+                v18 = y + box->max_y + y_speed - 1;
               }
-              v19 = (v18 >> g_world_to_tile_y) - v17;
-              if ( v17 + v19 >= g_tiles_num_y )
-                v19 = g_tiles_num_y - v17 - 1;
-              v20 = &g_tile_collisions[v12] + g_tiles_num_x * v17;
+              v19 = (v18 >> g_world_to_cgrid_y) - v17;
+              if ( v17 + v19 >= g_collision_grid_height )
+                v19 = g_collision_grid_height - v17 - 1;
+              v20 = &g_tile_collisions[v12] + g_collision_grid_width * v17;
               if ( v19 >= 0 )
               {
                 v24 = v19 + 1;
@@ -9126,7 +7767,7 @@ LABEL_16:
                     }
                     while ( v22 );
                   }
-                  v20 += g_tiles_num_x;
+                  v20 += g_collision_grid_width;
                   --v24;
                 }
                 while ( v24 );
@@ -9159,7 +7800,7 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
   KKND::Task *task; // eax
   __int16 v5; // ax
   KKND::BoxdCollisionShape *shape; // ecx
-  KKND::BoxdCollisionBox *box; // edi
+  KKND::BoxdAabb *box; // edi
   KKND::BoxdCollisionType type; // eax
   int x; // ebp
   int v10; // ebx
@@ -9172,33 +7813,33 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
   KKND::BoxdCollisionType v17; // eax
   KKND::BoxdCollisionType v18; // ebp
   KKND::BoxdCollisionHandler *v19; // ecx
-  bool (*obstacle_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, KKND::BoxdCollisionState *, KKND::BoxdCollisionState *); // eax
+  bool (*obstacle_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, ___remove__KKND::BoxdCollisionState *, ___remove__KKND::BoxdCollisionState *); // eax
   int v21; // eax
   int v22; // eax
-  KKND::BoxdCollisionBox *v23; // eax
+  KKND::BoxdAabb *v23; // eax
   KKND::BoxdCollisionHandler *collider; // ebp
   int v25; // ecx
   int v26; // ecx
-  bool (*mover_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, KKND::BoxdCollisionState *, KKND::BoxdCollisionState *); // eax
+  bool (*mover_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, ___remove__KKND::BoxdCollisionState *, ___remove__KKND::BoxdCollisionState *); // eax
   int v28; // eax
   int v29; // eax
   bool v30; // zf
-  KKND::BoxdCollisionBox *v31; // [esp+10h] [ebp-8Ch]
+  KKND::BoxdAabb *v31; // [esp+10h] [ebp-8Ch]
   KKND::BoxdCollisionShape *v32; // [esp+10h] [ebp-8Ch]
   KKND::BoxdCollisionShape *v33; // [esp+14h] [ebp-88h]
   KKND::BoxdCollisionShape *v34; // [esp+14h] [ebp-88h]
-  KKND::BoxdCollisionBucket *i; // [esp+18h] [ebp-84h]
+  BoxdSpatialHashEntry *i; // [esp+18h] [ebp-84h]
   int y; // [esp+1Ch] [ebp-80h]
   int v37; // [esp+1Ch] [ebp-80h]
   int v38; // [esp+1Ch] [ebp-80h]
   int v39; // [esp+20h] [ebp-7Ch]
-  KKND::BoxdCollisionBucket **v40; // [esp+20h] [ebp-7Ch]
+  BoxdSpatialHashEntry **v40; // [esp+20h] [ebp-7Ch]
   int category; // [esp+24h] [ebp-78h]
   int v42; // [esp+28h] [ebp-74h]
-  KKND::BoxdCollisionBucket **v43; // [esp+2Ch] [ebp-70h]
+  BoxdSpatialHashEntry **v43; // [esp+2Ch] [ebp-70h]
   int collides_with_categories; // [esp+30h] [ebp-6Ch]
   int v45; // [esp+34h] [ebp-68h]
-  KKND::BoxdTile **v46; // [esp+38h] [ebp-64h]
+  ___remove__KKND::BoxdTile **v46; // [esp+38h] [ebp-64h]
   int v48; // [esp+40h] [ebp-5Ch]
   KKND::BoxdCollisionType v49; // [esp+44h] [ebp-58h] BYREF
   int v50; // [esp+48h] [ebp-54h]
@@ -9217,7 +7858,7 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
   int v63; // [esp+90h] [ebp-Ch]
   int v64; // [esp+94h] [ebp-8h]
 
-  if ( g_current_lvl_boxd_verified )
+  if ( g_boxd_active )
   {
     if ( g_netz_synchronized_lockstep_mode && (task = entity->task) != nullptr )
       v5 = task->netz_flags & 1;
@@ -9231,7 +7872,7 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
         box = shape->box;
         v33 = entity->shape;
         type = shape->box->type;
-        if ( (int)type < (int)BoxdCollisionType_0 )
+        if ( (int)type < (int)BoxdCollisionType_Unit )
         {
           if ( type == BoxdCollisionType_Skip )
             return;
@@ -9245,34 +7886,34 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
         }
         x = entity->x;
         v49 = shape->box->type;
-        v10 = x + box->x;
+        v10 = x + box->min_x;
         v50 = v10;
-        v52 = box->z + x;
+        v52 = box->max_x + x;
         y = entity->y;
-        v11 = box->y + y;
+        v11 = box->min_y + y;
         v51 = v11;
-        v53 = box->w + y;
+        v53 = box->max_y + y;
         v31 = shape->box;
-        v12 = (x + shape->box->x) >> g_world_to_tile_x;
+        v12 = (x + shape->box->min_x) >> g_world_to_cgrid_x;
         v39 = v12;
         if ( v12 < 0 )
         {
           v12 = 0;
           v39 = 0;
         }
-        v45 = ((v31->z + x - 1) >> g_world_to_tile_x) - v12;
-        if ( (v31->z + x - 1) >> g_world_to_tile_x >= g_tiles_num_x )
-          v45 = g_tiles_num_x - v12 - 1;
-        v13 = (y + v31->y) >> g_world_to_tile_y;
+        v45 = ((v31->max_x + x - 1) >> g_world_to_cgrid_x) - v12;
+        if ( (v31->max_x + x - 1) >> g_world_to_cgrid_x >= g_collision_grid_width )
+          v45 = g_collision_grid_width - v12 - 1;
+        v13 = (y + v31->min_y) >> g_world_to_cgrid_y;
         if ( v13 < 0 )
           v13 = 0;
-        v37 = ((v31->w + y - 1) >> g_world_to_tile_y) - v13;
-        if ( v13 + v37 < g_tiles_num_y )
+        v37 = ((v31->max_y + y - 1) >> g_world_to_cgrid_y) - v13;
+        if ( v13 + v37 < g_collision_grid_height )
           v14 = v37;
         else
-          v14 = g_tiles_num_y - v13 - 1;
-        v15 = v39 + g_tiles_num_x * v13;
-        v46 = &g_tiles[v15];
+          v14 = g_collision_grid_height - v13 - 1;
+        v15 = v39 + g_collision_grid_width * v13;
+        v46 = &g_collision_grid[v15];
         v40 = &g_tile_collisions[v15];
         if ( v14 >= 0 )
         {
@@ -9297,7 +7938,7 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
                       if ( !v16->box )
                         break;
                       v17 = v16->box->type;
-                      if ( (int)v17 >= (int)BoxdCollisionType_0 )
+                      if ( (int)v17 >= (int)BoxdCollisionType_Unit )
                       {
                         category = entity->collider[v17].category;
                         v16 = v32;
@@ -9310,22 +7951,22 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
                       if ( (collides_with_categories & category) != 0 )
                       {
                         v55 = v17;
-                        v56 = i->entity->x + v16->box->x;
+                        v56 = i->entity->x + v16->box->min_x;
                         if ( v56 < v52 )
                         {
-                          v58 = i->entity->x + v16->box->z;
+                          v58 = i->entity->x + v16->box->max_x;
                           if ( v58 > v10 )
                           {
-                            v57 = i->entity->y + v16->box->y;
+                            v57 = i->entity->y + v16->box->min_y;
                             if ( v57 < v53 )
                             {
-                              v59 = i->entity->y + v16->box->w;
+                              v59 = i->entity->y + v16->box->max_y;
                               if ( v59 > v11 )
                               {
                                 v18 = v16->box->type;
-                                if ( (int)v18 >= (int)BoxdCollisionType_0 )
+                                if ( (int)v18 >= (int)BoxdCollisionType_Unit )
                                 {
-                                  if ( (int)box->type < (int)BoxdCollisionType_0 )
+                                  if ( (int)box->type < (int)BoxdCollisionType_Unit )
                                   {
                                     v34 = v33 + 1;
                                     v23 = v34->box;
@@ -9339,17 +7980,17 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
                                         {
                                           v25 = entity->x;
                                           v60 = v54;
-                                          v61 = v25 + v34->box->x;
+                                          v61 = v25 + v34->box->min_x;
                                           if ( v61 < v58 )
                                           {
-                                            v63 = v25 + v34->box->z;
+                                            v63 = v25 + v34->box->max_x;
                                             if ( v63 > v56 )
                                             {
                                               v26 = entity->y;
-                                              v62 = v26 + v34->box->y;
+                                              v62 = v26 + v34->box->min_y;
                                               if ( v62 < v59 )
                                               {
-                                                v64 = v26 + v34->box->w;
+                                                v64 = v26 + v34->box->max_y;
                                                 if ( v64 > v57 )
                                                 {
                                                   mover_response = collider[v34->box->type].mover_response;
@@ -9364,13 +8005,13 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
                                                            &v55) )
                                                     {
                                                       v28 = entity->x;
-                                                      v10 = v28 + box->x;
+                                                      v10 = v28 + box->min_x;
                                                       v50 = v10;
-                                                      v52 = box->z + v28;
+                                                      v52 = box->max_x + v28;
                                                       v29 = entity->y;
-                                                      v11 = box->y + v29;
+                                                      v11 = box->min_y + v29;
                                                       v51 = v11;
-                                                      v53 = box->w + v29;
+                                                      v53 = box->max_y + v29;
                                                     }
                                                     else
                                                     {
@@ -9406,13 +8047,13 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
                                              &v55) )
                                       {
                                         v21 = entity->x;
-                                        v10 = v21 + box->x;
+                                        v10 = v21 + box->min_x;
                                         v50 = v10;
-                                        v52 = box->z + v21;
+                                        v52 = box->max_x + v21;
                                         v22 = entity->y;
-                                        v11 = box->y + v22;
+                                        v11 = box->min_y + v22;
                                         v51 = v11;
-                                        v53 = box->w + v22;
+                                        v53 = box->max_y + v22;
                                       }
                                       else
                                       {
@@ -9444,9 +8085,9 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
               }
               while ( !v30 );
             }
-            v46 += g_tiles_num_x;
+            v46 += g_collision_grid_width;
             v30 = v38 == 1;
-            v40 += g_tiles_num_x;
+            v40 += g_collision_grid_width;
             --v38;
           }
           while ( !v30 );
@@ -9465,7 +8106,7 @@ void __fastcall BOXD_collide_entity(KKND::Entity *entity, KKND::BoxCollisionAxis
 //----- (00405430) --------------------------------------------------------
 void BOXD_cleanup()
 {
-  if ( g_current_lvl_boxd_verified )
+  if ( g_boxd_active )
   {
     if ( g_tile_collisions )
       free(g_tile_collisions);
@@ -9660,7 +8301,10 @@ BOOL __fastcall unit_405750_tanker_convoy(KKND::Unit *unit)
   unit->multi_purpose_field_3 = 600;
   entity->x_speed = -64;
   unit->entity->y_speed = 0;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   unit->mode_arrive = unit_mode_tanker_convoy_405680;
   ++g_num_convoy_tankers_en_route;
   if ( g_current_lvl_id == LevelId_Surv_07_ProtectTheConvoy )
@@ -9739,7 +8383,10 @@ void __cdecl UNIT_Handler_TankerConvoy(KKND::Task *task)
       v12 = v10 + (y & 0xFFFFE000);
       orientation = unit->orientation;
       unit->order_target_y = v12;
-      entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);
+      entity_anim_init_directional(
+        unit->entity,
+        unit->stats->mobd_lookup_offset_idle,
+        g_angle_to_orientation[orientation]);
       unit_mode_attack_move(unit);
     }
   }
@@ -9940,7 +8587,7 @@ void __cdecl task_credits_and_custom_mission_briefing_loop(KKND::Task *task)
     v1 = 480;
     v2 = ui_string_create(
            nullptr,
-           g_current_lvl_mobd[MobdId_FontItalic].layers[MobdId_Mute_AlchemyHall],// just 0 not alchemy hall
+           g_mobd[MobdId_FontItalic].layers[MobdId_Mute_AlchemyHall],// just 0 not alchemy hall
            (char *)0x54,
            84,
            39,
@@ -10101,12 +8748,12 @@ BOOL LVL_cplc_init()
   KKND::CplcEntity *prev_y_sorted; // ecx
   int v11; // eax
 
-  g_current_lvl_cplc_verified = 0;
+  g_cplc_active = 0;
   g_current_lvl_cplc = (KKND::LevelCplc *)LVL_FindSection("CPLC");
   if ( g_current_lvl_cplc )
   {
     result = (BOOL)malloc(0x5DC0u);             // 2000
-    g_cplc_entities_in_viewport_pool = (KKND::CplcEntityInViewport *)result;
+    g_cplc_viewport_pool = (KKND::CplcEntityInViewport *)result;
     if ( !result )
       return result;
     g_current_lvl_cplc_backup = nullptr;
@@ -10125,8 +8772,8 @@ BOOL LVL_cplc_init()
     LOBYTE(v4) = v3;
     v7 = 1999;
     qmemcpy(v5, v6, v4 & 3);
-    v8 = g_cplc_entities_in_viewport_pool;
-    g_cplc_entities_in_viewport_head = g_cplc_entities_in_viewport_pool;
+    v8 = g_cplc_viewport_pool;
+    g_cplc_viewport_active_head = g_cplc_viewport_pool;
     do
     {
       --v7;
@@ -10135,7 +8782,7 @@ BOOL LVL_cplc_init()
     }
     while ( v7 );
     v8->next = nullptr;
-    g_cplc_entities_in_viewport_tail = nullptr;
+    g_cplc_viewport_active_head2 = nullptr;
     g_current_lvl_cplc_layer_x_sorted_base = g_current_lvl_cplc_layer->next_x_sorted;
     g_current_lvl_cplc_layer_x_sorted_right = g_current_lvl_cplc_layer_x_sorted_base;
     g_current_lvl_cplc_layer_x_sorted_left = g_current_lvl_cplc_layer->prev_x_sorted;
@@ -10155,8 +8802,8 @@ BOOL LVL_cplc_init()
           goto LABEL_9;
       }
       g_mapd_camera = *(KKND::MapdCamera *)&next_y_sorted->x;
-      g_cplc_viewport_left_x = g_mapd_camera.x - 0x3FFF;// 4000 = 0.25, 3FFF = 0.25-epsilon (allow units to spawn slighly off-screen)
-      g_cplc_viewport_top_y = g_mapd_camera.y - 0x3FFF;
+      g_cplc_spawn_x = g_mapd_camera.x - 0x3FFF;// 4000 = 0.25, 3FFF = 0.25-epsilon (allow units to spawn slighly off-screen)
+      g_cplc_spawn_y = g_mapd_camera.y - 0x3FFF;
       v11 = 1;
     }
     else
@@ -10166,15 +8813,15 @@ LABEL_9:
     }
     if ( !v11 )
     {
-      free(g_cplc_entities_in_viewport_pool);
+      free(g_cplc_viewport_pool);
       return 0;
     }
-    g_current_lvl_cplc_verified = 1;
+    g_cplc_active = 1;
   }
   return 1;
 }
-// 477428: using guessed type int g_cplc_viewport_left_x;
-// 477434: using guessed type int g_cplc_viewport_top_y;
+// 477428: using guessed type int g_cplc_spawn_x;
+// 477434: using guessed type int g_cplc_spawn_y;
 
 //----- (00405FD0) --------------------------------------------------------
 BOOL __fastcall CPLC_select(int id)
@@ -10212,8 +8859,8 @@ BOOL __fastcall CPLC_select(int id)
   LOBYTE(v5) = v4;
   v8 = 1999;
   qmemcpy(v6, v7, v5 & 3);
-  v9 = g_cplc_entities_in_viewport_pool;
-  g_cplc_entities_in_viewport_head = g_cplc_entities_in_viewport_pool;
+  v9 = g_cplc_viewport_pool;
+  g_cplc_viewport_active_head = g_cplc_viewport_pool;
   do
   {
     --v8;
@@ -10222,7 +8869,7 @@ BOOL __fastcall CPLC_select(int id)
   }
   while ( v8 );
   v9->next = nullptr;
-  g_cplc_entities_in_viewport_tail = nullptr;
+  g_cplc_viewport_active_head2 = nullptr;
   g_current_lvl_cplc_layer_x_sorted_base = g_current_lvl_cplc_layer->next_x_sorted;
   g_current_lvl_cplc_layer_x_sorted_right = g_current_lvl_cplc_layer_x_sorted_base;
   g_current_lvl_cplc_layer_x_sorted_left = g_current_lvl_cplc_layer->prev_x_sorted;
@@ -10242,15 +8889,15 @@ BOOL __fastcall CPLC_select(int id)
       return (BOOL)result;
   }
   g_mapd_camera = *(KKND::MapdCamera *)&result->x;
-  g_cplc_viewport_left_x = g_mapd_camera.x - 0x3FFF;
-  g_cplc_viewport_top_y = g_mapd_camera.y - 0x3FFF;
+  g_cplc_spawn_x = g_mapd_camera.x - 0x3FFF;
+  g_cplc_spawn_y = g_mapd_camera.y - 0x3FFF;
   return 1;
 }
 // 477428: using guessed type int g_cplc_viewport_left_x;
 // 477434: using guessed type int g_cplc_viewport_top_y;
 
 //----- (004060F0) --------------------------------------------------------
-void cplc_4060F0()
+void CPLC_restore_from_backup()
 {
   KKND::LevelCplcSurface *v0; // esi
   KKND::LevelCplcSurface *v1; // edi
@@ -10270,8 +8917,8 @@ void cplc_4060F0()
     v4 = g_current_lvl_cplc_layer_size >> 2;
     qmemcpy(g_current_lvl_cplc_layer, g_current_lvl_cplc_backup, 4 * (g_current_lvl_cplc_layer_size >> 2));
     qmemcpy(&v1->size + v4, &v0->size + v4, v2 & 3);
-    v5 = g_cplc_entities_in_viewport_pool;
-    g_cplc_entities_in_viewport_head = g_cplc_entities_in_viewport_pool;
+    v5 = g_cplc_viewport_pool;
+    g_cplc_viewport_active_head = g_cplc_viewport_pool;
     do
     {
       --v3;
@@ -10280,7 +8927,7 @@ void cplc_4060F0()
     }
     while ( v3 );
     v5->next = nullptr;
-    g_cplc_entities_in_viewport_tail = nullptr;
+    g_cplc_viewport_active_head2 = nullptr;
     g_current_lvl_cplc_layer_x_sorted_base = g_current_lvl_cplc_layer->next_x_sorted;
     g_current_lvl_cplc_layer_x_sorted_right = g_current_lvl_cplc_layer_x_sorted_base;
     g_current_lvl_cplc_layer_x_sorted_left = g_current_lvl_cplc_layer->prev_x_sorted;
@@ -10300,8 +8947,8 @@ void cplc_4060F0()
           return;
       }
       g_mapd_camera = *(KKND::MapdCamera *)&next_y_sorted->x;
-      g_cplc_viewport_left_x = g_mapd_camera.x - 0x3FFF;
-      g_cplc_viewport_top_y = g_mapd_camera.y - 0x3FFF;
+      g_cplc_spawn_x = g_mapd_camera.x - 0x3FFF;
+      g_cplc_spawn_y = g_mapd_camera.y - 0x3FFF;
     }
   }
 }
@@ -10309,7 +8956,7 @@ void cplc_4060F0()
 // 477434: using guessed type int g_cplc_viewport_top_y;
 
 //----- (004061D0) --------------------------------------------------------
-void __fastcall cplc_entity_init(KKND::CplcEntity *cplc)
+void __fastcall CPLC_entity_spawn(KKND::CplcEntity *cplc)
 {
   KKND::CplcEntity *prev_x_sorted; // eax
   KKND::CplcEntity *next_x_sorted; // eax
@@ -10358,22 +9005,22 @@ void __fastcall cplc_entity_init(KKND::CplcEntity *cplc)
         v10->z = cplc->z;
         v10->cplc_spawn_params = &cplc->spawn_params;
         cplc->spawn_params.entity = v10;
-        v10->cplc_view = g_cplc_entities_in_viewport_head;
-        g_cplc_entities_in_viewport_head->entity = v10;
-        v11 = g_cplc_entities_in_viewport_head;
-        g_cplc_entities_in_viewport_head->prev = nullptr;
-        g_cplc_entities_in_viewport_head = g_cplc_entities_in_viewport_head->next;
-        v11->next = g_cplc_entities_in_viewport_tail;
-        if ( g_cplc_entities_in_viewport_tail )
-          g_cplc_entities_in_viewport_tail->prev = v11;
-        g_cplc_entities_in_viewport_tail = v11;
+        v10->cplc_view = g_cplc_viewport_active_head;
+        g_cplc_viewport_active_head->entity = v10;
+        v11 = g_cplc_viewport_active_head;
+        g_cplc_viewport_active_head->prev = nullptr;
+        g_cplc_viewport_active_head = g_cplc_viewport_active_head->next;
+        v11->next = g_cplc_viewport_active_head2;
+        if ( g_cplc_viewport_active_head2 )
+          g_cplc_viewport_active_head2->prev = v11;
+        g_cplc_viewport_active_head2 = v11;
       }
     }
   }
 }
 
 //----- (004062E0) --------------------------------------------------------
-void __fastcall cplc_4062E0(KKND::CplcEntityInViewport *view)
+void __fastcall CPLC_viewport_remove(KKND::CplcEntityInViewport *view)
 {
   KKND::CplcEntityInViewport *prev; // eax
 
@@ -10382,15 +9029,15 @@ void __fastcall cplc_4062E0(KKND::CplcEntityInViewport *view)
   if ( prev )
     prev->next = view->next;
   else
-    g_cplc_entities_in_viewport_tail = view->next;
+    g_cplc_viewport_active_head2 = view->next;
   if ( view->next )
     view->next->prev = view->prev;
-  view->next = g_cplc_entities_in_viewport_head;
-  g_cplc_entities_in_viewport_head = view;
+  view->next = g_cplc_viewport_active_head;
+  g_cplc_viewport_active_head = view;
 }
 
 //----- (00406320) --------------------------------------------------------
-KKND::CplcEntity *cplc_406320()
+KKND::CplcEntity *CPLC_viewport_update()
 {
   KKND::CplcEntity *result; // eax
   int v1; // ebx
@@ -10430,32 +9077,32 @@ KKND::CplcEntity *cplc_406320()
   int v35; // edx
   int v36; // eax
   KKND::CplcEntity *v37; // eax
-  KKND::CplcEntity *v38; // [esp+10h] [ebp-4h]
+  int v38; // [esp+10h] [ebp-4h]
 
-  result = (KKND::CplcEntity *)g_current_lvl_cplc_verified;
-  if ( g_current_lvl_cplc_verified )
+  result = (KKND::CplcEntity *)g_cplc_active;
+  if ( g_cplc_active )
   {
-    v1 = g_cplc_viewport_left_x;
+    v1 = g_cplc_spawn_x;
     v2 = g_mapd_camera.x - 0x4000;
-    g_cplc_viewport_left_x = g_mapd_camera.x - 0x4000;
-    dword_47745C = g_mapd_camera.x + ((g_screen_width + 64) << 8);
-    dword_477448 = g_mapd_camera.x - 24576;
+    g_cplc_spawn_x = g_mapd_camera.x - 0x4000;
+    g_cplc_spawn_z = g_mapd_camera.x + ((g_screen_width + 64) << 8);
+    g_cplc_despawn_x = g_mapd_camera.x - 24576;
     v3 = g_mapd_camera.x + ((g_screen_width + 96) << 8);
-    v38 = (KKND::CplcEntity *)g_cplc_viewport_top_y;
-    dword_477440 = v3;
-    g_cplc_viewport_top_y = g_mapd_camera.y - 0x4000;
-    dword_477460 = g_mapd_camera.y + ((g_screen_height - 64) << 8);
-    dword_477454 = g_mapd_camera.y - 24576;
-    v4 = g_cplc_entities_in_viewport_tail;
+    v38 = g_cplc_spawn_y;
+    g_cplc_despawn_z = v3;
+    g_cplc_spawn_y = g_mapd_camera.y - 0x4000;
+    g_cplc_spawn_w = g_mapd_camera.y + ((g_screen_height - 64) << 8);
+    g_cplc_despawn_y = g_mapd_camera.y - 24576;
+    v4 = g_cplc_viewport_active_head2;
     v5 = g_mapd_camera.y + ((g_screen_height - 32) << 8);
-    dword_47743C = v5;
-    if ( g_cplc_entities_in_viewport_tail )
+    g_cplc_despawn_w = v5;
+    if ( g_cplc_viewport_active_head2 )
     {
       do
       {
         entity = v4->entity;
         x = entity->x;
-        if ( x < dword_477448 || x > v3 || (y = entity->y, y < dword_477454) || y > v5 )
+        if ( x < g_cplc_despawn_x || x > v3 || (y = entity->y, y < g_cplc_despawn_y) || y > v5 )
         {
           task = entity->task;
           if ( task )
@@ -10470,13 +9117,13 @@ KKND::CplcEntity *cplc_406320()
           if ( prev )
             prev->next = v10->next;
           else
-            g_cplc_entities_in_viewport_tail = v10->next;
+            g_cplc_viewport_active_head2 = v10->next;
           if ( v10->next )
             v10->next->prev = v10->prev;
-          v10->next = g_cplc_entities_in_viewport_head;
-          v3 = dword_477440;
-          v5 = dword_47743C;
-          g_cplc_entities_in_viewport_head = v10;
+          v10->next = g_cplc_viewport_active_head;
+          v3 = g_cplc_despawn_z;
+          v5 = g_cplc_despawn_w;
+          g_cplc_viewport_active_head = v10;
         }
         else
         {
@@ -10484,7 +9131,7 @@ KKND::CplcEntity *cplc_406320()
         }
       }
       while ( v4 );
-      v2 = g_cplc_viewport_left_x;
+      v2 = g_cplc_spawn_x;
     }
     if ( v2 >= v1 )
     {
@@ -10503,15 +9150,15 @@ KKND::CplcEntity *cplc_406320()
         do
         {
           v24 = prev_x_sorted->x;
-          if ( v24 > dword_47745C )
+          if ( v24 > g_cplc_spawn_z )
             break;
           v25 = prev_x_sorted->y;
-          if ( v25 >= g_cplc_viewport_top_y
-            && v25 <= dword_477460
-            && v24 >= g_cplc_viewport_left_x
+          if ( v25 >= g_cplc_spawn_y
+            && v25 <= g_cplc_spawn_w
+            && v24 >= g_cplc_spawn_x
             && prev_x_sorted->task_type != TaskType_Camera )
           {
-            cplc_entity_init(prev_x_sorted);
+            CPLC_entity_spawn(prev_x_sorted);
             prev_x_sorted = g_current_lvl_cplc_layer_x_sorted_right;
             prev_y_sorted = g_current_lvl_cplc_layer_y_sorted_top;
             if ( g_current_lvl_cplc_layer_x_sorted_right == g_current_lvl_cplc_layer_y_sorted_top )
@@ -10558,7 +9205,7 @@ KKND::CplcEntity *cplc_406320()
           }
         }
         while ( !v23 );
-        if ( next_x_sorted->x <= g_cplc_viewport_left_x )
+        if ( next_x_sorted->x <= g_cplc_spawn_x )
         {
           do
           {
@@ -10568,7 +9215,7 @@ KKND::CplcEntity *cplc_406320()
             next_x_sorted = next_x_sorted->next_x_sorted;
             g_current_lvl_cplc_layer_x_sorted_left = v27;
           }
-          while ( v27->x <= g_cplc_viewport_left_x );
+          while ( v27->x <= g_cplc_spawn_x );
         }
       }
     }
@@ -10582,15 +9229,15 @@ KKND::CplcEntity *cplc_406320()
       do
       {
         v17 = v12->x;
-        if ( v17 < g_cplc_viewport_left_x )
+        if ( v17 < g_cplc_spawn_x )
           break;
         v18 = v12->y;
-        if ( v18 >= g_cplc_viewport_top_y
-          && v18 <= dword_477460
-          && v17 <= dword_47745C
+        if ( v18 >= g_cplc_spawn_y
+          && v18 <= g_cplc_spawn_w
+          && v17 <= g_cplc_spawn_z
           && v12->task_type != TaskType_Camera )
         {
-          cplc_entity_init(v12);
+          CPLC_entity_spawn(v12);
           v12 = g_current_lvl_cplc_layer_x_sorted_left;
           prev_y_sorted = g_current_lvl_cplc_layer_y_sorted_top;
           if ( g_current_lvl_cplc_layer_x_sorted_left == g_current_lvl_cplc_layer_y_sorted_top )
@@ -10637,7 +9284,7 @@ KKND::CplcEntity *cplc_406320()
         }
       }
       while ( !v16 );
-      if ( v15->x >= dword_47745C )
+      if ( v15->x >= g_cplc_spawn_z )
       {
         do
         {
@@ -10647,29 +9294,29 @@ KKND::CplcEntity *cplc_406320()
           v15 = v15->prev_x_sorted;
           g_current_lvl_cplc_layer_x_sorted_right = v20;
         }
-        while ( v20->x >= dword_47745C );
+        while ( v20->x >= g_cplc_spawn_z );
       }
     }
-    v28 = g_cplc_viewport_top_y;
-    result = v38;
-    if ( g_cplc_viewport_top_y >= (int)v38 )
+    v28 = g_cplc_spawn_y;
+    result = (KKND::CplcEntity *)v38;
+    if ( g_cplc_spawn_y >= v38 )
     {
-      if ( g_cplc_viewport_top_y > (int)v38 )
+      if ( g_cplc_spawn_y > v38 )
       {
         v34 = 0;
         do
         {
           v35 = next_y_sorted->y;
-          result = (KKND::CplcEntity *)dword_477460;
-          if ( v35 > dword_477460 )
+          result = (KKND::CplcEntity *)g_cplc_spawn_w;
+          if ( v35 > g_cplc_spawn_w )
             break;
           v36 = next_y_sorted->x;
-          if ( v36 >= g_cplc_viewport_left_x
-            && v36 <= dword_47745C
+          if ( v36 >= g_cplc_spawn_x
+            && v36 <= g_cplc_spawn_z
             && v35 >= v28
             && next_y_sorted->task_type != TaskType_Camera )
           {
-            cplc_entity_init(next_y_sorted);
+            CPLC_entity_spawn(next_y_sorted);
             next_y_sorted = g_current_lvl_cplc_layer_y_sorted_bottom;
             if ( g_current_lvl_cplc_layer_y_sorted_bottom == g_current_lvl_cplc_layer_x_sorted_left )
             {
@@ -10710,7 +9357,7 @@ KKND::CplcEntity *cplc_406320()
           {
             v34 = 1;
           }
-          v28 = g_cplc_viewport_top_y;
+          v28 = g_cplc_spawn_y;
         }
         while ( !v34 );
         if ( prev_y_sorted->y <= v28 )
@@ -10736,12 +9383,12 @@ KKND::CplcEntity *cplc_406320()
         if ( v30 < v28 )
           break;
         v31 = prev_y_sorted->x;
-        if ( v31 >= g_cplc_viewport_left_x
-          && v31 <= dword_47745C
-          && v30 <= dword_477460
+        if ( v31 >= g_cplc_spawn_x
+          && v31 <= g_cplc_spawn_z
+          && v30 <= g_cplc_spawn_w
           && prev_y_sorted->task_type != TaskType_Camera )
         {
-          cplc_entity_init(prev_y_sorted);
+          CPLC_entity_spawn(prev_y_sorted);
           prev_y_sorted = g_current_lvl_cplc_layer_y_sorted_top;
           if ( g_current_lvl_cplc_layer_y_sorted_top == g_current_lvl_cplc_layer_x_sorted_left )
           {
@@ -10784,10 +9431,10 @@ KKND::CplcEntity *cplc_406320()
         }
         if ( v29 )
           break;
-        v28 = g_cplc_viewport_top_y;
+        v28 = g_cplc_spawn_y;
       }
       result = (KKND::CplcEntity *)next_y_sorted->y;
-      if ( (int)result >= dword_477460 )
+      if ( (int)result >= g_cplc_spawn_w )
       {
         do
         {
@@ -10797,7 +9444,7 @@ KKND::CplcEntity *cplc_406320()
           next_y_sorted = next_y_sorted->prev_y_sorted;
           g_current_lvl_cplc_layer_y_sorted_bottom = result;
         }
-        while ( result->y >= dword_477460 );
+        while ( result->y >= g_cplc_spawn_w );
       }
     }
   }
@@ -10829,7 +9476,7 @@ void __fastcall cplc_init(KKND::TaskType type, BOOL create_objects)
   KKND::CplcEntity *v6; // edi
   KKND::CplcEntity *v7; // ebx
 
-  if ( g_current_lvl_cplc_verified )
+  if ( g_cplc_active )
   {
     v3 = g_current_lvl_cplc_layer_x_sorted_base;
     if ( g_current_lvl_cplc_layer_x_sorted_base )
@@ -10844,7 +9491,7 @@ void __fastcall cplc_init(KKND::TaskType type, BOOL create_objects)
         {
           if ( create_objects )
           {
-            cplc_entity_init(v3);
+            CPLC_entity_spawn(v3);
             v7 = g_current_lvl_cplc_layer_x_sorted_left;
             v6 = g_current_lvl_cplc_layer_x_sorted_right;
             v4 = g_current_lvl_cplc_layer_y_sorted_top;
@@ -10899,16 +9546,16 @@ void __fastcall cplc_init_without_objects(KKND::TaskType type)
 //----- (004069B0) --------------------------------------------------------
 void cplc_cleanup()
 {
-  if ( g_current_lvl_cplc_verified )
+  if ( g_cplc_active )
   {
-    if ( g_cplc_entities_in_viewport_pool )
+    if ( g_cplc_viewport_pool )
     {
-      free(g_cplc_entities_in_viewport_pool);
+      free(g_cplc_viewport_pool);
       if ( g_current_lvl_cplc_backup )
         free(g_current_lvl_cplc_backup);
     }
   }
-  g_current_lvl_cplc_verified = 0;
+  g_cplc_active = 0;
 }
 
 //----- (004069F0) --------------------------------------------------------
@@ -10986,7 +9633,7 @@ void __fastcall unit_mobile_derrick_init(KKND::Unit *unit)
       v10 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
     else
       v10 = v9->size != UnitSize_Regular ? 7424 : 4096;
-    v11 = BOXD_40DE80(
+    v11 = BOXD_place_unit_world_coords(
             unit,
             v10 + (unit->entity->x & 0xFFFFE000),
             v8 + (unit->entity->y & 0xFFFFE000),
@@ -11010,7 +9657,7 @@ void __fastcall unit_mobile_derrick_init(KKND::Unit *unit)
     }
     goto LABEL_17;
   }
-  if ( !BOXD_413860(unit) )
+  if ( !BOXD_find_nearby_clear_tile(unit) )
   {
 LABEL_17:
     unit_mode_destroy(unit);
@@ -11101,9 +9748,9 @@ void __fastcall unit_mode_mobile_derrick_406DC0(KKND::Unit *unit)
   KKND::Entity *entity; // edi
   KKND::Entity *v4; // eax
 
-  unit->entity->is_on_collision_grid = 1;
-  v2 = g_oil_patch_list_head;
-  if ( g_oil_patch_list_head == (KKND::OilPatch *)&g_oil_patch_list_head )
+  unit->entity->is_collidable = 1;
+  v2 = g_oil_patch_head;
+  if ( g_oil_patch_head == (KKND::OilPatch *)&g_oil_patch_head )
   {
 LABEL_7:
     v2 = nullptr;
@@ -11121,7 +9768,7 @@ LABEL_7:
         break;
       }
       v2 = v2->next;
-      if ( v2 == (KKND::OilPatch *)&g_oil_patch_list_head )
+      if ( v2 == (KKND::OilPatch *)&g_oil_patch_head )
         goto LABEL_7;
     }
   }
@@ -11130,7 +9777,10 @@ LABEL_7:
   {
     unit->entity->x_speed = 0;
     unit->entity->y_speed = 0;
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_idle,
+      g_angle_to_orientation[unit->orientation]);
     if ( !entity_anim_advance_rotation((ptrdiff_t *)&unit->orientation, MobdOrientation_SW, unit->stats->turning_speed) )
       unit->mode = unit_mode_mobile_derrick_406EB0;
     TASK_yield(unit->task, Task_Yield, 1);
@@ -11174,8 +9824,8 @@ void __fastcall unit_mode_mobile_base_despawn(KKND::Unit *unit)
   task = unit->task;
   unit->destroyed = 1;
   task->flags_24 &= ~0x10000000u;
-  TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
-  TASK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+  TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   BOXD_remove_unit(unit, unit->map_x, unit->map_y, unit->tile_position);
   unit->task->channel = TaskChannel_None;
   entity = unit->entity;
@@ -11195,15 +9845,15 @@ BOOL GAME_oil_patches_init()
   g_oil_patch_pool = v0;
   if ( !v0 )
     return 0;
-  g_oil_patch_free_pool = v0;
+  g_oil_patch_free_head = v0;
   for ( i = 0; i < 255; ++i )
   {
     v0[i].next = &v0[i + 1];
     v0 = g_oil_patch_pool;
   }
   g_oil_patch_pool[255].next = nullptr;
-  g_oil_patch_list_head = (KKND::OilPatch *)&g_oil_patch_list_head;
-  g_oil_patch_list_tail = (KKND::OilPatch *)&g_oil_patch_list_head;
+  g_oil_patch_head = (KKND::OilPatch *)&g_oil_patch_head;
+  g_oil_patch_tail = (KKND::OilPatch *)&g_oil_patch_head;
   return 1;
 }
 
@@ -11219,8 +9869,8 @@ KKND::OilPatch *__fastcall oil_patch_407040_find(int x, int y)
   KKND::OilPatch *result; // eax
   KKND::Entity *entity; // esi
 
-  result = g_oil_patch_list_head;
-  if ( g_oil_patch_list_head == (KKND::OilPatch *)&g_oil_patch_list_head )
+  result = g_oil_patch_head;
+  if ( g_oil_patch_head == (KKND::OilPatch *)&g_oil_patch_head )
     return nullptr;
   while ( 1 )
   {
@@ -11232,7 +9882,7 @@ KKND::OilPatch *__fastcall oil_patch_407040_find(int x, int y)
       break;
     }
     result = result->next;
-    if ( result == (KKND::OilPatch *)&g_oil_patch_list_head )
+    if ( result == (KKND::OilPatch *)&g_oil_patch_head )
       return nullptr;
   }
   return result;
@@ -11250,9 +9900,9 @@ KKND::OilPatch *__fastcall find_nearest_oil_patch_to(int x, int y)
   int v8; // edi
   int v9; // esi
 
-  v2 = g_oil_patch_list_head;
+  v2 = g_oil_patch_head;
   min_distance = 81920;
-  for ( i = nullptr; v2 != (KKND::OilPatch *)&g_oil_patch_list_head; v2 = v2->next )
+  for ( i = nullptr; v2 != (KKND::OilPatch *)&g_oil_patch_head; v2 = v2->next )
   {
     entity = v2->entity;
     v6 = entity->x - x;
@@ -11325,18 +9975,18 @@ void __cdecl __noreturn UNIT_Handler_OilPatch(KKND::Task *task)
   KKND::TerrainTileFlags2 *p_flags2; // eax
 
   entity = task->entity;
-  entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_terrain_detail;
-  entity_anim_load(entity, 0);
+  entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_scar;
+  entity_anim_init(entity, 0);
   cplc_meta = entity->cplc_meta;
   v3 = entity->y & 0xFFFFE000;
   entity->x = (entity->x & 0xFFFFE000) + 4096;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   entity->y = v3 + 4096;
   if ( cplc_meta )
   {
-    patch = g_oil_patch_free_pool;
-    if ( g_oil_patch_free_pool )
-      g_oil_patch_free_pool = g_oil_patch_free_pool->next;
+    patch = g_oil_patch_free_head;
+    if ( g_oil_patch_free_head )
+      g_oil_patch_free_head = g_oil_patch_free_head->next;
     else
       patch = nullptr;
     patch->entity = entity;
@@ -11344,17 +9994,17 @@ void __cdecl __noreturn UNIT_Handler_OilPatch(KKND::Task *task)
     patch->drillrig = nullptr;
     patch->drillrig_unit_id = 0;
     patch->amount = 500 * spawn_param;
-    patch->next = g_oil_patch_list_head;
-    patch->prev = (KKND::OilPatch *)&g_oil_patch_list_head;
-    g_oil_patch_list_head->prev = patch;
-    g_oil_patch_list_head = patch;
+    patch->next = g_oil_patch_head;
+    patch->prev = (KKND::OilPatch *)&g_oil_patch_head;
+    g_oil_patch_head->prev = patch;
+    g_oil_patch_head = patch;
   }
   else
   {
     patch = (KKND::OilPatch *)task->ctx;
   }
   y = entity->y;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   p_flags2 = &g_terrain[(entity->x >> 13) + g_map_num_tiles_x * (y >> 13)].flags2;
   *p_flags2 |= TerrainTileFlags2_OilPatch;
   TASK_yield(task, Task_1, 0);
@@ -11366,8 +10016,8 @@ void __cdecl __noreturn UNIT_Handler_OilPatch(KKND::Task *task)
   }
   patch->next->prev = patch->prev;
   patch->prev->next = patch->next;
-  patch->next = g_oil_patch_free_pool;
-  g_oil_patch_free_pool = patch;
+  patch->next = g_oil_patch_free_head;
+  g_oil_patch_free_head = patch;
   entity_remove(entity);
 }
 // 4793F8: using guessed type int g_map_num_tiles_x;
@@ -11404,10 +10054,10 @@ void __fastcall unit_mode_prison_407300(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  unit->entity->is_on_collision_grid = 1;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->x = ((unit->mobd_anchors.grid->x + unit->entity->x) & 0xFFFFE000) - unit->mobd_anchors.grid->x + 4096;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->y = ((unit->mobd_anchors.grid->y + unit->entity->y) & 0xFFFFE000) - unit->mobd_anchors.grid->y + 4096;
   unit_build_40DD00(unit);
   task = unit->task;
@@ -11420,7 +10070,10 @@ void __fastcall unit_mode_prison_407390(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   task = unit->task;
   unit->mode = unit_mode_prison_407300;
   TASK_yield(task, Task_Sleep, 1);
@@ -11437,7 +10090,7 @@ void __cdecl UNIT_Handler_Prison(KKND::Task *task)
     unit = unit_create(task);
     unit->task->message_handler = MessageHandler_Prison;
     unit_building_init(unit, 5, nullptr, nullptr);
-    entity_anim_load(task->entity, 0);
+    entity_anim_init(task->entity, 0);
     unit->mode = unit_mode_prison_407390;
   }
   ((void (__thiscall *)(KKND::Unit *))unit->mode)(unit);
@@ -11453,7 +10106,7 @@ void __fastcall unit_mode_prison_release_prisoners(KKND::Unit *unit)
 
   if ( unit->cplc_spawn_param )
   {
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     entity = unit->entity;
     x = entity->x;
     y = entity->y;
@@ -11492,7 +10145,7 @@ void __fastcall unit_mode_prison_release_general(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   entity_create_by_unit_type(UnitType_Surv_General, unit->entity->x, unit->entity->y, g_player_num);
   task = unit->task;
   unit->mode = unit_mode_building_finalize;
@@ -11500,7 +10153,7 @@ void __fastcall unit_mode_prison_release_general(KKND::Unit *unit)
 }
 
 //----- (00407530) --------------------------------------------------------
-void __fastcall unit_mode_prison_on_death_surv_09(KKND::Unit *unit)
+void __fastcall unit_mode_detention_center_on_death_surv_09(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
@@ -11546,14 +10199,17 @@ void __fastcall MessageHandler_TechBunker(
 //----- (004075F0) --------------------------------------------------------
 void __fastcall unit_mode_tech_bunker_4075F0(KKND::Unit *unit)
 {
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_move,
+    g_angle_to_orientation[unit->orientation]);
   TASK_yield(unit->task, Task_Sleep, 1);
 }
 
 //----- (00407630) --------------------------------------------------------
 void __fastcall unit_mode_tech_bunker_407630(KKND::Unit *unit)
 {
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   entity_create_by_unit_type(
     UnitType_Surv_ElPresidente,
     unit->mobd_anchors.rally->x + unit->entity->x,
@@ -11575,7 +10231,10 @@ void __fastcall unit_mode_tech_bunker_407690(KKND::Unit *unit)
   multi_purpose_field_1 = unit->multi_purpose_field_1;
   if ( !g_is_single_player || g_is_demo_build )
     unit->cplc_spawn_param = 9;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_move,
+    g_angle_to_orientation[unit->orientation]);
   if ( unit->cplc_spawn_param == 9 )
   {
     v3 = kknd_rand_1("C:\\k\\Scripts\\Detenshn.cpp", 275) % 6;
@@ -11589,7 +10248,7 @@ void __fastcall unit_mode_tech_bunker_407690(KKND::Unit *unit)
   cplc_spawn_param = unit->cplc_spawn_param;
   if ( cplc_spawn_param < 4 )
   {
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     entity_create_by_unit_type(
       g_bunker_hightech_unit_choice[unit->cplc_spawn_param],
       unit->entity->x + unit->mobd_anchors.rally->x,
@@ -11603,7 +10262,7 @@ void __fastcall unit_mode_tech_bunker_407690(KKND::Unit *unit)
     {
       if ( g_player_num == 1 )
       {
-        unit->entity->is_on_collision_grid = 1;
+        unit->entity->is_collidable = 1;
 LABEL_16:
         entity_create_by_unit_type(
           UnitType_Surv_Tanker,
@@ -11615,10 +10274,10 @@ LABEL_16:
     }
     else if ( !byte_47A766[28 * unit->player_num] )
     {
-      unit->entity->is_on_collision_grid = 1;
+      unit->entity->is_collidable = 1;
       goto LABEL_16;
     }
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     entity_create_by_unit_type(
       UnitType_Mute_Tanker,
       unit->entity->x + unit->mobd_anchors.rally->x,
@@ -11659,7 +10318,10 @@ LABEL_23:
 //----- (00407870) --------------------------------------------------------
 void __fastcall unit_mode_tech_bunker_407870(KKND::Unit *unit)
 {
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_attack,
+    g_angle_to_orientation[unit->orientation]);
   TASK_yield(unit->task, Task_Yield_10000000, 0);
   unit->mode = unit_mode_tech_bunker_407690;
 }
@@ -11679,7 +10341,7 @@ KKND::Unit *__fastcall unit_find_any_in_radius(KKND::Unit *unit, int max_distanc
   int v11; // edi
   int y; // [esp+10h] [ebp-4h]
 
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   entity = unit->entity;
   result = g_unit_list_head;
   x = entity->x;
@@ -11690,10 +10352,10 @@ KKND::Unit *__fastcall unit_find_any_in_radius(KKND::Unit *unit, int max_distanc
   {
     if ( !result->destroyed && result->player_num )
     {
-      result->entity->is_on_collision_grid = 1;
+      result->entity->is_collidable = 1;
       v5 = result->entity;
       v6 = v5->x;
-      v5->is_on_collision_grid = 1;
+      v5->is_collidable = 1;
       v7 = v6 - x <= 0;
       v8 = result->entity;
       v9 = v7 ? x - v8->x : v8->x - x;
@@ -11719,7 +10381,10 @@ void __fastcall unit_mode_tech_bunker_407950(KKND::Unit *unit)
   int v4; // eax
   KKND::Turret *turret; // eax
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   multi_purpose_field_3 = unit->multi_purpose_field_3;
   if ( multi_purpose_field_3 > 0 )
   {
@@ -11738,7 +10403,7 @@ void __fastcall unit_mode_tech_bunker_407950(KKND::Unit *unit)
     if ( u )
     {
       unit->multi_purpose_field_1 = u->player_num;
-      entity_408800_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
+      entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
       unit->mode = unit_mode_tech_bunker_407870;
     }
   }
@@ -11753,7 +10418,10 @@ void __fastcall unit_mode_tech_bunker_4079F0_surv18(KKND::Unit *unit)
   int v4; // eax
   KKND::Turret *turret; // eax
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   multi_purpose_field_3 = unit->multi_purpose_field_3;
   if ( multi_purpose_field_3 > 0 )
   {
@@ -11773,7 +10441,7 @@ void __fastcall unit_mode_tech_bunker_4079F0_surv18(KKND::Unit *unit)
     {
       unit->cplc_spawn_param = 10;
       unit->multi_purpose_field_1 = any_in_radius->player_num;
-      entity_408800_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
+      entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
       unit->mode = unit_mode_tech_bunker_407870;
     }
   }
@@ -11783,10 +10451,10 @@ void __fastcall unit_mode_tech_bunker_4079F0_surv18(KKND::Unit *unit)
 //----- (00407A90) --------------------------------------------------------
 void __fastcall unit_mode_tech_bunker_407A90(KKND::Unit *unit)
 {
-  unit->entity->is_on_collision_grid = 1;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->x = ((unit->mobd_anchors.grid->x + unit->entity->x) & 0xFFFFE000) - unit->mobd_anchors.grid->x + 4096;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->y = ((unit->mobd_anchors.grid->y + unit->entity->y) & 0xFFFFE000) - unit->mobd_anchors.grid->y + 4096;
   unit_build_40DD00(unit);
   if ( g_current_lvl_id == LevelId_Surv_18 )
@@ -11805,7 +10473,10 @@ void __fastcall unit_mode_tech_bunker_407B70(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   task = unit->task;
   unit->mode = unit_mode_tech_bunker_407A90;
   TASK_yield(task, Task_Sleep, 1);
@@ -11864,9 +10535,9 @@ void __fastcall unit_mode_tech_bunker_on_death(KKND::Unit *unit)
   task->flags_24 &= ~0x10000000u;
   turret = unit->turret;
   if ( turret )
-    TASK_send_message(nullptr, TaskMessage_DestroyAttachment, nullptr, turret->task);
-  TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
-  TASK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+    TSK_send_message(nullptr, TaskMessage_DestroyAttachment, nullptr, turret->task);
+  TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   unit->task->channel = TaskChannel_None;
   entity = unit->entity;
   unit->unit_id = 0;
@@ -11891,10 +10562,13 @@ void __fastcall unit_mode_hut_on_death(KKND::Unit *unit)
 {
   KKND::Task *task; // ecx
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_4, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_4,
+    g_angle_to_orientation[unit->orientation]);
   task = unit->task;
   unit->mode = unit_mode_hut_finalize;
-  TASK_send_message(task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_send_message(task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
   unit->destroyed = 1;
   unit_explode_1(unit);
   unit_438D90(unit);
@@ -11904,7 +10578,10 @@ void __fastcall unit_mode_hut_on_death(KKND::Unit *unit)
 //----- (00407DA0) --------------------------------------------------------
 void __fastcall unit_mode_hut_407DA0(KKND::Unit *unit)
 {
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   TASK_yield(unit->task, Task_Yield, 1);
 }
 
@@ -11946,10 +10623,10 @@ void __fastcall unit_mode_hut_407E70(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  unit->entity->is_on_collision_grid = 1;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->x = ((unit->mobd_anchors.grid->x + unit->entity->x) & 0xFFFFE000) - unit->mobd_anchors.grid->x + 4096;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   unit->entity->y = ((unit->mobd_anchors.grid->y + unit->entity->y) & 0xFFFFE000) - unit->mobd_anchors.grid->y + 4096;
   unit_build_40DD00(unit);
   task = unit->task;
@@ -11962,7 +10639,10 @@ void __fastcall unit_mode_hut_init(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   task = unit->task;
   unit->mode = unit_mode_hut_407E70;
   TASK_yield(task, Task_Sleep, 1);
@@ -12062,7 +10742,7 @@ void __cdecl UNIT_Handler_Drillrig(KKND::Task *task)
       unit_reveal_fog_of_war(unit);
       unit->task->channel = TaskChannel_Drillrig;
       unit_building_init(unit, 2, nullptr, nullptr);
-      unit->entity->is_on_collision_grid = 1;
+      unit->entity->is_collidable = 1;
       patch = find_nearest_oil_patch_to(unit->entity->x, unit->entity->y);
       if ( patch )
       {
@@ -12070,7 +10750,7 @@ void __cdecl UNIT_Handler_Drillrig(KKND::Task *task)
         unit->entity->y = (patch->entity->y & 0xFFFFE000) + 4096;
       }
       unit->_u1.oil_patch = patch;
-      unit->entity->is_on_collision_grid = 1;
+      unit->entity->is_collidable = 1;
       *(_DWORD *)unit->state = oil_patch_407040_find(unit->entity->x, unit->entity->y);
       if ( unit->entity->cplc_spawn_params )
         unit->mode = unit_mode_408240_drillrig;
@@ -12103,7 +10783,10 @@ void __fastcall unit_mode_4081C0_drillrig(KKND::Unit *unit)
   if ( turret )
   {
     turret->entity->rend->flags |= 0x40000000u;
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_attack,
+      g_angle_to_orientation[unit->orientation]);
     task = unit->task;
     unit->mode = unit_mode_408260_drillrig;
     TASK_yield(task, Task_Yield_10000000, 0);
@@ -12132,7 +10815,7 @@ void __fastcall unit_mode_408260_drillrig(KKND::Unit *unit)
 
   if ( !unit->_u1.oil_patch )
   {
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     nearest_oil_patch_to = find_nearest_oil_patch_to(unit->entity->x, unit->entity->y);
     if ( nearest_oil_patch_to )
     {
@@ -12152,7 +10835,7 @@ void __fastcall unit_mode_408260_drillrig(KKND::Unit *unit)
     unit->mode = unit_mode_403650;
     unit_build_40DD00(unit);
   }
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   *(_DWORD *)unit->state = oil_patch_407040_find(unit->entity->x, unit->entity->y);
   *(_DWORD *)(*(_DWORD *)unit->state + 16) = unit;
   *(_DWORD *)(*(_DWORD *)unit->state + 20) = unit->unit_id;
@@ -12164,7 +10847,7 @@ void __fastcall unit_mode_drillrig_on_death(KKND::Unit *unit)
 {
   KKND::Task *task; // eax
 
-  TASK_broadcast_message(unit->task, TaskMessage_DrillrigDown, nullptr, TaskChannel_Tanker);
+  TSK_broadcast_message(unit->task, TaskMessage_DrillrigDown, nullptr, TaskChannel_Tanker);
   task = unit->task;
   unit->destroyed = 1;
   unit->mode = unit_mode_building_on_death;
@@ -12215,7 +10898,7 @@ int sub_408400()
 //----- (00408410) --------------------------------------------------------
 void palette_408410_dim()
 {
-  infantr *v0; // eax
+  KKND::Palette *v0; // eax
   int i; // ecx
   int j; // ecx
   unsigned __int8 r; // dl
@@ -12225,22 +10908,22 @@ void palette_408410_dim()
   for ( i = 0; i < 960; ++i )
   {
     *(&g_477490[0].r + i) = v0->entries[0].r >> 1;
-    v0 = (infantr *)((char *)v0 + 1);
+    v0 = (KKND::Palette *)((char *)v0 + 1);
   }
   for ( j = 960; j < 1024; ++j )
   {
     r = v0->entries[0].r;
-    v0 = (infantr *)((char *)v0 + 1);
+    v0 = (KKND::Palette *)((char *)v0 + 1);
     *(&g_477490[0].r + j) = r;
   }
-  palette_40E400(g_477490);
+  PAL_apply(g_477490);
 }
 // 4778A8: using guessed type int dword_4778A8;
 
 //----- (00408460) --------------------------------------------------------
 void palette_408460()
 {
-  palette_40E400(g_pal_4778A4);
+  PAL_apply(g_pal_4778A4);
   dword_4778A8 = 0;
 }
 // 4778A8: using guessed type int dword_4778A8;
@@ -12374,7 +11057,7 @@ void sub_408550()
     while ( (int)v14 < (int)&g_next_entity_id );
   }
   qmemcpy(g_pal_4778A4, g_477490, 0x400u);
-  palette_40E400(g_477490);
+  PAL_apply(g_477490);
 }
 // 47C654: using guessed type char byte_47C654;
 // 47DCC4: using guessed type int g_next_entity_id;
@@ -12414,7 +11097,7 @@ void __fastcall FADE_Start(KKND::RenderViewport *ctx, int start, int end, int le
 // 4778C4: using guessed type int g_fade_timer;
 
 //----- (00408800) --------------------------------------------------------
-void __fastcall entity_408800_play_sound(KKND::Entity *entity, KKND::SoundId sound_id, int volume, int unused)
+void __fastcall entity_play_sound(KKND::Entity *entity, KKND::SoundId sound_id, int volume, int unused)
 {
   KKND::RenderNode *rend; // eax
   KKND::RenderViewport *ctx; // ebx
@@ -12435,7 +11118,7 @@ void __fastcall entity_408800_play_sound(KKND::Entity *entity, KKND::SoundId sou
   if ( v7 < 256 )
     v7 = 256;
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v9 = x - g_mapd_camera.x - v7;
   if ( v9 <= v7 )
   {
@@ -12538,8 +11221,8 @@ void __fastcall MessageHandler_AiController_General(
   KKND::CplcSpawnParams *cplc_spawn_params; // edi
   int cplc_sawpn_params_field_14; // ecx
   int v16; // ecx
-  KKND::Ai_stru26C_Node *p_ai_controller_26C_head; // eax
-  KKND::Ai_stru26C_Node *ai_controller_26C_free; // edx
+  KKND::AiBuildOrderNode *p_ai_controller_26C_head; // eax
+  KKND::AiBuildOrderNode *ai_controller_26C_free; // edx
   int v19; // ecx
   int spawn_param; // eax
   _DWORD *v21; // eax
@@ -12559,7 +11242,7 @@ void __fastcall MessageHandler_AiController_General(
   int v35; // ecx
   int v36; // eax
   int v37; // eax
-  KKND::Ai_stru160_Node *ai_controller_160_free; // eax
+  KKND::AiSquadNode *ai_controller_160_free; // eax
   KKND::UnitType v39; // eax
   KKND::AiTankerNode *tanker_free; // eax
   KKND::AiDrillrigNode *drillrig_free; // eax
@@ -12576,7 +11259,7 @@ void __fastcall MessageHandler_AiController_General(
   KKND::AiBuildNode *v52; // ebx
   KKND::AiTankerNode *v53; // edi
   KKND::AiDrillrigNode *v54; // eax
-  KKND::Ai_stru160_Node *ai_drillrig_node_24; // edx
+  KKND::AiSquadNode *ai_drillrig_node_24; // edx
   KKND::AiDrillrigNode *ai_controller_2E8; // ecx
   KKND::AiTankerNode *p_tanker_next; // edx
   KKND::AiTankerNode *tanker_next; // eax
@@ -12589,7 +11272,7 @@ void __fastcall MessageHandler_AiController_General(
   KKND::UnitStats *stats; // ecx
   KKND::AiWandererNode *v66; // edi
   KKND::AiAttackerNode *v67; // eax
-  KKND::Ai_stru160_Node *ai_attacker_node_8; // ecx
+  KKND::AiSquadNode *ai_attacker_node_8; // ecx
   KKND::AiController *j; // ecx
   KKND::AiBuildNode *messagea; // [esp+14h] [ebp+4h]
 
@@ -12633,7 +11316,7 @@ void __fastcall MessageHandler_AiController_General(
               if ( ai_drillrig_node_24 )
               {
                 ai_drillrig_node_24->next = ai->_ai_controller_11C_head;
-                v54->_ai_drillrig_node_24->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+                v54->_ai_drillrig_node_24->prev = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
                 ai->_ai_controller_11C_head->prev = v54->_ai_drillrig_node_24;
                 ai->_ai_controller_11C_head = v54->_ai_drillrig_node_24;
               }
@@ -12675,7 +11358,7 @@ void __fastcall MessageHandler_AiController_General(
                 else
                   ai_controller_314->unit_type = UnitType_Surv_MobileDerrick;
                 p_ai_controller_318_head = &ai->_ai_controller_318_head;
-                payload->entity->is_on_collision_grid = 1;
+                payload->entity->is_collidable = 1;
                 ai_controller_314->_ai_stru310_node_10_unit_x = payload->entity->x;
                 y = payload->entity->y;
                 ai_controller_314->_ai_stru310_node_20_unit_ai_strategic_value = 0;
@@ -12767,7 +11450,7 @@ void __fastcall MessageHandler_AiController_General(
                     v67->_ai_attacker_node_8->_ai_stru160_node_2C_ai_threat_weight_total -= v67->unit->stats->ai_threat_weight;
                     ai_attacker_node_8 = v67->_ai_attacker_node_8;
                     if ( ai_attacker_node_8 != ai->_ai_controller_24C
-                      && (KKND::AiAttackerNode **)ai_attacker_node_8->_ai_stru160_node_C == &ai_attacker_node_8->_ai_stru160_node_C )
+                      && (KKND::AiAttackerNode **)ai_attacker_node_8->attacker_list_head == &ai_attacker_node_8->attacker_list_head )
                     {
                       for ( j = (KKND::AiController *)ai->_ai_controller_1B4_head;
                             j != (KKND::AiController *)&ai->_ai_controller_1B4_head;
@@ -12789,7 +11472,7 @@ void __fastcall MessageHandler_AiController_General(
                   }
                   v67->next = ai->_ai_controller_58_free;
                   ai->_ai_controller_58_free = v67;
-                  --ai->_ai_controller_2AC;
+                  --ai->attacker_count;
                 }
               }
               else
@@ -13006,7 +11689,7 @@ LABEL_82:
                   v16 = cplc_sawpn_params_field_14 + 32;
                   if ( v16 )
                   {
-                    p_ai_controller_26C_head = (KKND::Ai_stru26C_Node *)&ai->_ai_controller_26C_head;
+                    p_ai_controller_26C_head = (KKND::AiBuildOrderNode *)&ai->_ai_controller_26C_head;
                     do
                     {
                       ai_controller_26C_free = ai->_ai_controller_26C_free;
@@ -13038,59 +11721,59 @@ LABEL_82:
                 spawn_param = cplc_spawn_params->spawn_param;
                 if ( spawn_param )
                 {
-                  ai->_ai_controller_278_x = *(_DWORD *)(spawn_param + 4);
-                  ai->_ai_controller_27C_y = *(_DWORD *)(cplc_spawn_params->spawn_param + 8);
+                  ai->rally_x = *(_DWORD *)(spawn_param + 4);
+                  ai->rally_y = *(_DWORD *)(cplc_spawn_params->spawn_param + 8);
                   v21 = (_DWORD *)(cplc_spawn_params->spawn_param + 32);
                   v22 = *(_DWORD *)(cplc_spawn_params->spawn_param + 52);
                   if ( v22 )
                     v23 = *(_DWORD *)(v22 + 4);
                   else
                     v23 = -1;
-                  ai->_ai_controller_280[0][0] = v23;
+                  ai->patrol_waypoints[0][0] = v23;
                   v24 = v21[5];
                   if ( v24 )
                     v25 = *(_DWORD *)(v24 + 8);
                   else
                     v25 = -1;
-                  ai->_ai_controller_280[0][1] = v25;
+                  ai->patrol_waypoints[0][1] = v25;
                   v26 = v21[6];
                   if ( v26 )
                     v27 = *(_DWORD *)(v26 + 4);
                   else
                     v27 = -1;
-                  ai->_ai_controller_280[0][2] = v27;
+                  ai->patrol_waypoints[0][2] = v27;
                   v28 = v21[6];
                   if ( v28 )
                     v29 = *(_DWORD *)(v28 + 8);
                   else
                     v29 = -1;
-                  ai->_ai_controller_280[0][3] = v29;
+                  ai->patrol_waypoints[0][3] = v29;
                   v30 = v21[7];
                   if ( v30 )
                     v31 = *(_DWORD *)(v30 + 4);
                   else
                     v31 = -1;
-                  ai->_ai_controller_280[1][0] = v31;
+                  ai->patrol_waypoints[1][0] = v31;
                   v32 = v21[7];
                   if ( v32 )
                     v33 = *(_DWORD *)(v32 + 8);
                   else
                     v33 = -1;
-                  ai->_ai_controller_280[1][1] = v33;
+                  ai->patrol_waypoints[1][1] = v33;
                   v34 = v21[8];
                   if ( v34 )
                     v35 = *(_DWORD *)(v34 + 4);
                   else
                     v35 = -1;
-                  ai->_ai_controller_280[1][2] = v35;
+                  ai->patrol_waypoints[1][2] = v35;
                   v36 = v21[8];
                   if ( v36 )
                     v37 = *(_DWORD *)(v36 + 8);
                   else
                     v37 = -1;
-                  ai->_ai_controller_280[1][3] = v37;
+                  ai->patrol_waypoints[1][3] = v37;
                 }
-                if ( !ai->_ai_controller_24C && ai->_ai_controller_278_x != -1 )
+                if ( !ai->_ai_controller_24C && ai->rally_x != -1 )
                 {
                   ai_controller_160_free = ai->_ai_controller_160_free;
                   if ( ai_controller_160_free )
@@ -13102,12 +11785,12 @@ LABEL_82:
                   {
                     ai->_ai_controller_24C = nullptr;
                   }
-                  ai->_ai_controller_24C->_ai_stru160_node_C = (KKND::AiAttackerNode *)&ai->_ai_controller_24C->_ai_stru160_node_C;
-                  ai->_ai_controller_24C->_ai_stru160_node_10 = &ai->_ai_controller_24C->_ai_stru160_node_C;
+                  ai->_ai_controller_24C->attacker_list_head = (KKND::AiAttackerNode *)&ai->_ai_controller_24C->attacker_list_head;
+                  ai->_ai_controller_24C->attacker_list_tail = &ai->_ai_controller_24C->attacker_list_head;
                   ai->_ai_controller_24C->_ai_stru160_node_1C = 0;
-                  ai->_ai_controller_24C->_ai_stru160_node_8 = nullptr;
-                  ai->_ai_controller_24C->_ai_stru160_node_34_x = ai->_ai_controller_278_x;
-                  ai->_ai_controller_24C->_ai_stru160_node_38_y = ai->_ai_controller_27C_y;
+                  ai->_ai_controller_24C->merge_target_squad = nullptr;
+                  ai->_ai_controller_24C->_ai_stru160_node_34_x = ai->rally_x;
+                  ai->_ai_controller_24C->_ai_stru160_node_38_y = ai->rally_y;
                   ai->_ai_controller_24C->_ai_stru160_node_24 = nullptr;
                   ai->_ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total = 0;
                   ai->_ai_controller_24C->_ai_stru160_node_30_threat_in_area = 0;
@@ -13184,7 +11867,7 @@ LABEL_82:
                 ai_controller_58_free->prev = (KKND::AiAttackerNode *)&ai->_ai_controller_58_head;
                 ai->_ai_controller_58_head->prev = ai_controller_58_free;
                 ai->_ai_controller_58_head = ai_controller_58_free;
-                ++ai->_ai_controller_2AC;
+                ++ai->attacker_count;
               }
               else
               {
@@ -13207,17 +11890,17 @@ void __fastcall ai_update_base_area(KKND::AiController *ai, KKND::Entity *entity
   int v5; // edx
 
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   if ( x < ai->base_area_min_x )
   {
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     ai->base_area_min_x = x;
   }
   v3 = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   if ( v3 > ai->base_area_max_x )
   {
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     ai->base_area_max_x = v3;
   }
   y = entity->y;
@@ -13246,7 +11929,7 @@ KKND::AiMobileDerrickNode *__fastcall ai_4095B0(KKND::AiController *ai, KKND::Un
   if ( result )
   {
     result->unit_type = unit->type;
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     result->_ai_stru310_node_10_unit_x = unit->entity->x;
     result->_ai_stru310_node_14_unit_y = unit->entity->y;
     result->_ai_stru310_node_18_unit_grid_anchor_x = unit->mobd_anchors.grid->x;
@@ -13311,8 +11994,8 @@ KKND::AiDrillrigNode *__thiscall ai_409650(KKND::AiController *ai)
           unit = v4->unit;
           if ( !unit->destroyed )
           {
-            unit->entity->is_on_collision_grid = 1;
-            ai_controller_9C->unit->entity->is_on_collision_grid = 1;
+            unit->entity->is_collidable = 1;
+            ai_controller_9C->unit->entity->is_collidable = 1;
             entity = v4->unit->entity;
             v9 = ai_controller_9C->unit->entity;
             v10 = entity->x - v9->x;
@@ -13373,12 +12056,12 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
   KKND::AiDrillrigNode *ai_controller_2E8; // eax
   KKND::AiTankerNode *tanker_head; // edi
   KKND::AiDrillrigNode *drillrig_head; // edi
-  KKND::Ai_stru160_Node *ai_drillrig_node_24; // ecx
+  KKND::AiSquadNode *ai_drillrig_node_24; // ecx
   KKND::AiAttackerNode *ai_stru160_node_C; // eax
-  KKND::Ai_stru160_Node *i; // eax
+  KKND::AiSquadNode *i; // eax
   int v9; // eax
   int threat_in_area; // eax
-  KKND::Ai_stru160_Node *v11; // edx
+  KKND::AiSquadNode *v11; // edx
   KKND::AiDrillrigNode *v12; // eax
   KKND::_ai_stru57 *v13; // ebp
   KKND::AiBuildNode *j; // edi
@@ -13396,7 +12079,7 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
   int v26; // eax
   KKND::AiBuildNode *build_head; // ecx
   int v28; // eax
-  KKND::Ai_stru26C_Node *ai_controller_274; // eax
+  KKND::AiBuildOrderNode *ai_controller_274; // eax
   int ai_stru26C_node_8; // ecx
   KKND::TaskType creature_id; // eax
   KKND::UnitType v32; // eax
@@ -13407,8 +12090,8 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
   int v37; // eax
   void *v38; // edx
   KKND::Unit *v39; // edx
-  KKND::Ai_stru26C_Node *next; // eax
-  KKND::Ai_stru26C_Node *v41; // edx
+  KKND::AiBuildOrderNode *next; // eax
+  KKND::AiBuildOrderNode *v41; // edx
   bool v42; // zf
   int player_num; // ecx
   KKND::AiAirstrikeConfig *v44; // edi
@@ -13433,37 +12116,37 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
   KKND::Unit *v63; // eax
   int ai_stru310_node_10_unit_x; // ecx
   int ai_stru310_node_14_unit_y; // edx
-  KKND::Ai_stru160_Node *ai_controller_11C_head; // edi
+  KKND::AiSquadNode *ai_controller_11C_head; // edi
   int v67; // ebp
   KKND::AiAttackerNode *v68; // ecx
   KKND::AiController *ai_controller_1B4_head; // eax
-  KKND::Ai_stru160_Node *m; // edx
+  KKND::AiSquadNode *m; // edx
   KKND::Entity *entity; // ebx
   int v72; // eax
   int v73; // edx
   int v74; // eax
   int v75; // eax
-  KKND::Ai_stru160_Node *n; // edi
+  KKND::AiSquadNode *n; // edi
   KKND::AiAttackerNode *v77; // ecx
   int v78; // ebp
   KKND::AiController *v79; // eax
-  KKND::Ai_stru160_Node *ii; // edx
+  KKND::AiSquadNode *ii; // edx
   KKND::Entity *v81; // ebx
   int v82; // eax
   int v83; // edx
   int v84; // eax
   int v85; // eax
-  KKND::Ai_stru160_Node *v86; // edi
-  KKND::Ai_stru160_Node **p_ai_controller_1B4_head; // edx
+  KKND::AiSquadNode *v86; // edi
+  KKND::AiSquadNode **p_ai_controller_1B4_head; // edx
   int jj; // ebx
   KKND::AiAttackerNode **p_ai_stru160_node_C; // ecx
-  KKND::Ai_stru160_Node *v90; // eax
-  KKND::Ai_stru160_Node *kk; // ecx
+  KKND::AiSquadNode *v90; // eax
+  KKND::AiSquadNode *kk; // ecx
   KKND::AiAttackerNode *v92; // eax
   int v93; // ecx
   int v94; // eax
   int v95; // eax
-  KKND::Ai_stru160_Node *ai_controller_24C; // edi
+  KKND::AiSquadNode *ai_controller_24C; // edi
   KKND::AiAttackerNode *v97; // eax
   int v98; // ecx
   int v99; // ebx
@@ -13472,7 +12155,7 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
   int ai_controller_2C0_threat_in_area; // eax
   int ai_controller_2C4_2C8_idx; // ecx
   KKND::AiAttackerNode *ai_controller_58_head; // eax
-  KKND::Ai_stru160_Node *v105; // edx
+  KKND::AiSquadNode *v105; // edx
   int v106; // ecx
   int ai_controller_27C_y; // edx
   KKND::AiAttackerNode *v108; // edi
@@ -13481,45 +12164,45 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
   int v111; // ecx
   int v112; // edx
   KKND::AiAttackerNode *v113; // ecx
-  KKND::Ai_stru160_Node *v114; // edx
+  KKND::AiSquadNode *v114; // edx
   int v115; // ebx
   KKND::AiController *v116; // eax
   KKND::AiController *v117; // edx
-  KKND::Ai_stru160_Node *v118; // ecx
-  KKND::Ai_stru160_Node *v119; // edx
-  KKND::Ai_stru160_Node *v120; // eax
+  KKND::AiSquadNode *v118; // ecx
+  KKND::AiSquadNode *v119; // edx
+  KKND::AiSquadNode *v120; // eax
   KKND::AiAttackerNode *v121; // edi
   KKND::AiAttackerNode **v122; // ebx
-  KKND::Ai_stru160_Node *v123; // edx
-  KKND::Ai_stru160_Node *p_ai_controller_168_head; // eax
+  KKND::AiSquadNode *v123; // edx
+  KKND::AiSquadNode *p_ai_controller_168_head; // eax
   int v125; // eax
-  KKND::Ai_stru160_Node *ai_controller_160_free; // eax
-  KKND::Ai_stru160_Node *v127; // eax
-  KKND::Ai_stru160_Node *mm; // edi
-  KKND::Ai_stru160_Node *ai_stru160_node_8; // ecx
+  KKND::AiSquadNode *ai_controller_160_free; // eax
+  KKND::AiSquadNode *v127; // eax
+  KKND::AiSquadNode *mm; // edi
+  KKND::AiSquadNode *ai_stru160_node_8; // ecx
   int v130; // eax
   int v131; // ecx
   KKND::AiAttackerNode *v132; // eax
-  KKND::Ai_stru160_Node *prev; // ebx
+  KKND::AiSquadNode *prev; // ebx
   KKND::AiAttackerNode **v134; // ecx
   KKND::AiController *nn; // eax
-  KKND::Ai_stru160_Node *v136; // eax
+  KKND::AiSquadNode *v136; // eax
   KKND::AiAttackerNode *v137; // ebx
   int ai_stru160_node_38_y; // ecx
   int ai_stru160_node_34_x; // eax
-  KKND::Ai_stru160_Node *v140; // ecx
-  KKND::Ai_stru160_Node *i1; // eax
+  KKND::AiSquadNode *v140; // ecx
+  KKND::AiSquadNode *i1; // eax
   int ai_stru160_node_40; // ebx
   int v143; // ecx
   int v144; // edx
-  KKND::Ai_stru160_Node *v145; // edx
-  KKND::Ai_stru160_Node *i2; // edi
+  KKND::AiSquadNode *v145; // edx
+  KKND::AiSquadNode *i2; // edi
   int v147; // ecx
   int v148; // ebx
   int ai_stru160_node_2C_ai_threat_weight_total; // eax
   int ai_stru160_node_30_threat_in_area; // ecx
   int v151; // ecx
-  KKND::Ai_stru160_Node *v152; // eax
+  KKND::AiSquadNode *v152; // eax
   KKND::AiAttackerNode *v153; // ebx
   int v154; // ecx
   int v155; // eax
@@ -13533,7 +12216,7 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
   int v163; // [esp+10h] [ebp-24h]
   KKND::AiController *v164; // [esp+10h] [ebp-24h]
   int out_y; // [esp+14h] [ebp-20h] BYREF
-  KKND::Ai_stru160_Node *v166; // [esp+18h] [ebp-1Ch] BYREF
+  KKND::AiSquadNode *v166; // [esp+18h] [ebp-1Ch] BYREF
   int param; // [esp+1Ch] [ebp-18h] BYREF
   int ai_controller_278_x; // [esp+20h] [ebp-14h]
   int i3; // [esp+24h] [ebp-10h]
@@ -13561,12 +12244,12 @@ void __cdecl __noreturn ai_task_409770(KKND::Task *task)
       ai->_ai_controller_2E8->tanker_next = tanker_head;
       tanker_head->drillrig = ai->_ai_controller_2E8;
       ++ai->_ai_controller_2E8->_ai_drillrig_node_30;
-      TASK_send_message(
+      TSK_send_message(
         nullptr,
         TaskMessage_TankerAssignedNewDrillrig,
         ai->_ai_controller_2E8->unit,
         tanker_head->unit->task);
-      TASK_send_message(
+      TSK_send_message(
         nullptr,
         TaskMessage_TankerAssignedNewPowerPlant,
         ai->_ai_controller_2E8->_ai_drillrig_node_28->unit,
@@ -13583,13 +12266,13 @@ LABEL_8:
       ai_drillrig_node_24 = drillrig_head->_ai_drillrig_node_24;
       if ( !ai_drillrig_node_24 )
         goto LABEL_20;
-      ai_stru160_node_C = ai_drillrig_node_24->_ai_stru160_node_C;
-      if ( ai_stru160_node_C != (KKND::AiAttackerNode *)&ai_drillrig_node_24->_ai_stru160_node_C )
+      ai_stru160_node_C = ai_drillrig_node_24->attacker_list_head;
+      if ( ai_stru160_node_C != (KKND::AiAttackerNode *)&ai_drillrig_node_24->attacker_list_head )
         break;
-      for ( i = ai->_ai_controller_1B4_head; i != (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head; i = i->next )
+      for ( i = ai->_ai_controller_1B4_head; i != (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head; i = i->next )
       {
-        if ( i->_ai_stru160_node_8 == ai_drillrig_node_24 )
-          i->_ai_stru160_node_8 = nullptr;
+        if ( i->merge_target_squad == ai_drillrig_node_24 )
+          i->merge_target_squad = nullptr;
       }
       ai_drillrig_node_24->next = ai->_ai_controller_160_free;
       ai->_ai_controller_160_free = ai_drillrig_node_24;
@@ -13603,19 +12286,19 @@ LABEL_25:
     ai_drillrig_node_24->_ai_stru160_node_34_x = 0;
     do
     {
-      ai_stru160_node_C->unit->entity->is_on_collision_grid = 1;
+      ai_stru160_node_C->unit->entity->is_collidable = 1;
       ai_drillrig_node_24->_ai_stru160_node_34_x += ai_stru160_node_C->unit->entity->x;
       ai_drillrig_node_24->_ai_stru160_node_38_y += ai_stru160_node_C->unit->entity->y;
       ai_stru160_node_C = ai_stru160_node_C->next;
       ++v2;
     }
-    while ( ai_stru160_node_C != (KKND::AiAttackerNode *)&ai_drillrig_node_24->_ai_stru160_node_C );
+    while ( ai_stru160_node_C != (KKND::AiAttackerNode *)&ai_drillrig_node_24->attacker_list_head );
     ai_drillrig_node_24->_ai_stru160_node_34_x /= v2;
     v9 = ai_drillrig_node_24->_ai_stru160_node_38_y / v2;
     v2 = 0;
     ai_drillrig_node_24->_ai_stru160_node_38_y = v9;
 LABEL_20:
-    drillrig_head->unit->entity->is_on_collision_grid = 1;
+    drillrig_head->unit->entity->is_collidable = 1;
     threat_in_area = ai_get_threat_in_area(ai, 81920, drillrig_head->unit->entity->x, drillrig_head->unit->entity->y);
     drillrig_head->_ai_drillrig_node_2C = threat_in_area;
     if ( !threat_in_area )
@@ -13625,7 +12308,7 @@ LABEL_20:
       {
         ai_40B020_send_attack_order(ai, v11);
         drillrig_head->_ai_drillrig_node_24->next = ai->_ai_controller_11C_head;
-        drillrig_head->_ai_drillrig_node_24->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+        drillrig_head->_ai_drillrig_node_24->prev = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
         ai->_ai_controller_11C_head->prev = drillrig_head->_ai_drillrig_node_24;
         ai->_ai_controller_11C_head = drillrig_head->_ai_drillrig_node_24;
         drillrig_head->_ai_drillrig_node_24 = nullptr;
@@ -13639,7 +12322,7 @@ LABEL_26:
   v12 = ai->_ai_controller_2E8;
   v13 = g_464DD0;
   out_y = 0;
-  v166 = (KKND::Ai_stru160_Node *)1;
+  v166 = (KKND::AiSquadNode *)1;
   if ( v12 )
   {
     if ( !ai->tanker_production_in_progress )
@@ -13707,7 +12390,7 @@ LABEL_26:
           v36 = k->unit;
           if ( v36->type == g_unit_stats[v13->unit_type].factory )
           {
-            if ( !unit_402AC0(v36) && k->remaining_cost <= 0 && ai->_ai_controller_2AC < ai->_ai_controller_2B0 )
+            if ( !unit_402AC0(v36) && k->remaining_cost <= 0 && ai->attacker_count < ai->max_attackers )
             {
               k->unit_type = v13->unit_type;
               v37 = (v34 << 8) / v163;
@@ -13727,7 +12410,7 @@ LABEL_26:
         {
           next = ai->_ai_controller_274->next;
           ai->_ai_controller_274 = next;
-          if ( next == (KKND::Ai_stru26C_Node *)&ai->_ai_controller_26C_head )
+          if ( next == (KKND::AiBuildOrderNode *)&ai->_ai_controller_26C_head )
             ai->_ai_controller_274 = ai->_ai_controller_26C_head;
         }
       }
@@ -13736,7 +12419,7 @@ LABEL_79:
       {
         show_message_unit(nullptr, "EnemyAI: Creature ID unknown");
         v41 = ai->_ai_controller_274;
-        v42 = v41->next == (KKND::Ai_stru26C_Node *)&ai->_ai_controller_26C_head;
+        v42 = v41->next == (KKND::AiBuildOrderNode *)&ai->_ai_controller_26C_head;
         ai->_ai_controller_274 = v41->next;
         if ( v42 )
           ai->_ai_controller_274 = ai->_ai_controller_26C_head;
@@ -13827,14 +12510,14 @@ LABEL_97:
               v160 = ai->_ai_controller_358_unit_task;
               v53 = ai->player_num;
               ai->_ai_controller_344 = 1;
-              TASK_send_message(g_ai_players_tasks[v53], TaskMessage_AdvanceConstructionStage, (void *)1, v160);
+              TSK_send_message(g_ai_players_tasks[v53], TaskMessage_AdvanceConstructionStage, (void *)1, v160);
             }
           }
           else if ( ai->_ai_controller_344 < 2 )
           {
             v52 = ai->player_num;
             ai->_ai_controller_344 = 2;
-            TASK_send_message(
+            TSK_send_message(
               g_ai_players_tasks[v52],
               TaskMessage_AdvanceConstructionStage,
               (void *)2,
@@ -13843,7 +12526,7 @@ LABEL_97:
         }
         else
         {
-          TASK_send_message(
+          TSK_send_message(
             g_ai_players_tasks[ai->player_num],
             TaskMessage_AdvanceConstructionStage,
             (void *)3,
@@ -13916,7 +12599,7 @@ LABEL_125:
             ai_stru310_node_14_unit_y = v62->_ai_stru310_node_14_unit_y;
             ai_controller_278_x = ai_stru310_node_10_unit_x;
             i3 = ai_stru310_node_14_unit_y;
-            TASK_send_message(nullptr, TaskMessage_MoveOrder, &param, v63->task);
+            TSK_send_message(nullptr, TaskMessage_MoveOrder, &param, v63->task);
             v62->next->prev = v62->prev;
             v62->prev->next = v62->next;
             v62->next = ai->_ai_controller_314;
@@ -13931,20 +12614,20 @@ LABEL_125:
     }
   }
   ai_controller_11C_head = ai->_ai_controller_11C_head;
-  if ( ai_controller_11C_head != (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head )
+  if ( ai_controller_11C_head != (KKND::AiSquadNode *)&ai->_ai_controller_11C_head )
   {
     v67 = 0;
     do
     {
-      v68 = ai_controller_11C_head->_ai_stru160_node_C;
-      if ( v68 == (KKND::AiAttackerNode *)&ai_controller_11C_head->_ai_stru160_node_C )
+      v68 = ai_controller_11C_head->attacker_list_head;
+      if ( v68 == (KKND::AiAttackerNode *)&ai_controller_11C_head->attacker_list_head )
       {
         ai_controller_1B4_head = (KKND::AiController *)ai->_ai_controller_1B4_head;
         for ( m = ai_controller_11C_head->prev;
               ai_controller_1B4_head != (KKND::AiController *)&ai->_ai_controller_1B4_head;
               ai_controller_1B4_head = ai_controller_1B4_head->next )
         {
-          if ( (KKND::Ai_stru160_Node *)ai_controller_1B4_head->_ai_controller_8 == ai_controller_11C_head )
+          if ( (KKND::AiSquadNode *)ai_controller_1B4_head->_ai_controller_8 == ai_controller_11C_head )
             ai_controller_1B4_head->_ai_controller_8 = nullptr;
         }
         ai_controller_11C_head->next->prev = ai_controller_11C_head->prev;
@@ -13957,25 +12640,25 @@ LABEL_125:
       {
         do
         {
-          v68->unit->entity->is_on_collision_grid = 1;
+          v68->unit->entity->is_collidable = 1;
           entity = v68->unit->entity;
-          v72 = entity->x - ai->_ai_controller_278_x;
-          v73 = entity->y - ai->_ai_controller_27C_y;
+          v72 = entity->x - ai->rally_x;
+          v73 = entity->y - ai->rally_y;
           if ( v72 < 0 )
-            v72 = ai->_ai_controller_278_x - entity->x;
+            v72 = ai->rally_x - entity->x;
           if ( v73 < 0 )
-            v73 = ai->_ai_controller_27C_y - entity->y;
+            v73 = ai->rally_y - entity->y;
           v74 = v73 + v72;
           if ( v74 > v67 )
           {
             v67 = v74;
-            entity->is_on_collision_grid = 1;
+            entity->is_collidable = 1;
             ai_controller_11C_head->_ai_stru160_node_34_x = v68->unit->entity->x;
             ai_controller_11C_head->_ai_stru160_node_38_y = v68->unit->entity->y;
           }
           v68 = v68->next;
         }
-        while ( v68 != (KKND::AiAttackerNode *)&ai_controller_11C_head->_ai_stru160_node_C );
+        while ( v68 != (KKND::AiAttackerNode *)&ai_controller_11C_head->attacker_list_head );
         v67 = 0;
         v75 = ai_get_threat_in_area(
                 ai,
@@ -13983,25 +12666,25 @@ LABEL_125:
                 ai_controller_11C_head->_ai_stru160_node_34_x,
                 ai_controller_11C_head->_ai_stru160_node_38_y);
         ai_controller_11C_head->_ai_stru160_node_30_threat_in_area = v75;
-        if ( v75 > ai->_ai_controller_2C0_threat_in_area )
-          ai->_ai_controller_2C0_threat_in_area = v75;
+        if ( v75 > ai->max_squad_threat )
+          ai->max_squad_threat = v75;
       }
       ai_controller_11C_head = ai_controller_11C_head->next;
     }
-    while ( ai_controller_11C_head != (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head );
+    while ( ai_controller_11C_head != (KKND::AiSquadNode *)&ai->_ai_controller_11C_head );
   }
-  for ( n = (KKND::Ai_stru160_Node *)ai->_ai_controller_168_head;
-        n != (KKND::Ai_stru160_Node *)&ai->_ai_controller_168_head;
+  for ( n = (KKND::AiSquadNode *)ai->_ai_controller_168_head;
+        n != (KKND::AiSquadNode *)&ai->_ai_controller_168_head;
         n = n->next )
   {
-    v77 = n->_ai_stru160_node_C;
+    v77 = n->attacker_list_head;
     v78 = 0;
-    if ( v77 == (KKND::AiAttackerNode *)&n->_ai_stru160_node_C )
+    if ( v77 == (KKND::AiAttackerNode *)&n->attacker_list_head )
     {
       v79 = (KKND::AiController *)ai->_ai_controller_1B4_head;
       for ( ii = n->prev; v79 != (KKND::AiController *)&ai->_ai_controller_1B4_head; v79 = v79->next )
       {
-        if ( (KKND::Ai_stru160_Node *)v79->_ai_controller_8 == n )
+        if ( (KKND::AiSquadNode *)v79->_ai_controller_8 == n )
           v79->_ai_controller_8 = nullptr;
       }
       n->next->prev = n->prev;
@@ -14014,45 +12697,45 @@ LABEL_125:
     {
       do
       {
-        v77->unit->entity->is_on_collision_grid = 1;
+        v77->unit->entity->is_collidable = 1;
         v81 = v77->unit->entity;
-        v82 = v81->x - ai->_ai_controller_278_x;
-        v83 = v81->y - ai->_ai_controller_27C_y;
+        v82 = v81->x - ai->rally_x;
+        v83 = v81->y - ai->rally_y;
         if ( v82 < 0 )
-          v82 = ai->_ai_controller_278_x - v81->x;
+          v82 = ai->rally_x - v81->x;
         if ( v83 < 0 )
-          v83 = ai->_ai_controller_27C_y - v81->y;
+          v83 = ai->rally_y - v81->y;
         v84 = v83 + v82;
         if ( v84 > v78 )
         {
           v78 = v84;
-          v81->is_on_collision_grid = 1;
+          v81->is_collidable = 1;
           n->_ai_stru160_node_34_x = v77->unit->entity->x;
           n->_ai_stru160_node_38_y = v77->unit->entity->y;
         }
         v77 = v77->next;
       }
-      while ( v77 != (KKND::AiAttackerNode *)&n->_ai_stru160_node_C );
+      while ( v77 != (KKND::AiAttackerNode *)&n->attacker_list_head );
       v85 = ai_get_threat_in_area(ai, 0x10000, n->_ai_stru160_node_34_x, n->_ai_stru160_node_38_y);
       n->_ai_stru160_node_30_threat_in_area = v85;
-      if ( v85 > ai->_ai_controller_2C0_threat_in_area )
-        ai->_ai_controller_2C0_threat_in_area = v85;
+      if ( v85 > ai->max_squad_threat )
+        ai->max_squad_threat = v85;
     }
   }
   v86 = ai->_ai_controller_1B4_head;
   p_ai_controller_1B4_head = &ai->_ai_controller_1B4_head;
-  if ( v86 != (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head )
+  if ( v86 != (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head )
   {
     for ( jj = 0; ; jj = 0 )
     {
-      p_ai_stru160_node_C = &v86->_ai_stru160_node_C;
-      if ( (KKND::AiAttackerNode **)v86->_ai_stru160_node_C == &v86->_ai_stru160_node_C )
+      p_ai_stru160_node_C = &v86->attacker_list_head;
+      if ( (KKND::AiAttackerNode **)v86->attacker_list_head == &v86->attacker_list_head )
       {
         v90 = *p_ai_controller_1B4_head;
-        for ( kk = v86->prev; v90 != (KKND::Ai_stru160_Node *)p_ai_controller_1B4_head; v90 = v90->next )
+        for ( kk = v86->prev; v90 != (KKND::AiSquadNode *)p_ai_controller_1B4_head; v90 = v90->next )
         {
-          if ( v90->_ai_stru160_node_8 == v86 )
-            v90->_ai_stru160_node_8 = nullptr;
+          if ( v90->merge_target_squad == v86 )
+            v90->merge_target_squad = nullptr;
         }
         v86->next->prev = v86->prev;
         v86->prev->next = v86->next;
@@ -14066,7 +12749,7 @@ LABEL_125:
         v86->_ai_stru160_node_38_y = 0;
         for ( v86->_ai_stru160_node_34_x = 0; v92 != (KKND::AiAttackerNode *)p_ai_stru160_node_C; ++jj )
         {
-          v92->unit->entity->is_on_collision_grid = 1;
+          v92->unit->entity->is_collidable = 1;
           v86->_ai_stru160_node_34_x += v92->unit->entity->x;
           v86->_ai_stru160_node_38_y += v92->unit->entity->y;
           v92 = v92->next;
@@ -14077,20 +12760,20 @@ LABEL_125:
         v86->_ai_stru160_node_38_y = v94;
         v95 = ai_get_threat_in_area(ai, 81920, v93, v94);
         v86->_ai_stru160_node_30_threat_in_area = v95;
-        if ( v95 > ai->_ai_controller_2C0_threat_in_area )
-          ai->_ai_controller_2C0_threat_in_area = v95;
+        if ( v95 > ai->max_squad_threat )
+          ai->max_squad_threat = v95;
       }
       v86 = v86->next;
       p_ai_controller_1B4_head = &ai->_ai_controller_1B4_head;
-      if ( v86 == (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head )
+      if ( v86 == (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head )
         break;
     }
   }
   ai_controller_24C = ai->_ai_controller_24C;
   if ( ai_controller_24C )
   {
-    v97 = ai_controller_24C->_ai_stru160_node_C;
-    if ( v97 != (KKND::AiAttackerNode *)&ai_controller_24C->_ai_stru160_node_C )
+    v97 = ai_controller_24C->attacker_list_head;
+    if ( v97 != (KKND::AiAttackerNode *)&ai_controller_24C->attacker_list_head )
     {
       v98 = 0;
       ai_controller_24C->_ai_stru160_node_38_y = 0;
@@ -14098,37 +12781,37 @@ LABEL_125:
       ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total = 0;
       do
       {
-        v97->unit->entity->is_on_collision_grid = 1;
+        v97->unit->entity->is_collidable = 1;
         ai_controller_24C->_ai_stru160_node_34_x += v97->unit->entity->x;
         ai_controller_24C->_ai_stru160_node_38_y += v97->unit->entity->y;
         ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total += v97->unit->stats->ai_threat_weight;
         v97 = v97->next;
         ++v98;
       }
-      while ( v97 != (KKND::AiAttackerNode *)&ai_controller_24C->_ai_stru160_node_C );
+      while ( v97 != (KKND::AiAttackerNode *)&ai_controller_24C->attacker_list_head );
       v99 = ai_controller_24C->_ai_stru160_node_34_x / v98;
       v100 = ai_controller_24C->_ai_stru160_node_38_y / v98;
       ai_controller_24C->_ai_stru160_node_34_x = v99;
       ai_controller_24C->_ai_stru160_node_38_y = v100;
       v101 = ai_get_threat_in_area(ai, 81920, v99, v100);
       ai_controller_24C->_ai_stru160_node_30_threat_in_area = v101;
-      if ( v101 > ai->_ai_controller_2C0_threat_in_area )
-        ai->_ai_controller_2C0_threat_in_area = v101;
+      if ( v101 > ai->max_squad_threat )
+        ai->max_squad_threat = v101;
     }
   }
-  ai_controller_2C0_threat_in_area = ai->_ai_controller_2C0_threat_in_area;
-  if ( ai_controller_2C0_threat_in_area > ai->_ai_controller_2B4 )
-    ai->_ai_controller_2C0_threat_in_area = ai_controller_2C0_threat_in_area - 2;
+  ai_controller_2C0_threat_in_area = ai->max_squad_threat;
+  if ( ai_controller_2C0_threat_in_area > ai->squad_threshold )
+    ai->max_squad_threat = ai_controller_2C0_threat_in_area - 2;
   if ( (KKND::AiEnemyNode **)ai->enemy_tail != &ai->enemy_tail )
   {
     v164 = nullptr;
     ai_40B230(ai);
-    if ( ai->_ai_controller_278_x == -1 )
+    if ( ai->rally_x == -1 )
     {
 LABEL_227:
-      for ( mm = ai->_ai_controller_1B4_head; mm != (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head; mm = mm->next )
+      for ( mm = ai->_ai_controller_1B4_head; mm != (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head; mm = mm->next )
       {
-        ai_stru160_node_8 = mm->_ai_stru160_node_8;
+        ai_stru160_node_8 = mm->merge_target_squad;
         if ( ai_stru160_node_8 )
         {
           v130 = ai_stru160_node_8->_ai_stru160_node_34_x - mm->_ai_stru160_node_34_x;
@@ -14139,8 +12822,8 @@ LABEL_227:
             v131 = -v131;
           if ( v130 >= 0x4000 || v131 >= 0x4000 )
           {
-            v136 = mm->_ai_stru160_node_8;
-            v137 = mm->_ai_stru160_node_C;
+            v136 = mm->merge_target_squad;
+            v137 = mm->attacker_list_head;
             ai_stru160_node_38_y = v136->_ai_stru160_node_38_y;
             ai_stru160_node_34_x = v136->_ai_stru160_node_34_x;
             move_order.player_num = ai->player_num;
@@ -14149,29 +12832,29 @@ LABEL_227:
             mm->_ai_stru160_node_40 = ai_stru160_node_38_y;
             move_order.dst_y = ai_stru160_node_38_y;
             for ( mm->_ai_stru160_node_24 = nullptr;
-                  v137 != (KKND::AiAttackerNode *)&mm->_ai_stru160_node_C;
+                  v137 != (KKND::AiAttackerNode *)&mm->attacker_list_head;
                   v137 = v137->next )
             {
-              TASK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, v137->unit->task);
+              TSK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, v137->unit->task);
             }
           }
           else
           {
-            v132 = mm->_ai_stru160_node_C;
+            v132 = mm->attacker_list_head;
             prev = mm->prev;
-            v134 = &mm->_ai_stru160_node_C;
-            if ( v132 != (KKND::AiAttackerNode *)&mm->_ai_stru160_node_C )
+            v134 = &mm->attacker_list_head;
+            if ( v132 != (KKND::AiAttackerNode *)&mm->attacker_list_head )
             {
               do
               {
                 v132->next->prev = v132->prev;
                 v132->prev->next = v132->next;
-                v132->next = mm->_ai_stru160_node_8->_ai_stru160_node_C;
-                v132->prev = (KKND::AiAttackerNode *)&mm->_ai_stru160_node_8->_ai_stru160_node_C;
-                mm->_ai_stru160_node_8->_ai_stru160_node_C->prev = v132;
-                mm->_ai_stru160_node_8->_ai_stru160_node_C = v132;
-                mm->_ai_stru160_node_8->_ai_stru160_node_2C_ai_threat_weight_total += v132->unit->stats->ai_threat_weight;
-                v132->_ai_attacker_node_8 = mm->_ai_stru160_node_8;
+                v132->next = mm->merge_target_squad->attacker_list_head;
+                v132->prev = (KKND::AiAttackerNode *)&mm->merge_target_squad->attacker_list_head;
+                mm->merge_target_squad->attacker_list_head->prev = v132;
+                mm->merge_target_squad->attacker_list_head = v132;
+                mm->merge_target_squad->_ai_stru160_node_2C_ai_threat_weight_total += v132->unit->stats->ai_threat_weight;
+                v132->_ai_attacker_node_8 = mm->merge_target_squad;
                 v132 = *v134;
               }
               while ( *v134 != (KKND::AiAttackerNode *)v134 );
@@ -14180,8 +12863,8 @@ LABEL_227:
                   nn != (KKND::AiController *)&ai->_ai_controller_1B4_head;
                   nn = nn->next )
             {
-              if ( (KKND::Ai_stru160_Node *)nn->_ai_controller_8 == mm )
-                nn->_ai_controller_8 = (KKND::Unit *)mm->_ai_stru160_node_8;
+              if ( (KKND::AiSquadNode *)nn->_ai_controller_8 == mm )
+                nn->_ai_controller_8 = (KKND::Unit *)mm->merge_target_squad;
             }
             mm->next->prev = mm->prev;
             mm->prev->next = mm->next;
@@ -14196,14 +12879,14 @@ LABEL_227:
           mm->next->prev = v140;
           mm->prev->next = mm->next;
           mm->next = ai->_ai_controller_11C_head;
-          mm->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+          mm->prev = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
           ai->_ai_controller_11C_head->prev = mm;
           ai->_ai_controller_11C_head = mm;
           mm = v140;
         }
       }
-      for ( i1 = (KKND::Ai_stru160_Node *)ai->_ai_controller_168_head;
-            i1 != (KKND::Ai_stru160_Node *)&ai->_ai_controller_168_head;
+      for ( i1 = (KKND::AiSquadNode *)ai->_ai_controller_168_head;
+            i1 != (KKND::AiSquadNode *)&ai->_ai_controller_168_head;
             i1 = i1->next )
       {
         if ( !i1->_ai_stru160_node_30_threat_in_area )
@@ -14222,24 +12905,24 @@ LABEL_227:
         i1->next->prev = v145;
         i1->prev->next = i1->next;
         i1->next = ai->_ai_controller_11C_head;
-        i1->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+        i1->prev = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
         ai->_ai_controller_11C_head->prev = i1;
         ai->_ai_controller_11C_head = i1;
         i1 = v145;
       }
-      for ( i2 = ai->_ai_controller_11C_head; i2 != (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head; i2 = i2->next )
+      for ( i2 = ai->_ai_controller_11C_head; i2 != (KKND::AiSquadNode *)&ai->_ai_controller_11C_head; i2 = i2->next )
       {
         v147 = i2->_ai_stru160_node_28 + 1;
         i2->_ai_stru160_node_28 = v147;
         v148 = v147;
         if ( v164
-          || ai->_ai_controller_2BC_ai_importance
+          || ai->base_threat
           || (ai_stru160_node_2C_ai_threat_weight_total = i2->_ai_stru160_node_2C_ai_threat_weight_total,
               ai_stru160_node_30_threat_in_area = i2->_ai_stru160_node_30_threat_in_area,
-              v166 = (KKND::Ai_stru160_Node *)(ai_stru160_node_2C_ai_threat_weight_total
-                                             + ai_stru160_node_30_threat_in_area
-                                             + 1),
-              100 * (ai_stru160_node_2C_ai_threat_weight_total - ai_stru160_node_30_threat_in_area) / (int)v166 >= ai->_ai_controller_2B8) )
+              v166 = (KKND::AiSquadNode *)(ai_stru160_node_2C_ai_threat_weight_total
+                                         + ai_stru160_node_30_threat_in_area
+                                         + 1),
+              100 * (ai_stru160_node_2C_ai_threat_weight_total - ai_stru160_node_30_threat_in_area) / (int)v166 >= ai->attack_confidence) )
         {
           if ( !i2->_ai_stru160_node_24 || v148 > 4 )
           {
@@ -14256,8 +12939,8 @@ LABEL_227:
           v152 = ai_40B410(ai, i2, v151, v161);
           if ( v152 )
           {
-            v153 = i2->_ai_stru160_node_C;
-            i2->_ai_stru160_node_8 = v152;
+            v153 = i2->attacker_list_head;
+            i2->merge_target_squad = v152;
             v154 = v152->_ai_stru160_node_38_y;
             v155 = v152->_ai_stru160_node_34_x;
             move_order.player_num = ai->player_num;
@@ -14266,21 +12949,21 @@ LABEL_227:
             i2->_ai_stru160_node_40 = v154;
             move_order.dst_y = v154;
             for ( i2->_ai_stru160_node_24 = nullptr;
-                  v153 != (KKND::AiAttackerNode *)&i2->_ai_stru160_node_C;
+                  v153 != (KKND::AiAttackerNode *)&i2->attacker_list_head;
                   v153 = v153->next )
             {
-              TASK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, v153->unit->task);
+              TSK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, v153->unit->task);
             }
           }
           else
           {
-            i2->_ai_stru160_node_8 = ai->_ai_controller_24C;
-            ai_40AFC0_send_move_order(ai, i2, ai->_ai_controller_278_x, ai->_ai_controller_27C_y);
+            i2->merge_target_squad = ai->_ai_controller_24C;
+            ai_40AFC0_send_move_order(ai, i2, ai->rally_x, ai->rally_y);
           }
           i2->next->prev = i2->prev;
           i2->prev->next = i2->next;
           i2->next = ai->_ai_controller_1B4_head;
-          i2->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head;
+          i2->prev = (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head;
           ai->_ai_controller_1B4_head->prev = i2;
           ai->_ai_controller_1B4_head = i2;
           i2 = v166;
@@ -14289,14 +12972,14 @@ LABEL_227:
       ai_42E070_attack_order(ai);
       goto LABEL_272;
     }
-    ai_controller_2C4_2C8_idx = ai->_ai_controller_2C4_2C8_idx;
-    ai_controller_278_x = ai->_ai_controller_278_x;
+    ai_controller_2C4_2C8_idx = ai->best_patrol_waypoint_idx;
+    ai_controller_278_x = ai->rally_x;
     out_y = 0;
     ai_controller_58_head = ai->_ai_controller_58_head;
-    v105 = (KKND::Ai_stru160_Node *)((char *)ai->_ai_controller_280 + 8 * ai_controller_2C4_2C8_idx);
+    v105 = (KKND::AiSquadNode *)((char *)ai->patrol_waypoints + 8 * ai_controller_2C4_2C8_idx);
     v106 = ai->player_num;
     v166 = v105;
-    ai_controller_27C_y = ai->_ai_controller_27C_y;
+    ai_controller_27C_y = ai->rally_y;
     param = v106;
     for ( i3 = ai_controller_27C_y;
           ai_controller_58_head != (KKND::AiAttackerNode *)&ai->_ai_controller_58_head;
@@ -14311,16 +12994,16 @@ LABEL_227:
         ai_controller_58_head->prev = (KKND::AiAttackerNode *)&ai->_ai_controller_60_head;
         ai->_ai_controller_60_head->prev = ai_controller_58_head;
         ai->_ai_controller_60_head = ai_controller_58_head;
-        TASK_send_message(nullptr, TaskMessage_MoveOrder, &param, ai_controller_58_head->unit->task);
+        TSK_send_message(nullptr, TaskMessage_MoveOrder, &param, ai_controller_58_head->unit->task);
         ai_controller_58_head = v108;
       }
     }
     for ( i4 = ai->_ai_controller_60_head; i4 != (KKND::AiAttackerNode *)&ai->_ai_controller_60_head; i4 = i4->next )
     {
-      i4->unit->entity->is_on_collision_grid = 1;
+      i4->unit->entity->is_collidable = 1;
       v110 = i4->unit->entity;
-      v111 = v110->x - ai->_ai_controller_278_x;
-      v112 = v110->y - ai->_ai_controller_27C_y;
+      v111 = v110->x - ai->rally_x;
+      v112 = v110->y - ai->rally_y;
       if ( v111 < 0 )
         v111 = -v111;
       if ( v112 < 0 )
@@ -14330,10 +13013,10 @@ LABEL_227:
         v113 = i4->prev;
         i4->next->prev = v113;
         i4->prev->next = i4->next;
-        i4->next = ai->_ai_controller_24C->_ai_stru160_node_C;
-        i4->prev = (KKND::AiAttackerNode *)&ai->_ai_controller_24C->_ai_stru160_node_C;
-        ai->_ai_controller_24C->_ai_stru160_node_C->prev = i4;
-        ai->_ai_controller_24C->_ai_stru160_node_C = i4;
+        i4->next = ai->_ai_controller_24C->attacker_list_head;
+        i4->prev = (KKND::AiAttackerNode *)&ai->_ai_controller_24C->attacker_list_head;
+        ai->_ai_controller_24C->attacker_list_head->prev = i4;
+        ai->_ai_controller_24C->attacker_list_head = i4;
         i4->_ai_attacker_node_8 = ai->_ai_controller_24C;
         v114 = ai->_ai_controller_24C;
         v115 = i4->unit->stats->ai_threat_weight + v114->_ai_stru160_node_2C_ai_threat_weight_total;
@@ -14356,35 +13039,35 @@ LABEL_227:
     }
     if ( ai->_ai_controller_160_free )
     {
-      if ( v117 && ai->_ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total >= ai->_ai_controller_2B4 )
+      if ( v117 && ai->_ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total >= ai->squad_threshold )
         goto LABEL_275;
-      if ( ai->_ai_controller_2BC_ai_importance )
+      if ( ai->base_threat )
         goto LABEL_218;
-      if ( ai->_ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total >= ai->_ai_controller_2C0_threat_in_area )
+      if ( ai->_ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total >= ai->max_squad_threat )
       {
 LABEL_275:
-        if ( !ai->_ai_controller_2BC_ai_importance && v166 && !ai->_ai_controller_2C4_2C8_idx )
+        if ( !ai->base_threat && v166 && !ai->best_patrol_waypoint_idx )
         {
           v118 = v166->prev;
           v119 = v166->next;
           v120 = ai->_ai_controller_24C;
           move_order.player_num = ai->player_num;
           move_order.dst_x = (int)v119;
-          v121 = v120->_ai_stru160_node_C;
-          v122 = &v120->_ai_stru160_node_C;
+          v121 = v120->attacker_list_head;
+          v122 = &v120->attacker_list_head;
           v120->_ai_stru160_node_3C = (int)v119;
           v120->_ai_stru160_node_40 = (int)v118;
           move_order.dst_y = (int)v118;
           for ( v120->_ai_stru160_node_24 = nullptr; v121 != (KKND::AiAttackerNode *)v122; v121 = v121->next )
-            TASK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, v121->unit->task);
+            TSK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, v121->unit->task);
           v123 = ai->_ai_controller_24C;
-          p_ai_controller_168_head = (KKND::Ai_stru160_Node *)&ai->_ai_controller_168_head;
+          p_ai_controller_168_head = (KKND::AiSquadNode *)&ai->_ai_controller_168_head;
           goto LABEL_219;
         }
 LABEL_218:
         ai_40B020_send_attack_order(ai, ai->_ai_controller_24C);
         v123 = ai->_ai_controller_24C;
-        p_ai_controller_168_head = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+        p_ai_controller_168_head = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
 LABEL_219:
         v123->next = p_ai_controller_168_head->next;
         ai->_ai_controller_24C->prev = p_ai_controller_168_head;
@@ -14407,15 +13090,15 @@ LABEL_221:
           v127 = ai->_ai_controller_24C;
           if ( v127 )
           {
-            v127->_ai_stru160_node_C = (KKND::AiAttackerNode *)&v127->_ai_stru160_node_C;
-            ai->_ai_controller_24C->_ai_stru160_node_10 = &ai->_ai_controller_24C->_ai_stru160_node_C;
+            v127->attacker_list_head = (KKND::AiAttackerNode *)&v127->attacker_list_head;
+            ai->_ai_controller_24C->attacker_list_tail = &ai->_ai_controller_24C->attacker_list_head;
             ai->_ai_controller_24C->_ai_stru160_node_1C = 0;
-            ai->_ai_controller_24C->_ai_stru160_node_8 = nullptr;
+            ai->_ai_controller_24C->merge_target_squad = nullptr;
             ai->_ai_controller_24C->_ai_stru160_node_24 = nullptr;
             ai->_ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total = 0;
             ai->_ai_controller_24C->_ai_stru160_node_30_threat_in_area = 0;
-            ai->_ai_controller_24C->_ai_stru160_node_34_x = ai->_ai_controller_278_x;
-            ai->_ai_controller_24C->_ai_stru160_node_38_y = ai->_ai_controller_27C_y;
+            ai->_ai_controller_24C->_ai_stru160_node_34_x = ai->rally_x;
+            ai->_ai_controller_24C->_ai_stru160_node_38_y = ai->rally_y;
           }
         }
         goto LABEL_227;
@@ -14539,7 +13222,7 @@ LABEL_32:
                 goto LABEL_37;
               }
             }
-            while ( BOXD_40EE70(v17, v16) && !BOXD_40EE10(v17, v16 - 1) )
+            while ( BOXD_is_tile_free_for_building(v17, v16) && !BOXD_find_building_at_tile(v17, v16 - 1) )
             {
               if ( ++v17 >= v13 )
                 goto LABEL_32;
@@ -14573,7 +13256,7 @@ LABEL_44:
           v25 = v22;
           if ( v22 >= v20 )
             goto LABEL_49;
-          while ( BOXD_40EE70(v25, v24) && !BOXD_40EE10(v25, v24 - 1) )
+          while ( BOXD_is_tile_free_for_building(v25, v24) && !BOXD_find_building_at_tile(v25, v24 - 1) )
           {
             if ( ++v25 >= v20 )
             {
@@ -14604,7 +13287,7 @@ LABEL_49:
             {
               do
               {
-                if ( !BOXD_40EE70(v29, k) || BOXD_40EE10(v29, k - 1) )
+                if ( !BOXD_is_tile_free_for_building(v29, k) || BOXD_find_building_at_tile(v29, k - 1) )
                   goto LABEL_68;
                 ++v29;
               }
@@ -14645,7 +13328,7 @@ LABEL_82:
             if ( ++v35 >= v32 )
               goto LABEL_87;
           }
-          while ( BOXD_40EE70(v36, v35) && !BOXD_40EE10(v36, v35 - 1) )
+          while ( BOXD_is_tile_free_for_building(v36, v35) && !BOXD_find_building_at_tile(v36, v35 - 1) )
           {
             if ( ++v36 >= v43 )
             {
@@ -14670,7 +13353,7 @@ LABEL_20:
     }
     while ( 1 )
     {
-      if ( BOXD_40EE70(v12, v9) && !BOXD_40EE10(v12, v9 - 1) )
+      if ( BOXD_is_tile_free_for_building(v12, v9) && !BOXD_find_building_at_tile(v12, v9 - 1) )
         goto LABEL_19;
       if ( v12 >= v43 )
       {
@@ -14717,15 +13400,15 @@ LABEL_19:
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0040AFC0) --------------------------------------------------------
-void __fastcall ai_40AFC0_send_move_order(KKND::AiController *ai, KKND::Ai_stru160_Node *node, int x, int y)
+void __fastcall ai_40AFC0_send_move_order(KKND::AiController *ai, KKND::AiSquadNode *node, int x, int y)
 {
   KKND::AiAttackerNode *ai_stru160_node_C; // esi
   KKND::AiAttackerNode **p_ai_stru160_node_C; // edi
   KKND::MoveOrderPayload move_order; // [esp+8h] [ebp-Ch] BYREF
 
-  ai_stru160_node_C = node->_ai_stru160_node_C;
+  ai_stru160_node_C = node->attacker_list_head;
   move_order.player_num = ai->player_num;
-  p_ai_stru160_node_C = &node->_ai_stru160_node_C;
+  p_ai_stru160_node_C = &node->attacker_list_head;
   node->_ai_stru160_node_3C = x;
   move_order.dst_x = x;
   node->_ai_stru160_node_40 = y;
@@ -14734,12 +13417,12 @@ void __fastcall ai_40AFC0_send_move_order(KKND::AiController *ai, KKND::Ai_stru1
         ai_stru160_node_C != (KKND::AiAttackerNode *)p_ai_stru160_node_C;
         ai_stru160_node_C = ai_stru160_node_C->next )
   {
-    TASK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, ai_stru160_node_C->unit->task);
+    TSK_send_message(nullptr, TaskMessage_MoveOrder, &move_order, ai_stru160_node_C->unit->task);
   }
 }
 
 //----- (0040B020) --------------------------------------------------------
-void __fastcall ai_40B020_send_attack_order(KKND::AiController *ai, KKND::Ai_stru160_Node *a2)
+void __fastcall ai_40B020_send_attack_order(KKND::AiController *ai, KKND::AiSquadNode *a2)
 {
   KKND::AiController *player_num; // esi
   KKND::AiEnemyNode *ai_controller_114_head; // ebx
@@ -14756,7 +13439,7 @@ void __fastcall ai_40B020_send_attack_order(KKND::AiController *ai, KKND::Ai_str
   KKND::Entity *v15; // ecx
   KKND::AiAttackerNode *ai_stru160_node_C; // esi
   KKND::AiAttackerNode **p_ai_stru160_node_C; // edi
-  KKND::Ai_stru160_Node *v18; // [esp+10h] [ebp-18h]
+  KKND::AiSquadNode *v18; // [esp+10h] [ebp-18h]
   int v19; // [esp+14h] [ebp-14h]
   KKND::AiEnemyNode *v20; // [esp+18h] [ebp-10h]
   int v21; // [esp+1Ch] [ebp-Ch]
@@ -14780,7 +13463,7 @@ void __fastcall ai_40B020_send_attack_order(KKND::AiController *ai, KKND::Ai_str
       unit = ai_controller_114_head->unit;
       if ( !unit->destroyed && unit->stats->ai_strategic_value )
       {
-        unit->entity->is_on_collision_grid = 1;
+        unit->entity->is_collidable = 1;
         v10 = ai_controller_114_head->unit;
         entity = v10->entity;
         v12 = entity->x - v18->_ai_stru160_node_34_x;
@@ -14823,15 +13506,15 @@ void __fastcall ai_40B020_send_attack_order(KKND::AiController *ai, KKND::Ai_str
   {
     v14 = player_num->player_num;
     v15 = (KKND::Entity *)v7->unit;
-    ai_stru160_node_C = a2->_ai_stru160_node_C;
+    ai_stru160_node_C = a2->attacker_list_head;
     a2->_ai_stru160_node_24 = v7;
-    p_ai_stru160_node_C = &a2->_ai_stru160_node_C;
+    p_ai_stru160_node_C = &a2->attacker_list_head;
     attack_order.player_num = v14;
     for ( attack_order.target = v15;
           ai_stru160_node_C != (KKND::AiAttackerNode *)p_ai_stru160_node_C;
           ai_stru160_node_C = ai_stru160_node_C->next )
     {
-      TASK_send_message(nullptr, TaskMessage_AttackOrder, &attack_order, ai_stru160_node_C->unit->task);
+      TSK_send_message(nullptr, TaskMessage_AttackOrder, &attack_order, ai_stru160_node_C->unit->task);
     }
   }
   v18->_ai_stru160_node_28 = 0;
@@ -14858,7 +13541,7 @@ int __fastcall ai_get_threat_in_area(KKND::AiController *ai, int radius, int x, 
     unit = ai_controller_114_head->unit;
     if ( !unit->destroyed && unit->stats->ai_threat_weight )
     {
-      unit->entity->is_on_collision_grid = 1;
+      unit->entity->is_collidable = 1;
       v7 = ai_controller_114_head->unit;
       entity = v7->entity;
       v9 = entity->x - x;
@@ -14897,18 +13580,16 @@ void __fastcall ai_40B230(KKND::AiController *ai)
   int v19; // eax
   int v20; // [esp+10h] [ebp-4h]
 
-  if ( ai->_ai_controller_278_x != -1 )
+  if ( ai->rally_x != -1 )
   {
     enemy_tail = ai->enemy_tail;
     p_enemy_tail = &ai->enemy_tail;
-    for ( ai->_ai_controller_2BC_ai_importance = 0;
-          enemy_tail != (KKND::AiEnemyNode *)p_enemy_tail;
-          enemy_tail = enemy_tail->next )
+    for ( ai->base_threat = 0; enemy_tail != (KKND::AiEnemyNode *)p_enemy_tail; enemy_tail = enemy_tail->next )
     {
       unit = enemy_tail->unit;
       if ( !unit->destroyed )
       {
-        unit->entity->is_on_collision_grid = 1;
+        unit->entity->is_collidable = 1;
         v5 = enemy_tail->unit;
         entity = v5->entity;
         x = entity->x;
@@ -14918,18 +13599,18 @@ void __fastcall ai_40B230(KKND::AiController *ai)
           && y > ai->base_area_min_y - 49152
           && y < ai->base_area_max_y + 49152 )
         {
-          ai->_ai_controller_2BC_ai_importance += v5->stats->ai_threat_weight;
+          ai->base_threat += v5->stats->ai_threat_weight;
         }
       }
     }
   }
-  v9 = ai->_ai_controller_280[0];
-  ai->_ai_controller_2C4_2C8_idx = 4;
-  ai->_ai_controller_2C8[4] = 0x80000000;
+  v9 = ai->patrol_waypoints[0];
+  ai->best_patrol_waypoint_idx = 4;
+  ai->patrol_threat[4] = 0x80000000;
   v20 = 0;
-  if ( ai->_ai_controller_280[0][0] != -1 )
+  if ( ai->patrol_waypoints[0][0] != -1 )
   {
-    ai_controller_2C8 = ai->_ai_controller_2C8;
+    ai_controller_2C8 = ai->patrol_threat;
     do
     {
       if ( v20 >= 4 )
@@ -14940,7 +13621,7 @@ void __fastcall ai_40B230(KKND::AiController *ai)
         ai_controller_8 = i->_ai_controller_8;
         if ( !ai_controller_8->destroyed && ai_controller_8->stats->ai_threat_weight )
         {
-          ai_controller_8->entity->is_on_collision_grid = 1;
+          ai_controller_8->entity->is_collidable = 1;
           v13 = i->_ai_controller_8;
           v14 = v13->entity;
           v15 = v14->x - *v9;
@@ -14959,15 +13640,15 @@ void __fastcall ai_40B230(KKND::AiController *ai)
           }
         }
       }
-      v18 = ai->_ai_controller_2C8[ai->_ai_controller_2C4_2C8_idx];
+      v18 = ai->patrol_threat[ai->best_patrol_waypoint_idx];
       if ( *ai_controller_2C8 <= v18 )
       {
         if ( *ai_controller_2C8 == v18 && (kknd_rand_1("C:\\k\\Scripts\\Enemyai.cpp", 1265) & 1) != 0 )
-          ai->_ai_controller_2C4_2C8_idx = v20;
+          ai->best_patrol_waypoint_idx = v20;
       }
       else
       {
-        ai->_ai_controller_2C4_2C8_idx = v20;
+        ai->best_patrol_waypoint_idx = v20;
       }
       v19 = v9[2];
       v9 += 2;
@@ -14979,25 +13660,25 @@ void __fastcall ai_40B230(KKND::AiController *ai)
 }
 
 //----- (0040B410) --------------------------------------------------------
-KKND::Ai_stru160_Node *__fastcall ai_40B410(KKND::AiController *ai, KKND::Ai_stru160_Node *node, int x, int y)
+KKND::AiSquadNode *__fastcall ai_40B410(KKND::AiController *ai, KKND::AiSquadNode *node, int x, int y)
 {
-  KKND::Ai_stru160_Node **p_ai_controller_11C_head; // ecx
-  KKND::Ai_stru160_Node *v5; // edi
+  KKND::AiSquadNode **p_ai_controller_11C_head; // ecx
+  KKND::AiSquadNode *v5; // edi
   int v6; // ebx
   int v7; // ebp
   int ai_stru160_node_38_y; // edx
   int v9; // ecx
   int v10; // esi
-  KKND::Ai_stru160_Node *v12; // [esp+Ch] [ebp-Ch]
-  KKND::Ai_stru160_Node *v14; // [esp+14h] [ebp-4h]
+  KKND::AiSquadNode *v12; // [esp+Ch] [ebp-Ch]
+  KKND::AiSquadNode *v14; // [esp+14h] [ebp-4h]
 
   p_ai_controller_11C_head = &ai->_ai_controller_11C_head;
   v5 = *p_ai_controller_11C_head;
   v6 = 0x20000000;
   v7 = 0x20000000;
   v12 = nullptr;
-  v14 = (KKND::Ai_stru160_Node *)p_ai_controller_11C_head;
-  if ( *p_ai_controller_11C_head != (KKND::Ai_stru160_Node *)p_ai_controller_11C_head )
+  v14 = (KKND::AiSquadNode *)p_ai_controller_11C_head;
+  if ( *p_ai_controller_11C_head != (KKND::AiSquadNode *)p_ai_controller_11C_head )
   {
     do
     {
@@ -15079,10 +13760,10 @@ BOOL __fastcall ai_40B490(KKND::AiController *ai, KKND::UnitType type, int *out_
     {
       while ( 1 )
       {
-        enemy_tail->_ai_controller_8->entity->is_on_collision_grid = 1;
+        enemy_tail->_ai_controller_8->entity->is_collidable = 1;
         entity = enemy_tail->_ai_controller_8->entity;
         x = entity->x;
-        entity->is_on_collision_grid = 1;
+        entity->is_collidable = 1;
         v11 = enemy_tail->_ai_controller_8->entity;
         v12 = (x - 0x2000) / 0x4000 - 1;
         v13 = v11->x;
@@ -15202,7 +13883,7 @@ int AI_init()
   unsigned __int16 count; // dx
   int v9; // ecx
   int *v10; // eax
-  KKND::Ai_stru26C_Node *v11; // eax
+  KKND::AiBuildOrderNode *v11; // eax
   int i1; // eax
   KKND::AiAttackerNode *v13; // eax
   int v14; // eax
@@ -15217,7 +13898,7 @@ int AI_init()
   int i5; // eax
   KKND::AiEnemyNode *v24; // eax
   int i6; // eax
-  KKND::Ai_stru160_Node *v26; // eax
+  KKND::AiSquadNode *v26; // eax
   int i7; // eax
   KKND::AiMobileDerrickNode *v28; // eax
   int i8; // eax
@@ -15232,7 +13913,7 @@ int AI_init()
   int v39; // edx
   KKND::AiEnemyNode *v40; // eax
   int ii; // eax
-  KKND::Ai_stru160_Node *v42; // eax
+  KKND::AiSquadNode *v42; // eax
   int jj; // eax
   KKND::AiAttackerNode *v44; // eax
   int v45; // eax
@@ -15257,7 +13938,7 @@ int AI_init()
   KKND::AiAttackerNode *v64; // eax
   int v65; // eax
   int v66; // ecx
-  KKND::Ai_stru160_Node *v67; // eax
+  KKND::AiSquadNode *v67; // eax
   int k; // eax
   KKND::AiWandererNode *v69; // eax
   int m; // eax
@@ -15303,15 +13984,15 @@ int AI_init()
         *v78 = ai;
         ai->player_num = v75;
         ai->cash = &g_cash.cash[i + 1];
-        ai->_ai_controller_2B0 = 549 / (dword_4778C8 + 1);
-        ai->_ai_controller_2B4 = 4;
-        ai->_ai_controller_2B8 = -50;
-        ai->_ai_controller_2BC_ai_importance = 0;
+        ai->max_attackers = 549 / (dword_4778C8 + 1);
+        ai->squad_threshold = 4;
+        ai->attack_confidence = -50;
+        ai->base_threat = 0;
         v61 = g_current_lvl_id;
         g_cash.cash[i + 1] = g_lvl_desc[g_current_lvl_id].ai_starting_cash;
         ai->airstrike_interval = (unsigned __int16)g_lvl_desc[v61].superlvl_ai_airstrike_count_enemy.interval;
-        ai->_ai_controller_26C_head = (KKND::Ai_stru26C_Node *)&ai->_ai_controller_26C_head;
-        ai->_ai_controller_26C_tail = (KKND::Ai_stru26C_Node *)&ai->_ai_controller_26C_head;
+        ai->_ai_controller_26C_head = (KKND::AiBuildOrderNode *)&ai->_ai_controller_26C_head;
+        ai->_ai_controller_26C_tail = (KKND::AiBuildOrderNode *)&ai->_ai_controller_26C_head;
         ai->_ai_controller_26C_pool = nullptr;
         ai->build_head = (KKND::AiBuildNode *)&ai->build_head;
         ai->build_tail = (KKND::AiBuildNode *)&ai->build_head;
@@ -15335,13 +14016,13 @@ int AI_init()
         ai->enemy_pool[598].next = nullptr;
         ai->enemy_tail = (KKND::AiEnemyNode *)&ai->enemy_tail;
         ai->enemy_head = (KKND::AiEnemyNode *)&ai->enemy_tail;
-        v64 = (KKND::AiAttackerNode *)malloc(16 * (ai->_ai_controller_2B0 + 16));
+        v64 = (KKND::AiAttackerNode *)malloc(16 * (ai->max_attackers + 16));
         ai->_ai_controller_58_pool = v64;
         if ( !v64 )
           return 0;
         ai->_ai_controller_58_free = v64;
         v65 = 0;
-        if ( ai->_ai_controller_2B0 + 15 > 0 )
+        if ( ai->max_attackers + 15 > 0 )
         {
           v66 = 0;
           do
@@ -15350,12 +14031,12 @@ int AI_init()
             ai->_ai_controller_58_pool[v66].next = &ai->_ai_controller_58_pool[v66 + 1];
             ++v66;
           }
-          while ( v65 < ai->_ai_controller_2B0 + 15 );
+          while ( v65 < ai->max_attackers + 15 );
         }
         ai->_ai_controller_58_pool[v65].next = nullptr;
         ai->_ai_controller_58_head = (KKND::AiAttackerNode *)&ai->_ai_controller_58_head;
         ai->_ai_controller_58_tail = (KKND::AiAttackerNode *)&ai->_ai_controller_58_head;
-        v67 = (KKND::Ai_stru160_Node *)malloc(0x880u);
+        v67 = (KKND::AiSquadNode *)malloc(0x880u);
         ai->_ai_controller_160_pool = v67;
         if ( !v67 )
           return 0;
@@ -15363,9 +14044,9 @@ int AI_init()
         for ( k = 0; k < 31; ++k )
           ai->_ai_controller_160_pool[k].next = &ai->_ai_controller_160_pool[k + 1];
         ai->_ai_controller_160_pool[31].next = nullptr;
-        ai->_ai_controller_11C_tail = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+        ai->_ai_controller_11C_tail = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
         ai->_ai_controller_70 = nullptr;
-        ai->_ai_controller_11C_head = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+        ai->_ai_controller_11C_head = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
         ai->_ai_controller_60_tail = (KKND::AiAttackerNode *)&ai->_ai_controller_60_head;
         ai->next = ai;
         ai->_ai_controller_60_head = (KKND::AiAttackerNode *)&ai->_ai_controller_60_head;
@@ -15395,9 +14076,9 @@ int AI_init()
         ai->_ai_controller_168_tail = (int)&ai->_ai_controller_168_head;
         ai->_ai_controller_1F8 = 0;
         ai->_ai_controller_168_head = (int)&ai->_ai_controller_168_head;
-        ai->_ai_controller_1B4_tail = (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head;
+        ai->_ai_controller_1B4_tail = (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head;
         ai->_ai_controller_244 = 0;
-        ai->_ai_controller_1B4_head = (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head;
+        ai->_ai_controller_1B4_head = (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head;
         ai->_ai_controller_200_tail = (int)&ai->_ai_controller_200_head;
         ai->_ai_controller_310 = nullptr;
         ai->_ai_controller_200_head = (int)&ai->_ai_controller_200_head;
@@ -15451,13 +14132,13 @@ int AI_init()
         v38->cash = &g_cash.cash[v80 + 1];
         v39 = dword_4778C8;
         g_cash.cash[v80 + 1] = g_lvl_desc[g_current_lvl_id].ai_starting_cash;
-        v38->_ai_controller_2B0 = 549 / (v39 + 1);
-        v38->_ai_controller_2B4 = 4;
-        v38->_ai_controller_2B8 = -50;
-        v38->_ai_controller_2BC_ai_importance = 0;
+        v38->max_attackers = 549 / (v39 + 1);
+        v38->squad_threshold = 4;
+        v38->attack_confidence = -50;
+        v38->base_threat = 0;
         v38->airstrike_interval = (unsigned __int16)g_lvl_desc[g_current_lvl_id].superlvl_ai_airstrike_count_enemy.interval;
-        v38->_ai_controller_26C_head = (KKND::Ai_stru26C_Node *)&v38->_ai_controller_26C_head;
-        v38->_ai_controller_26C_tail = (KKND::Ai_stru26C_Node *)&v38->_ai_controller_26C_head;
+        v38->_ai_controller_26C_head = (KKND::AiBuildOrderNode *)&v38->_ai_controller_26C_head;
+        v38->_ai_controller_26C_tail = (KKND::AiBuildOrderNode *)&v38->_ai_controller_26C_head;
         v38->_ai_controller_26C_pool = nullptr;
         v38->build_head = (KKND::AiBuildNode *)&v38->build_head;
         v38->build_tail = (KKND::AiBuildNode *)&v38->build_head;
@@ -15481,7 +14162,7 @@ int AI_init()
         v38->enemy_pool[598].next = nullptr;
         v38->enemy_tail = (KKND::AiEnemyNode *)&v38->enemy_tail;
         v38->enemy_head = (KKND::AiEnemyNode *)&v38->enemy_tail;
-        v42 = (KKND::Ai_stru160_Node *)malloc(0x880u);
+        v42 = (KKND::AiSquadNode *)malloc(0x880u);
         v38->_ai_controller_160_pool = v42;
         if ( !v42 )
           return 0;
@@ -15489,15 +14170,15 @@ int AI_init()
         for ( jj = 0; jj < 31; ++jj )
           v38->_ai_controller_160_pool[jj].next = &v38->_ai_controller_160_pool[jj + 1];
         v38->_ai_controller_160_pool[31].next = nullptr;
-        v38->_ai_controller_11C_head = (KKND::Ai_stru160_Node *)&v38->_ai_controller_11C_head;
-        v38->_ai_controller_11C_tail = (KKND::Ai_stru160_Node *)&v38->_ai_controller_11C_head;
-        v44 = (KKND::AiAttackerNode *)malloc(16 * (v38->_ai_controller_2B0 + 16));
+        v38->_ai_controller_11C_head = (KKND::AiSquadNode *)&v38->_ai_controller_11C_head;
+        v38->_ai_controller_11C_tail = (KKND::AiSquadNode *)&v38->_ai_controller_11C_head;
+        v44 = (KKND::AiAttackerNode *)malloc(16 * (v38->max_attackers + 16));
         v38->_ai_controller_70 = v44;
         if ( !v44 )
           return 0;
         v38->_ai_controller_74 = v44;
         v45 = 0;
-        if ( v38->_ai_controller_2B0 + 15 > 0 )
+        if ( v38->max_attackers + 15 > 0 )
         {
           v46 = 0;
           do
@@ -15506,16 +14187,16 @@ int AI_init()
             v38->_ai_controller_70[v46].next = &v38->_ai_controller_70[v46 + 1];
             ++v46;
           }
-          while ( v45 < v38->_ai_controller_2B0 + 15 );
+          while ( v45 < v38->max_attackers + 15 );
         }
         v38->_ai_controller_70[v45].next = nullptr;
         v38->_ai_controller_60_head = (KKND::AiAttackerNode *)&v38->_ai_controller_60_head;
         v38->_ai_controller_60_tail = (KKND::AiAttackerNode *)&v38->_ai_controller_60_head;
-        v47 = (KKND::AiAttackerNode *)malloc(16 * (v38->_ai_controller_2B0 + 16));
+        v47 = (KKND::AiAttackerNode *)malloc(16 * (v38->max_attackers + 16));
         v38->_ai_controller_58_pool = v47;
         if ( !v47 )
           return 0;
-        ai_controller_2B0 = v38->_ai_controller_2B0;
+        ai_controller_2B0 = v38->max_attackers;
         v38->_ai_controller_58_free = v47;
         v49 = 0;
         if ( ai_controller_2B0 + 15 > 0 )
@@ -15527,7 +14208,7 @@ int AI_init()
             v38->_ai_controller_58_pool[v50].next = &v38->_ai_controller_58_pool[v50 + 1];
             ++v50;
           }
-          while ( v49 < v38->_ai_controller_2B0 + 15 );
+          while ( v49 < v38->max_attackers + 15 );
         }
         v38->_ai_controller_58_pool[v49].next = nullptr;
         v38->_ai_controller_58_tail = (KKND::AiAttackerNode *)&v38->_ai_controller_58_head;
@@ -15566,9 +14247,9 @@ int AI_init()
         v38->_ai_controller_168_tail = (int)&v38->_ai_controller_168_head;
         v38->_ai_controller_1F8 = 0;
         v38->_ai_controller_168_head = (int)&v38->_ai_controller_168_head;
-        v38->_ai_controller_1B4_tail = (KKND::Ai_stru160_Node *)&v38->_ai_controller_1B4_head;
+        v38->_ai_controller_1B4_tail = (KKND::AiSquadNode *)&v38->_ai_controller_1B4_head;
         v38->_ai_controller_244 = 0;
-        v38->_ai_controller_1B4_head = (KKND::Ai_stru160_Node *)&v38->_ai_controller_1B4_head;
+        v38->_ai_controller_1B4_head = (KKND::AiSquadNode *)&v38->_ai_controller_1B4_head;
         v38->_ai_controller_200_tail = (int)&v38->_ai_controller_200_head;
         v38->_ai_controller_310 = nullptr;
         v38->_ai_controller_200_head = (int)&v38->_ai_controller_200_head;
@@ -15656,11 +14337,11 @@ int AI_init()
           v4->airstrike_count = count;
         }
         v9 = 4;
-        v4->_ai_controller_2B0 = 549 / (dword_4778C8 + 1);
-        v4->_ai_controller_2B4 = 200;
-        v4->_ai_controller_2C0_threat_in_area = 0;
-        v4->_ai_controller_278_x = -1;
-        v10 = v4->_ai_controller_280[0];
+        v4->max_attackers = 549 / (dword_4778C8 + 1);
+        v4->squad_threshold = 200;
+        v4->max_squad_threat = 0;
+        v4->rally_x = -1;
+        v10 = v4->patrol_waypoints[0];
         do
         {
           *v10 = -1;
@@ -15668,13 +14349,13 @@ int AI_init()
           --v9;
         }
         while ( v9 );
-        v4->_ai_controller_2B8 = -50;
+        v4->attack_confidence = -50;
         v4->base_area_min_x = 0x40000000;
         v4->base_area_max_x = -1;
         v4->base_area_min_y = 0x40000000;
         v4->base_area_max_y = -1;
-        v4->_ai_controller_2BC_ai_importance = 0;
-        v11 = (KKND::Ai_stru26C_Node *)malloc(0x180u);
+        v4->base_threat = 0;
+        v11 = (KKND::AiBuildOrderNode *)malloc(0x180u);
         v4->_ai_controller_26C_pool = v11;
         if ( !v11 )
           return 0;
@@ -15682,15 +14363,15 @@ int AI_init()
         for ( i1 = 0; i1 < 31; ++i1 )
           v4->_ai_controller_26C_pool[i1].next = &v4->_ai_controller_26C_pool[i1 + 1];
         v4->_ai_controller_26C_pool[31].next = nullptr;
-        v4->_ai_controller_26C_head = (KKND::Ai_stru26C_Node *)&v4->_ai_controller_26C_head;
-        v4->_ai_controller_26C_tail = (KKND::Ai_stru26C_Node *)&v4->_ai_controller_26C_head;
-        v13 = (KKND::AiAttackerNode *)malloc(16 * (v4->_ai_controller_2B0 + 16));
+        v4->_ai_controller_26C_head = (KKND::AiBuildOrderNode *)&v4->_ai_controller_26C_head;
+        v4->_ai_controller_26C_tail = (KKND::AiBuildOrderNode *)&v4->_ai_controller_26C_head;
+        v13 = (KKND::AiAttackerNode *)malloc(16 * (v4->max_attackers + 16));
         v4->_ai_controller_58_pool = v13;
         if ( !v13 )
           return 0;
         v4->_ai_controller_58_free = v13;
         v14 = 0;
-        if ( v4->_ai_controller_2B0 + 15 > 0 )
+        if ( v4->max_attackers + 15 > 0 )
         {
           v15 = 0;
           do
@@ -15699,7 +14380,7 @@ int AI_init()
             v4->_ai_controller_58_pool[v15].next = &v4->_ai_controller_58_pool[v15 + 1];
             ++v15;
           }
-          while ( v14 < v4->_ai_controller_2B0 + 15 );
+          while ( v14 < v4->max_attackers + 15 );
         }
         v4->_ai_controller_58_pool[v14].next = nullptr;
         v4->_ai_controller_58_head = (KKND::AiAttackerNode *)&v4->_ai_controller_58_head;
@@ -15760,7 +14441,7 @@ int AI_init()
         v4->enemy_pool[598].next = nullptr;
         v4->enemy_head = (KKND::AiEnemyNode *)&v4->enemy_tail;
         v4->enemy_tail = (KKND::AiEnemyNode *)&v4->enemy_tail;
-        v26 = (KKND::Ai_stru160_Node *)malloc(0x880u);
+        v26 = (KKND::AiSquadNode *)malloc(0x880u);
         v4->_ai_controller_160_pool = v26;
         if ( !v26 )
           return 0;
@@ -15768,15 +14449,15 @@ int AI_init()
         for ( i7 = 0; i7 < 31; ++i7 )
           v4->_ai_controller_160_pool[i7].next = &v4->_ai_controller_160_pool[i7 + 1];
         v4->_ai_controller_160_pool[31].next = nullptr;
-        v4->_ai_controller_11C_tail = (KKND::Ai_stru160_Node *)&v4->_ai_controller_11C_head;
+        v4->_ai_controller_11C_tail = (KKND::AiSquadNode *)&v4->_ai_controller_11C_head;
         v4->_ai_controller_1AC = 0;
-        v4->_ai_controller_11C_head = (KKND::Ai_stru160_Node *)&v4->_ai_controller_11C_head;
+        v4->_ai_controller_11C_head = (KKND::AiSquadNode *)&v4->_ai_controller_11C_head;
         v4->_ai_controller_168_tail = (int)&v4->_ai_controller_168_head;
         v4->_ai_controller_1F8 = 0;
         v4->_ai_controller_168_head = (int)&v4->_ai_controller_168_head;
-        v4->_ai_controller_1B4_tail = (KKND::Ai_stru160_Node *)&v4->_ai_controller_1B4_head;
+        v4->_ai_controller_1B4_tail = (KKND::AiSquadNode *)&v4->_ai_controller_1B4_head;
         v4->_ai_controller_244 = 0;
-        v4->_ai_controller_1B4_head = (KKND::Ai_stru160_Node *)&v4->_ai_controller_1B4_head;
+        v4->_ai_controller_1B4_head = (KKND::AiSquadNode *)&v4->_ai_controller_1B4_head;
         v4->_ai_controller_200_tail = (int)&v4->_ai_controller_200_head;
         v4->_ai_controller_200_head = (int)&v4->_ai_controller_200_head;
         v28 = (KKND::AiMobileDerrickNode *)malloc(0x900u);
@@ -15880,7 +14561,7 @@ void AI_cleanup()
         free(ai_->_ai_controller_28_pool);
         free(ai_->_ai_controller_40_pool);
       }
-      task_445310(*v0);
+      TASK_terminate(*v0);
     }
     ++v0;
   }
@@ -15911,7 +14592,7 @@ BOOL FILE_init()
     g_file_pool[19].next = nullptr;
     dword_477928 = (KKND::File *)&unk_477910;
     dword_47792C = (KKND::File *)&unk_477910;
-    g_file_free = g_file_pool;
+    g_file_free_head = g_file_pool;
     g_num_files_open = nullptr;
     return 1;
   }
@@ -15926,10 +14607,10 @@ KKND::File *__thiscall FILE_open(const char *filename)
   KKND::File *v4; // ecx
   FILE *v6; // eax
 
-  v1 = g_file_free;
-  if ( g_file_free )
+  v1 = g_file_free_head;
+  if ( g_file_free_head )
   {
-    g_file_free = (KKND::File *)g_file_free->next;
+    g_file_free_head = (KKND::File *)g_file_free_head->next;
     memset(v1, 0, sizeof(KKND::File));
     v4 = dword_477928;
     v1->prev = (int)&unk_477910;
@@ -15952,8 +14633,8 @@ KKND::File *__thiscall FILE_open(const char *filename)
     return v3;
   *(_DWORD *)(v3->next + 28) = v3->prev;
   *(_DWORD *)(v3->prev + 24) = v3->next;
-  v3->next = (int)g_file_free;
-  g_file_free = v3;
+  v3->next = (int)g_file_free_head;
+  g_file_free_head = v3;
   --g_num_files_open;
   return nullptr;
 }
@@ -16062,8 +14743,8 @@ void __fastcall FILE_close(KKND::File *file)
     }
     file->next->prev = file->prev;
     file->prev->next = file->next;
-    file->next = g_file_free;
-    g_file_free = file;
+    file->next = g_file_free_head;
+    g_file_free_head = file;
     --g_num_files_open;
   }
 }
@@ -16096,8 +14777,8 @@ void FILE_cleanup()
         }
         v0->next->prev = v0->prev;
         v0->prev->next = v0->next;
-        v0->next = g_file_free;
-        g_file_free = v0;
+        v0->next = g_file_free_head;
+        g_file_free_head = v0;
         --g_num_files_open;
       }
       v0 = next;
@@ -16382,7 +15063,7 @@ LABEL_55:
       v22 += 4;
     }
     while ( *(_WORD *)g_movie->_movie_2C );
-    palette_40E400((KKND::PaletteEntry *)&stru_477980.cbSize);
+    PAL_apply((KKND::PaletteEntry *)&stru_477980.cbSize);
     v19 = g_movie;
   }
   if ( !dword_477DF0 )
@@ -16472,7 +15153,7 @@ void MOVIE_cleanup()
 }
 
 //----- (0040D2C0) --------------------------------------------------------
-BOOL MOVIE_is_null()
+BOOL sub_40D2C0()
 {
   return g_movie == nullptr;
 }
@@ -16790,24 +15471,24 @@ BOOL __fastcall entity_is_in_radius(KKND::Entity *a, KKND::Entity *b, int radius
 {
   int x; // esi
 
-  b->is_on_collision_grid = 1;
+  b->is_collidable = 1;
   x = a->x;
-  a->is_on_collision_grid = 1;
+  a->is_collidable = 1;
   return ((b->y - a->y) >> 8) * ((b->y - a->y) >> 8) + ((b->x - x) >> 8) * ((b->x - x) >> 8) <= radius * radius;
 }
 
 //----- (0040D8B0) --------------------------------------------------------
-int __fastcall entity_40D8B0(KKND::Entity *entity, int radius)
+void __fastcall entity_apply_aoe_damage(KKND::Entity *entity, int radius)
 {
   int v2; // ebp
   int v4; // ebx
   int v5; // edx
   int v6; // ecx
-  int result; // eax
+  int v7; // eax
   int v8; // edi
   int v9; // edx
   int v10; // edi
-  KKND::TerrainTile *v11; // eax
+  KKND::TerrainTile *tile; // eax
   KKND::Unit **units; // ebx
   int *v13; // edi
   KKND::Entity *v14; // ecx
@@ -16815,7 +15496,7 @@ int __fastcall entity_40D8B0(KKND::Entity *entity, int radius)
   int v16; // eax
   KKND::Unit *v17; // edx
   int v18; // eax
-  int *v19; // ecx
+  KKND::Unit **v19; // ecx
   bool v20; // cc
   int v21; // [esp+10h] [ebp-28h]
   int v22; // [esp+14h] [ebp-24h]
@@ -16832,7 +15513,7 @@ int __fastcall entity_40D8B0(KKND::Entity *entity, int radius)
   v4 = (radius >> 4) + 1;
   v5 = radius >> 5;
   v6 = (entity->x >> 13) - v5;
-  result = (entity->y >> 13) - v5;
+  v7 = (entity->y >> 13) - v5;
   v25 = v2;
   v21 = 0;
   v24 = v4;
@@ -16845,40 +15526,40 @@ int __fastcall entity_40D8B0(KKND::Entity *entity, int radius)
     v6 = 0;
     v24 = v4;
   }
-  if ( result < 0 )
+  if ( v7 < 0 )
   {
-    v8 += result;
-    result = 0;
+    v8 += v7;
+    v7 = 0;
   }
-  v9 = result;
-  v23 = result;
-  v30 = result + v8;
-  if ( result < result + v8 )
+  v9 = v7;
+  v23 = v7;
+  v30 = v7 + v8;
+  if ( v7 < v7 + v8 )
   {
     while ( v9 < g_map_num_tiles_y )
     {
       v10 = v6;
       v27 = v6;
-      v11 = &g_terrain[v6 + g_map_num_tiles_x * v9];
+      tile = &g_terrain[v6 + g_map_num_tiles_x * v9];
       v29 = v4 + v6;
       if ( v6 < v4 + v6 )
       {
-        units = v11->units;
-        v28 = v11->units;
+        units = tile->units;
+        v28 = tile->units;
         do
         {
           if ( v10 >= g_map_num_tiles_x )
             break;
           v26 = 0;
-          v13 = &dword_478108[v21];
+          v13 = (int *)&g_aoe_dedup[v21];
           do
           {
             if ( *units )
             {
               v14 = (*units)->entity;
-              v14->is_on_collision_grid = 1;
+              v14->is_collidable = 1;
               x = entity->x;
-              entity->is_on_collision_grid = 1;
+              entity->is_collidable = 1;
               v16 = (v14->y - entity->y) >> 8;
               if ( v16 * v16 + ((v14->x - x) >> 8) * ((v14->x - x) >> 8) <= v2 * v2 )
               {
@@ -16888,12 +15569,12 @@ int __fastcall entity_40D8B0(KKND::Entity *entity, int radius)
                   if ( v17->task )
                   {
                     v18 = 0;
-                    if ( (int)v13 > (int)dword_478108 )
+                    if ( (int)v13 > (int)g_aoe_dedup )
                     {
-                      v19 = dword_478108;
+                      v19 = g_aoe_dedup;        // avoid damaging the same unit multiple times (when they occupy multiple tiles)
                       do
                       {
-                        if ( (KKND::Unit *)*v19 == v17 )
+                        if ( *v19 == v17 )
                           break;
                         ++v18;
                         ++v19;
@@ -16902,11 +15583,11 @@ int __fastcall entity_40D8B0(KKND::Entity *entity, int radius)
                     }
                     if ( v18 >= v21 )
                     {
-                      result = TASK_send_message(entity->task, TaskMessage_ReceiveDamage, entity, v17->task);
+                      TSK_send_message(entity->task, TaskMessage_ReceiveDamage, entity, v17->task);
                       *v13++ = (int)*units;
                       ++v21;
                       if ( v13 == &dword_4785B8 )
-                        return result;
+                        return;
                     }
                   }
                   v2 = v25;
@@ -16925,22 +15606,20 @@ int __fastcall entity_40D8B0(KKND::Entity *entity, int radius)
         }
         while ( v20 );
       }
-      result = ++v23;
-      if ( v23 >= v30 )
+      if ( ++v23 >= v30 )
         break;
       v4 = v24;
       v9 = v23;
     }
   }
-  return result;
 }
-// 478108: using guessed type int dword_478108[300];
 // 4785B8: using guessed type int dword_4785B8;
 // 478AAC: using guessed type int g_map_num_tiles_y;
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0040DA90) --------------------------------------------------------
-KKND::BoxdPathingClassification __fastcall BOXD_40DA90(KKND::Unit *unit)
+// Called during movement tick to update tile occupancy when entity moves between tiles
+KKND::BoxdPathingClassification __fastcall BOXD_update_tile_on_move(KKND::Unit *unit)
 {
   KKND::Entity *entity; // eax
   int y; // ecx
@@ -16968,7 +15647,7 @@ KKND::BoxdPathingClassification __fastcall BOXD_40DA90(KKND::Unit *unit)
     {
       v15 = BOXD_place_unit(unit, v13, v14, UnitPosition_Slot1);
       if ( v15 == UnitTilePosition_Invalid )
-        return BOX_classify_tile_for_pathing(unit, v13, v14, &g_terrain[v13 + g_map_num_tiles_x * v14]);
+        return BOXD_classify_tile_for_pathing(unit, v13, v14, &g_terrain[v13 + g_map_num_tiles_x * v14]);
       BOXD_remove_unit_from_tile(unit, unit->map_x, unit->map_y, unit->tile_position);
       unit->tile_position = v15;
       unit->map_x = v13;
@@ -16996,7 +15675,7 @@ KKND::BoxdPathingClassification __fastcall BOXD_40DA90(KKND::Unit *unit)
       v9 = v17;
     }
   }
-  result = BOXD_40E1B0(
+  result = BOXD_place_unit_xl(
              unit,
              unit->entity->x_speed + unit->entity->x,
              unit->entity->y + unit->entity->y_speed,
@@ -17004,7 +15683,7 @@ KKND::BoxdPathingClassification __fastcall BOXD_40DA90(KKND::Unit *unit)
   v12 = result;
   if ( result != 4 )
   {
-    BOXD_40E1B0(unit, unit->entity->x, unit->entity->y, UnitPosition_Slot1);
+    BOXD_place_unit_xl(unit, unit->entity->x, unit->entity->y, UnitPosition_Slot1);
     return v12;
   }
   return result;
@@ -17145,7 +15824,7 @@ LABEL_4:
           if ( (v14 & v3->collision_mask) != 0 )
             v8 = BOXD_place_unit(unit, v12, v10, UnitPosition_Slot0);
           else
-            v8 = BOXD_place_unit(unit, v12, v10, UnitTilePosition_40);
+            v8 = BOXD_place_unit(unit, v12, v10, UnitTilePosition_BuildingPlacement);
           v14 >>= 1;
           ++v12;
         }
@@ -17227,12 +15906,12 @@ LABEL_4:
 }
 
 //----- (0040DE80) --------------------------------------------------------
-int __fastcall BOXD_40DE80(KKND::Unit *unit, int x, int y, KKND::UnitTilePosition a4)
+int __fastcall BOXD_place_unit_world_coords(KKND::Unit *unit, int x, int y, KKND::UnitTilePosition pos)
 {
   if ( unit->stats->size == UnitSize_XL )
-    return BOXD_40E1B0(unit, x, y, a4) != 4 ? 5 : 0;
+    return BOXD_place_unit_xl(unit, x, y, pos) != 4 ? 5 : 0;
   else
-    return BOXD_place_unit(unit, x >> 13, y >> 13, a4);
+    return BOXD_place_unit(unit, x >> 13, y >> 13, pos);
 }
 
 //----- (0040DEC0) --------------------------------------------------------
@@ -17322,11 +16001,12 @@ void __fastcall BOXD_40DF50(KKND::Unit *a1, BOOL a2)
 }
 
 //----- (0040E000) --------------------------------------------------------
-int __fastcall BOXD_40E000(KKND::Unit *unit, int scan_x, int scan_y)
+// Like BOX_classify_tile_for_pathing but handles XL 2×2 area and tracks nav_obstacle
+KKND::BoxdPathingClassification __fastcall BOXD_classify_area_for_pathing(KKND::Unit *unit, int scan_x, int scan_y)
 {
   KKND::TerrainTile *v4; // ebx
   KKND::TerrainTile *v5; // esi
-  int result; // eax
+  KKND::BoxdPathingClassification result; // eax
   int v7; // ecx
   KKND::Unit **i; // edx
   int v9; // edi
@@ -17338,8 +16018,8 @@ int __fastcall BOXD_40E000(KKND::Unit *unit, int scan_x, int scan_y)
   int v15; // ecx
   int v16; // ebx
   KKND::TerrainTile *v17; // esi
-  int v18; // eax
-  int v19; // eax
+  KKND::BoxdPathingClassification v18; // eax
+  unsigned __int32 v19; // eax
   int v20; // eax
   KKND::Unit **units; // ecx
   int v22; // eax
@@ -17354,8 +16034,8 @@ int __fastcall BOXD_40E000(KKND::Unit *unit, int scan_x, int scan_y)
   if ( unit->stats->size != UnitSize_XL )
   {
     v5 = &g_terrain[(scan_x >> 13) + g_map_num_tiles_x * (scan_y >> 13)];
-    result = BOXD_40ED00(unit, v5);
-    if ( result == 1 || result == 3 )
+    result = BOXD_classify_tile_simple(unit, v5);
+    if ( result == Boxd_PartiallyOccupied || result == Boxd_FullyOccupied )
     {
       v7 = 0;
       for ( i = v5->units; !*i; ++i )
@@ -17389,9 +16069,9 @@ int __fastcall BOXD_40E000(KKND::Unit *unit, int scan_x, int scan_y)
       {
         while ( 1 )
         {
-          v18 = BOXD_40ED00(unit, v17);
-          if ( !v18 )
-            return 0;
+          v18 = BOXD_classify_tile_simple(unit, v17);
+          if ( v18 == Boxd_Impassable )
+            return Boxd_Impassable;
           v19 = v18 - 1;
           if ( !v19 )
             break;
@@ -17421,7 +16101,7 @@ LABEL_19:
     v11 = v24;
   }
   if ( !v11 && !v25 )
-    return 2;
+    return Boxd_Clear;
   v20 = 0;
   units = v4->units;
   while ( !*units )
@@ -17441,7 +16121,11 @@ LABEL_29:
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0040E1B0) --------------------------------------------------------
-KKND::BoxdPathingClassification __fastcall sub_40E1B0(KKND::Unit *unit, int x, int y, KKND::UnitTilePosition a4)
+KKND::BoxdPathingClassification __fastcall BOXD_place_unit_xl(
+        KKND::Unit *unit,
+        int x,
+        int y,
+        KKND::UnitTilePosition pos)
 {
   KKND::UnitSize size; // ecx
   int v6; // ebp
@@ -17478,12 +16162,12 @@ LABEL_5:
       if ( ++v6 > ya )
         goto LABEL_6;
     }
-    while ( BOXD_place_unit(unit, v8, v6, a4) != 5 )
+    while ( BOXD_place_unit(unit, v8, v6, pos) != 5 )
     {
       if ( ++v8 > v7 )
         goto LABEL_5;
     }
-    v10 = BOX_classify_tile_for_pathing(unit, v8, v6, &g_terrain[v8 + g_map_num_tiles_x * v6]);
+    v10 = BOXD_classify_tile_for_pathing(unit, v8, v6, &g_terrain[v8 + g_map_num_tiles_x * v6]);
     v11 = map_y;
     for ( i = v10; v11 <= ya; ++v11 )
     {
@@ -17500,8 +16184,8 @@ LABEL_5:
 //----- (0040E2A0) --------------------------------------------------------
 int sub_40E2A0()
 {
-  g_screen_width = dword_478AA0;
-  g_screen_height = dword_478A84;
+  g_screen_width = g_display_width;
+  g_screen_height = g_display_height;
   sub_434890();
   dword_478A94 = 1;
   dword_478A0C = 1;
@@ -17565,10 +16249,10 @@ int sub_40E390()
   dword_478A00 = 1;
   dword_4785E8 = 640;
   dword_478A80 = 480;
-  if ( dword_478AA0 != 640 || dword_478A84 != 480 )
+  if ( g_display_width != 640 || g_display_height != 480 )
   {
-    dword_478AA0 = 640;
-    dword_478A84 = 480;
+    g_display_width = 640;
+    g_display_height = 480;
   }
   return 1;
 }
@@ -17584,14 +16268,14 @@ const char *__cdecl sub_40E3E0()
   const char *result; // eax
 
   result = "320";
-  if ( dword_478AA0 >= 640 )
+  if ( g_display_width >= 640 )
     return "640";
   return result;
 }
 // 478AA0: using guessed type int dword_478AA0;
 
 //----- (0040E400) --------------------------------------------------------
-void __fastcall palette_40E400(KKND::PaletteEntry *pal)
+void __fastcall PAL_apply(KKND::PaletteEntry *pal)
 {
   g_pal_4785C0 = pal;
   g_pal_4785DC = pal;
@@ -17690,7 +16374,7 @@ KKND::PaletteEntry *palette_40E550()
 }
 
 //----- (0040E560) --------------------------------------------------------
-int sub_40E560()
+int pal_40E560()
 {
   int result; // eax
   unsigned int i; // esi
@@ -17714,20 +16398,20 @@ int sub_40E560()
     g_pdd->lpVtbl->FlipToGDISurface(g_pdd);
     if ( dword_465680 )
     {
-      for ( i = 0; i < 0x64; i += 4 )
-        *(COLORREF *)((char *)&::aRgbValues + i) = GetSysColor(*(const INT *)((char *)&dword_463008 + i));
+      for ( i = 0; i < 25; ++i )
+        dword_478A18[i] = GetSysColor(dword_463008[i]);
       dword_465680 = 0;
     }
     v2 = 0;
     v12 = 0;
     do
     {
-      v3 = *(unsigned __int8 *)(v2 + 4688409);
+      v3 = *((unsigned __int8 *)dword_478A18 + v2 + 1);
       v11 = 0;
       v10 = 195075;
       v9 = 0;
-      v13 = *((unsigned __int8 *)&::aRgbValues + v2);
-      v4 = (unsigned __int8)BYTE2(*(COLORREF *)((char *)&::aRgbValues + v2));
+      v13 = *((unsigned __int8 *)dword_478A18 + v2);
+      v4 = (unsigned __int8)BYTE2(*(COLORREF *)((char *)dword_478A18 + v2));
       p_peGreen = &stru_47B808[0].peGreen;
       do
       {
@@ -17759,7 +16443,7 @@ int sub_40E560()
       v12 = v2;
     }
     while ( v2 < 0x64 );
-    return SetSysColors(25, &dword_463008, aRgbValues);
+    return SetSysColors(25, dword_463008, aRgbValues);
   }
   return result;
 }
@@ -17773,7 +16457,7 @@ int sub_40E6B0()
 
   if ( dword_4798AC == 1 )
   {
-    SetSysColors(25, &dword_463008, &aRgbValues);
+    SetSysColors(25, &dword_463008, &dword_478A18);
     return sub_431980(g_pal_4785DC, 0);
   }
   return result;
@@ -17782,10 +16466,10 @@ int sub_40E6B0()
 // 4798AC: using guessed type int dword_4798AC;
 
 //----- (0040E6E0) --------------------------------------------------------
-BOOL LVL_InitBoxdTerrain()
+BOOL LVL_terrain_init()
 {
   KKND::LevelBoxd *boxd; // eax
-  KKND::LevelBoxdSurface *v1; // ebx
+  BoxdGrid *v1; // ebx
   int v2; // edi
   int num_tiles_y; // eax
   KKND::TerrainTile *v4; // eax
@@ -17793,7 +16477,7 @@ BOOL LVL_InitBoxdTerrain()
   int v7; // ecx
   int v8; // eax
   int v9; // edx
-  KKND::BoxdTile *v10; // edx
+  ___remove__KKND::BoxdTile *v10; // edx
   int *type; // eax
   int v12; // eax
   KKND::TerrainTile *v13; // esi
@@ -17808,12 +16492,12 @@ BOOL LVL_InitBoxdTerrain()
   int v22; // ecx
   int v23; // ecx
   KKND::TerrainTile *v24; // [esp+10h] [ebp-34h]
-  KKND::BoxdTile *v25; // [esp+14h] [ebp-30h]
+  ___remove__KKND::BoxdTile *v25; // [esp+14h] [ebp-30h]
   int j; // [esp+18h] [ebp-2Ch]
-  KKND::BoxdTile **tiles; // [esp+1Ch] [ebp-28h]
+  ___remove__KKND::BoxdTile **tiles; // [esp+1Ch] [ebp-28h]
   int i; // [esp+20h] [ebp-24h]
   int v29; // [esp+24h] [ebp-20h]
-  KKND::LevelBoxdSurface *v30; // [esp+28h] [ebp-1Ch]
+  BoxdGrid *v30; // [esp+28h] [ebp-1Ch]
   int v31; // [esp+2Ch] [ebp-18h]
   char v32; // [esp+30h] [ebp-14h]
   int v33; // [esp+34h] [ebp-10h]
@@ -17828,11 +16512,11 @@ BOOL LVL_InitBoxdTerrain()
   boxd = (KKND::LevelBoxd *)LVL_FindSection("BOXD");
   if ( boxd )
   {
-    v1 = boxd->layers[0];
+    v1 = boxd->grid[0];
     v30 = v1;
-    v2 = boxd->layers[0]->world_to_tile_x - 13;
+    v2 = boxd->grid[0]->world_to_tile_x - 13;
     v32 = v2;
-    g_map_num_tiles_x = boxd->layers[0]->num_tiles_x << v2;
+    g_map_num_tiles_x = boxd->grid[0]->num_tiles_x << v2;
     num_tiles_y = v1->num_tiles_y;
     v33 = v1->world_to_tile_y - 13;
     g_map_width = g_map_num_tiles_x << 13;
@@ -17948,8 +16632,8 @@ BOOL LVL_InitBoxdTerrain()
                   v10 = v25;
                 }
               }
-              type = (int *)v10->x;
-              v10 = (KKND::BoxdTile *)((char *)v10 + 4);
+              type = (int *)v10->x1;
+              v10 = (___remove__KKND::BoxdTile *)((char *)v10 + 4);
               v25 = v10;
             }
             while ( type );
@@ -17988,14 +16672,14 @@ BOOL LVL_InitBoxdTerrain()
 // 4793F8: using guessed type int g_map_num_tiles_x;
 // 47952C: using guessed type int dword_47952C;
 // 479538: using guessed type int dword_479538;
-// 47953C: using guessed type int dword_47953C;
+// 47953C: using guessed type int g_opportunity_timer;
 
 //----- (0040EA20) --------------------------------------------------------
 void sub_40EA20()
 {
   ++g_opportunity_timer;
 }
-// 47953C: using guessed type int dword_47953C;
+// 47953C: using guessed type int g_opportunity_timer;
 
 //----- (0040EA30) --------------------------------------------------------
 void BOXD_terrain_cleanup()
@@ -18005,7 +16689,7 @@ void BOXD_terrain_cleanup()
 }
 
 //----- (0040EA50) --------------------------------------------------------
-KKND::BoxdPathingClassification __fastcall BOX_classify_tile_for_pathing(
+KKND::BoxdPathingClassification __fastcall BOXD_classify_tile_for_pathing(
         KKND::Unit *unit,
         int map_x,
         int map_y,
@@ -18158,7 +16842,8 @@ LABEL_33:
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0040ED00) --------------------------------------------------------
-int __fastcall BOXD_40ED00(KKND::Unit *unit, KKND::TerrainTile *tile)
+// Simpler version of BOX_classify_tile_for_pathing, used during scanning
+KKND::BoxdPathingClassification __fastcall BOXD_classify_tile_simple(KKND::Unit *unit, KKND::TerrainTile *tile)
 {
   KKND::UnitSize size; // eax
   KKND::TerrainTileFlags1 flags1; // al
@@ -18177,22 +16862,22 @@ int __fastcall BOXD_40ED00(KKND::Unit *unit, KKND::TerrainTile *tile)
     {
       flags1 = tile->flags1;
       if ( (tile->flags1 & 0x60) != 0 && (flags1 & 0x80u) == 0 )
-        return 0;
+        return Boxd_Impassable;
       if ( (flags1 & 0x1F) == 0x1F )
         return (tile->flags2 & 0x1F) != 0 ? 3 : 1;
-      return 2;
+      return Boxd_Clear;
     }
     if ( size != UnitSize_XL )
-      return 0;
+      return Boxd_Impassable;
   }
   v6 = tile->flags1;
   if ( (tile->flags1 & 0x60) != 0 && (v6 & 0x80u) == 0 )
-    return 0;
+    return Boxd_Impassable;
   units = tile->units;
   if ( tile->units[0] == unit )
-    return 2;
+    return Boxd_Clear;
   if ( (v6 & 0x1F) == 0 )
-    return 2;
+    return Boxd_Clear;
   if ( (v6 & 0x80u) == 0 )
   {
     player_num = unit->player_num;
@@ -18204,7 +16889,7 @@ int __fastcall BOXD_40ED00(KKND::Unit *unit, KKND::TerrainTile *tile)
       if ( v9 >= 5 )
       {
         if ( unit->stats->can_crush )
-          return 2;
+          return Boxd_Clear;
         break;
       }
     }
@@ -18216,7 +16901,8 @@ int __fastcall BOXD_40ED00(KKND::Unit *unit, KKND::TerrainTile *tile)
 }
 
 //----- (0040EDF0) --------------------------------------------------------
-BOOL __fastcall BOXD_40EDF0(KKND::TerrainTile *tile, KKND::Unit *a2, KKND::Unit *a3)
+// Checks if tile blocked, ignoring two specific units (self + target)
+BOOL __fastcall BOXD_is_tile_passable_except(KKND::TerrainTile *tile, KKND::Unit *self, KKND::Unit *target)
 {
   KKND::Unit *v3; // eax
   BOOL result; // eax
@@ -18225,16 +16911,16 @@ BOOL __fastcall BOXD_40EDF0(KKND::TerrainTile *tile, KKND::Unit *a2, KKND::Unit 
   if ( (tile->flags1 & TerrainTileFlags1_Blocked) != 0 )
   {
     v3 = tile->units[0];
-    if ( v3 != a2 && v3 != a3 )
+    if ( v3 != self && v3 != target )
       return false;
   }
   return result;
 }
 
 //----- (0040EE10) --------------------------------------------------------
-KKND::Unit *__fastcall BOXD_40EE10(int map_x, int map_y)
+KKND::Unit *__fastcall BOXD_find_building_at_tile(int map_x, int map_y)
 {
-  KKND::TerrainTile *v2; // eax
+  KKND::TerrainTile *tile; // eax
   KKND::Unit *v3; // ecx
   KKND::UnitType type; // ecx
   KKND::Unit *result; // eax
@@ -18242,18 +16928,18 @@ KKND::Unit *__fastcall BOXD_40EE10(int map_x, int map_y)
 
   if ( map_x < 0 || map_y < 1 || map_x >= g_map_num_tiles_x || map_y >= g_map_num_tiles_y )
     return nullptr;
-  v2 = &g_terrain[map_x + g_map_num_tiles_x * map_y];
-  if ( (v2->flags2 & 0x40) != 0 )
+  tile = &g_terrain[map_x + g_map_num_tiles_x * map_y];
+  if ( (tile->flags2 & 0x40) != 0 )
   {
-    v3 = v2[-1].units[0];
+    v3 = tile[-1].units[0];
     if ( v3 )
     {
       type = v3->type;
       if ( (int)type >= (int)UnitType_Surv_Drillrig && (int)type <= (int)UnitType_Surv_AlchemyHall )
-        return v2[-1].units[0];
+        return tile[-1].units[0];
     }
   }
-  result = v2->units[0];
+  result = tile->units[0];
   if ( !result )
     return nullptr;
   v6 = result->type;
@@ -18265,16 +16951,16 @@ KKND::Unit *__fastcall BOXD_40EE10(int map_x, int map_y)
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0040EE70) --------------------------------------------------------
-BOOL __fastcall BOXD_40EE70(int map_x, int map_y)
+BOOL __fastcall BOXD_is_tile_free_for_building(int map_x, int map_y)
 {
-  KKND::TerrainTile *v2; // eax
+  KKND::TerrainTile *tile; // eax
   BOOL result; // eax
 
   result = false;
   if ( map_x >= 0 && map_y >= 1 && map_x < g_map_num_tiles_x && map_y < g_map_num_tiles_y )
   {
-    v2 = &g_terrain[map_x + g_map_num_tiles_x * map_y];
-    if ( (v2->flags1 & 0x1F) == 0 && (v2->flags2 & 0x40) == 0 )
+    tile = &g_terrain[map_x + g_map_num_tiles_x * map_y];
+    if ( (tile->flags1 & 0x1F) == 0 && (tile->flags2 & TerrainTileFlags2_CantPlaceBuilding) == 0 )
       return true;
   }
   return result;
@@ -18283,7 +16969,7 @@ BOOL __fastcall BOXD_40EE70(int map_x, int map_y)
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0040EEB0) --------------------------------------------------------
-KKND::UnitTilePosition __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, int map_y, KKND::UnitTilePosition pos)
+int __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, int map_y, KKND::UnitTilePosition pos)
 {
   KKND::TerrainTile *v5; // ebp
   KKND::UnitStats *stats; // ecx
@@ -18302,7 +16988,7 @@ KKND::UnitTilePosition __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, i
   int player_num; // [esp+10h] [ebp-4h]
 
   if ( map_x < 0 || map_x >= g_map_num_tiles_x || map_y < 0 || map_y >= g_map_num_tiles_y )
-    return UnitTilePosition_Invalid;
+    return 5;
   v5 = &g_terrain[map_x + g_map_num_tiles_x * map_y];
   stats = unit->stats;
   flags1 = v5->flags1;
@@ -18324,13 +17010,13 @@ KKND::UnitTilePosition __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, i
         return tile_position;
       }
     }
-    return UnitTilePosition_Invalid;
+    return 5;
   }
   if ( (v5->flags1 & 0x1F) != 0 )
   {
     units = v5->units;
     if ( v5->units[0] == unit )
-      return UnitPosition_Slot0;
+      return 0;
     if ( (flags1 & 0x60) == 0 && flags1 >= 0 && stats->can_crush )
     {
       v15 = 0;
@@ -18347,7 +17033,7 @@ KKND::UnitTilePosition __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, i
           {
             if ( *v16 && (*v16)->task )
             {
-              TASK_send_message(unit->task, TaskMessage_Crushed, nullptr, (*v16)->task);
+              TSK_send_message(unit->task, TaskMessage_Crushed, nullptr, (*v16)->task);
               *v16 = nullptr;
             }
             ++v16;
@@ -18366,7 +17052,7 @@ KKND::UnitTilePosition __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, i
         }
       }
     }
-    return UnitTilePosition_Invalid;
+    return 5;
   }
   if ( !stats->speed )
   {
@@ -18375,17 +17061,17 @@ KKND::UnitTilePosition __fastcall BOXD_place_unit(KKND::Unit *unit, int map_x, i
       v5->flags1 = flags1 | 0x40;
       goto LABEL_15;
     }
-    return UnitTilePosition_Invalid;
+    return 5;
   }
 LABEL_15:
-  if ( pos == UnitTilePosition_40 )
+  if ( pos == UnitTilePosition_BuildingPlacement )
     v5->flags1 = TerrainTileFlags1_None;
   else
     v5->flags1 |= 0x9Fu;
   if ( pos )
   {
     v12 = v5->flags2;
-    if ( pos == UnitTilePosition_40 )
+    if ( pos == UnitTilePosition_BuildingPlacement )
       v13 = v12 | 0x40;
     else
       v13 = v12 | 0x1F;
@@ -18395,17 +17081,17 @@ LABEL_15:
     v13 = v5->flags2 & 0xE0;
   }
   v5->flags2 = v13;
-  if ( pos == UnitTilePosition_40 )
+  if ( pos == UnitTilePosition_BuildingPlacement )
   {
 LABEL_43:
     unit_reveal_fog_of_war(unit);
-    return UnitPosition_Slot0;
+    return 0;
   }
   else
   {
     v5->units[0] = unit;
     unit_reveal_fog_of_war(unit);
-    return UnitPosition_Slot0;
+    return 0;
   }
 }
 // 40EF7D: conditional instruction was optimized away because ecx.4==0
@@ -18502,7 +17188,7 @@ void __fastcall BOXD_remove_unit_from_tile(KKND::Unit *unit, int map_x, int map_
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0040F230) --------------------------------------------------------
-void __fastcall BOXD_40F230(KKND::Unit *a1, int map_x, int map_y, KKND::UnitTilePosition a4, BOOL a5)
+void __fastcall BOXD_40F230(KKND::Unit *unit, int map_x, int map_y, KKND::UnitTilePosition bit, BOOL set)
 {
   KKND::TerrainTile *v5; // eax
   KKND::TerrainTileFlags2 flags2; // cl
@@ -18512,18 +17198,18 @@ void __fastcall BOXD_40F230(KKND::Unit *a1, int map_x, int map_y, KKND::UnitTile
   {
     if ( (v5->flags1 & 0x80u) == 0 )
     {
-      if ( a1->stats->is_infantry && ((1 << a4) & (char)v5->flags1) != 0 )
+      if ( unit->stats->is_infantry && ((1 << bit) & (char)v5->flags1) != 0 )
       {
-        if ( a5 )
-          v5->flags2 |= 1 << a4;
+        if ( set )
+          v5->flags2 |= 1 << bit;
         else
-          v5->flags2 &= ~(1 << a4);
+          v5->flags2 &= ~(1 << bit);
       }
     }
-    else if ( a4 == UnitPosition_Slot0 && v5->units[0] == a1 )
+    else if ( bit == UnitPosition_Slot0 && v5->units[0] == unit )
     {
       flags2 = v5->flags2;
-      if ( a5 )
+      if ( set )
         v5->flags2 = flags2 | 0x1F;
       else
         v5->flags2 = flags2 & 0xE0;
@@ -18589,20 +17275,20 @@ BOOL sidebar_init()
   g_sidebar_pool = v0;
   if ( !v0 )
     return 0;
-  g_sidebar_free_list_head = v0;
+  g_sidebar_free_head = v0;
   for ( i = 0; i < 15; ++i )
   {
     v0[i].next = &v0[i + 1];
     v0 = g_sidebar_pool;
   }
   g_sidebar_pool[15].next = nullptr;
-  g_siderbar_active_list_head = (KKND::Sidebar *)&g_siderbar_active_list_head;
-  g_siderbar_active_list_tail = (KKND::Sidebar *)&g_siderbar_active_list_head;
+  g_sidebar_active_head = (KKND::Sidebar *)&g_sidebar_active_head;
+  g_sidebar_active_tail = (KKND::Sidebar *)&g_sidebar_active_head;
   v2 = (KKND::SidebarButton *)malloc(0x7D0u);
   g_sidebar_button_pool = v2;
   if ( !v2 )
     return 0;
-  g_sidebar_button_free_list_head = v2;
+  g_sidebar_button_free_head = v2;
   for ( j = 0; j < 49; ++j )
   {
     v2[j].next = &v2[j + 1];
@@ -18641,9 +17327,9 @@ KKND::Sidebar *__fastcall sidebar_create(
   KKND::Sidebar *v5; // esi
   int v8; // ecx
 
-  v5 = g_sidebar_free_list_head;
-  if ( g_sidebar_free_list_head )
-    g_sidebar_free_list_head = g_sidebar_free_list_head->next;
+  v5 = g_sidebar_free_head;
+  if ( g_sidebar_free_head )
+    g_sidebar_free_head = g_sidebar_free_head->next;
   else
     v5 = nullptr;
   if ( !v5 )
@@ -18661,9 +17347,9 @@ KKND::Sidebar *__fastcall sidebar_create(
   if ( !entity )
     v5->entity = entity_create(MobdId_Sidebar, v5->task, nullptr);
   v5->entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-  v5->entity->is_on_collision_grid = 1;
+  v5->entity->is_collidable = 1;
   v5->entity->x = v5->x;
-  v5->entity->is_on_collision_grid = 1;
+  v5->entity->is_collidable = 1;
   v5->entity->y = v5->y;
   v5->entity->z = 1;
   v5->entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
@@ -18671,10 +17357,10 @@ KKND::Sidebar *__fastcall sidebar_create(
   v5->entity->ctx = v5;
   v5->button_list_tail = (KKND::SidebarButton *)&v5->button_list_head;
   v5->button_list_head = (KKND::SidebarButton *)&v5->button_list_head;
-  v5->next = g_siderbar_active_list_head;
-  v5->prev = (KKND::Sidebar *)&g_siderbar_active_list_head;
-  g_siderbar_active_list_head->prev = v5;
-  g_siderbar_active_list_head = v5;
+  v5->next = g_sidebar_active_head;
+  v5->prev = (KKND::Sidebar *)&g_sidebar_active_head;
+  g_sidebar_active_head->prev = v5;
+  g_sidebar_active_head = v5;
   return v5;
 }
 // 40F460: using guessed type void __cdecl __noreturn task_sidebar(KKND::Task *task);
@@ -18713,14 +17399,14 @@ void __cdecl __noreturn task_sidebar_buttons_1_2(KKND::Task *task)
 
   entity = task->entity;
   taska = (KKND::Task *)entity->ctx;
-  entity_anim_start(entity, taska->sleep, 0);
+  entity_anim_init_directional(entity, taska->sleep, 0);
   while ( 1 )
   {
     v2 = 0;
     v3 = 0;
     v4 = 0;
     TASK_yield(task, Task_Wait, 0);
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       if ( type == TaskMessage_SidebarRefreshOptions )
@@ -18729,7 +17415,7 @@ void __cdecl __noreturn task_sidebar_buttons_1_2(KKND::Task *task)
         v2 = 1;
       if ( type == TaskMessage_UnitSelected )
         v3 = 1;
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( v4 && !v2 )
       break;
@@ -18737,12 +17423,12 @@ void __cdecl __noreturn task_sidebar_buttons_1_2(KKND::Task *task)
     {
       v23 = 0;
       v25 = 0;
-      entity_anim_start(entity, taska->sleep, 1);
+      entity_anim_init_directional(entity, taska->sleep, 1);
       do
       {
         TASK_yield(task, Task_Yield, 1);
         v7 = 0;
-        for ( j = TASK_pop_message(task); j; j = TASK_pop_message(task) )
+        for ( j = TSK_pop_message(task); j; j = TSK_pop_message(task) )
         {
           v9 = j->type;
           if ( v9 == TaskMessage_SidebarRefreshOptions )
@@ -18755,11 +17441,11 @@ void __cdecl __noreturn task_sidebar_buttons_1_2(KKND::Task *task)
           {
             v23 = 1;
           }
-          task_message_recycle(j);
+          TSK_message_recycle(j);
         }
         if ( v25 )
           break;
-        entity_anim_start(entity, taska->sleep, v7 != 0);
+        entity_anim_init_directional(entity, taska->sleep, v7 != 0);
       }
       while ( !v23 );
       if ( v7 && v23 )
@@ -18781,7 +17467,7 @@ void __cdecl __noreturn task_sidebar_buttons_1_2(KKND::Task *task)
           if ( v4 )
             goto LABEL_63;
           TASK_yield(task, Task_Wait, 0);
-          for ( k = TASK_pop_message(task); k; k = TASK_pop_message(task) )
+          for ( k = TSK_pop_message(task); k; k = TSK_pop_message(task) )
           {
             v14 = k->type;
             if ( v14 == TaskMessage_SidebarRefreshOptions )
@@ -18794,26 +17480,26 @@ void __cdecl __noreturn task_sidebar_buttons_1_2(KKND::Task *task)
             {
               v24 = 1;
             }
-            task_message_recycle(k);
+            TSK_message_recycle(k);
           }
         }
         while ( !v12 );
         if ( v4 )
         {
 LABEL_63:
-          entity_anim_load(entity, 1980);
+          entity_anim_init(entity, 1980);
           do
           {
             TASK_yield(task, Task_Wait, 0);
-            for ( m = TASK_pop_message(task); m; m = TASK_pop_message(task) )
+            for ( m = TSK_pop_message(task); m; m = TSK_pop_message(task) )
             {
               if ( m->type == TaskMessage_1514_sidebar )
                 v4 = 0;
-              task_message_recycle(m);
+              TSK_message_recycle(m);
             }
           }
           while ( v4 );
-          entity_anim_start(entity, v10->sleep, 0);
+          entity_anim_init_directional(entity, v10->sleep, 0);
         }
         else
         {
@@ -18825,12 +17511,12 @@ LABEL_63:
           {
             v15 = entity;
             v16 = 0;
-            entity_anim_start(entity, taska->sleep, 1);
+            entity_anim_init_directional(entity, taska->sleep, 1);
             do
             {
               TASK_yield(task, Task_Yield, 1);
               v17 = 0;
-              for ( n = TASK_pop_message(task); n; n = TASK_pop_message(task) )
+              for ( n = TSK_pop_message(task); n; n = TSK_pop_message(task) )
               {
                 v19 = n->type;
                 if ( v19 == TaskMessage_SidebarRefreshOptions )
@@ -18843,17 +17529,17 @@ LABEL_63:
                 {
                   v24 = 1;
                 }
-                task_message_recycle(n);
+                TSK_message_recycle(n);
               }
               if ( v16 )
                 break;
               if ( v17 )
               {
-                entity_anim_start(entity, taska->sleep, 1);
+                entity_anim_init_directional(entity, taska->sleep, 1);
               }
               else if ( !taska->mode_turret )
               {
-                entity_anim_start(entity, taska->sleep, 0);
+                entity_anim_init_directional(entity, taska->sleep, 0);
               }
             }
             while ( !v24 );
@@ -18863,12 +17549,12 @@ LABEL_63:
           if ( mode_turret )
           {
             ((void (__thiscall *)(KKND::Task *))mode_turret)(v10);
-            entity_anim_start(v15, v10->sleep, 0);
+            entity_anim_init_directional(v15, v10->sleep, 0);
           }
           else
           {
 LABEL_61:
-            entity_anim_start(v15, v10->sleep, 0);
+            entity_anim_init_directional(v15, v10->sleep, 0);
           }
         }
       }
@@ -18910,14 +17596,14 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
 
   entity = task->entity;
   taska = (KKND::Task *)entity->ctx;
-  entity_anim_start(entity, taska->sleep, 0);
+  entity_anim_init_directional(entity, taska->sleep, 0);
   while ( 1 )
   {
     v2 = 0;
     v3 = 0;
     v4 = 0;
     TASK_yield(task, Task_Wait, 0);
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       if ( type == TaskMessage_SidebarRefreshOptions )
@@ -18926,7 +17612,7 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
         v2 = 1;
       if ( type == TaskMessage_UnitSelected )
         v3 = 1;
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( v4 && !v2 )
       break;
@@ -18934,12 +17620,12 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
     {
       v7 = 0;
       v8 = 0;
-      entity_anim_start(entity, taska->sleep, 1);
+      entity_anim_init_directional(entity, taska->sleep, 1);
       do
       {
         TASK_yield(task, Task_Yield, 1);
         v9 = 0;
-        for ( j = TASK_pop_message(task); j; j = TASK_pop_message(task) )
+        for ( j = TSK_pop_message(task); j; j = TSK_pop_message(task) )
         {
           v11 = j->type;
           if ( v11 == TaskMessage_SidebarRefreshOptions )
@@ -18952,14 +17638,14 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
           {
             v7 = 1;
           }
-          task_message_recycle(j);
+          TSK_message_recycle(j);
         }
         if ( v8 )
           break;
         if ( v9 )
-          entity_anim_start(entity, taska->sleep, 1);
+          entity_anim_init_directional(entity, taska->sleep, 1);
         else
-          entity_anim_start(entity, taska->sleep, 0);
+          entity_anim_init_directional(entity, taska->sleep, 0);
       }
       while ( !v7 );
       if ( v9 && v7 )
@@ -18980,7 +17666,7 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
             if ( v24 )
               break;
             TASK_yield(task, Task_Wait, 0);
-            for ( k = TASK_pop_message(task); k; k = TASK_pop_message(task) )
+            for ( k = TSK_pop_message(task); k; k = TSK_pop_message(task) )
             {
               v16 = k->type;
               if ( v16 == TaskMessage_SidebarRefreshOptions )
@@ -18993,7 +17679,7 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
               {
                 v24 = 1;
               }
-              task_message_recycle(k);
+              TSK_message_recycle(k);
             }
           }
           while ( !v14 );
@@ -19002,12 +17688,12 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
             if ( !v24 )
             {
               v17 = 0;
-              entity_anim_start(entity, taska->sleep, 1);
+              entity_anim_init_directional(entity, taska->sleep, 1);
               do
               {
                 TASK_yield(task, Task_Yield, 1);
                 v18 = 0;
-                for ( m = TASK_pop_message(task); m; m = TASK_pop_message(task) )
+                for ( m = TSK_pop_message(task); m; m = TSK_pop_message(task) )
                 {
                   v20 = m->type;
                   if ( v20 == TaskMessage_SidebarRefreshOptions )
@@ -19020,17 +17706,17 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
                   {
                     v24 = 1;
                   }
-                  task_message_recycle(m);
+                  TSK_message_recycle(m);
                 }
                 if ( v17 )
                   break;
                 if ( v18 )
                 {
-                  entity_anim_start(entity, taska->sleep, 1);
+                  entity_anim_init_directional(entity, taska->sleep, 1);
                 }
                 else if ( !taska->mode_turret )
                 {
-                  entity_anim_start(entity, taska->sleep, 0);
+                  entity_anim_init_directional(entity, taska->sleep, 0);
                 }
               }
               while ( !v24 );
@@ -19044,21 +17730,21 @@ void __cdecl __noreturn task_sidebar_buttons_3(KKND::Task *task)
           goto LABEL_69;
         }
 LABEL_75:
-        entity_anim_start(entity, v12->sleep, 0);
+        entity_anim_init_directional(entity, v12->sleep, 0);
       }
     }
   }
   v12 = taska;
 LABEL_69:
-  entity_anim_load(entity, 1980);
+  entity_anim_init(entity, 1980);
   do
   {
     TASK_yield(task, Task_Wait, 0);
-    for ( n = TASK_pop_message(task); n; n = TASK_pop_message(task) )
+    for ( n = TSK_pop_message(task); n; n = TSK_pop_message(task) )
     {
       if ( n->type == TaskMessage_1514_sidebar )
         v4 = 0;
-      task_message_recycle(n);
+      TSK_message_recycle(n);
     }
   }
   while ( v4 );
@@ -19126,7 +17812,7 @@ void __cdecl __noreturn task_sidebar_buttons_production(KKND::Task *task)
         if ( !production_state->remaining_cost && !production_state->num_orders )
           break;
 LABEL_23:
-        entity_anim_start(entity, ctx->icon_mobd_frame, 1);
+        entity_anim_init_directional(entity, ctx->icon_mobd_frame, 1);
         if ( production_state->remaining_cost <= 0 )
           production_state->remaining_cost = ctx->base_cost;
         if ( production_state->remaining_cost )
@@ -19151,16 +17837,16 @@ LABEL_23:
             }
             else if ( num_orders >= 10 )
             {
-              entity_anim_load(v12, 2160);
+              entity_anim_init(v12, 2160);
             }
             else
             {
-              entity_anim_start(v12, 2276, num_orders - 1);
+              entity_anim_init_directional(v12, 2276, num_orders - 1);
             }
             v14 = v12->y + 6656;
             v15 = v12->z + 2;
             v12->x += 2048;
-            v12->is_on_collision_grid = 1;
+            v12->is_collidable = 1;
             v12->y = v14;
             v12->z = v15;
             v12->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
@@ -19170,10 +17856,10 @@ LABEL_23:
           if ( v9 )
           {
             v9->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-            entity_anim_start(v9, 2312, v33);
+            entity_anim_init_directional(v9, 2312, v33);
             v16 = v9->x + 256;
             v17 = v9->z + 2;
-            v9->is_on_collision_grid = 1;
+            v9->is_collidable = 1;
             v9->x = v16;
             v9->z = v17;
             v9->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
@@ -19186,7 +17872,7 @@ LABEL_23:
             v19 = 0;
             TASK_yield(task, Task_Sleep, 6);
             v36 = v18 != production_state->num_orders;
-            for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+            for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
             {
               type = i->type;
               if ( type == TaskMessage_1513_sidebar )
@@ -19211,7 +17897,7 @@ LABEL_47:
                   production_state->num_orders = v23 + 1;
                 goto LABEL_47;
               }
-              task_message_recycle(i);
+              TSK_message_recycle(i);
             }
             if ( !production_state->num_orders )
               goto LABEL_69;
@@ -19223,7 +17909,7 @@ LABEL_47:
               remaining_cost = production_state->remaining_cost;
               v33 = 0;
               v19 = 1;
-              entity_anim_start(v9, 2312, 0);
+              entity_anim_init_directional(v9, 2312, 0);
             }
             else
             {
@@ -19240,9 +17926,9 @@ LABEL_47:
               else
               {
                 if ( v25 >= 10 )
-                  entity_anim_load(v35, 2160);
+                  entity_anim_init(v35, 2160);
                 else
-                  entity_anim_start(v35, 2276, v25 - 1);
+                  entity_anim_init_directional(v35, 2276, v25 - 1);
                 rend = v35->rend;
                 v27 = rend->flags & 0xBFFFFFFF;
               }
@@ -19254,7 +17940,7 @@ LABEL_47:
               if ( v24 < 15 )
               {
                 v33 = v24 + 1;
-                entity_anim_start(v9, 2312, v24 + 1);
+                entity_anim_init_directional(v9, 2312, v24 + 1);
               }
             }
             if ( !production_state->remaining_cost )
@@ -19286,23 +17972,23 @@ LABEL_70:
           v1 = task;
         }
       }
-      entity_anim_start(entity, ctx->icon_mobd_frame, 0);
+      entity_anim_init_directional(entity, ctx->icon_mobd_frame, 0);
       TASK_yield(v1, Task_Wait, 0);
-      for ( j = TASK_pop_message(v1); j; j = TASK_pop_message(v1) )
+      for ( j = TSK_pop_message(v1); j; j = TSK_pop_message(v1) )
       {
         if ( j->type == TaskMessage_UnitSelected )
           v30 = 1;
-        task_message_recycle(j);
+        TSK_message_recycle(j);
       }
     }
     while ( !v30 );
     v34 = 0;
-    entity_anim_start(entity, ctx->icon_mobd_frame, 1);
+    entity_anim_init_directional(entity, ctx->icon_mobd_frame, 1);
     do
     {
       TASK_yield(v1, Task_Yield, 1);
       v31 = 0;
-      for ( k = TASK_pop_message(v1); k; k = TASK_pop_message(v1) )
+      for ( k = TSK_pop_message(v1); k; k = TSK_pop_message(v1) )
       {
         v7 = k->type;
         if ( v7 == TaskMessage_MouseHover )
@@ -19313,9 +17999,9 @@ LABEL_70:
         {
           v34 = 1;
         }
-        task_message_recycle(k);
+        TSK_message_recycle(k);
       }
-      entity_anim_start(entity, ctx->icon_mobd_frame, v31 != 0);
+      entity_anim_init_directional(entity, ctx->icon_mobd_frame, v31 != 0);
     }
     while ( !v34 );
     if ( !v31 )
@@ -19441,9 +18127,9 @@ KKND::SidebarButton *__fastcall sidebar_button_create_ex(
   KKND::Entity *v14; // eax
   int v15; // eax
 
-  v8 = g_sidebar_button_free_list_head;
-  if ( g_sidebar_button_free_list_head )
-    g_sidebar_button_free_list_head = g_sidebar_button_free_list_head->next;
+  v8 = g_sidebar_button_free_head;
+  if ( g_sidebar_button_free_head )
+    g_sidebar_button_free_head = g_sidebar_button_free_head->next;
   else
     v8 = nullptr;
   if ( !v8 )
@@ -19468,9 +18154,9 @@ KKND::SidebarButton *__fastcall sidebar_button_create_ex(
     v8->next = (KKND::SidebarButton *)&sidebar->button_list_head;
     sidebar->button_list_tail->next = v8;
     sidebar->button_list_tail = v8;
-    v8->entity->is_on_collision_grid = 1;
+    v8->entity->is_collidable = 1;
     v8->entity->x = sidebar->x + sidebar->num_buttons * sidebar->h_spacing;
-    v8->entity->is_on_collision_grid = 1;
+    v8->entity->is_collidable = 1;
     if ( task_ctx == (void *)-11 )
       v15 = 13 * sidebar->v_spacing;
     else
@@ -19512,9 +18198,9 @@ void __fastcall sidebar_4102D0(KKND::Sidebar *sidebar, KKND::SidebarButton *butt
     }
   }
   entity_remove(button->entity);
-  task_445310(button->task);
-  button->next = g_sidebar_button_free_list_head;
-  g_sidebar_button_free_list_head = button;
+  TASK_terminate(button->task);
+  button->next = g_sidebar_button_free_head;
+  g_sidebar_button_free_head = button;
 }
 
 //----- (00410340) --------------------------------------------------------
@@ -19539,12 +18225,12 @@ KKND::Sidebar *__thiscall sidebar_410340(KKND::Sidebar *sidebar)
   entity_remove(sidebar->entity);
   task = sidebar->task;
   if ( task->channel == TaskChannel_SidebarPlaceholder )
-    task_445310(task);
+    TASK_terminate(task);
   sidebar->next->prev = sidebar->prev;
   result = sidebar->next;
   sidebar->prev->next = sidebar->next;
-  sidebar->next = g_sidebar_free_list_head;
-  g_sidebar_free_list_head = sidebar;
+  sidebar->next = g_sidebar_free_head;
+  g_sidebar_free_head = sidebar;
   return result;
 }
 
@@ -19562,11 +18248,11 @@ BOOL stru2_init()
   int v1; // edx
 
   result = (BOOL)malloc(0x180u);
-  g_4795E8_pool = (KKND::stru2 *)result;
+  g_blitter_pool = (KKND::stru2 *)result;
   if ( result )
   {
-    g_4795E8_free = (KKND::stru2 *)result;
-    *(_DWORD *)(result + 4) = &g_4795E8_free;
+    g_blitter_free_head = (KKND::stru2 *)result;
+    *(_DWORD *)(result + 4) = &g_blitter_free_head;
     v1 = 15;
     do
     {
@@ -19575,9 +18261,9 @@ BOOL stru2_init()
       result += 24;
     }
     while ( v1 );
-    *(_DWORD *)result = &g_4795E8_free;
-    g_4795E8_head = (KKND::stru2 *)&g_4795E8_tail;
-    g_4795E8_tail = (KKND::stru2 *)&g_4795E8_tail;
+    *(_DWORD *)result = &g_blitter_free_head;
+    g_blitter_active_head = (KKND::stru2 *)&g_blitter_active_tail;
+    g_blitter_active_tail = (KKND::stru2 *)&g_blitter_active_tail;
     return 1;
   }
   return result;
@@ -19590,22 +18276,22 @@ KKND::stru2 *__fastcall stru2_create(int hunk)
   KKND::stru3 *v2; // edx
   int v3; // eax
 
-  result = g_4795E8_tail;
-  if ( g_4795E8_tail == (KKND::stru2 *)&g_4795E8_tail )
+  result = g_blitter_active_tail;
+  if ( g_blitter_active_tail == (KKND::stru2 *)&g_blitter_active_tail )
   {
 LABEL_4:
-    v2 = &g_render_handlers;
-    if ( g_render_handlers.hunk == hunk )
+    v2 = &g_blitter_table;
+    if ( g_blitter_table.hunk == hunk )
     {
 LABEL_7:
-      result = g_4795E8_free;
-      if ( g_4795E8_free != (KKND::stru2 *)&g_4795E8_free )
+      result = g_blitter_free_head;
+      if ( g_blitter_free_head != (KKND::stru2 *)&g_blitter_free_head )
       {
-        g_4795E8_free = g_4795E8_free->next;
-        result->next = (KKND::stru2 *)&g_4795E8_tail;
-        result->prev = g_4795E8_head;
-        g_4795E8_head->next = result;
-        g_4795E8_head = result;
+        g_blitter_free_head = g_blitter_free_head->next;
+        result->next = (KKND::stru2 *)&g_blitter_active_tail;
+        result->prev = g_blitter_active_head;
+        g_blitter_active_head->next = result;
+        g_blitter_active_head = result;
         result->hunk = hunk;
         result->mode_init = v2->mode_init;
         result->mode_render = v2->mode_draw;
@@ -19630,7 +18316,7 @@ LABEL_7:
   while ( result->hunk != hunk )
   {
     result = result->next;
-    if ( result == (KKND::stru2 *)&g_4795E8_tail )
+    if ( result == (KKND::stru2 *)&g_blitter_active_tail )
       goto LABEL_4;
   }
   return result;
@@ -19642,8 +18328,8 @@ BOOL stru2_4104A0()
   KKND::stru2 *v0; // esi
   int (*mode_init)(void); // eax
 
-  v0 = g_4795E8_tail;
-  if ( g_4795E8_tail == (KKND::stru2 *)&g_4795E8_tail )
+  v0 = g_blitter_active_tail;
+  if ( g_blitter_active_tail == (KKND::stru2 *)&g_blitter_active_tail )
     return 1;
   while ( 1 )
   {
@@ -19654,7 +18340,7 @@ BOOL stru2_4104A0()
         break;
     }
     v0 = v0->next;
-    if ( v0 == (KKND::stru2 *)&g_4795E8_tail )
+    if ( v0 == (KKND::stru2 *)&g_blitter_active_tail )
       return 1;
   }
   return 0;
@@ -19666,7 +18352,7 @@ void stru2_4104E0()
   KKND::stru2 *i; // esi
   void (*mode_cleanup)(void); // eax
 
-  for ( i = g_4795E8_tail; i != (KKND::stru2 *)&g_4795E8_tail; i = i->next )
+  for ( i = g_blitter_active_tail; i != (KKND::stru2 *)&g_blitter_active_tail; i = i->next )
   {
     mode_cleanup = (void (*)(void))i->mode_cleanup;
     if ( mode_cleanup )
@@ -19675,9 +18361,9 @@ void stru2_4104E0()
 }
 
 //----- (00410510) --------------------------------------------------------
-void stru2_cleanup()
+void sub_410510()
 {
-  free(g_4795E8_pool);
+  free(g_blitter_pool);
 }
 
 //----- (00410520) --------------------------------------------------------
@@ -20657,7 +19343,7 @@ void sub_4113D0()
     }
     while ( v1 );
   }
-  while ( v0 != (void **)&g_window_rect );
+  while ( v0 != (void **)&g_window_rect );      // BUG
   v2 = (void **)dword_4795F0;
   do
   {
@@ -20883,7 +19569,7 @@ LABEL_17:
     v14 = g_viewports_pool;
   }
   g_viewports_pool[6].next = nullptr;
-  g_viewports_free = g_viewports_pool;
+  g_viewports_free_head = g_viewports_pool;
   g_default_viewport.prev = &g_default_viewport;
   g_default_viewport.next = &g_default_viewport;
   g_default_viewport.flags = 0;
@@ -21216,7 +19902,7 @@ BOOL REND_RateLimiter()
 // 4798F0: using guessed type int dword_4798F0;
 
 //----- (004121F0) --------------------------------------------------------
-KKND::RenderViewport *__fastcall REND_viewport_create(int flags, int x, int y, int w, int h)
+KKND::RenderViewport *__fastcall REND_create_viewport(int flags, int x, int y, int w, int h)
 {
   KKND::RenderViewport *result; // eax
 
@@ -21228,10 +19914,10 @@ KKND::RenderViewport *__fastcall REND_viewport_create(int flags, int x, int y, i
     return nullptr;
   if ( h + y > g_window_height )
     return nullptr;
-  result = g_viewports_free;
-  if ( !g_viewports_free )
+  result = g_viewports_free_head;
+  if ( !g_viewports_free_head )
     return nullptr;
-  g_viewports_free = g_viewports_free->next;
+  g_viewports_free_head = g_viewports_free_head->next;
   result->next = g_default_viewport.next;
   g_default_viewport.next = result;
   result->next->prev = result;
@@ -21256,17 +19942,17 @@ KKND::RenderViewport *__thiscall REND_viewport_free(KKND::RenderViewport *viewpo
     viewport->next->prev = viewport->prev;
     viewport->prev->next = viewport->next;
     viewport->flags |= 0x80000000;
-    result = g_viewports_free;
-    viewport->next = g_viewports_free;
-    g_viewports_free = viewport;
+    result = g_viewports_free_head;
+    viewport->next = g_viewports_free_head;
+    g_viewports_free_head = viewport;
   }
   return result;
 }
 
 //----- (004122B0) --------------------------------------------------------
-HRESULT sub_4122B0()
+BOOL REND_4122B0()
 {
-  HRESULT result; // eax
+  BOOL result; // eax
 
   if ( !g_pdds )
     return 1;
@@ -21872,7 +20558,7 @@ void __fastcall unit_init_default(KKND::Unit *unit)
       v9 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
     else
       v9 = v8->size != UnitSize_Regular ? 7424 : 4096;
-    v10 = BOXD_40DE80(
+    v10 = BOXD_place_unit_world_coords(
             unit,
             v9 + (unit->entity->x & 0xFFFFE000),
             v7 + (unit->entity->y & 0xFFFFE000),
@@ -21895,16 +20581,19 @@ void __fastcall unit_init_default(KKND::Unit *unit)
     }
     goto LABEL_18;
   }
-  if ( !BOXD_413860(unit) )
+  if ( !BOXD_find_nearby_clear_tile(unit) )
   {
 LABEL_18:
     unit->entity->x_speed = 0;
     unit->entity->y_speed = 0;
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_move,
+      g_angle_to_orientation[unit->orientation]);
     v13 = unit->task;
     unit->mode = unit_mode_destroyed;
     unit->destroyed = 1;
-    TASK_broadcast_message(v13, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+    TSK_broadcast_message(v13, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
     BOXD_remove_unit(unit, unit->map_x, unit->map_y, unit->tile_position);
     unit->task->message_handler = EventHandler_Passive;
     return;
@@ -21940,7 +20629,10 @@ LABEL_18:
   unit->orientation = v25;
   unit->entity->x_speed = (v26->speed * dword_4731A8[dword_47CFC8[v25]]) >> 6;
   unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_move,
+    g_angle_to_orientation[unit->orientation]);
   unit->mode = unit_mode_417360;
 }
 // 4731A8: using guessed type int dword_4731A8[];
@@ -22122,7 +20814,7 @@ BOOL __fastcall unit_is_in_firing_range(KKND::Unit *unit, KKND::Unit *target, in
 }
 
 //----- (004133D0) --------------------------------------------------------
-void __fastcall sub_4133D0(KKND::Unit *unit)
+void __fastcall unit_4133D0(KKND::Unit *unit)
 {
   KKND::Unit *order_target; // eax
   int unit_id; // ecx
@@ -22205,11 +20897,14 @@ LABEL_21:
           goto LABEL_21;
         unit->entity->x_speed = 0;
         unit->entity->y_speed = 0;
-        entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+        entity_anim_init_directional(
+          unit->entity,
+          unit->stats->mobd_lookup_offset_move,
+          g_angle_to_orientation[unit->orientation]);
         task = unit->task;
         unit->mode = unit_mode_destroyed;
         unit->destroyed = 1;
-        TASK_broadcast_message(task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+        TSK_broadcast_message(task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
         BOXD_remove_unit(unit, unit->map_x, unit->map_y, unit->tile_position);
         unit->task->message_handler = EventHandler_Passive;
         break;
@@ -22328,7 +21023,8 @@ LABEL_19:
 }
 
 //----- (00413860) --------------------------------------------------------
-BOOL __fastcall BOXD_413860(KKND::Unit *unit)
+// Emergency placement: diamond-scan for clear tile with LOS
+BOOL __fastcall BOXD_find_nearby_clear_tile(KKND::Unit *unit)
 {
   int v2; // ebp
   int v3; // edx
@@ -22353,7 +21049,7 @@ BOOL __fastcall BOXD_413860(KKND::Unit *unit)
 
   v2 = unit->entity->y >> 13;
   if ( v2 >= g_map_num_tiles_y )
-    return BOXD_413A90(unit);
+    return BOXD_find_nearby_clear_tile_spiral(unit);
   v3 = g_map_num_tiles_x;
   for ( i = v2 << 13; ; i += 0x2000 )
   {
@@ -22370,7 +21066,7 @@ BOOL __fastcall BOXD_413860(KKND::Unit *unit)
       break;
 LABEL_19:
     if ( ++v2 >= g_map_num_tiles_y )
-      return BOXD_413A90(unit);
+      return BOXD_find_nearby_clear_tile_spiral(unit);
   }
   v20 = v6 << 13;
   while ( v7 >= v3 )
@@ -22381,7 +21077,7 @@ LABEL_18:
     if ( v7 >= v9 )
       goto LABEL_19;
   }
-  v10 = BOX_classify_tile_for_pathing(unit, v7, v2, &g_terrain[v7 + v3 * v2]);
+  v10 = BOXD_classify_tile_for_pathing(unit, v7, v2, &g_terrain[v7 + v3 * v2]);
   unit->scan_pathing.disperse_timer = 0;
   unit->scan_pathing.push_through_timer = 1;
   if ( v10 != Boxd_Clear )
@@ -22400,7 +21096,7 @@ LABEL_17:
     v14 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
   else
     v14 = v13->size != UnitSize_Regular ? 7424 : 4096;
-  if ( !BOXD_41C130(v14 + v20, v12 + i, unit->entity->x, unit->entity->y, unit) )
+  if ( !BOXD_line_of_sight_check(v14 + v20, v12 + i, unit->entity->x, unit->entity->y, unit) )
   {
     v9 = v22;
     goto LABEL_17;
@@ -22418,14 +21114,15 @@ LABEL_17:
     v19 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
   else
     v19 = v18->size != UnitSize_Regular ? 7424 : 4096;
-  unit->tile_position = BOXD_40DE80(unit, v19 + (v7 << 13), v17 + (v2 << 13), UnitPosition_Slot0);
+  unit->tile_position = BOXD_place_unit_world_coords(unit, v19 + (v7 << 13), v17 + (v2 << 13), UnitPosition_Slot0);
   return 1;
 }
 // 478AAC: using guessed type int g_map_num_tiles_y;
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (00413A90) --------------------------------------------------------
-BOOL __fastcall BOXD_413A90(KKND::Unit *unit)
+// Spiral search for any passable tile
+BOOL __fastcall BOXD_find_nearby_clear_tile_spiral(KKND::Unit *unit)
 {
   KKND::Entity *entity; // eax
   int v2; // ebp
@@ -22462,7 +21159,7 @@ LABEL_12:
     if ( v6 >= 80 )
       return 0;
   }
-  while ( BOX_classify_tile_for_pathing(unit, v2, v3, v5) != Boxd_Clear )
+  while ( BOXD_classify_tile_for_pathing(unit, v2, v3, v5) != Boxd_Clear )
   {
     if ( (v12 & 1) != 0 )
     {
@@ -22496,13 +21193,13 @@ LABEL_12:
     v11 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
   else
     v11 = v10->size != UnitSize_Regular ? 7424 : 4096;
-  unit->tile_position = BOXD_40DE80(unit, v11 + (v2 << 13), v9 + (v3 << 13), UnitPosition_Slot0);
+  unit->tile_position = BOXD_place_unit_world_coords(unit, v11 + (v2 << 13), v9 + (v3 << 13), UnitPosition_Slot0);
   return 1;
 }
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (00413C10) --------------------------------------------------------
-KKND::BoxdPathingClassification __thiscall sub_413C10(KKND::Unit *unit)
+void __fastcall unit_413C10(KKND::Unit *unit)
 {
   KKND::Entity *entity; // eax
   int x; // ecx
@@ -22510,46 +21207,41 @@ KKND::BoxdPathingClassification __thiscall sub_413C10(KKND::Unit *unit)
   int v5; // ebp
   KKND::MobdOrientation v6; // ebx
   int v7; // esi
-  KKND::BoxdPathingClassification result; // eax
-  char v9; // bl
-  int v10; // [esp+10h] [ebp-Ch]
-  int v11; // [esp+14h] [ebp-8h]
-  KKND::TerrainTile *v12; // [esp+18h] [ebp-4h]
+  char v8; // bl
+  int v9; // [esp+10h] [ebp-Ch]
+  int v10; // [esp+14h] [ebp-8h]
+  KKND::TerrainTile *v11; // [esp+18h] [ebp-4h]
 
   entity = unit->entity;
   x = entity->x;
   y = entity->y;
-  v10 = y >> 13;
+  v9 = y >> 13;
   v5 = x >> 13;
-  v11 = (__int16)vec2_orientation(unit->order_next_waypoint_x - x, unit->order_next_waypoint_y - y);
+  v10 = vec2_orientation(unit->order_next_waypoint_x - x, unit->order_next_waypoint_y - y);
   v6 = ((unsigned __int8)unit->orientation + 16) & 0xE0;
   v7 = (int)v6 >> 5;
-  v12 = &g_terrain[v5 + g_map_num_tiles_x * v10];
-  result = BOX_classify_tile_for_pathing(unit, v5 + dword_465708[v7], v10 + dword_465728[v7], &v12[dword_478BE8[v7]]);
-  if ( result != Boxd_Clear )
+  v11 = &g_terrain[v5 + g_map_num_tiles_x * v9];
+  if ( BOXD_classify_tile_for_pathing(unit, v5 + dword_465708[v7], v9 + dword_465728[v7], &v11[dword_478BE8[v7]]) != Boxd_Clear )
   {
-    if ( v11 >= (int)v6 )
+    if ( v10 >= (int)v6 )
     {
-      if ( v11 <= (int)v6 )
+      if ( v10 <= (int)v6 )
         goto LABEL_7;
       v7 = ((_BYTE)v7 + 1) & 7;
-      v9 = v6 + 32;
+      v8 = v6 + 32;
     }
     else
     {
       v7 = ((_BYTE)v7 - 1) & 7;
-      v9 = v6 - 32;
+      v8 = v6 - 32;
     }
-    v6 = v9 & 0xE0;
+    v6 = v8 & 0xE0;
 LABEL_7:
-    result = BOX_classify_tile_for_pathing(unit, v5 + dword_465708[v7], v10 + dword_465728[v7], &v12[dword_478BE8[v7]]);
-    if ( result != Boxd_Clear )
-      return result;
+    if ( BOXD_classify_tile_for_pathing(unit, v5 + dword_465708[v7], v9 + dword_465728[v7], &v11[dword_478BE8[v7]]) != Boxd_Clear )
+      return;
   }
   unit->orientation = v6;
-  return result;
 }
-// 42D560: using guessed type _DWORD __cdecl sub_42D560(_DWORD, _DWORD);
 // 465708: using guessed type int dword_465708[8];
 // 465728: using guessed type int dword_465728[40];
 // 478BE8: using guessed type int dword_478BE8[8];
@@ -22973,17 +21665,17 @@ void __fastcall BOXD_adjust_xl_movement_destination(KKND::Unit *unit, int *out_x
     map_x = *out_x >> 13;
     map_y = *out_y >> 13;
     tile = &g_terrain[map_x + g_map_num_tiles_x * map_y];
-    if ( BOX_classify_tile_for_pathing(unit, map_x, map_y, tile) == Boxd_Impassable )
+    if ( BOXD_classify_tile_for_pathing(unit, map_x, map_y, tile) == Boxd_Impassable )
     {
-      if ( BOX_classify_tile_for_pathing(unit, map_x - 1, map_y, tile - 1) )
+      if ( BOXD_classify_tile_for_pathing(unit, map_x - 1, map_y, tile - 1) )
       {
         *out_x -= 0x2000;
         return;
       }
       v7 = map_y - 1;
-      if ( BOX_classify_tile_for_pathing(unit, map_x, v7, &tile[-g_map_num_tiles_x]) == Boxd_Impassable )
+      if ( BOXD_classify_tile_for_pathing(unit, map_x, v7, &tile[-g_map_num_tiles_x]) == Boxd_Impassable )
       {
-        if ( BOX_classify_tile_for_pathing(unit, map_x - 1, v7, &tile[-g_map_num_tiles_x - 1]) == Boxd_Impassable )
+        if ( BOXD_classify_tile_for_pathing(unit, map_x - 1, v7, &tile[-g_map_num_tiles_x - 1]) == Boxd_Impassable )
           return;
         *out_x -= 0x2000;
       }
@@ -23184,8 +21876,8 @@ void __fastcall unit_scan_for_target_of_opportunity(KKND::Unit *unit)
         }
       }
     }
-    v17 = g_aircraft_list_head;
-    if ( g_aircraft_list_head != (KKND::Aircraft *)&g_aircraft_list_head )
+    v17 = g_aircraft_head;
+    if ( g_aircraft_head != (KKND::Aircraft *)&g_aircraft_head )
     {
       while ( 1 )
       {
@@ -23196,7 +21888,7 @@ void __fastcall unit_scan_for_target_of_opportunity(KKND::Unit *unit)
             break;
         }
         v17 = v17->next;
-        if ( v17 == (KKND::Aircraft *)&g_aircraft_list_head )
+        if ( v17 == (KKND::Aircraft *)&g_aircraft_head )
           return;
       }
       v1->opportunity_target = v17->unit;
@@ -23208,7 +21900,7 @@ void __fastcall unit_scan_for_target_of_opportunity(KKND::Unit *unit)
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (00414870) --------------------------------------------------------
-int __fastcall sub_414870(KKND::Unit *unit)
+BOOL __fastcall unit_414870(KKND::Unit *unit)
 {
   int v2; // ebx
   KKND::Entity *entity; // edx
@@ -23246,7 +21938,7 @@ int __fastcall sub_414870(KKND::Unit *unit)
     v10 = -v10;
   if ( v9 <= v10 )
   {
-    v11 = !BOXD_41C130(x, v2 + y, x, y, unit);
+    v11 = !BOXD_line_of_sight_check(x, v2 + y, x, y, unit);
     v16 = unit->entity;
     if ( !v11 )
     {
@@ -23255,7 +21947,7 @@ int __fastcall sub_414870(KKND::Unit *unit)
       unit->order_next_waypoint_y = v2 + v17;
       return 1;
     }
-    if ( BOXD_41C130(v6 + v16->x, v16->y, v16->x, v16->y, unit) )
+    if ( BOXD_line_of_sight_check(v6 + v16->x, v16->y, v16->x, v16->y, unit) )
     {
       v18 = unit->entity;
       unit->order_next_waypoint_x = v6 + v18->x;
@@ -23265,7 +21957,7 @@ int __fastcall sub_414870(KKND::Unit *unit)
   }
   else
   {
-    v11 = !BOXD_41C130(v6 + x, y, x, y, unit);
+    v11 = !BOXD_line_of_sight_check(v6 + x, y, x, y, unit);
     v12 = unit->entity;
     if ( !v11 )
     {
@@ -23273,7 +21965,7 @@ int __fastcall sub_414870(KKND::Unit *unit)
       unit->order_next_waypoint_y = v12->y;
       return 1;
     }
-    if ( BOXD_41C130(v12->x, v2 + v12->y, v12->x, v12->y, unit) )
+    if ( BOXD_line_of_sight_check(v12->x, v2 + v12->y, v12->x, v12->y, unit) )
     {
       v14 = unit->entity;
       unit->order_next_waypoint_x = v14->x;
@@ -23368,7 +22060,7 @@ BOOL __fastcall unit_414AD0(KKND::Unit *unit)
   v4 = (entity->y + dword_465948[((_BYTE)v3 - 4) & 0xF]) >> 13;
   v5 = (entity->x + dword_465948[v3]) >> 13;
   v6 = &g_terrain[v5 + g_map_num_tiles_x * v4];
-  v7 = BOX_classify_tile_for_pathing(unit, v5, v4, v6);
+  v7 = BOXD_classify_tile_for_pathing(unit, v5, v4, v6);
   if ( (int)v7 < (int)Boxd_Impassable )
     return 0;
   if ( (int)v7 <= (int)Boxd_PartiallyOccupied )
@@ -23393,7 +22085,10 @@ BOOL __fastcall unit_414AD0(KKND::Unit *unit)
     }
     if ( ++v8 >= 5 )
     {
-      entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+      entity_anim_init_directional(
+        unit->entity,
+        unit->stats->mobd_lookup_offset_idle,
+        g_angle_to_orientation[unit->orientation]);
       unit->entity->x_speed = 0;
       unit->entity->y_speed = 0;
       unit->multi_purpose_field_1 = 60;
@@ -23401,7 +22096,10 @@ BOOL __fastcall unit_414AD0(KKND::Unit *unit)
       return 1;
     }
   }
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
   unit->multi_purpose_field_1 = 60;
@@ -23436,7 +22134,7 @@ void __fastcall unit_414C30(KKND::Unit *unit)
   {
     unit->entity->x_speed = (unit->stats->speed * dword_4731A8[dword_47CFC8[v2]]) >> 6;
     unit->entity->y_speed = 0;
-    if ( BOXD_40DA90(unit) == 4 )
+    if ( BOXD_update_tile_on_move(unit) == Boxd_MovementSucceeded )
     {
       entity = unit->entity;
       if ( entity->x_speed <= 0 )
@@ -23476,7 +22174,7 @@ LABEL_14:
     }
     unit->entity->x_speed = 0;
     unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[v3]]) >> 6;
-    if ( BOXD_40DA90(unit) == 4 )
+    if ( BOXD_update_tile_on_move(unit) == Boxd_MovementSucceeded )
     {
       v10 = unit->entity;
       if ( v10->y_speed <= 0 )
@@ -23510,7 +22208,7 @@ LABEL_27:
       }
     }
   }
-  unit_417E60(unit);
+  unit_mode_417E60(unit);
 }
 // 4731A8: using guessed type int dword_4731A8[];
 // 4731C8: using guessed type int dword_4731C8[32];
@@ -23554,7 +22252,7 @@ void __fastcall unit_414E80(KKND::Unit *unit)
   v2 = vec2_orientation(unit->order_next_waypoint_x - unit->entity->x, unit->order_next_waypoint_y - unit->entity->y);
   if ( (v2 & 0x3F) == 0 )
   {
-    unit_417E60(unit);
+    unit_mode_417E60(unit);
     return;
   }
   if ( v2 <= 32 )
@@ -23612,7 +22310,7 @@ LABEL_18:
     v8 = (int)v3 >> 4;
     v9 = entity->x + dword_465948[v8];
     v10 = (entity->y + dword_465948[((_BYTE)v8 - 4) & 0xF]) >> 13;
-    v11 = BOX_classify_tile_for_pathing(unit, v9 >> 13, v10, &g_terrain[(v9 >> 13) + g_map_num_tiles_x * v10]);
+    v11 = BOXD_classify_tile_for_pathing(unit, v9 >> 13, v10, &g_terrain[(v9 >> 13) + g_map_num_tiles_x * v10]);
   }
   else
   {
@@ -23691,7 +22389,7 @@ LABEL_52:
       v13 = unit->entity;
       v14 = v13->x + dword_465948[(int)v4 >> 4];
       v15 = v13->y + dword_465948[((unsigned __int8)((int)v4 >> 4) - 4) & 0xF];
-      v16 = BOX_classify_tile_for_pathing(
+      v16 = BOXD_classify_tile_for_pathing(
               unit,
               v14 >> 13,
               v15 >> 13,
@@ -23730,7 +22428,7 @@ LABEL_52:
     else
     {
       unit->orientation = orientation;
-      unit_417E60(unit);
+      unit_mode_417E60(unit);
     }
   }
 }
@@ -23839,7 +22537,7 @@ void __fastcall unit_mode_415540(KKND::Unit *unit)
   unit->order_next_waypoint_y = v8;
   entity->x_speed = order_next_waypoint_x - entity->x;
   unit->entity->y_speed = unit->order_next_waypoint_y - unit->entity->y;
-  if ( BOXD_40DA90(unit) == 4 )
+  if ( BOXD_update_tile_on_move(unit) == 4 )
   {
     unit->entity->x += unit->entity->x_speed;
     unit->entity->y += unit->entity->y_speed;
@@ -23850,7 +22548,7 @@ void __fastcall unit_mode_415540(KKND::Unit *unit)
   unit->order_target_x = v10->x;
   orientation = unit->orientation;
   unit->order_target_y = v10->y;
-  entity_anim_start(v10, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);
+  entity_anim_init_directional(v10, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);
   unit->mode = unit_mode_idle;
   BOXD_40DF50(unit, 0);
   veterancy = unit->veterancy;
@@ -23887,7 +22585,7 @@ void __fastcall unit_mode_idle(KKND::Unit *unit)
     {
       dword_479538 = (unsigned __int16)(3141 * dword_479538 + 13867);
       if ( !(_BYTE)dword_479538 )
-        unit->mode = (KKND::UnitMode)sub_4157F0;
+        unit->mode = unit_mode_4157F0;
     }
   }
   if ( unit->veterancy )
@@ -23919,7 +22617,7 @@ void __fastcall unit_mode_idle(KKND::Unit *unit)
   }
   else if ( unit->task->channel == TaskChannel_Tanker && unit->order == UnitOrder_TankerDock )
   {
-    unit_417E60(unit);
+    unit_mode_417E60(unit);
   }
   else
   {
@@ -23935,53 +22633,49 @@ void __fastcall unit_mode_idle(KKND::Unit *unit)
     }
   }
 }
-// 4157F0: using guessed type int sub_4157F0();
 // 479538: using guessed type int dword_479538;
 // 47953C: using guessed type int g_opportunity_timer;
 
 //----- (004157F0) --------------------------------------------------------
-unsigned int __thiscall sub_4157F0(int this)
+void __fastcall unit_mode_4157F0(KKND::Unit *unit)
 {
-  ptrdiff_t v2; // edx
-  int v3; // eax
-  int v4; // eax
-  int v5; // edx
-  int v6; // eax
-  KKND::Task *v8; // [esp-Ch] [ebp-10h]
+  ptrdiff_t mobd_lookup_offset_attack; // edx
+  KKND::MobdOrientation orientation; // eax
+  KKND::MobdOrientation v4; // eax
+  KKND::UnitStats *stats; // edx
+  KKND::MobdOrientation v6; // eax
+  KKND::Task *task; // [esp-Ch] [ebp-10h]
 
   dword_479538 = (unsigned __int16)(3141 * dword_479538 + 13867);
   if ( (dword_479538 & 0x7Fu) >= 0x46 )
   {
-    v3 = *(_DWORD *)(this + 124);
+    orientation = unit->orientation;
     if ( (dword_479538 & 0x7Fu) >= 0x64 )
     {
-      v5 = *(_DWORD *)(this + 24);
-      v6 = (unsigned __int8)(v3 - 32);
-      *(_DWORD *)(this + 124) = v6;
-      entity_anim_switch_direction(*(KKND::Entity **)(this + 92), *(_DWORD *)(v5 + 60), g_angle_to_orientation[v6]);
+      stats = unit->stats;
+      v6 = (unsigned __int8)(orientation - 32);
+      unit->orientation = v6;
+      entity_anim_change_direction(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[v6]);
     }
     else
     {
-      v4 = (unsigned __int8)(v3 + 32);
-      *(_DWORD *)(this + 124) = v4;
-      entity_anim_switch_direction(
-        *(KKND::Entity **)(this + 92),
-        *(_DWORD *)(*(_DWORD *)(this + 24) + 60),
-        g_angle_to_orientation[v4]);
+      v4 = (unsigned __int8)(orientation + 32);
+      unit->orientation = v4;
+      entity_anim_change_direction(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[v4]);
     }
   }
   else
   {
-    v2 = *(_DWORD *)(*(_DWORD *)(this + 24) + 52);
-    if ( v2 != -1 )
+    mobd_lookup_offset_attack = unit->stats->mobd_lookup_offset_attack;
+    if ( mobd_lookup_offset_attack != -1 )
     {
-      entity_anim_start(*(KKND::Entity **)(this + 92), v2, g_angle_to_orientation[*(_DWORD *)(this + 124)]);
-      *(_DWORD *)(*(_DWORD *)(this + 92) + 96) = 0;
+      entity_anim_init_directional(unit->entity, mobd_lookup_offset_attack, g_angle_to_orientation[unit->orientation]);
+      unit->entity->anim_speed = 0;
     }
   }
-  v8 = *(KKND::Task **)(this + 12);
-  *(_DWORD *)(this + 64) = unit_mode_415540;
-  return TASK_yield(v8, Task_Sleep, 80);
+  task = unit->task;
+  unit->mode = unit_mode_415540;
+  TASK_yield(task, Task_Sleep, 80);
 }
 // 479538: using guessed type int dword_479538;
 
@@ -23994,7 +22688,10 @@ void __fastcall unit_4158B0(KKND::Unit *unit)
   KKND::UnitStats *v5; // eax
   int v6; // eax
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   entity = unit->entity;
   unit->mode = unit_mode_415980;
   entity->x_speed = 0;
@@ -24058,16 +22755,15 @@ void __fastcall unit_mode_415980(KKND::Unit *unit)
 }
 
 //----- (00415A20) --------------------------------------------------------
-int __thiscall sub_415A20(int this)
+void __fastcall unit_415A20(KKND::Unit *unit)
 {
-  entity_anim_start(
-    *(KKND::Entity **)(this + 92),
-    *(_DWORD *)(*(_DWORD *)(this + 24) + 56),
-    g_angle_to_orientation[*(_DWORD *)(this + 124)]);
-  *(_DWORD *)(*(_DWORD *)(this + 92) + 28) = 0;
-  *(_DWORD *)(*(_DWORD *)(this + 92) + 32) = 0;
-  *(_DWORD *)(this + 64) = unit_mode_415A60;
-  return 0;
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_move,
+    g_angle_to_orientation[unit->orientation]);
+  unit->entity->x_speed = 0;
+  unit->entity->y_speed = 0;
+  unit->mode = unit_mode_415A60;
 }
 
 //----- (00415A60) --------------------------------------------------------
@@ -24085,7 +22781,7 @@ void __fastcall unit_mode_415A60(KKND::Unit *unit)
   else
   {
     entity_anim_advance_rotation((ptrdiff_t *)&unit->orientation, target_orientation, unit->stats->turning_speed);
-    entity_anim_switch_direction(
+    entity_anim_change_direction(
       unit->entity,
       unit->stats->mobd_lookup_offset_move,
       g_angle_to_orientation[*p_orientation]);
@@ -24123,7 +22819,10 @@ void __fastcall unit_mode_attack_move(KKND::Unit *unit)
     BOXD_40DF50(unit, 1);
     if ( !unit_413D10(unit) )
     {
-      entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+      entity_anim_init_directional(
+        unit->entity,
+        unit->stats->mobd_lookup_offset_idle,
+        g_angle_to_orientation[unit->orientation]);
       disperse_timer = unit->scan_pathing.disperse_timer;
       if ( disperse_timer )
         unit->scan_pathing.disperse_timer = disperse_timer - 1;
@@ -24179,7 +22878,7 @@ void __fastcall unit_mode_attack_move(KKND::Unit *unit)
           order = unit->order;
           if ( order == UnitOrder_TankerDock || order == UnitOrder_RepairInfiltrate )
             goto LABEL_29;
-          sub_417550((int)unit);
+          unit_417550(unit);
           return;
         case BoxdRaycastResult_InvalidState:
           if ( unit->scan_pathing.first_clear_tile_x || unit->scan_pathing.first_clear_tile_y )
@@ -24205,7 +22904,7 @@ LABEL_36:
           else
           {
 LABEL_29:
-            unit_417E60(unit);
+            unit_mode_417E60(unit);
           }
           break;
         default:
@@ -24267,13 +22966,13 @@ void __fastcall unit_mode_415D30(KKND::Unit *unit)
       }
       else
       {
-        unit_417E60(unit);
+        unit_mode_417E60(unit);
       }
     }
     else
     {
       unit->scan_pathing.push_through_timer = 4;
-      unit_417E60(unit);
+      unit_mode_417E60(unit);
     }
   }
   else
@@ -24292,7 +22991,7 @@ void __fastcall unit_mode_415D30(KKND::Unit *unit)
       unit->scan_pathing.ccw_scan_x = unit->ray_exit_map_xs[ray_stack];
       unit->scan_pathing.ccw_scan_y = unit->ray_exit_map_ys[ray_stack];
     }
-    if ( BOX_classify_tile_for_pathing(
+    if ( BOXD_classify_tile_for_pathing(
            unit,
            unit->scan_pathing.cw_scan_x,
            unit->scan_pathing.cw_scan_y,
@@ -24303,7 +23002,7 @@ void __fastcall unit_mode_415D30(KKND::Unit *unit)
           (v6 = unit->stats, !v6->is_infantry)
         ? (v7 = v6->size != UnitSize_Regular ? 7424 : 4096)
         : (v7 = BOXD_adjust_unit_position_x(unit, unit->tile_position)),
-          BOXD_41C130(
+          BOXD_line_of_sight_check(
             v7 + (unit->scan_pathing.cw_scan_x << 13),
             v5 + (unit->scan_pathing.cw_scan_y << 13),
             unit->entity->x,
@@ -24391,11 +23090,11 @@ void __fastcall unit_mode_path_around_obstacles(KKND::Unit *unit)
   int v40; // ecx
   KKND::UnitStats *v41; // eax
   KKND::UnitPathFlags v42; // eax
-  int v43; // [esp+10h] [ebp-18h] BYREF
-  int ccw_scan_y; // [esp+14h] [ebp-14h] BYREF
-  KKND::Direction v45; // [esp+18h] [ebp-10h] BYREF
+  int a1; // [esp+10h] [ebp-18h] BYREF
+  int a2; // [esp+14h] [ebp-14h] BYREF
+  KKND::Direction a5; // [esp+18h] [ebp-10h] BYREF
   int v46; // [esp+1Ch] [ebp-Ch]
-  int v47; // [esp+20h] [ebp-8h]
+  int ccw_scan_y; // [esp+20h] [ebp-8h]
   int cw_scan_y; // [esp+24h] [ebp-4h]
 
   v46 = 0;
@@ -24407,13 +23106,13 @@ void __fastcall unit_mode_path_around_obstacles(KKND::Unit *unit)
       p_cw_scan_y = &unit->scan_pathing.cw_scan_y;
       p_cw_scan_x = &unit->scan_pathing.cw_scan_x;
       cw_scan_y = unit->scan_pathing.cw_scan_y;
-      v47 = cw_scan_x;
+      ccw_scan_y = cw_scan_x;
       if ( sub_44D340(
              &unit->scan_pathing.cw_scan_x,
              &unit->scan_pathing.cw_scan_y,
              1,
              unit,
-             (int *)&unit->scan_pathing.cw_heading) )
+             &unit->scan_pathing.cw_heading) )
       {
         entity = unit->entity;
         if ( *p_cw_scan_x == entity->x >> 13 && *p_cw_scan_y == entity->y >> 13 )
@@ -24421,11 +23120,11 @@ void __fastcall unit_mode_path_around_obstacles(KKND::Unit *unit)
 LABEL_63:
           unit->scan_pathing.push_through_timer = 0;
           unit->scan_pathing.disperse_timer = 2;
-          unit->mode_return = (KKND::UnitMode)unit_417E60;
+          unit->mode_return = unit_mode_417E60;
           unit_mode_416A70(unit);
           return;
         }
-        v6 = BOX_classify_tile_for_pathing(
+        v6 = BOXD_classify_tile_for_pathing(
                unit,
                *p_cw_scan_x,
                *p_cw_scan_y,
@@ -24444,7 +23143,7 @@ LABEL_63:
               : v9->size != UnitSize_Regular
               ? 7424
               : 4096;
-          if ( BOXD_41C130(
+          if ( BOXD_line_of_sight_check(
                  v10 + (*p_cw_scan_x << 13),
                  v8 + (*p_cw_scan_y << 13),
                  unit->entity->x,
@@ -24478,11 +23177,11 @@ LABEL_63:
           if ( *p_cw_scan_x == ccw_scan_x && *p_cw_scan_y == unit->scan_pathing.ccw_scan_y )
           {
             ccw_heading = unit->scan_pathing.ccw_heading;
-            ccw_scan_y = unit->scan_pathing.ccw_scan_y;
-            v43 = ccw_scan_x;
-            v45 = ccw_heading;
-            sub_44D340(&v43, &ccw_scan_y, 0, unit, (int *)&v45);
-            if ( v43 == v47 && ccw_scan_y == cw_scan_y )
+            a2 = unit->scan_pathing.ccw_scan_y;
+            a1 = ccw_scan_x;
+            a5 = ccw_heading;
+            sub_44D340(&a1, &a2, 0, unit, &a5);
+            if ( a1 == ccw_scan_y && a2 == cw_scan_y )
               break;
           }
         }
@@ -24499,19 +23198,19 @@ LABEL_63:
       v14 = unit->scan_pathing.ccw_scan_x;
       p_ccw_scan_y = &unit->scan_pathing.ccw_scan_y;
       p_ccw_scan_x = &unit->scan_pathing.ccw_scan_x;
-      v47 = unit->scan_pathing.ccw_scan_y;
+      ccw_scan_y = unit->scan_pathing.ccw_scan_y;
       cw_scan_y = v14;
       if ( sub_44D340(
              &unit->scan_pathing.ccw_scan_x,
              &unit->scan_pathing.ccw_scan_y,
              0,
              unit,
-             (int *)&unit->scan_pathing.ccw_heading) )
+             &unit->scan_pathing.ccw_heading) )
       {
         v17 = unit->entity;
         if ( *p_ccw_scan_x == v17->x >> 13 && *p_ccw_scan_y == v17->y >> 13 )
           goto LABEL_63;
-        v18 = BOX_classify_tile_for_pathing(
+        v18 = BOXD_classify_tile_for_pathing(
                 unit,
                 *p_ccw_scan_x,
                 *p_ccw_scan_y,
@@ -24530,7 +23229,7 @@ LABEL_63:
               : v21->size != UnitSize_Regular
               ? 7424
               : 4096;
-          if ( BOXD_41C130(
+          if ( BOXD_line_of_sight_check(
                  v22 + (*p_ccw_scan_x << 13),
                  v20 + (*p_ccw_scan_y << 13),
                  unit->entity->x,
@@ -24562,11 +23261,11 @@ LABEL_71:
           if ( v23 == *p_ccw_scan_x && unit->scan_pathing.cw_scan_y == *p_ccw_scan_y )
           {
             cw_heading = unit->scan_pathing.cw_heading;
-            ccw_scan_y = unit->scan_pathing.cw_scan_y;
-            v43 = v23;
-            v45 = cw_heading;
-            sub_44D340(&v43, &ccw_scan_y, 1, unit, (int *)&v45);
-            if ( v43 == cw_scan_y && ccw_scan_y == v47 )
+            a2 = unit->scan_pathing.cw_scan_y;
+            a1 = v23;
+            a5 = cw_heading;
+            sub_44D340(&a1, &a2, 1, unit, &a5);
+            if ( a1 == cw_scan_y && a2 == ccw_scan_y )
               break;
           }
         }
@@ -24636,16 +23335,27 @@ void __fastcall unit_mode_4165C0(KKND::Unit *unit)
     unit->orientation = vec2_orientation(
                           unit->order_next_waypoint_x - entity->x,
                           unit->order_next_waypoint_y - entity->y);
-    sub_413C10(unit);
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+    unit_413C10(unit);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_move,
+      g_angle_to_orientation[unit->orientation]);
     dword_479538 = (unsigned __int16)(3141 * dword_479538 + 13867);// inlined pathing rng
     unit->entity->anim_speed -= dword_479538 << 9;
     unit->base_anim_speed = unit->entity->anim_speed;
   }
   else if ( stats->size == UnitSize_Regular
-         || BOXD_41C130(unit->order_next_waypoint_x, unit->order_next_waypoint_y, entity->x, entity->y, unit) )
+         || BOXD_line_of_sight_check(
+              unit->order_next_waypoint_x,
+              unit->order_next_waypoint_y,
+              entity->x,
+              entity->y,
+              unit) )
   {
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_move,
+      g_angle_to_orientation[unit->orientation]);
     dword_479538 = (unsigned __int16)(3141 * dword_479538 + 13867);// inlined pathing rng
     unit->entity->anim_speed -= dword_479538 << 9;
     v5 = unit->entity;
@@ -24656,14 +23366,14 @@ void __fastcall unit_mode_4165C0(KKND::Unit *unit)
     v9 = unit->stats;
     unit->mode_turn_return = unit_mode_416790;
     unit->target_orientation = (v7 + 8) & 0xF0;
-    entity_anim_start(unit->entity, v9->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+    entity_anim_init_directional(unit->entity, v9->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
     unit->entity->x_speed = 0;
     unit->entity->y_speed = 0;
     unit->mode = unit_mode_415A60;
   }
-  else if ( !sub_414870(unit) )
+  else if ( !unit_414870(unit) )
   {
-    unit_417E60(unit);
+    unit_mode_417E60(unit);
   }
 }
 // 479538: using guessed type int dword_479538;
@@ -24760,12 +23470,12 @@ LABEL_37:
     unit->entity->y_speed += unit->entity->y_speed < 0;
     if ( unit->stats->is_infantry )
     {
-      v23 = BOXD_40DA90(unit);
+      v23 = BOXD_update_tile_on_move(unit);
       if ( (int)v23 >= (int)Boxd_Impassable )
       {
         if ( (int)v23 <= (int)Boxd_PartiallyOccupied )
         {
-          unit_417E60(unit);
+          unit_mode_417E60(unit);
           return;
         }
 LABEL_42:
@@ -24774,7 +23484,10 @@ LABEL_42:
           orientation = unit->orientation;
           stats = unit->stats;
           unit->mode_return = unit_mode_4165C0;
-          entity_anim_start(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);
+          entity_anim_init_directional(
+            unit->entity,
+            stats->mobd_lookup_offset_idle,
+            g_angle_to_orientation[orientation]);
           v26 = unit->entity;
           unit->scan_pathing.cw_scan_x = v26->x_speed;
           unit->scan_pathing.cw_scan_y = v26->y_speed;
@@ -24791,7 +23504,7 @@ LABEL_42:
     }
     else
     {
-      v23 = BOXD_40DA90(unit);
+      v23 = BOXD_update_tile_on_move(unit);
       if ( v23 >= Boxd_Clear )
         goto LABEL_42;
       unit_414C30(unit);
@@ -24806,12 +23519,12 @@ LABEL_42:
   if ( v22->is_infantry )
   {
     unit->orientation = v19;
-    entity_anim_switch_direction(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v19]);
+    entity_anim_change_direction(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v19]);
     goto LABEL_37;
   }
   v28 = unit->entity;
   unit->mode_turn_return = unit_mode_416790;
-  entity_anim_start(v28, v22->mobd_lookup_offset_move, g_angle_to_orientation[v20]);
+  entity_anim_init_directional(v28, v22->mobd_lookup_offset_move, g_angle_to_orientation[v20]);
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
   unit->mode = unit_mode_415A60;
@@ -24916,14 +23629,14 @@ LABEL_24:
     if ( v22->is_infantry || (orientation = unit->orientation, orientation == v21) )
     {
       unit->orientation = v21;
-      entity_anim_start(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v21]);
+      entity_anim_init_directional(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v21]);
       unit->mode = unit_mode_416CD0;
     }
     else
     {
       unit->target_orientation = v21;
       unit->mode_turn_return = unit_mode_416A70;
-      entity_anim_start(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+      entity_anim_init_directional(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
       unit->entity->x_speed = 0;
       unit->entity->y_speed = 0;
       unit->mode = unit_mode_415A60;
@@ -24973,10 +23686,10 @@ void __fastcall unit_mode_416CD0(KKND::Unit *unit)
     v8 = vec2_orientation(order_next_waypoint_x - x, unit->order_next_waypoint_y - entity->y);
     v9 = unit->entity;
     unit->orientation = v8;
-    entity_anim_switch_direction(v9, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v8]);
+    entity_anim_change_direction(v9, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v8]);
     unit->entity->x_speed = (unit->stats->speed * dword_4731A8[dword_47CFC8[unit->orientation]]) >> 6;
     unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
-    if ( BOXD_40DA90(unit) != 4 )
+    if ( BOXD_update_tile_on_move(unit) != 4 )
     {
       unit->entity->x_speed = 0;
       unit->entity->y_speed = 0;
@@ -25115,14 +23828,14 @@ LABEL_24:
     if ( v22->is_infantry || (orientation = unit->orientation, orientation == v21) )
     {
       unit->orientation = v21;
-      entity_anim_start(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v21]);
+      entity_anim_init_directional(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v21]);
       unit->mode = unit_mode_417100;
     }
     else
     {
       unit->target_orientation = v21;
       unit->mode_turn_return = unit_mode_416EB0;
-      entity_anim_start(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+      entity_anim_init_directional(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
       unit->entity->x_speed = 0;
       unit->entity->y_speed = 0;
       unit->mode = unit_mode_415A60;
@@ -25170,10 +23883,10 @@ void __fastcall unit_mode_417100(KKND::Unit *unit)
     v8 = vec2_orientation(order_next_waypoint_x - x, unit->order_next_waypoint_y - entity->y);
     v9 = unit->entity;
     unit->orientation = v8;
-    entity_anim_switch_direction(v9, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v8]);
+    entity_anim_change_direction(v9, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v8]);
     unit->entity->x_speed = (unit->stats->speed * dword_4731A8[dword_47CFC8[unit->orientation]]) >> 6;
     unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
-    if ( BOXD_40DA90(unit) != 4 )
+    if ( BOXD_update_tile_on_move(unit) != 4 )
     {
       unit->entity->x_speed = 0;
       unit->entity->y_speed = 0;
@@ -25225,7 +23938,10 @@ void __fastcall unit_4172D0(KKND::Unit *unit)
   unit->orientation = v2;
   unit->entity->x_speed = (stats->speed * dword_4731A8[dword_47CFC8[v2]]) >> 6;
   unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_move,
+    g_angle_to_orientation[unit->orientation]);
   unit->mode = unit_mode_417360;
 }
 // 4731A8: using guessed type int dword_4731A8[];
@@ -25267,7 +23983,7 @@ void __fastcall unit_mode_417360(KKND::Unit *unit)
     v14 = vec2_orientation(order_next_waypoint_x - x, unit->order_next_waypoint_y - entity->y);
     stats = unit->stats;
     unit->orientation = v14;
-    entity_anim_switch_direction(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v14]);
+    entity_anim_change_direction(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v14]);
     unit->entity->x_speed = (unit->stats->speed * dword_4731A8[dword_47CFC8[unit->orientation]]) >> 6;
     unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
   }
@@ -25328,168 +24044,176 @@ void __fastcall unit_mode_417360(KKND::Unit *unit)
 // 47CFC8: using guessed type int dword_47CFC8[255];
 
 //----- (00417550) --------------------------------------------------------
-int __thiscall sub_417550(int this)
+void __fastcall unit_417550(KKND::Unit *unit)
 {
-  int v2; // edx
+  KKND::Entity *entity; // edx
   int v3; // eax
   int v4; // ecx
   int v5; // edi
   int v6; // edx
-  int v7; // edi
+  int path_scan_origin_tile_y; // edi
   int v8; // eax
-  int v9; // edx
-  int v10; // ecx
+  int path_next_waypoint_tile_x; // edx
+  int path_scan_origin_tile_x; // ecx
   int v11; // eax
   int v12; // edx
   int v13; // edi
-  int result; // eax
+  int v14; // eax
 
-  entity_anim_start(
-    *(KKND::Entity **)(this + 92),
-    *(_DWORD *)(*(_DWORD *)(this + 24) + 60),
-    g_angle_to_orientation[*(_DWORD *)(this + 124)]);
-  *(_DWORD *)(*(_DWORD *)(this + 92) + 28) = 0;
-  *(_DWORD *)(*(_DWORD *)(this + 92) + 32) = 0;
-  v2 = *(_DWORD *)(this + 92);
-  v3 = *(int *)(this + 176) >> 13;
-  v4 = *(int *)(this + 180) >> 13;
-  *(_DWORD *)(this + 204) = v3;
-  *(_DWORD *)(this + 208) = v4;
-  v5 = *(int *)(v2 + 16) >> 13;
-  *(_DWORD *)(this + 312) = v5;
-  *(_DWORD *)(this + 316) = *(int *)(v2 + 20) >> 13;
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
+  unit->entity->x_speed = 0;
+  unit->entity->y_speed = 0;
+  entity = unit->entity;
+  v3 = unit->order_next_waypoint_x >> 13;
+  v4 = unit->order_next_waypoint_y >> 13;
+  unit->path_next_waypoint_tile_x = v3;
+  unit->path_next_waypoint_tile_y = v4;
+  v5 = entity->x >> 13;
+  unit->path_scan_origin_tile_x = v5;
+  unit->path_scan_origin_tile_y = entity->y >> 13;
   v6 = v5;
-  v7 = *(_DWORD *)(this + 316);
-  *(_DWORD *)(this + 600) = v6;
-  *(_DWORD *)(this + 592) = v6;
-  *(_DWORD *)(this + 604) = v7;
-  *(_DWORD *)(this + 596) = v7;
-  LOWORD(v8) = vec2_orientation(v3 - v6, v4 - v7);
-  v9 = *(_DWORD *)(this + 204);
+  path_scan_origin_tile_y = unit->path_scan_origin_tile_y;
+  unit->scan_pathing.ccw_scan_x = v6;
+  unit->scan_pathing.cw_scan_x = v6;
+  unit->scan_pathing.ccw_scan_y = path_scan_origin_tile_y;
+  unit->scan_pathing.cw_scan_y = path_scan_origin_tile_y;
+  LOWORD(v8) = vec2_orientation(v3 - v6, v4 - path_scan_origin_tile_y);
+  path_next_waypoint_tile_x = unit->path_next_waypoint_tile_x;
   LOBYTE(v8) = ((v8 + 16) >> 5) & 7;
-  *(_DWORD *)(this + 608) = ((_BYTE)v8 + 2) & 7;
-  v10 = *(_DWORD *)(this + 312);
-  *(_DWORD *)(this + 612) = ((_BYTE)v8 - 2) & 7;
-  v11 = v9 - v10;
-  if ( v9 - v10 <= 0 )
-    v11 = v10 - v9;
-  v12 = *(_DWORD *)(this + 316);
-  v13 = *(_DWORD *)(this + 208) - v12;
+  unit->scan_pathing.cw_heading = ((_BYTE)v8 + 2) & 7;
+  path_scan_origin_tile_x = unit->path_scan_origin_tile_x;
+  unit->scan_pathing.ccw_heading = ((_BYTE)v8 - 2) & 7;
+  v11 = path_next_waypoint_tile_x - path_scan_origin_tile_x;
+  if ( path_next_waypoint_tile_x - path_scan_origin_tile_x <= 0 )
+    v11 = path_scan_origin_tile_x - path_next_waypoint_tile_x;
+  v12 = unit->path_scan_origin_tile_y;
+  v13 = unit->path_next_waypoint_tile_y - v12;
   if ( v13 <= 0 )
-    v13 = v12 - *(_DWORD *)(this + 208);
-  result = v13 + v11;
-  *(_DWORD *)(this + 336) = v12;
-  *(_DWORD *)(this + 328) = result;
-  *(_DWORD *)(this + 332) = v10;
-  *(_DWORD *)(this + 340) = 0;
-  *(_DWORD *)(this + 320) = 0;
-  *(_DWORD *)(this + 324) = 2 * result;
-  *(_DWORD *)(this + 64) = sub_417670;
-  return result;
+    v13 = v12 - unit->path_next_waypoint_tile_y;
+  v14 = v13 + v11;
+  unit->path_scan_best_tile_y = v12;
+  unit->path_scan_best_distance = v14;
+  unit->path_scan_best_tile_x = path_scan_origin_tile_x;
+  unit->path_scan_best_iteration = 0;
+  unit->path_scan_iteration = 0;
+  unit->path_scan_max_iterations = 2 * v14;
+  unit->mode = unit_mode_417670;
 }
 // 4175E1: variable 'v8' is possibly undefined
 
 //----- (00417670) --------------------------------------------------------
-void __thiscall sub_417670(int this)
+void __fastcall unit_mode_417670(KKND::Unit *unit)
 {
-  int *v2; // ebp
+  int *p_cw_scan_x; // ebp
   int v3; // edx
   int v4; // eax
-  int v5; // edi
+  int cw_scan_y; // edi
   int v6; // ecx
   int v7; // ecx
-  int v8; // eax
-  int v9; // ebx
-  int v10; // ebx
+  int path_scan_best_distance; // eax
+  int path_scan_iteration; // ebx
+  int ccw_scan_x; // ebx
   int v11; // eax
-  int v12; // edx
+  int ccw_scan_y; // edx
   int v13; // ecx
   int v14; // ecx
   int v15; // eax
   int v16; // edi
   int v17; // edi
-  int v18; // eax
+  int path_scan_origin_tile_x; // eax
   int v19; // eax
-  int v20; // eax
+  int path_scan_origin_tile_y; // eax
   int v21; // eax
   int v22; // [esp+10h] [ebp-4h]
 
   v22 = 0;
-  v2 = (int *)(this + 592);
+  p_cw_scan_x = &unit->scan_pathing.cw_scan_x;
   while ( 1 )
   {
-    sub_44D250(v2, (_DWORD *)(this + 596), 1, (KKND::Unit *)this, (int *)(this + 608));
-    v3 = *v2;
-    v4 = *(_DWORD *)(this + 204) - *v2;
+    sub_44D250(p_cw_scan_x, &unit->scan_pathing.cw_scan_y, 1, unit, (int *)&unit->scan_pathing.cw_heading);
+    v3 = *p_cw_scan_x;
+    v4 = unit->path_next_waypoint_tile_x - *p_cw_scan_x;
     if ( v4 <= 0 )
-      v4 = v3 - *(_DWORD *)(this + 204);
-    v5 = *(_DWORD *)(this + 596);
-    v6 = *(_DWORD *)(this + 208) - v5;
+      v4 = v3 - unit->path_next_waypoint_tile_x;
+    cw_scan_y = unit->scan_pathing.cw_scan_y;
+    v6 = unit->path_next_waypoint_tile_y - cw_scan_y;
     if ( v6 <= 0 )
-      v6 = v5 - *(_DWORD *)(this + 208);
+      v6 = cw_scan_y - unit->path_next_waypoint_tile_y;
     v7 = v4 + v6;
-    v8 = *(_DWORD *)(this + 328);
-    *(_DWORD *)(this + 344) = v7;
-    if ( v7 < v8 )
+    path_scan_best_distance = unit->path_scan_best_distance;
+    unit->path_scan_cur_distance = v7;
+    if ( v7 < path_scan_best_distance )
     {
-      v9 = *(_DWORD *)(this + 320);
-      if ( v9 < 2 * (v8 - v7) )
+      path_scan_iteration = unit->path_scan_iteration;
+      if ( path_scan_iteration < 2 * (path_scan_best_distance - v7) )
       {
-        *(_DWORD *)(this + 328) = v7;
-        *(_DWORD *)(this + 332) = v3;
-        *(_DWORD *)(this + 336) = v5;
-        *(_DWORD *)(this + 340) = v9;
-        *(_DWORD *)(this + 212) = 1;
+        unit->path_scan_best_distance = v7;
+        unit->path_scan_best_tile_x = v3;
+        unit->path_scan_best_tile_y = cw_scan_y;
+        unit->path_scan_best_iteration = path_scan_iteration;
+        unit->path_scan_direction = 1;
       }
     }
-    sub_44D250((_DWORD *)(this + 600), (_DWORD *)(this + 604), 0, (KKND::Unit *)this, (int *)(this + 612));
-    v10 = *(_DWORD *)(this + 600);
-    v11 = *(_DWORD *)(this + 204) - v10;
+    sub_44D250(
+      &unit->scan_pathing.ccw_scan_x,
+      &unit->scan_pathing.ccw_scan_y,
+      0,
+      unit,
+      (int *)&unit->scan_pathing.ccw_heading);
+    ccw_scan_x = unit->scan_pathing.ccw_scan_x;
+    v11 = unit->path_next_waypoint_tile_x - ccw_scan_x;
     if ( v11 <= 0 )
-      v11 = v10 - *(_DWORD *)(this + 204);
-    v12 = *(_DWORD *)(this + 604);
-    v13 = *(_DWORD *)(this + 208) - v12;
+      v11 = ccw_scan_x - unit->path_next_waypoint_tile_x;
+    ccw_scan_y = unit->scan_pathing.ccw_scan_y;
+    v13 = unit->path_next_waypoint_tile_y - ccw_scan_y;
     if ( v13 <= 0 )
-      v13 = v12 - *(_DWORD *)(this + 208);
+      v13 = ccw_scan_y - unit->path_next_waypoint_tile_y;
     v14 = v11 + v13;
-    v15 = *(_DWORD *)(this + 328);
-    *(_DWORD *)(this + 344) = v14;
+    v15 = unit->path_scan_best_distance;
+    unit->path_scan_cur_distance = v14;
     if ( v14 < v15 )
     {
-      v16 = *(_DWORD *)(this + 320);
+      v16 = unit->path_scan_iteration;
       if ( v16 < 2 * (v15 - v14) )
       {
-        *(_DWORD *)(this + 328) = v14;
-        *(_DWORD *)(this + 332) = v10;
-        *(_DWORD *)(this + 336) = v12;
-        *(_DWORD *)(this + 340) = v16;
-        *(_DWORD *)(this + 212) = 0;
+        unit->path_scan_best_distance = v14;
+        unit->path_scan_best_tile_x = ccw_scan_x;
+        unit->path_scan_best_tile_y = ccw_scan_y;
+        unit->path_scan_best_iteration = v16;
+        unit->path_scan_direction = 0;
       }
     }
-    v17 = *(_DWORD *)(this + 320);
-    if ( v17 == *(_DWORD *)(this + 324) )
+    v17 = unit->path_scan_iteration;
+    if ( v17 == unit->path_scan_max_iterations )
       break;
     if ( v17 > 1 )
     {
-      v18 = *(_DWORD *)(this + 312);
-      v19 = *v2 - v18 <= 0 ? v18 - *v2 : *v2 - v18;
+      path_scan_origin_tile_x = unit->path_scan_origin_tile_x;
+      v19 = *p_cw_scan_x - path_scan_origin_tile_x <= 0
+          ? path_scan_origin_tile_x - *p_cw_scan_x
+          : *p_cw_scan_x - path_scan_origin_tile_x;
       if ( v19 <= 1 )
       {
-        v20 = *(_DWORD *)(this + 316);
-        v21 = *(_DWORD *)(this + 596) - v20 <= 0 ? v20 - *(_DWORD *)(this + 596) : *(_DWORD *)(this + 596) - v20;
+        path_scan_origin_tile_y = unit->path_scan_origin_tile_y;
+        v21 = unit->scan_pathing.cw_scan_y - path_scan_origin_tile_y <= 0
+            ? path_scan_origin_tile_y - unit->scan_pathing.cw_scan_y
+            : unit->scan_pathing.cw_scan_y - path_scan_origin_tile_y;
         if ( v21 <= 1 )
           break;
       }
     }
-    *(_DWORD *)(this + 320) = v17 + 1;
+    unit->path_scan_iteration = v17 + 1;
     if ( ++v22 >= 4 )
       return;
   }
-  sub_417810((KKND::Unit *)this);
+  unit_417810(unit);
 }
 
 //----- (00417810) --------------------------------------------------------
-void __thiscall sub_417810(KKND::Unit *this)
+void __fastcall unit_417810(KKND::Unit *unit)
 {
   KKND::Entity *entity; // ecx
   int path_scan_best_tile_x; // eax
@@ -25504,77 +24228,77 @@ void __thiscall sub_417810(KKND::Unit *this)
   KKND::MobdOrientation orientation; // edx
   KKND::UnitPathFlags path_flags; // eax
 
-  entity = this->entity;
-  path_scan_best_tile_x = this->path_scan_best_tile_x;
-  if ( path_scan_best_tile_x == entity->x >> 13 && this->path_scan_best_tile_y == entity->y >> 13 )
+  entity = unit->entity;
+  path_scan_best_tile_x = unit->path_scan_best_tile_x;
+  if ( path_scan_best_tile_x == entity->x >> 13 && unit->path_scan_best_tile_y == entity->y >> 13 )
   {
-    this->mode_return = unit_mode_415540;
-    unit_mode_416A70(this);
+    unit->mode_return = unit_mode_415540;
+    unit_mode_416A70(unit);
   }
   else
   {
-    path_scan_best_tile_y = this->path_scan_best_tile_y;
-    this->path_next_waypoint_tile_x = path_scan_best_tile_x;
-    path_scan_best_iteration = this->path_scan_best_iteration;
-    this->path_next_waypoint_tile_y = path_scan_best_tile_y;
-    this->base_anim_speed = path_scan_best_iteration + 1;
-    stats = this->stats;
+    path_scan_best_tile_y = unit->path_scan_best_tile_y;
+    unit->path_next_waypoint_tile_x = path_scan_best_tile_x;
+    path_scan_best_iteration = unit->path_scan_best_iteration;
+    unit->path_next_waypoint_tile_y = path_scan_best_tile_y;
+    unit->base_anim_speed = path_scan_best_iteration + 1;
+    stats = unit->stats;
     if ( stats->is_infantry )
-      v7 = BOXD_adjust_unit_position_x(this, this->tile_position);
+      v7 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
     else
       v7 = stats->size != UnitSize_Regular ? 7424 : 4096;
-    v8 = v7 + (this->path_next_waypoint_tile_x << 13);
-    v9 = this->stats;
-    this->order_next_waypoint_x = v8;
+    v8 = v7 + (unit->path_next_waypoint_tile_x << 13);
+    v9 = unit->stats;
+    unit->order_next_waypoint_x = v8;
     if ( v9->is_infantry )
-      v10 = BOXD_adjust_unit_position_y(this, this->tile_position);
+      v10 = BOXD_adjust_unit_position_y(unit, unit->tile_position);
     else
       v10 = v9->size != UnitSize_Regular ? 7424 : 4096;
-    v11 = this->entity;
-    this->order_next_waypoint_y = v10 + (this->path_next_waypoint_tile_y << 13);
-    orientation = this->orientation;
-    this->scan_pathing.cw_scan_x = v11->anim_speed;
-    path_flags = this->path_flags;
-    this->multi_purpose_field_1 = 0;
+    v11 = unit->entity;
+    unit->order_next_waypoint_y = v10 + (unit->path_next_waypoint_tile_y << 13);
+    orientation = unit->orientation;
+    unit->scan_pathing.cw_scan_x = v11->anim_speed;
+    path_flags = unit->path_flags;
+    unit->multi_purpose_field_1 = 0;
     LOBYTE(path_flags) = path_flags & 0xFE;
-    this->mode = unit_mode_417BD0;
-    this->path_flags = path_flags;
-    entity_anim_start(v11, this->stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
-    this->entity->x_speed = 0;
-    this->entity->y_speed = 0;
-    if ( this->path_scan_direction )
-      this->path_scan_orientation = ((unsigned __int8)this->orientation + 64) & 0xE0;
+    unit->mode = unit_mode_417BD0;
+    unit->path_flags = path_flags;
+    entity_anim_init_directional(v11, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+    unit->entity->x_speed = 0;
+    unit->entity->y_speed = 0;
+    if ( unit->path_scan_direction )
+      unit->path_scan_orientation = ((unsigned __int8)unit->orientation + 64) & 0xE0;
     else
-      this->path_scan_orientation = ((unsigned __int8)this->orientation - 64) & 0xE0;
-    unit_mode_417A20(this);
+      unit->path_scan_orientation = ((unsigned __int8)unit->orientation - 64) & 0xE0;
+    unit_mode_417A20(unit);
   }
 }
 
 //----- (00417980) --------------------------------------------------------
-void __thiscall sub_417980(KKND::Unit *this)
+void __fastcall unit_417980(KKND::Unit *unit)
 {
   KKND::Entity *entity; // ecx
   KKND::MobdOrientation orientation; // edx
   int anim_speed; // eax
   KKND::UnitPathFlags path_flags; // eax
 
-  entity = this->entity;
-  orientation = this->orientation;
+  entity = unit->entity;
+  orientation = unit->orientation;
   anim_speed = entity->anim_speed;
-  this->multi_purpose_field_1 = 0;
-  this->scan_pathing.cw_scan_x = anim_speed;
-  path_flags = this->path_flags;
+  unit->multi_purpose_field_1 = 0;
+  unit->scan_pathing.cw_scan_x = anim_speed;
+  path_flags = unit->path_flags;
   LOBYTE(path_flags) = path_flags & 0xFE;
-  this->mode = unit_mode_417BD0;
-  this->path_flags = path_flags;
-  entity_anim_start(entity, this->stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
-  this->entity->x_speed = 0;
-  this->entity->y_speed = 0;
-  if ( this->path_scan_direction )
-    this->path_scan_orientation = ((unsigned __int8)this->orientation + 64) & 0xE0;
+  unit->mode = unit_mode_417BD0;
+  unit->path_flags = path_flags;
+  entity_anim_init_directional(entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+  unit->entity->x_speed = 0;
+  unit->entity->y_speed = 0;
+  if ( unit->path_scan_direction )
+    unit->path_scan_orientation = ((unsigned __int8)unit->orientation + 64) & 0xE0;
   else
-    this->path_scan_orientation = ((unsigned __int8)this->orientation - 64) & 0xE0;
-  unit_mode_417A20(this);
+    unit->path_scan_orientation = ((unsigned __int8)unit->orientation - 64) & 0xE0;
+  unit_mode_417A20(unit);
 }
 
 //----- (00417A20) --------------------------------------------------------
@@ -25620,12 +24344,20 @@ LABEL_5:
       target_orientation = unit->target_orientation;
       unit->orientation = v6;
       unit->path_scan_orientation = target_orientation;
-      sub_413C10(unit);
-      entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+      unit_413C10(unit);
+      entity_anim_init_directional(
+        unit->entity,
+        unit->stats->mobd_lookup_offset_move,
+        g_angle_to_orientation[unit->orientation]);
       return;
     }
     if ( stats->size == UnitSize_Regular
-      || BOXD_41C130(unit->order_next_waypoint_x, unit->order_next_waypoint_y, unit->entity->x, unit->entity->y, unit) )
+      || BOXD_line_of_sight_check(
+           unit->order_next_waypoint_x,
+           unit->order_next_waypoint_y,
+           unit->entity->x,
+           unit->entity->y,
+           unit) )
     {
       v8 = vec2_orientation(
              unit->order_next_waypoint_x - unit->entity->x,
@@ -25635,16 +24367,16 @@ LABEL_5:
       unit->target_orientation = ((_BYTE)v8 + 8) & 0xF0;
       orientation = unit->orientation;
       unit->mode_turn_return = unit_mode_417BD0;
-      entity_anim_start(unit->entity, v9->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+      entity_anim_init_directional(unit->entity, v9->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
       unit->entity->x_speed = 0;
       unit->entity->y_speed = 0;
       unit->mode = unit_mode_415A60;
       return;
     }
-    if ( sub_414870(unit) )
+    if ( unit_414870(unit) )
       return;
   }
-  unit_417E60(unit);
+  unit_mode_417E60(unit);
 }
 
 //----- (00417BD0) --------------------------------------------------------
@@ -25731,14 +24463,14 @@ void __fastcall unit_mode_417BD0(KKND::Unit *unit)
           {
             v23 = unit->entity;
             unit->mode_turn_return = unit_mode_417BD0;
-            entity_anim_start(v23, stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+            entity_anim_init_directional(v23, stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
             unit->entity->x_speed = 0;
             unit->entity->y_speed = 0;
             unit->mode = unit_mode_415A60;
             return;
           }
           unit->orientation = v14;
-          entity_anim_switch_direction(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v14]);
+          entity_anim_change_direction(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v14]);
         }
       }
     }
@@ -25748,12 +24480,12 @@ void __fastcall unit_mode_417BD0(KKND::Unit *unit)
     unit->entity->y_speed += unit->entity->y_speed < 0;
     if ( unit->stats->is_infantry )
     {
-      v18 = BOXD_40DA90(unit);
+      v18 = BOXD_update_tile_on_move(unit);
       if ( (int)v18 >= (int)Boxd_Impassable )
       {
         if ( (int)v18 <= (int)Boxd_PartiallyOccupied )
         {
-          unit_417E60(unit);
+          unit_mode_417E60(unit);
           return;
         }
 LABEL_34:
@@ -25762,7 +24494,7 @@ LABEL_34:
           v19 = unit->orientation;
           v20 = unit->stats;
           unit->mode_return = unit_mode_4165C0;
-          entity_anim_start(unit->entity, v20->mobd_lookup_offset_idle, g_angle_to_orientation[v19]);
+          entity_anim_init_directional(unit->entity, v20->mobd_lookup_offset_idle, g_angle_to_orientation[v19]);
           v21 = unit->entity;
           unit->scan_pathing.cw_scan_x = v21->x_speed;
           unit->scan_pathing.cw_scan_y = v21->y_speed;
@@ -25779,7 +24511,7 @@ LABEL_34:
     }
     else
     {
-      v18 = BOXD_40DA90(unit);
+      v18 = BOXD_update_tile_on_move(unit);
       if ( v18 >= Boxd_Clear )
         goto LABEL_34;
       unit_414C30(unit);
@@ -25792,37 +24524,35 @@ LABEL_34:
 // 47CFC8: using guessed type int dword_47CFC8[255];
 
 //----- (00417E60) --------------------------------------------------------
-unsigned int __fastcall unit_417E60(KKND::Unit *unit)
+void __fastcall unit_mode_417E60(KKND::Unit *unit)
 {
-  unsigned int result; // eax
   KKND::Entity *entity; // ecx
-  int v4; // eax
-  int v5; // ecx
+  int v3; // eax
+  int v4; // ecx
+  int v5; // edi
   int v6; // edi
-  int v7; // edi
 
   unit->mode = unit_mode_attack_move_2;
-  result = unit_4135E0(unit);
-  if ( !result )
+  if ( !unit_4135E0(unit) )
   {
     entity = unit->entity;
-    v4 = entity->x >> 13;
-    v5 = entity->y >> 13;
-    if ( (_WORD)v4 == unit->last_stuck_tile_x && (_WORD)v5 == unit->last_stuck_tile_y )
+    v3 = entity->x >> 13;
+    v4 = entity->y >> 13;
+    if ( (_WORD)v3 == unit->last_stuck_tile_x && (_WORD)v4 == unit->last_stuck_tile_y )
     {
       ++unit->stuck_timer;
     }
     else
     {
       unit->stuck_timer = 0;
-      unit->last_stuck_tile_x = v4;
-      unit->last_stuck_tile_y = v5;
+      unit->last_stuck_tile_x = v3;
+      unit->last_stuck_tile_y = v4;
     }
-    v6 = 16 * unit->stuck_timer;
-    if ( v6 >= 240 )
-      v6 = 240;
+    v5 = 16 * unit->stuck_timer;
+    if ( v5 >= 240 )
+      v5 = 240;
     dword_479538 = (unsigned __int16)(3141 * dword_479538 + 13867);// inlined rng
-    v7 = (dword_479538 & 7) + v6;
+    v6 = (dword_479538 & 7) + v5;
     BOXD_40DF50(unit, 1);
     unit->entity->anim_speed = 0;
     unit->entity->x_speed = 0;
@@ -25832,33 +24562,31 @@ unsigned int __fastcall unit_417E60(KKND::Unit *unit)
       unit->mode_return = unit_mode_attack_move_2;
       unit_mode_416A70(unit);
     }
-    return TASK_yield(unit->task, Task_Sleep, v7);
+    TASK_yield(unit->task, Task_Sleep, v6);
   }
-  return result;
 }
 // 479538: using guessed type int dword_479538;
 
 //----- (00417F60) --------------------------------------------------------
-char __thiscall sub_417F60(int this)
+void __fastcall unit_417F60(KKND::Unit *unit)
 {
-  int v2; // eax
-  int v3; // eax
+  KKND::Entity *entity; // eax
+  KKND::UnitPathFlags path_flags; // eax
 
-  entity_anim_start(
-    *(KKND::Entity **)(this + 92),
-    *(_DWORD *)(*(_DWORD *)(this + 24) + 60),
-    g_angle_to_orientation[*(_DWORD *)(this + 124)]);
-  v2 = *(_DWORD *)(this + 92);
-  *(_DWORD *)(this + 592) = *(_DWORD *)(v2 + 28);
-  *(_DWORD *)(this + 596) = *(_DWORD *)(v2 + 32);
-  *(_DWORD *)(v2 + 28) = 0;
-  *(_DWORD *)(*(_DWORD *)(this + 92) + 32) = 0;
-  v3 = *(_DWORD *)(this + 292);
-  LOBYTE(v3) = v3 & 0xBF;
-  *(_DWORD *)(this + 296) = 60;
-  *(_DWORD *)(this + 292) = v3;
-  *(_DWORD *)(this + 64) = unit_mode_417FC0;
-  return v3;
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
+  entity = unit->entity;
+  unit->scan_pathing.cw_scan_x = entity->x_speed;
+  unit->scan_pathing.cw_scan_y = entity->y_speed;
+  entity->x_speed = 0;
+  unit->entity->y_speed = 0;
+  path_flags = unit->path_flags;
+  LOBYTE(path_flags) = path_flags & 0xBF;
+  unit->multi_purpose_field_1 = 60;
+  unit->path_flags = path_flags;
+  unit->mode = unit_mode_417FC0;
 }
 
 //----- (00417FC0) --------------------------------------------------------
@@ -25875,7 +24603,7 @@ void __fastcall unit_mode_417FC0(KKND::Unit *unit)
 
   unit->entity->x_speed = unit->scan_pathing.cw_scan_x;
   unit->entity->y_speed = unit->scan_pathing.cw_scan_y;
-  v2 = BOXD_40DA90(unit) == 4;
+  v2 = BOXD_update_tile_on_move(unit) == 4;
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
   entity = unit->entity;
@@ -25887,12 +24615,12 @@ void __fastcall unit_mode_417FC0(KKND::Unit *unit)
     unit->scan_pathing.disperse_timer = 0;
     return;
   }
-  if ( (unsigned int)BOXD_40E000(
+  if ( (unsigned int)BOXD_classify_area_for_pathing(
                        unit,
                        unit->scan_pathing.cw_scan_x + entity->x,
                        unit->scan_pathing.cw_scan_y + entity->y) < 2 )
   {
-    unit_417E60(unit);
+    unit_mode_417E60(unit);
     return;
   }
   multi_purpose_field_1 = unit->multi_purpose_field_1;
@@ -25900,7 +24628,7 @@ void __fastcall unit_mode_417FC0(KKND::Unit *unit)
   if ( !multi_purpose_field_1 )
   {
     unit->scan_pathing.disperse_timer = 2;
-    unit_417E60(unit);
+    unit_mode_417E60(unit);
     return;
   }
   nav_obstacle = unit->nav_obstacle;
@@ -25942,7 +24670,10 @@ void __fastcall unit_mode_417FC0(KKND::Unit *unit)
 //----- (00418120) --------------------------------------------------------
 void __fastcall unit_418120(KKND::Unit *unit)
 {
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
   unit->multi_purpose_field_1 = 60;
@@ -25951,38 +24682,37 @@ void __fastcall unit_418120(KKND::Unit *unit)
 }
 
 //----- (00418170) --------------------------------------------------------
-int __thiscall sub_418170(int this)
+void __fastcall unit_418170(KKND::Unit *unit)
 {
-  entity_anim_start(
-    *(KKND::Entity **)(this + 92),
-    *(_DWORD *)(*(_DWORD *)(this + 24) + 60),
-    g_angle_to_orientation[*(_DWORD *)(this + 124)]);
-  *(_DWORD *)(*(_DWORD *)(this + 92) + 28) = 0;
-  *(_DWORD *)(*(_DWORD *)(this + 92) + 32) = 0;
-  *(_DWORD *)(this + 296) = 60;
-  *(_DWORD *)(this + 64) = unit_mode_4181B0;
-  return 0;
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
+  unit->entity->x_speed = 0;
+  unit->entity->y_speed = 0;
+  unit->multi_purpose_field_1 = 60;
+  unit->mode = unit_mode_4181B0;
 }
 
 //----- (004181B0) --------------------------------------------------------
 void __fastcall unit_mode_4181B0(KKND::Unit *unit)
 {
   KKND::TerrainTile *v2; // ebx
-  unsigned int v3; // edi
+  KKND::BoxdPathingClassification v3; // edi
   int v4; // edx
   KKND::Unit **units; // ecx
   int multi_purpose_field_1; // eax
 
   v2 = &g_terrain[unit->scan_pathing.cw_scan_x + g_map_num_tiles_x * unit->scan_pathing.cw_scan_y];
-  v3 = BOXD_40ED00(unit, v2);
-  if ( v3 == 2 )
+  v3 = BOXD_classify_tile_simple(unit, v2);
+  if ( v3 == Boxd_Clear )
   {
     BOXD_40DF50(unit, 1);
     unit_mode_4165C0(unit);
   }
-  if ( v3 < 2 )
+  if ( v3 < Boxd_Clear )
   {
-    unit_417E60(unit);
+    unit_mode_417E60(unit);
   }
   else
   {
@@ -26009,7 +24739,7 @@ void __fastcall unit_mode_4181B0(KKND::Unit *unit)
     else
     {
       unit->scan_pathing.disperse_timer = 2;
-      unit_417E60(unit);
+      unit_mode_417E60(unit);
     }
   }
 }
@@ -26044,7 +24774,10 @@ void __fastcall unit_418290(KKND::Unit *unit)
     unit->mode = unit_mode_418550;
     return;
   }
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   BOXD_40DF50(unit, 0);
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
@@ -26061,7 +24794,7 @@ void __fastcall unit_418290(KKND::Unit *unit)
       unit->target_orientation = v2;
       stats = unit->stats;
       unit->mode_turn_return = unit_mode_attack;
-      entity_anim_start(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
+      entity_anim_init_directional(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
       unit->entity->x_speed = 0;
       unit->entity->y_speed = 0;
       unit->mode = unit_mode_415A60;
@@ -26162,7 +24895,7 @@ void __fastcall unit_mode_attack(KKND::Unit *unit)
   if ( !locked_target || !unit_is_in_firing_range(unit, locked_target, unit->active_target_id) )
   {
 LABEL_23:
-    sub_4133D0(unit);
+    unit_4133D0(unit);
     return;
   }
   if ( !unit_is_ally(unit->player_num, unit->locked_target) )
@@ -26170,7 +24903,7 @@ LABEL_23:
     if ( unit->locked_target == unit->order_target )
     {
       unit->order_target = nullptr;
-      sub_4133D0(unit);
+      unit_4133D0(unit);
       return;
     }
     goto LABEL_23;
@@ -26182,9 +24915,9 @@ LABEL_23:
   unit->orientation = v3;
   mobd_lookup_offset_attack = stats->mobd_lookup_offset_attack;
   if ( mobd_lookup_offset_attack == -1 )
-    entity_anim_start(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[v3]);
+    entity_anim_init_directional(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[v3]);
   else
-    entity_anim_start(unit->entity, mobd_lookup_offset_attack, g_angle_to_orientation[v3]);
+    entity_anim_init_directional(unit->entity, mobd_lookup_offset_attack, g_angle_to_orientation[v3]);
   projectile = unit->stats->projectile;
   if ( projectile && g_num_active_projectiles < 200 )
   {
@@ -26192,13 +24925,13 @@ LABEL_23:
     v7 = entity_create_ex(
            projectile->mobd_id,
            unit->entity,
-           (KKND::TaskFn)projectile->task_fn,
+           projectile->task_fn,
            TaskKind_Coroutine,
            unit->mobd_anchors.turret);
     mobd_lookup_offset_travel = projectile->mobd_lookup_offset_travel;
     v9 = v7;
     if ( mobd_lookup_offset_travel != -1 )
-      entity_anim_start(v7, mobd_lookup_offset_travel, g_angle_to_orientation[unit->orientation]);
+      entity_anim_init_directional(v7, mobd_lookup_offset_travel, g_angle_to_orientation[unit->orientation]);
     task = v9->task;
     z = unit->entity->z;
     v9->ctx = projectile;
@@ -26212,7 +24945,7 @@ LABEL_23:
                        + ((projectile->damage_vehicle * g_veterancy_damage_mod[unit->veterancy]) >> 8);
     v9->building_damage = LOWORD(projectile->damage_building)
                         + ((projectile->damage_building * g_veterancy_damage_mod[unit->veterancy]) >> 8);
-    TASK_send_message(unit->task, TaskMessage_Attacked, unit, unit->locked_target->task);
+    TSK_send_message(unit->task, TaskMessage_Attacked, unit, unit->locked_target->task);
     TASK_yield(
       unit->task,
       Task_Sleep,
@@ -26244,8 +24977,6 @@ LABEL_23:
     }
   }
 }
-// 44CE40: using guessed type int __fastcall sub_44CE40(_DWORD, _DWORD);
-// 465610: using guessed type int dword_465610[4];
 // 465620: using guessed type int dword_465620[4];
 // 47C048: using guessed type int g_num_active_projectiles;
 
@@ -26260,7 +24991,7 @@ void __fastcall unit_mode_4187F0(KKND::Unit *unit)
 
   unit->task->message_handler = MessageHandler_419CA0;
   BOXD_remove_unit(unit, unit->map_x, unit->map_y, unit->tile_position);
-  TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
   order_target = unit->order_target;
   unit->order_next_waypoint_x = order_target->entity->x + order_target->mobd_anchors.rally->x;
   v3 = order_target->mobd_anchors.rally->y + order_target->entity->y;
@@ -26269,7 +25000,7 @@ void __fastcall unit_mode_4187F0(KKND::Unit *unit)
   v5 = vec2_orientation(unit->order_next_waypoint_x - entity->x, v3 - entity->y);
   stats = unit->stats;
   unit->orientation = v5;
-  entity_anim_start(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v5]);
+  entity_anim_init_directional(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v5]);
   unit->entity->x_speed = (unit->stats->speed * dword_4731A8[dword_47CFC8[unit->orientation]]) >> 6;
   unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
   unit->mode = unit->mode_arrive;
@@ -26309,7 +25040,7 @@ void __cdecl __noreturn task_4188F0_technician(KKND::Task *task)
     if ( v5 )
     {
       v5->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_repair_anim;
-      entity_anim_load(v5, 144);
+      entity_anim_init(v5, 144);
       parent->z = 0;
       parent->anim_speed = 0;
       unit->entity->parent = parent;
@@ -26390,7 +25121,7 @@ void __cdecl __noreturn task_418A10_technician(KKND::Task *task)
     if ( v5 )
     {
       v5->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_repair_anim;
-      entity_anim_load(v5, 144);
+      entity_anim_init(v5, 144);
       v4->z = 0;
       v4->anim_speed = 0;
       state[8] = v4;
@@ -26488,12 +25219,12 @@ LABEL_27:
     v17 = vec2_orientation(order_next_waypoint_x - x, unit->order_next_waypoint_y - entity->y);
     v18 = unit->entity;
     unit->orientation = v17;
-    entity_anim_switch_direction(v18, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v17]);
+    entity_anim_change_direction(v18, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v17]);
     unit->entity->x_speed = (unit->stats->speed * dword_4731A8[dword_47CFC8[unit->orientation]]) >> 6;
     unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
     return;
   }
-  TASK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+  TSK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   v10 = unit->order_target;
   if ( v10 )
   {
@@ -26566,15 +25297,15 @@ void __fastcall unit_mode_418D20(KKND::Unit *unit)
       v11 = vec2_orientation(order_next_waypoint_x - x, unit->order_next_waypoint_y - entity->y);
       stats = unit->stats;
       unit->orientation = v11;
-      entity_anim_switch_direction(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v11]);
+      entity_anim_change_direction(unit->entity, stats->mobd_lookup_offset_move, g_angle_to_orientation[v11]);
       unit->entity->x_speed = (unit->stats->speed * dword_4731A8[dword_47CFC8[unit->orientation]]) >> 6;
       unit->entity->y_speed = -(unit->stats->speed * dword_4731C8[dword_47CFC8[unit->orientation]]) >> 6;
       return;
     }
-    TASK_send_message(unit->task, TaskMessage_Sabotage, unit, unit->order_target->task);
+    TSK_send_message(unit->task, TaskMessage_Sabotage, unit, unit->order_target->task);
     task = unit->task;
     unit->destroyed = 1;
-    TASK_broadcast_message(task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+    TSK_broadcast_message(task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
     unit->task->channel = TaskChannel_None;
     unit->unit_id = 0;
   }
@@ -26626,7 +25357,10 @@ void __fastcall unit_mode_418E90(KKND::Unit *unit)
     }
     else
     {
-      entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+      entity_anim_init_directional(
+        unit->entity,
+        unit->stats->mobd_lookup_offset_idle,
+        g_angle_to_orientation[unit->orientation]);
       unit->mode_return = unit_mode_415540;
       unit_mode_416A70(unit);
     }
@@ -26647,7 +25381,10 @@ void __fastcall unit_mode_418F60(KKND::Unit *unit)
   unit->mode = unit_mode_418E90;
   entity->x_speed = -64;
   unit->entity->y_speed = 64;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_move,
+    g_angle_to_orientation[unit->orientation]);
   order_target = unit->order_target;
   unit->multi_purpose_field_1 = 100;
   if ( order_target )
@@ -26715,7 +25452,7 @@ LABEL_18:
       {
         goto LABEL_18;
       }
-      TASK_send_message(unit->task, TaskMessage_RepairTick, unit, g_game_update_loop_task);
+      TSK_send_message(unit->task, TaskMessage_RepairTick, unit, g_game_update_loop_task);
     }
   }
   hitpoints = unit->stats->hitpoints;
@@ -26727,7 +25464,10 @@ LABEL_18:
     unit->mode = unit_mode_418E90;
     entity->x_speed = -64;
     unit->entity->y_speed = 64;
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_move,
+      g_angle_to_orientation[unit->orientation]);
     v11 = unit->order_target;
     unit->multi_purpose_field_1 = 100;
     if ( v11 )
@@ -26770,7 +25510,7 @@ void __fastcall unit_mode_419180(KKND::Unit *unit)
       orientation = unit->orientation;
       stats = unit->stats;
       unit->mode = unit_mode_418FE0;
-      entity_anim_start(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);
+      entity_anim_init_directional(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);
       unit->task->message_handler = MessageHandler_419DF0;
     }
   }
@@ -26794,12 +25534,18 @@ void __fastcall unit_mode_419230(KKND::Unit *unit)
   p_orientation = (ptrdiff_t *)&unit->orientation;
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   if ( !entity_anim_advance_rotation(p_orientation, MobdOrientation_SW, unit->stats->turning_speed) )
   {
     unit->entity->x_speed = 64;
     unit->entity->y_speed = -64;
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[*p_orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_move,
+      g_angle_to_orientation[*p_orientation]);
     order_target = unit->order_target;
     unit->multi_purpose_field_1 = 100;
     unit->order = UnitOrder_Idle;
@@ -26823,7 +25569,10 @@ void __fastcall unit_4192F0(KKND::Unit *unit)
   KKND::Entity *v9; // ecx
   int v10; // eax
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
   state = (KKND::TankerState *)unit->state;
@@ -26831,10 +25580,10 @@ void __fastcall unit_4192F0(KKND::Unit *unit)
   if ( state )
   {
     _4_entity = state->_4_entity;
-    unit_mobd_anchor_unknown = _4_entity->mobd_anchors._unit_mobd_anchor_unknown;
+    unit_mobd_anchor_unknown = _4_entity->mobd_anchors.dock_point;
     x = unit_mobd_anchor_unknown->x;
     y = unit_mobd_anchor_unknown->y;
-    _4_entity->entity->is_on_collision_grid = 1;
+    _4_entity->entity->is_collidable = 1;
     entity = state->_4_entity->entity;
     v8 = y + entity->y;
     v9 = unit->entity;
@@ -26907,11 +25656,11 @@ void __fastcall unit_mode_419420(KKND::Unit *unit)
   entity = unit->entity;
   if ( mode == unit_mode_419420 )
   {
-    entity_anim_switch_direction(entity, mobd_lookup_offset_move, v19);
+    entity_anim_change_direction(entity, mobd_lookup_offset_move, v19);
   }
   else
   {
-    entity_anim_start(entity, mobd_lookup_offset_move, v19);
+    entity_anim_init_directional(entity, mobd_lookup_offset_move, v19);
     unit->mode = unit_mode_419420;
   }
   stats = unit->stats;
@@ -26967,16 +25716,16 @@ void __fastcall unit_mode_419560(KKND::Unit *unit)
   task = unit->task;
   unit->destroyed = 1;
   task->flags_24 &= ~0x10000000u;
-  TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
   turret = unit->turret;
   if ( turret )
   {
     entity_remove(turret->entity);
-    task_445310(unit->turret->task);
+    TASK_terminate(unit->turret->task);
     TASK_FreeLocal(unit->task, unit->turret);
     unit->turret = nullptr;
   }
-  TASK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+  TSK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   unit->task->channel = TaskChannel_None;
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
@@ -26995,17 +25744,17 @@ void __fastcall unit_mode_419560(KKND::Unit *unit)
       v5 = kknd_rand_1("C:\\k\\Scripts\\Infantry.cpp", 4185);
       v6 = 5;
     }
-    entity_408800_play_sound(unit->entity, sound_id[(unsigned int)(v5 % v6)], v10, 0);
+    entity_play_sound(unit->entity, sound_id[(unsigned int)(v5 % v6)], v10, 0);
     unit->entity->mobd_id = MobdId_Explosions;
     v7 = 568;
     if ( unit->stats->race != Race_Survivors )
     {
-      entity_anim_load(unit->entity, 636);
+      entity_anim_init(unit->entity, 636);
       unit_438D90(unit);
       goto LABEL_15;
     }
 LABEL_11:
-    entity_anim_load(unit->entity, v7);
+    entity_anim_init(unit->entity, v7);
     unit_438D90(unit);
     goto LABEL_15;
   }
@@ -27013,7 +25762,7 @@ LABEL_11:
   {
     v11 = g_4690A8_sfx_volume;
     v8 = kknd_rand_1("C:\\k\\Scripts\\Infantry.cpp", 4196);
-    entity_408800_play_sound(unit->entity, sound_id[v8 % 5], v11, 0);
+    entity_play_sound(unit->entity, sound_id[v8 % 5], v11, 0);
     unit->entity->mobd_id = MobdId_Mute_DirewWolf;
     v7 = 1216;
     goto LABEL_11;
@@ -27022,7 +25771,10 @@ LABEL_11:
   if ( v9 )
     v9->z = unit->entity->z + 256;
   unit_438D90(unit);
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
 LABEL_15:
   TASK_yield(unit->task, Task_Sleep, 60);
 }
@@ -27044,11 +25796,14 @@ void __fastcall unit_mode_destroy(KKND::Unit *unit)
 
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_move,
+    g_angle_to_orientation[unit->orientation]);
   task = unit->task;
   unit->mode = unit_mode_destroyed;
   unit->destroyed = 1;
-  TASK_broadcast_message(task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+  TSK_broadcast_message(task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   BOXD_remove_unit(unit, unit->map_x, unit->map_y, unit->tile_position);
   unit->task->message_handler = EventHandler_Passive;
 }
@@ -27064,7 +25819,7 @@ void __fastcall unit_mode_destroyed(KKND::Unit *unit)
   v2 = unit->orientation + 64;
   entity = unit->entity;
   unit->orientation = v2;
-  entity_anim_start(entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v2]);
+  entity_anim_init_directional(entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[v2]);
   TASK_yield(unit->task, Task_Yield_10000000, 0);
 }
 
@@ -27121,9 +25876,9 @@ void __fastcall MessageHandler_Scout(
           unit->veterancy = Veterancy_Veteran;
         break;
       case TaskMessage_EscortBegin:
-        v7 = g_escort_free_list_head;
-        if ( g_escort_free_list_head )
-          g_escort_free_list_head = g_escort_free_list_head->next;
+        v7 = g_escort_free_head;
+        if ( g_escort_free_head )
+          g_escort_free_head = g_escort_free_head->next;
         else
           v7 = nullptr;
         v7->next = unit->escort_list_head;
@@ -27144,7 +25899,7 @@ void __fastcall MessageHandler_Scout(
         }
         else
         {
-          TASK_send_message(unit->task, TaskMessage_EscortEnd, unit, *((KKND::Task **)payload + 3));
+          TSK_send_message(unit->task, TaskMessage_EscortEnd, unit, *((KKND::Task **)payload + 3));
         }
         break;
       case TaskMessage_EscortEnd:
@@ -27170,13 +25925,13 @@ void __fastcall MessageHandler_Scout(
         unit_show_hint(unit);
         break;
       case TaskMessage_AttackOrder:
-        sub_419F00(unit, (int)payload);
+        unit_419F00(unit, (int)payload);
         break;
       case TaskMessage_MoveOrder:
         unit_xl_on_move(unit, payload);
         break;
       case TaskMessage_1525:
-        sub_41A060(unit, payload);
+        unit_41A060(unit, payload);
         break;
       case TaskMessage_Infiltrate:
         if ( payload != unit->order_target || unit->order != UnitOrder_RepairInfiltrate )
@@ -27203,7 +25958,7 @@ void __fastcall MessageHandler_Scout(
           task = unit->task;
           unit->opportunity_target = nullptr;
           unit->multi_purpose_field_3 = 600;
-          TASK_send_message(task, TaskMessage_EscortBegin, unit, v5->task);
+          TSK_send_message(task, TaskMessage_EscortBegin, unit, v5->task);
           unit->locked_target = nullptr;
           unit_mode_attack_move(unit);
         }
@@ -27306,7 +26061,7 @@ void __fastcall EventHandler_Passive(
       }
       break;
     case TaskMessage_MoveOrder:
-      sub_41A9B0(unit, payload);
+      unit_41A9B0(unit, payload);
       break;
     default:
       return;
@@ -27334,7 +26089,7 @@ void __fastcall MessageHandler_419DF0(
     switch ( message )
     {
       case TaskMessage_ReceiveDamage:
-        sub_41A510(unit, (KKND::Entity *)payload);
+        unit_41A510(unit, (KKND::Entity *)payload);
         break;
       case TaskMessage_UnitSelected:
         unit_on_selected(unit);
@@ -27346,7 +26101,7 @@ void __fastcall MessageHandler_419DF0(
         unit_show_hint(unit);
         break;
       case TaskMessage_MoveOrder:
-        sub_41A170(unit, payload);
+        unit_41A170(unit, payload);
         break;
       default:
         return;
@@ -27369,7 +26124,7 @@ void __fastcall MessageHandler_419E80(
     switch ( message )
     {
       case TaskMessage_ReceiveDamage:
-        sub_41A510(unit, (KKND::Entity *)payload);
+        unit_41A510(unit, (KKND::Entity *)payload);
         break;
       case TaskMessage_UnitSelected:
         unit_on_selected(unit);
@@ -27387,7 +26142,7 @@ void __fastcall MessageHandler_419E80(
 }
 
 //----- (00419F00) --------------------------------------------------------
-void __fastcall sub_419F00(KKND::Unit *a1, int a2)
+void __fastcall unit_419F00(KKND::Unit *unit, int a2)
 {
   int player_num; // ecx
   KKND::Unit *v5; // edx
@@ -27399,18 +26154,18 @@ void __fastcall sub_419F00(KKND::Unit *a1, int a2)
   KKND::Unit *order_target; // ecx
   KKND::Task *task; // [esp-Ch] [ebp-18h]
 
-  player_num = a1->player_num;
+  player_num = unit->player_num;
   if ( player_num == *(_DWORD *)a2 )
   {
     v5 = *(KKND::Unit **)(a2 + 4);
-    if ( v5 == a1->order_target )
+    if ( v5 == unit->order_target )
     {
-      locked_target = a1->locked_target;
-      order_target = a1->order_target;
-      a1->opportunity_target = nullptr;
-      a1->multi_purpose_field_3 = 600;
+      locked_target = unit->locked_target;
+      order_target = unit->order_target;
+      unit->opportunity_target = nullptr;
+      unit->multi_purpose_field_3 = 600;
       if ( locked_target != order_target )
-        a1->locked_target = nullptr;
+        unit->locked_target = nullptr;
     }
     else
     {
@@ -27420,38 +26175,38 @@ void __fastcall sub_419F00(KKND::Unit *a1, int a2)
         if ( !g_is_single_player )
         {
           v7 = *(_DWORD *)(*(_DWORD *)(a2 + 4) + 20);
-          if ( g_player_num == v7 || g_player_num == a1->player_num )
+          if ( g_player_num == v7 || g_player_num == unit->player_num )
           {
             sprintf(
               byte_479B00,
               "%s's allegiance with %s is broken",
               (const char *)&unk_47A767 + 28 * v7,
-              (const char *)&unk_47A767 + 28 * a1->player_num);
+              (const char *)&unk_47A767 + 28 * unit->player_num);
             show_message_unit(nullptr, byte_479B00);
           }
         }
-        g_diplomacy.is_ally[*(_DWORD *)(*(_DWORD *)(a2 + 4) + 20)][a1->player_num] = 0;
-        g_diplomacy.is_ally[a1->player_num][*(_DWORD *)(*(_DWORD *)(a2 + 4) + 20)] = 0;
+        g_diplomacy.is_ally[*(_DWORD *)(*(_DWORD *)(a2 + 4) + 20)][unit->player_num] = 0;
+        g_diplomacy.is_ally[unit->player_num][*(_DWORD *)(*(_DWORD *)(a2 + 4) + 20)] = 0;
       }
-      task = a1->task;
-      a1->scan_pathing.push_through_timer = 0;
-      a1->scan_pathing.disperse_timer = 0;
+      task = unit->task;
+      unit->scan_pathing.push_through_timer = 0;
+      unit->scan_pathing.disperse_timer = 0;
       TASK_yield(task, Task_Sleep, 1);
-      a1->order = UnitOrder_Attack;
+      unit->order = UnitOrder_Attack;
       v8 = *(KKND::Unit **)(a2 + 4);
-      a1->order_target = v8;
+      unit->order_target = v8;
       unit_id = v8->unit_id;
-      a1->opportunity_target = nullptr;
-      a1->order_target_id = unit_id;
-      a1->multi_purpose_field_3 = 600;
-      a1->locked_target = nullptr;
-      a1->mode = unit_mode_attack_move;
+      unit->opportunity_target = nullptr;
+      unit->order_target_id = unit_id;
+      unit->multi_purpose_field_3 = 600;
+      unit->locked_target = nullptr;
+      unit->mode = unit_mode_attack_move;
     }
   }
 }
 
 //----- (0041A060) --------------------------------------------------------
-void __fastcall sub_41A060(KKND::Unit *unit, _DWORD *a2)
+void __fastcall unit_41A060(KKND::Unit *unit, _DWORD *a2)
 {
   KKND::UnitStats *stats; // eax
   int v5; // eax
@@ -27490,7 +26245,7 @@ void __fastcall sub_41A060(KKND::Unit *unit, _DWORD *a2)
 }
 
 //----- (0041A170) --------------------------------------------------------
-int __fastcall sub_41A170(KKND::Unit *unit, _DWORD *a2)
+int __fastcall unit_41A170(KKND::Unit *unit, _DWORD *a2)
 {
   int result; // eax
   KKND::UnitStats *stats; // eax
@@ -27609,7 +26364,7 @@ void __fastcall unit_on_technician_assigned(KKND::Unit *unit, KKND::Unit *a2)
 }
 
 //----- (0041A470) --------------------------------------------------------
-void __fastcall sub_41A470(KKND::Unit *unit, KKND::Unit *a2)
+void __fastcall unit_41A470(KKND::Unit *unit, KKND::Unit *a2)
 {
   int y; // edx
   int v5; // edi
@@ -27621,9 +26376,9 @@ void __fastcall sub_41A470(KKND::Unit *unit, KKND::Unit *a2)
   unit->opportunity_target = nullptr;
   unit->multi_purpose_field_3 = 600;
   unit->mode_arrive = unit_mode_419230;
-  a2->entity->is_on_collision_grid = 1;
-  unit->order_target_x = a2->entity->x + a2->mobd_anchors._unit_mobd_anchor_unknown->x;
-  y = a2->mobd_anchors._unit_mobd_anchor_unknown->y;
+  a2->entity->is_collidable = 1;
+  unit->order_target_x = a2->entity->x + a2->mobd_anchors.dock_point->x;
+  y = a2->mobd_anchors.dock_point->y;
   v5 = a2->entity->y;
   unit->locked_target = nullptr;
   unit->order_target_y = v5 + y;
@@ -27632,7 +26387,7 @@ void __fastcall sub_41A470(KKND::Unit *unit, KKND::Unit *a2)
 }
 
 //----- (0041A510) --------------------------------------------------------
-void __fastcall sub_41A510(KKND::Unit *victim, KKND::Entity *a2)
+void __fastcall unit_41A510(KKND::Unit *victim, KKND::Entity *a2)
 {
   KKND::UnitStats *stats; // eax
   int damage; // edi
@@ -27658,7 +26413,7 @@ void __fastcall sub_41A510(KKND::Unit *victim, KKND::Entity *a2)
         {
           task = attacker->task;
           if ( task )
-            TASK_send_message(victim->task, TaskMessage_GainExperience, (void *)damage, task);
+            TSK_send_message(victim->task, TaskMessage_GainExperience, (void *)damage, task);
         }
       }
       v7 = victim->hitpoints - damage;
@@ -27686,7 +26441,7 @@ void __fastcall sub_41A510(KKND::Unit *victim, KKND::Entity *a2)
 }
 
 //----- (0041A610) --------------------------------------------------------
-void __fastcall unit_do_damage(KKND::Unit *unit, KKND::Entity *attacker)
+void __fastcall unit_on_damage(KKND::Unit *unit, KKND::Entity *attacker)
 {
   KKND::UnitStats *stats; // eax
   int damage; // edi
@@ -27710,7 +26465,7 @@ void __fastcall unit_do_damage(KKND::Unit *unit, KKND::Entity *attacker)
         {
           task = attacker_unit->task;
           if ( task )
-            TASK_send_message(unit->task, TaskMessage_GainExperience, (void *)damage, task);
+            TSK_send_message(unit->task, TaskMessage_GainExperience, (void *)damage, task);
         }
       }
       v7 = unit->hitpoints - damage;
@@ -27768,8 +26523,8 @@ void __fastcall unit_on_attacked_default(KKND::Unit *unit, KKND::Unit *attacker)
         }
         v6->next->prev = v6->prev;
         v6->prev->next = v6->next;
-        v6->next = g_escort_free_list_head;
-        g_escort_free_list_head = v6;
+        v6->next = g_escort_free_head;
+        g_escort_free_head = v6;
         v7 = 1;
       }
 LABEL_23:
@@ -27781,7 +26536,7 @@ LABEL_23:
     {
       escort = v8->escort;
       if ( escort )
-        TASK_send_message(unit->task, TaskMessage_EscortRetaliate, unit, escort->task);
+        TSK_send_message(unit->task, TaskMessage_EscortRetaliate, unit, escort->task);
     }
   }
   else
@@ -27803,9 +26558,9 @@ void __fastcall unit_on_escort_begin(KKND::Unit *unit, KKND::Unit *a2)
   KKND::UnitEscortNode *escort_list_head; // esi
   KKND::UnitEscortNode **p_escort_list_head; // ecx
 
-  v2 = g_escort_free_list_head;
-  if ( g_escort_free_list_head )
-    g_escort_free_list_head = g_escort_free_list_head->next;
+  v2 = g_escort_free_head;
+  if ( g_escort_free_head )
+    g_escort_free_head = g_escort_free_head->next;
   else
     v2 = nullptr;
   escort_list_head = unit->escort_list_head;
@@ -27883,7 +26638,7 @@ void __fastcall unit_on_escort_end(KKND::Unit *unit, KKND::Unit *a2)
 }
 
 //----- (0041A9B0) --------------------------------------------------------
-void __fastcall sub_41A9B0(KKND::Unit *a1, int **a2)
+void __fastcall unit_41A9B0(KKND::Unit *a1, int **a2)
 {
   int *v4; // eax
   int *v5; // eax
@@ -27924,7 +26679,7 @@ void __fastcall sub_41A9B0(KKND::Unit *a1, int **a2)
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0041AAA0) --------------------------------------------------------
-int sub_41AAA0()
+BOOL sub_41AAA0()
 {
   int v0; // eax
   int v1; // edx
@@ -28176,54 +26931,69 @@ LABEL_41:
 // 479B90: using guessed type int dword_479B90;
 
 //----- (0041B000) --------------------------------------------------------
-int __fastcall sub_41B000(int a1, int a2, int a3, int a4, int a5)
+BOOL __fastcall collider_ui_41B000(
+        KKND::Entity *a1,
+        KKND::Entity *a2,
+        KKND::BoxCollisionAxis a3,
+        ___remove__KKND::BoxdCollisionState *a4,
+        ___remove__KKND::BoxdCollisionState *a5)
 {
-  if ( *(_DWORD *)(a1 + 108) )
-    TASK_send_message(nullptr, TaskMessage_MouseHover, *(void **)(a2 + 108), *(KKND::Task **)(a1 + 108));
+  if ( a1->task )
+    TSK_send_message(nullptr, TaskMessage_MouseHover, a2->task, a1->task);
   return 0;
 }
 
 //----- (0041B020) --------------------------------------------------------
-int __fastcall sub_41B020(void *payload, int a2, int a3, int a4, int a5)
+BOOL __fastcall collider_ui_41B020(
+        KKND::Entity *a1,
+        KKND::Entity *a2,
+        KKND::BoxCollisionAxis a3,
+        ___remove__KKND::BoxdCollisionState *a4,
+        ___remove__KKND::BoxdCollisionState *a5)
 {
-  int v7; // eax
-  int v8; // eax
+  KKND::Task *task; // eax
+  KKND::Task *v8; // eax
 
-  v7 = *((_DWORD *)payload + 27);
-  if ( v7 && (*(_DWORD *)(v7 + 40) & 0x40000000) != 0 )
-    TASK_send_message(nullptr, TaskMessage_MouseHover, *(void **)(a2 + 108), *((KKND::Task **)payload + 27));
-  v8 = *(_DWORD *)(a2 + 108);
-  if ( v8 && (*(_DWORD *)(v8 + 40) & 0x40000000) != 0 )
-    TASK_send_message(nullptr, TaskMessage_MouseHover, payload, *(KKND::Task **)(a2 + 108));
+  task = a1->task;
+  if ( task && (task->wait_flags & 0x40000000) != 0 )
+    TSK_send_message(nullptr, TaskMessage_MouseHover, a2->task, a1->task);
+  v8 = a2->task;
+  if ( v8 && (v8->wait_flags & 0x40000000) != 0 )
+    TSK_send_message(nullptr, TaskMessage_MouseHover, a1, a2->task);
   return 0;
 }
 
 //----- (0041B070) --------------------------------------------------------
-int __fastcall sub_41B070(_DWORD *payload, int a2, int a3, int a4, int a5)
+BOOL __fastcall collider_ui_41B070(
+        KKND::Entity *a1,
+        KKND::Entity *a2,
+        KKND::BoxCollisionAxis a3,
+        ___remove__KKND::BoxdCollisionState *a4,
+        ___remove__KKND::BoxdCollisionState *a5)
 {
-  KKND::Task *v6; // ecx
-  int v7; // edi
-  int v8; // eax
-  int v9; // eax
+  KKND::Task *task; // ecx
+  _DWORD *ctx; // edi
+  KKND::Entity *parent; // eax
+  _DWORD *v9; // eax
   int v10; // eax
 
-  v6 = *(KKND::Task **)(a2 + 108);
-  v7 = *(_DWORD *)(a2 + 124);
-  if ( v6 )
+  task = a2->task;
+  ctx = a2->ctx;
+  if ( task )
   {
-    v8 = payload[2];
-    if ( v8 != a2 )
+    parent = a1->parent;
+    if ( parent != a2 )
     {
-      if ( v8 )
+      if ( parent )
       {
-        v9 = *(_DWORD *)(v8 + 124);
+        v9 = parent->ctx;
         if ( v9 )
         {
-          if ( *(_DWORD *)(v9 + 20) != *(_DWORD *)(v7 + 20) || (v10 = *(_DWORD *)(v7 + 16), v10 >= 46) && v10 <= 72 )
+          if ( v9[5] != ctx[5] || (v10 = ctx[4], v10 >= 46) && v10 <= 72 )
           {
-            TASK_send_message(nullptr, TaskMessage_ReceiveDamage, payload, v6);
-            *(_DWORD *)(payload[27] + 32) |= 2u;
-            *(_DWORD *)(payload[27] + 36) |= *(_DWORD *)(payload[27] + 32);
+            TSK_send_message(nullptr, TaskMessage_ReceiveDamage, a1, task);
+            a1->task->flags_20 |= 2u;
+            a1->task->flags_24 |= a1->task->flags_20;
           }
         }
       }
@@ -28261,12 +27031,12 @@ BOOL LVL_SysInit()
 KKND::LevelHunk *__fastcall LVL_LoadLevel(const char *filename)
 {
   KKND::LevelHunk *result; // eax
-  KKND::LevelHunk *v2; // esi
+  KKND::File *v2; // esi
   KKND::LevelHunk *data; // ebx
   KKND::LevelHunk *rllc; // edi
 
   result = (KKND::LevelHunk *)FILE_open(filename);
-  v2 = result;
+  v2 = (KKND::File *)result;
   if ( result )
   {
     result = LVL_ReadHunk(result);
@@ -28277,7 +27047,7 @@ KKND::LevelHunk *__fastcall LVL_LoadLevel(const char *filename)
       rllc = result;
       if ( result )
       {
-        FILE_close((int)v2);
+        FILE_close(v2);
         result = (KKND::LevelHunk *)HUNK_FixPointers(data, rllc);
         if ( result )
         {
@@ -28335,11 +27105,11 @@ BOOL __fastcall LVL_RunLevel(KKND::LevelHunk *lvl)
             if ( result )
             {
               dword_479DC4 = 1;
-              result = LVL_InitMapd();
+              result = LVL_mapd_init();
               if ( result )
               {
                 g_mapd_initialized = 1;
-                result = LVL_InitMobd();
+                result = LVL_mobd_init();
                 if ( result )
                 {
                   g_mobd_initialized = 1;
@@ -28383,16 +27153,17 @@ BOOL __fastcall LVL_RunLevel(KKND::LevelHunk *lvl)
 // 479DC0: using guessed type int dword_479DC0;
 // 479DC4: using guessed type int dword_479DC4;
 // 479DD8: using guessed type int dword_479DD8;
-// 479DE4: using guessed type int dword_479DE4;
 // 479DEC: using guessed type int dword_479DEC;
 
 //----- (0041B2E0) --------------------------------------------------------
-void LVL_Deinit()
+void LVL_cleanup()
 {
+  void *v0; // ecx
+
   if ( dword_479DD8 )
     render_mode_scrl_setup();
   if ( g_fade_initialized )
-    mode_null();
+    mode_null(v0);
   if ( dword_479DC0 )
     sub_445B30();
   if ( g_cplc_initialized )
@@ -28408,9 +27179,9 @@ void LVL_Deinit()
   if ( dword_479DEC )
     stru2_4104E0();
   if ( dword_479DBC )
-    mode_null();
+    mode_null(v0);
   if ( g_timer_initialized )
-    mode_null();
+    mode_null(v0);
   if ( g_tasks_initialized )
     sub_4455A0();
   g_boxd_collisions_initialized = 0;
@@ -28429,23 +27200,15 @@ void LVL_Deinit()
   g_current_lvl = nullptr;
   g_current_lvl_sections = nullptr;
 }
-// 4104E0: using guessed type int sub_4104E0(void);
-// 412850: using guessed type int sub_412850(void);
-// 43B910: using guessed type int sub_43B910(void);
-// 4455A0: using guessed type int sub_4455A0(void);
-// 445B30: using guessed type int sub_445B30(void);
-// 448310: using guessed type int nullsub_1(void);
+// 41B2F9: variable 'v0' is possibly undefined
 // 479DBC: using guessed type int dword_479DBC;
 // 479DC0: using guessed type int dword_479DC0;
 // 479DC4: using guessed type int dword_479DC4;
 // 479DD8: using guessed type int dword_479DD8;
-// 479DE0: using guessed type int dword_479DE0;
-// 479DE4: using guessed type int dword_479DE4;
-// 479DE8: using guessed type int g_boxd_initialized;
 // 479DEC: using guessed type int dword_479DEC;
 
 //----- (0041B3E0) --------------------------------------------------------
-void __fastcall kknd_mfree(void *p)
+void __fastcall KKND_free(void *p)
 {
   free(p);
 }
@@ -28486,18 +27249,18 @@ void *__fastcall LVL_FindSection(const char *name)
 BOOL __fastcall LVL_SubstHunk(KKND::LevelHunk *dst, KKND::LevelHunk *src, const char *name)
 {
   KKND::LevelHunkSection *src_hunk_name; // eax
-  int dst_hunk_name; // ecx MAPDST
+  KKND::LevelHunkSection *dst_hunk_name; // ecx MAPDST
   KKND::LevelHunkSection *__shifted(KKND::LevelHunkSection,4) src_hunk_ptr; // esi
   void *src_hunk_items; // ebp
   void *ptr; // ecx
   int v8; // edi
   const char *v9; // eax
-  int v10; // esi
-  int v11; // ecx
+  KKND::LevelHunkSection *v10; // esi
+  void *v11; // ecx
 
-  src_hunk_name = *(KKND::LevelHunkSection **)src->sections[0].name;
-  dst_hunk_name = *(_DWORD *)dst->sections[0].name;
-  src_hunk_ptr = (KKND::LevelHunkSection *__shifted(KKND::LevelHunkSection,4))(*(_DWORD *)src->sections[0].name + 4);
+  src_hunk_name = src->sections[0];
+  dst_hunk_name = dst->sections[0];
+  src_hunk_ptr = (KKND::LevelHunkSection *__shifted(KKND::LevelHunkSection,4))&src->sections[0]->ptr;
   src_hunk_items = nullptr;
   if ( ADJ(src_hunk_ptr)->ptr )
   {
@@ -28513,20 +27276,20 @@ BOOL __fastcall LVL_SubstHunk(KKND::LevelHunk *dst, KKND::LevelHunk *src, const 
   if ( !src_hunk_items )
     return 0;
   v8 = 0;
-  if ( !*(_DWORD *)(dst_hunk_name + 4) )
+  if ( !dst_hunk_name->ptr )
     return 0;
   v9 = (const char *)dst_hunk_name;
   v10 = dst_hunk_name;
   while ( strncmp(name, v9, 4u) )
   {
-    v11 = *(_DWORD *)(v10 + 12);
-    v10 += 8;
+    v11 = v10[1].ptr;
+    ++v10;
     ++v8;
     v9 = (const char *)v10;
     if ( !v11 )
       return 0;
   }
-  *(_DWORD *)(dst_hunk_name + 8 * v8 + 4) = src_hunk_items;
+  dst_hunk_name[v8].ptr = src_hunk_items;
   return 1;
 }
 
@@ -28641,7 +27404,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                       v47 += v46;
                     }
                     v42 -= v13;
-                    if ( !BOXD_40EDF0(v42, a, b) )
+                    if ( !BOXD_is_tile_passable_except(v42, a, b) )
                       break;
                     v21 = v57-- == 0;
                     if ( v21 )
@@ -28670,7 +27433,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                       v44 += v43;
                       v42 -= v13;
                     }
-                    if ( !BOXD_40EDF0(--v42, a, b) )
+                    if ( !BOXD_is_tile_passable_except(--v42, a, b) )
                       break;
                     v21 = v56-- == 0;
                     if ( v21 )
@@ -28702,7 +27465,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                     v37 += v36;
                     v34 -= v13;
                   }
-                  if ( !BOXD_40EDF0(++v34, a, b) )
+                  if ( !BOXD_is_tile_passable_except(++v34, a, b) )
                     break;
                   v21 = v54-- == 0;
                   if ( v21 )
@@ -28730,7 +27493,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                     v40 += v39;
                   }
                   v34 -= v13;
-                  if ( !BOXD_40EDF0(v34, a, b) )
+                  if ( !BOXD_is_tile_passable_except(v34, a, b) )
                     break;
                   v21 = v55-- == 0;
                   if ( v21 )
@@ -28769,7 +27532,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                       v31 += v30;
                     }
                     v26 += v13;
-                    if ( !BOXD_40EDF0(v26, a, b) )
+                    if ( !BOXD_is_tile_passable_except(v26, a, b) )
                       break;
                     v21 = v53-- == 0;
                     if ( v21 )
@@ -28798,7 +27561,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                       v28 += v27;
                       v26 += v13;
                     }
-                    if ( !BOXD_40EDF0(--v26, a, b) )
+                    if ( !BOXD_is_tile_passable_except(--v26, a, b) )
                       break;
                     v21 = v52-- == 0;
                     if ( v21 )
@@ -28830,7 +27593,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                     v20 += v19;
                     v17 += v13;
                   }
-                  if ( !BOXD_40EDF0(++v17, a, b) )
+                  if ( !BOXD_is_tile_passable_except(++v17, a, b) )
                     break;
                   v21 = v50-- == 0;
                   if ( v21 )
@@ -28858,7 +27621,7 @@ BOOL __fastcall unit_test_line_of_sight_bresenham(KKND::Unit *a, KKND::Unit *b)
                     v24 += v23;
                   }
                   v17 += v13;
-                  if ( !BOXD_40EDF0(v17, a, b) )
+                  if ( !BOXD_is_tile_passable_except(v17, a, b) )
                     break;
                   v21 = v51-- == 0;
                   if ( v21 )
@@ -28912,7 +27675,7 @@ KKND::BoxdRaycastResult __fastcall BOXD_pathing_bresenham_raycast(KKND::Unit *un
       v14 = (y - target_y) >> 8;
       v13 = -v10;
       if ( -v10 > v11 )
-        return sub_41BA30(x, y, v13, v14, v15, v16, v17);
+        return BOXD_raycast_x_major(x, y, v13, v14, v15, v16, v17);
     }
     else
     {
@@ -28922,7 +27685,7 @@ KKND::BoxdRaycastResult __fastcall BOXD_pathing_bresenham_raycast(KKND::Unit *un
       v14 = (y - target_y) >> 8;
       v13 = v10;
       if ( v10 > v11 )
-        return sub_41BA30(x, y, v13, v14, v15, v16, v17);
+        return BOXD_raycast_x_major(x, y, v13, v14, v15, v16, v17);
     }
   }
   else
@@ -28937,7 +27700,7 @@ KKND::BoxdRaycastResult __fastcall BOXD_pathing_bresenham_raycast(KKND::Unit *un
       v14 = (target_y - y) >> 8;
       v13 = -v8;
       if ( -v8 > v9 )
-        return sub_41BA30(x, y, v13, v14, v15, v16, v17);
+        return BOXD_raycast_x_major(x, y, v13, v14, v15, v16, v17);
     }
     else
     {
@@ -28947,14 +27710,14 @@ KKND::BoxdRaycastResult __fastcall BOXD_pathing_bresenham_raycast(KKND::Unit *un
       v14 = (target_y - y) >> 8;
       v13 = v8;
       if ( v8 > v9 )
-        return sub_41BA30(x, y, v13, v14, v15, v16, v17);
+        return BOXD_raycast_x_major(x, y, v13, v14, v15, v16, v17);
     }
   }
-  return sub_41BC60(x, y, v13, v14, v15, v16, v17);
+  return BOXD_raycast_y_major(x, y, v13, v14, v15, v16, v17);
 }
 
 //----- (0041BA30) --------------------------------------------------------
-int __fastcall sub_41BA30(int a1, int a2, int a3, int a4, int a5, int a6, KKND::Unit *unit)
+int __fastcall BOXD_raycast_x_major(int x, int y, int a3, int a4, int a5, int a6, KKND::Unit *unit)
 {
   int v7; // ebx
   int v8; // esi
@@ -28982,12 +27745,12 @@ int __fastcall sub_41BA30(int a1, int a2, int a3, int a4, int a5, int a6, KKND::
   _BYTE v31[40]; // [esp+90h] [ebp-28h] BYREF
   int v32; // [esp+BCh] [ebp+4h]
 
-  unit[1].state = nullptr;
-  unit[1].turret = nullptr;
-  v19 = a2 >> 13;
-  v7 = a1 >> 13;
-  v23 = a2;
-  tile = &g_terrain[(a1 >> 13) + g_map_num_tiles_x * (a2 >> 13)];
+  unit->scan_pathing.first_clear_tile_y = 0;
+  unit->scan_pathing.first_clear_tile_x = 0;
+  v19 = y >> 13;
+  v7 = x >> 13;
+  v23 = y;
+  tile = &g_terrain[(x >> 13) + g_map_num_tiles_x * (y >> 13)];
   v25 = 2 * a4;
   v28 = 2 * a4 - 2 * a3;
   v8 = 2 * a4 - a3;
@@ -29007,7 +27770,7 @@ int __fastcall sub_41BA30(int a1, int a2, int a3, int a4, int a5, int a6, KKND::
   v10 = a3 == 0;
   v32 = a3 - 1;
   if ( v10 )
-    return sub_41C060(v20, v22, v31, v30, v29, v21);
+    return BOXD_raycast_finalize(i, unit, v20, v22, (int)v31, (int)v30, (int)v29, v21);
   while ( 1 )
   {
     if ( v8 < 0 )
@@ -29017,16 +27780,16 @@ int __fastcall sub_41BA30(int a1, int a2, int a3, int a4, int a5, int a6, KKND::
     else
     {
       v11 = v28;
-      a2 += a6;
-      v23 = a2;
+      y += a6;
+      v23 = y;
     }
-    a1 += a5;
+    x += a5;
     v24 = v11 + v8;
-    v12 = a1 >> 13;
-    v13 = a2 >> 13;
-    v14 = a1 >> 13 <= v7;
-    v26 = a1;
-    if ( a1 >> 13 == v7 )
+    v12 = x >> 13;
+    v13 = y >> 13;
+    v14 = x >> 13 <= v7;
+    v26 = x;
+    if ( x >> 13 == v7 )
     {
       if ( v13 == v19 )
         goto LABEL_22;
@@ -29043,25 +27806,24 @@ int __fastcall sub_41BA30(int a1, int a2, int a3, int a4, int a5, int a6, KKND::
       tile += g_map_num_tiles_x;
     if ( v13 < v19 )
       tile -= g_map_num_tiles_x;
-    v7 = a1 >> 13;
-    v19 = a2 >> 13;
-    v15 = BOX_classify_tile_for_pathing(unit, v12, v13, tile);
-    if ( sub_41BE90(&i, v15, &v20, &v22, unit, (int)v29, (int)v31, (int)v30, v12, v13, &v27, &v21) != 6 )
+    v7 = x >> 13;
+    v19 = y >> 13;
+    v15 = BOXD_classify_tile_for_pathing(unit, v12, v13, tile);
+    if ( BOXD_raycast_classify_step(&i, v15, &v20, &v22, unit, (int)v29, (int)v31, (int)v30, v12, v13, &v27, &v21) != 6 )
       return 1;
-    a2 = v23;
-    a1 = v26;
+    y = v23;
+    x = v26;
 LABEL_22:
     v10 = v32-- == 0;
     if ( v10 )
-      return sub_41C060(v20, v22, v31, v30, v29, v21);
+      return BOXD_raycast_finalize(i, unit, v20, v22, (int)v31, (int)v30, (int)v29, v21);
     v8 = v24;
   }
 }
-// 41C060: using guessed type _DWORD __stdcall sub_41C060(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD);
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0041BC60) --------------------------------------------------------
-int __fastcall sub_41BC60(int a1, int a2, int a3, int a4, int a5, int a6, KKND::Unit *unit)
+int __fastcall BOXD_raycast_y_major(int a1, int a2, int a3, int a4, int a5, int a6, KKND::Unit *unit)
 {
   int v7; // ebx
   int v8; // esi
@@ -29089,8 +27851,8 @@ int __fastcall sub_41BC60(int a1, int a2, int a3, int a4, int a5, int a6, KKND::
   _BYTE v31[40]; // [esp+90h] [ebp-28h] BYREF
   int v32; // [esp+C0h] [ebp+8h]
 
-  unit[1].state = nullptr;
-  unit[1].turret = nullptr;
+  unit->scan_pathing.first_clear_tile_y = 0;
+  unit->scan_pathing.first_clear_tile_x = 0;
   v19 = a2 >> 13;
   v7 = a1 >> 13;
   v23 = a1;
@@ -29114,7 +27876,7 @@ int __fastcall sub_41BC60(int a1, int a2, int a3, int a4, int a5, int a6, KKND::
   v10 = a4 == 0;
   v32 = a4 - 1;
   if ( v10 )
-    return sub_41C060(v20, v22, v31, v30, v29, v21);
+    return BOXD_raycast_finalize(i, unit, v20, v22, (int)v31, (int)v30, (int)v29, v21);
   while ( 1 )
   {
     if ( v8 < 0 )
@@ -29152,23 +27914,22 @@ int __fastcall sub_41BC60(int a1, int a2, int a3, int a4, int a5, int a6, KKND::
       tile -= g_map_num_tiles_x;
     v7 = a1 >> 13;
     v19 = a2 >> 13;
-    v15 = BOX_classify_tile_for_pathing(unit, v12, v13, tile);
-    if ( sub_41BE90(&i, v15, &v20, &v22, unit, (int)v29, (int)v31, (int)v30, v12, v13, &v27, &v21) != 6 )
+    v15 = BOXD_classify_tile_for_pathing(unit, v12, v13, tile);
+    if ( BOXD_raycast_classify_step(&i, v15, &v20, &v22, unit, (int)v29, (int)v31, (int)v30, v12, v13, &v27, &v21) != 6 )
       return 1;
     a2 = v26;
     a1 = v23;
 LABEL_22:
     v10 = v32-- == 0;
     if ( v10 )
-      return sub_41C060(v20, v22, v31, v30, v29, v21);
+      return BOXD_raycast_finalize(i, unit, v20, v22, (int)v31, (int)v30, (int)v29, v21);
     v8 = v24;
   }
 }
-// 41C060: using guessed type _DWORD __stdcall sub_41C060(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD);
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0041BE90) --------------------------------------------------------
-int __fastcall sub_41BE90(
+int __fastcall BOXD_raycast_classify_step(
         _DWORD *a1,
         KKND::BoxdPathingClassification boxd_class,
         _DWORD *a3,
@@ -29185,21 +27946,21 @@ int __fastcall sub_41BE90(
   int v12; // ebp
   int v13; // edi
   bool v14; // zf
-  KKND::Unit *v15; // esi
+  int v15; // esi
   int v17; // ecx
 
   v12 = map_y;
   switch ( boxd_class )
   {
     case Boxd_PartiallyOccupied:
-      if ( !unit[1].ai_node_per_side[2] )
+      if ( !unit->scan_pathing.push_through_timer )
         goto LABEL_6;
       v13 = 0;
       break;
     case Boxd_Clear:
       goto LABEL_5;
     case Boxd_FullyOccupied:
-      if ( unit[1].ai_node_per_side[1] )
+      if ( unit->scan_pathing.disperse_timer )
         goto LABEL_6;
 LABEL_5:
       v13 = 0;
@@ -29207,21 +27968,21 @@ LABEL_5:
     default:
 LABEL_6:
       v13 = 1;
-      unit->ray_unit_obstacle_map_xs[(int)unit[1].next] = map_x;
-      unit->ray_unit_obstacle_map_ys[(int)unit[1].next] = map_y;
+      unit->ray_unit_obstacle_map_xs[unit->scan_pathing.ray_stack] = map_x;
+      unit->ray_unit_obstacle_map_ys[unit->scan_pathing.ray_stack] = map_y;
       break;
   }
   v14 = boxd_class == Boxd_Impassable;
   if ( boxd_class == Boxd_Impassable )
   {
     v14 = 1;
-    unit->ray_terrain_obstacle_xs[(int)unit[1].next] = map_x;
-    unit->ray_terrain_obstacle_ys[(int)unit[1].next] = map_y;
+    unit->ray_terrain_obstacle_xs[unit->scan_pathing.ray_stack] = map_x;
+    unit->ray_terrain_obstacle_ys[unit->scan_pathing.ray_stack] = map_y;
   }
   if ( v14 )
   {
     *a3 = 1;
-    *(_DWORD *)(a6 + 4 * (int)unit[1].next) = 0;
+    *(_DWORD *)(a6 + 4 * unit->scan_pathing.ray_stack) = 0;
   }
   if ( boxd_class == Boxd_FullyOccupied )
     *a12 = 1;
@@ -29236,8 +27997,8 @@ LABEL_6:
   }
   if ( boxd_class == Boxd_Clear && !*a3 && !*a11 )
   {
-    unit[1].state = (void *)v12;
-    unit[1].turret = (KKND::Turret *)map_x;
+    unit->scan_pathing.first_clear_tile_y = v12;
+    unit->scan_pathing.first_clear_tile_x = map_x;
   }
   if ( *a1 )
   {
@@ -29245,11 +28006,11 @@ LABEL_6:
     {
       if ( !v13 )
       {
-        unit->ray_exit_map_xs[(int)unit[1].next] = map_x;
-        unit->ray_exit_map_ys[(int)unit[1].next] = v12;
-        v15 = (KKND::Unit *)((char *)&unit[1].next->next + 1);
-        unit[1].next = v15;
-        if ( v15 == (KKND::Unit *)10 )
+        unit->ray_exit_map_xs[unit->scan_pathing.ray_stack] = map_x;
+        unit->ray_exit_map_ys[unit->scan_pathing.ray_stack] = v12;
+        v15 = unit->scan_pathing.ray_stack + 1;
+        unit->scan_pathing.ray_stack = v15;
+        if ( v15 == 10 )
           return 1;
         *a1 = 0;
       }
@@ -29257,12 +28018,12 @@ LABEL_6:
       {
         if ( *a3 )
         {
-          v17 = 4 * (int)unit[1].next;
+          v17 = 4 * unit->scan_pathing.ray_stack;
           if ( !*(_DWORD *)(a6 + v17) )
           {
             *(_DWORD *)(a7 + v17) = map_x;
-            *(_DWORD *)(a8 + 4 * (int)unit[1].next) = v12;
-            *(_DWORD *)(a6 + 4 * (int)unit[1].next) = 1;
+            *(_DWORD *)(a8 + 4 * unit->scan_pathing.ray_stack) = v12;
+            *(_DWORD *)(a6 + 4 * unit->scan_pathing.ray_stack) = 1;
             return 6;
           }
         }
@@ -29277,18 +28038,18 @@ LABEL_6:
 }
 
 //----- (0041C060) --------------------------------------------------------
-int __fastcall sub_41C060(int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8)
+int __fastcall BOXD_raycast_finalize(int a1, KKND::Unit *unit, int a3, int a4, int a5, int a6, int a7, int a8)
 {
-  int v8; // eax
+  int ray_stack; // eax
 
   if ( !a1 )
-    return *(_DWORD *)(a2 + 588) != 0;
+    return unit->scan_pathing.ray_stack != 0;
   if ( a1 != 1 )
     return 5;
-  v8 = *(_DWORD *)(a2 + 588);
-  if ( !v8 && !a3 && !a4 && !a8 )
+  ray_stack = unit->scan_pathing.ray_stack;
+  if ( !ray_stack && !a3 && !a4 && !a8 )
     return 4;
-  if ( v8 )
+  if ( ray_stack )
   {
     if ( !a3 )
       return 1;
@@ -29297,29 +28058,29 @@ int __fastcall sub_41C060(int a1, int a2, int a3, int a4, int a5, int a6, int a7
   {
     return 2;
   }
-  if ( *(_DWORD *)(a7 + 4 * v8) )
+  if ( *(_DWORD *)(a7 + 4 * ray_stack) )
   {
-    *(_DWORD *)(a2 + 4 * v8 + 348) = *(_DWORD *)(a5 + 4 * v8);
-    *(_DWORD *)(a2 + 4 * *(_DWORD *)(a2 + 588) + 388) = *(_DWORD *)(a6 + 4 * *(_DWORD *)(a2 + 588));
-    ++*(_DWORD *)(a2 + 588);
+    unit->ray_exit_map_xs[ray_stack] = *(_DWORD *)(a5 + 4 * ray_stack);
+    unit->ray_exit_map_ys[unit->scan_pathing.ray_stack] = *(_DWORD *)(a6 + 4 * unit->scan_pathing.ray_stack);
+    ++unit->scan_pathing.ray_stack;
     return 3;
   }
-  if ( v8 )
+  if ( ray_stack )
     return 1;
   else
     return 5;
 }
 
 //----- (0041C130) --------------------------------------------------------
-BOOL __fastcall BOXD_41C130(int x1, int y1, int x2, int y2, KKND::Unit *unit)
+BOOL __fastcall BOXD_line_of_sight_check(int x1, int y1, int x2, int y2, KKND::Unit *unit)
 {
   KKND::UnitSize size; // esi
 
   size = unit->stats->size;
   if ( size == UnitSize_Regular || size == UnitSize_Small )
-    return BOXD_41C190(x1, y1, x2, y2, unit);
+    return BOXD_line_of_sight_check_regular_small(x1, y1, x2, y2, unit);
   if ( size == UnitSize_XL )
-    return BOXD_41C250(x1, y1, x2, y2, unit);
+    return BOXD_line_of_sight_check_xl(x1, y1, x2, y2, unit);
   return 0;
 }
 
@@ -29348,7 +28109,7 @@ BOOL __fastcall BOXD_41C190(int x1, int y1, int x2, int y2, KKND::Unit *unit)
       v11 = (y1 - y2) >> 8;
       v10 = -v7;
       if ( -v7 > v8 )
-        return BOXD_41C660(x1, y1, v10, v11, v12, v13, v14);
+        return BOXD_los_bresenham_x_major(x1, y1, v10, v11, v12, v13, v14);
     }
     else
     {
@@ -29358,7 +28119,7 @@ BOOL __fastcall BOXD_41C190(int x1, int y1, int x2, int y2, KKND::Unit *unit)
       v11 = (y1 - y2) >> 8;
       v10 = (x2 - x1) >> 8;
       if ( v7 > v8 )
-        return BOXD_41C660(x1, y1, v10, v11, v12, v13, v14);
+        return BOXD_los_bresenham_x_major(x1, y1, v10, v11, v12, v13, v14);
     }
   }
   else
@@ -29373,7 +28134,7 @@ BOOL __fastcall BOXD_41C190(int x1, int y1, int x2, int y2, KKND::Unit *unit)
       v11 = (y2 - y1) >> 8;
       v10 = -v5;
       if ( -v5 > v6 )
-        return BOXD_41C660(x1, y1, v10, v11, v12, v13, v14);
+        return BOXD_los_bresenham_x_major(x1, y1, v10, v11, v12, v13, v14);
     }
     else
     {
@@ -29383,10 +28144,10 @@ BOOL __fastcall BOXD_41C190(int x1, int y1, int x2, int y2, KKND::Unit *unit)
       v11 = (y2 - y1) >> 8;
       v10 = (x2 - x1) >> 8;
       if ( v5 > v6 )
-        return BOXD_41C660(x1, y1, v10, v11, v12, v13, v14);
+        return BOXD_los_bresenham_x_major(x1, y1, v10, v11, v12, v13, v14);
     }
   }
-  return BOXD_41C890(x1, y1, v10, v11, v12, v13, v14);
+  return BOXD_los_bresenham_y_major(x1, y1, v10, v11, v12, v13, v14);
 }
 
 //----- (0041C250) --------------------------------------------------------
@@ -29412,16 +28173,16 @@ BOOL __fastcall BOXD_41C250(int x1, int y1, int x2, int y2, KKND::Unit *unit)
       v17 = -v13;
       if ( v17 <= v14 )
       {
-        if ( BOXD_41C890(x1 - 4096, y1 + 4096, v17, v14, -256, -256, unit)
-          && BOXD_41C890(x1 + 4096, y1 - 4096, v17, v14, -256, -256, unit)
-          && BOXD_41C890(x1, y1, v17, v14, -256, -256, unit) )
+        if ( BOXD_los_bresenham_y_major(x1 - 4096, y1 + 4096, v17, v14, -256, -256, unit)
+          && BOXD_los_bresenham_y_major(x1 + 4096, y1 - 4096, v17, v14, -256, -256, unit)
+          && BOXD_los_bresenham_y_major(x1, y1, v17, v14, -256, -256, unit) )
         {
           return 1;
         }
       }
-      else if ( BOXD_41C660(x1 + 4096, y1 - 4096, v17, v14, -256, -256, unit)
-             && BOXD_41C660(x1 - 4096, y1 + 4096, v17, v14, -256, -256, unit)
-             && BOXD_41C660(x1, y1, v17, v14, -256, -256, unit) )
+      else if ( BOXD_los_bresenham_x_major(x1 + 4096, y1 - 4096, v17, v14, -256, -256, unit)
+             && BOXD_los_bresenham_x_major(x1 - 4096, y1 + 4096, v17, v14, -256, -256, unit)
+             && BOXD_los_bresenham_x_major(x1, y1, v17, v14, -256, -256, unit) )
       {
         return 1;
       }
@@ -29432,16 +28193,16 @@ BOOL __fastcall BOXD_41C250(int x1, int y1, int x2, int y2, KKND::Unit *unit)
       v16 = x1 - 4096;
       if ( v13 <= v14 )
       {
-        if ( BOXD_41C890(v16, v15, v13, v14, 256, -256, unit)
-          && BOXD_41C890(x1 + 4096, y1 + 4096, v13, v14, 256, -256, unit)
-          && BOXD_41C890(x1, y1, v13, v14, 256, -256, unit) )
+        if ( BOXD_los_bresenham_y_major(v16, v15, v13, v14, 256, -256, unit)
+          && BOXD_los_bresenham_y_major(x1 + 4096, y1 + 4096, v13, v14, 256, -256, unit)
+          && BOXD_los_bresenham_y_major(x1, y1, v13, v14, 256, -256, unit) )
         {
           return 1;
         }
       }
-      else if ( BOXD_41C660(v16, v15, v13, v14, 256, -256, unit)
-             && BOXD_41C660(x1 + 4096, y1 + 4096, v13, v14, 256, -256, unit)
-             && BOXD_41C660(x1, y1, v13, v14, 256, -256, unit) )
+      else if ( BOXD_los_bresenham_x_major(v16, v15, v13, v14, 256, -256, unit)
+             && BOXD_los_bresenham_x_major(x1 + 4096, y1 + 4096, v13, v14, 256, -256, unit)
+             && BOXD_los_bresenham_x_major(x1, y1, v13, v14, 256, -256, unit) )
       {
         return 1;
       }
@@ -29458,32 +28219,32 @@ BOOL __fastcall BOXD_41C250(int x1, int y1, int x2, int y2, KKND::Unit *unit)
       v12 = x1 - 4096;
       if ( v11 <= v8 )
       {
-        if ( BOXD_41C890(v12, v10, v11, v8, -256, 256, unit)
-          && BOXD_41C890(x1 + 4096, y1 + 4096, v11, v8, -256, 256, unit)
-          && BOXD_41C890(x1, y1, v11, v8, -256, 256, unit) )
+        if ( BOXD_los_bresenham_y_major(v12, v10, v11, v8, -256, 256, unit)
+          && BOXD_los_bresenham_y_major(x1 + 4096, y1 + 4096, v11, v8, -256, 256, unit)
+          && BOXD_los_bresenham_y_major(x1, y1, v11, v8, -256, 256, unit) )
         {
           return 1;
         }
       }
-      else if ( BOXD_41C660(v12, v10, v11, v8, -256, 256, unit)
-             && BOXD_41C660(x1 + 4096, y1 + 4096, v11, v8, -256, 256, unit)
-             && BOXD_41C660(x1, y1, v11, v8, -256, 256, unit) )
+      else if ( BOXD_los_bresenham_x_major(v12, v10, v11, v8, -256, 256, unit)
+             && BOXD_los_bresenham_x_major(x1 + 4096, y1 + 4096, v11, v8, -256, 256, unit)
+             && BOXD_los_bresenham_x_major(x1, y1, v11, v8, -256, 256, unit) )
       {
         return 1;
       }
     }
     else if ( v7 <= v8 )
     {
-      if ( BOXD_41C890(x1 - 4096, y1 + 4096, v7, v8, 256, 256, unit)
-        && BOXD_41C890(x1 + 4096, y1 - 4096, v7, v8, 256, 256, unit)
-        && BOXD_41C890(x1, y1, v7, v8, 256, 256, unit) )
+      if ( BOXD_los_bresenham_y_major(x1 - 4096, y1 + 4096, v7, v8, 256, 256, unit)
+        && BOXD_los_bresenham_y_major(x1 + 4096, y1 - 4096, v7, v8, 256, 256, unit)
+        && BOXD_los_bresenham_y_major(x1, y1, v7, v8, 256, 256, unit) )
       {
         return 1;
       }
     }
-    else if ( BOXD_41C660(x1 + 4096, y1 - 4096, v7, v8, 256, 256, unit)
-           && BOXD_41C660(x1 - 4096, y1 + 4096, v7, v8, 256, 256, unit)
-           && BOXD_41C660(x1, y1, v7, v8, 256, 256, unit) )
+    else if ( BOXD_los_bresenham_x_major(x1 + 4096, y1 - 4096, v7, v8, 256, 256, unit)
+           && BOXD_los_bresenham_x_major(x1 - 4096, y1 + 4096, v7, v8, 256, 256, unit)
+           && BOXD_los_bresenham_x_major(x1, y1, v7, v8, 256, 256, unit) )
     {
       return 1;
     }
@@ -29492,7 +28253,7 @@ BOOL __fastcall BOXD_41C250(int x1, int y1, int x2, int y2, KKND::Unit *unit)
 }
 
 //----- (0041C660) --------------------------------------------------------
-BOOL __fastcall BOXD_41C660(int x, int y, int a3, int a4, int a5, int a6, KKND::Unit *unit)
+BOOL __fastcall BOXD_los_bresenham_x_major(int x, int y, int a3, int a4, int a5, int a6, KKND::Unit *unit)
 {
   int map_x; // esi
   int map_y; // ebx
@@ -29546,7 +28307,7 @@ BOOL __fastcall BOXD_41C660(int x, int y, int a3, int a4, int a5, int a6, KKND::
   v27 = entity->y >> 13;
   v26 = entity->x >> 13;
   v15 = &g_terrain[map_x + g_map_num_tiles_x * map_y];
-  switch ( BOXD_40ED00(unit, v15) )
+  switch ( BOXD_classify_tile_simple(unit, v15) )
   {
     case 1:
       if ( unit->scan_pathing.push_through_timer )
@@ -29608,7 +28369,7 @@ LABEL_39:
       v15 -= g_map_num_tiles_x;
     map_y = v23 >> 13;
     map_x = v24 >> 13;
-    switch ( BOXD_40ED00(unit, v15) )
+    switch ( BOXD_classify_tile_simple(unit, v15) )
     {
       case 1:
         if ( unit->scan_pathing.push_through_timer )
@@ -29630,7 +28391,7 @@ LABEL_39:
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0041C890) --------------------------------------------------------
-BOOL __fastcall BOXD_41C890(int x, int y, int a3, int a4, int a5, int a6, KKND::Unit *unit)
+BOOL __fastcall BOXD_los_bresenham_y_major(int x, int y, int a3, int a4, int a5, int a6, KKND::Unit *unit)
 {
   int map_x; // esi
   int map_y; // ebx
@@ -29684,7 +28445,7 @@ BOOL __fastcall BOXD_41C890(int x, int y, int a3, int a4, int a5, int a6, KKND::
   v27 = entity->y >> 13;
   v26 = entity->x >> 13;
   v15 = &g_terrain[map_x + g_map_num_tiles_x * map_y];
-  switch ( BOXD_40ED00(unit, v15) )
+  switch ( BOXD_classify_tile_simple(unit, v15) )
   {
     case 1:
       if ( unit->scan_pathing.push_through_timer )
@@ -29746,7 +28507,7 @@ LABEL_39:
       v15 -= g_map_num_tiles_x;
     map_y = v24 >> 13;
     map_x = v23 >> 13;
-    switch ( BOXD_40ED00(unit, v15) )
+    switch ( BOXD_classify_tile_simple(unit, v15) )
     {
       case 1:
         if ( unit->scan_pathing.push_through_timer )
@@ -29820,13 +28581,13 @@ int *__thiscall sub_41CB90(size_t *this)
   int *v5; // ecx
 
   *this = 4;
-  for ( i = g_oil_patch_list_head; i != (KKND::OilPatch *)&g_oil_patch_list_head; i = i->next )
+  for ( i = g_oil_patch_head; i != (KKND::OilPatch *)&g_oil_patch_head; i = i->next )
     *this += 16;
   result = (int *)malloc(*this);
   if ( result )
   {
-    v3 = g_oil_patch_list_head;
-    for ( j = result; v3 != (KKND::OilPatch *)&g_oil_patch_list_head; j = v5 + 1 )
+    v3 = g_oil_patch_head;
+    for ( j = result; v3 != (KKND::OilPatch *)&g_oil_patch_head; j = v5 + 1 )
     {
       *j = v3->amount;
       v5 = j + 1;
@@ -29839,7 +28600,7 @@ int *__thiscall sub_41CB90(size_t *this)
   }
   else
   {
-    off_467260 = aMemory;
+    off_467260 = "memory";
   }
   return result;
 }
@@ -29865,9 +28626,9 @@ BOOL __fastcall GAME_load_oil(KKND::OilPatchSaveStruct *oil)
     return 1;
   while ( 1 )
   {
-    v2 = g_oil_patch_free_pool;
-    if ( g_oil_patch_free_pool )
-      g_oil_patch_free_pool = g_oil_patch_free_pool->next;
+    v2 = g_oil_patch_free_head;
+    if ( g_oil_patch_free_head )
+      g_oil_patch_free_head = g_oil_patch_free_head->next;
     else
       v2 = nullptr;
     if ( !v2 )
@@ -29890,9 +28651,9 @@ BOOL __fastcall GAME_load_oil(KKND::OilPatchSaveStruct *oil)
     v9 = *v7;
     v1 = (KKND::OilPatchSaveStruct *)(v7 + 1);
     v2->drillrig_unit_id = v9;
-    v10 = g_oil_patch_list_tail;
-    next = g_oil_patch_list_tail->next;
-    v2->prev = g_oil_patch_list_tail;
+    v10 = g_oil_patch_tail;
+    next = g_oil_patch_tail->next;
+    v2->prev = g_oil_patch_tail;
     v2->next = next;
     v10->next->prev = v2;
     v10->next = v2;
@@ -29903,87 +28664,87 @@ BOOL __fastcall GAME_load_oil(KKND::OilPatchSaveStruct *oil)
 }
 
 //----- (0041CCE0) --------------------------------------------------------
-int __fastcall sub_41CCE0(int a1, int a2, int a3)
+int __fastcall sub_41CCE0(KKND::Unit *unit, int a2, int a3)
 {
-  int v5; // eax
-  int v6; // edx
+  KKND::Unit *locked_target; // eax
+  int active_target_id; // edx
   int v7; // eax
-  int v8; // ecx
-  _DWORD *v9; // esi
+  int unit_id; // ecx
+  KKND::Task *task; // esi
   int result; // eax
   int v11; // edx
-  void *v12; // eax
+  KKND::TaskFn v12; // eax
   void **v13; // ecx
   int v14; // eax
-  void *v15; // eax
+  KKND::MessageHandler v15; // eax
   int v16; // edx
   void **v17; // ecx
   int v18; // edx
-  int v19; // eax
+  KKND::Turret *turret; // eax
   int v20; // edx
-  _DWORD *v21; // edi
-  void *v22; // eax
+  KKND::Task *v21; // edi
+  KKND::TaskFn v22; // eax
   void **v23; // ecx
   int v24; // eax
-  void *v25; // eax
+  KKND::MessageHandler v25; // eax
   int v26; // edx
   void **v27; // ecx
   int v28; // edx
-  int v29; // ecx
-  int v30; // edx
+  KKND::Unit *target; // ecx
+  int target_unit_id; // edx
   int v31; // eax
-  void *v32; // eax
+  KKND::TurretMode v32; // eax
   int v33; // edx
   void **v34; // ecx
   int v35; // eax
-  void *v36; // eax
+  void (__fastcall *v36)(KKND::Unit *); // eax
   int v37; // edx
   void **v38; // ecx
   int v39; // eax
-  void *v40; // eax
+  void (__fastcall *v40)(KKND::Unit *); // eax
   int v41; // edx
   void **v42; // ecx
   int v43; // eax
-  void *v44; // eax
+  void (__fastcall *v44)(KKND::Unit *); // eax
   int v45; // edx
   void **v46; // ecx
   int v47; // eax
-  void *v48; // eax
+  void (__fastcall *v48)(KKND::Unit *); // eax
   int v49; // edx
   void **v50; // ecx
   int v51; // eax
-  void *v52; // eax
+  void (__fastcall *v52)(KKND::Unit *); // eax
   int v53; // edx
   void **v54; // ecx
   int v55; // eax
-  void *v56; // eax
+  void (__fastcall *v56)(KKND::Unit *); // eax
   int v57; // edx
   void **v58; // ecx
   int v59; // eax
-  void *v60; // eax
+  void (__fastcall *v60)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *); // eax
   int v61; // edx
   void **v62; // ecx
   int v63; // eax
-  int v64; // eax
-  int v65; // edx
+  KKND::Unit *order_target; // eax
+  int order_target_id; // edx
   int v66; // eax
   int v67; // ecx
-  int v68; // eax
-  int v69; // edx
+  KKND::Unit *opportunity_target; // eax
+  int opportunity_target_id; // edx
   int v70; // eax
   int v71; // ecx
-  int v72; // eax
+  KKND::Unit *last_attacker; // eax
   int v73; // edx
   int v74; // eax
   int v75; // ecx
-  int v76; // eax
-  int v77; // ecx
+  KKND::Unit *nav_obstacle; // eax
+  int nav_obstacle_id; // ecx
   int v78; // eax
   int v79; // edx
   int v80; // eax
   _DWORD *v81; // ecx
-  int v82; // eax
-  char *v83; // ebp
+  KKND::UnitType type; // eax
+  char *state; // ebp
   _DWORD *v84; // ebx
   int v85; // eax
   int v86; // edx
@@ -30003,14 +28764,14 @@ int __fastcall sub_41CCE0(int a1, int a2, int a3)
   int v100; // ecx
   int v101; // ecx
   _DWORD *v102; // ebp
-  int v103; // ecx
+  _DWORD *v103; // ecx
   KKND::OilPatch *v104; // eax
   int v105; // edx
   int v106; // eax
   int v107; // esi
   int v108; // eax
   int v109; // edx
-  int v110; // eax
+  KKND::UnitType v110; // eax
   void *v111; // eax
   int v112; // edx
   int v113; // esi
@@ -30027,159 +28788,162 @@ int __fastcall sub_41CCE0(int a1, int a2, int a3)
   int v124; // edx
   void **v125; // ecx
   int v126; // eax
-  int v127; // [esp+10h] [ebp-4h]
+  KKND::Turret *v127; // [esp+10h] [ebp-4h]
 
-  v5 = *(_DWORD *)(a1 + 8);
-  v6 = *(_DWORD *)(a1 + 244);
-  if ( !v5 )
+  locked_target = unit->locked_target;
+  active_target_id = unit->active_target_id;
+  if ( !locked_target )
     goto LABEL_8;
-  if ( v6 != -1 )
+  if ( active_target_id != -1 )
   {
-    v8 = *(_DWORD *)(v5 + 304);
-    if ( v8 && v8 == v6 && !*(_DWORD *)(v5 + 140) )
+    unit_id = locked_target->unit_id;
+    if ( unit_id && unit_id == active_target_id && !locked_target->destroyed )
     {
-      v7 = *(_DWORD *)(v5 + 304);
+      v7 = locked_target->unit_id;
       goto LABEL_9;
     }
 LABEL_8:
     v7 = -1;
     goto LABEL_9;
   }
-  v7 = *(_DWORD *)(v5 + 304);
+  v7 = locked_target->unit_id;
 LABEL_9:
   *(_DWORD *)a2 = v7;
-  v9 = *(_DWORD **)(a1 + 12);
-  if ( v9[6] != 1 )
+  task = unit->task;
+  if ( task->kind != TaskKind_Callback )
   {
-    off_467260 = aTaskIsWrongTyp;
+    off_467260 = "task is wrong type";
     return 0;
   }
   v11 = 0;
-  *(_DWORD *)(a2 + 4) = v9[3];
-  v12 = g_script_handlers[0];
+  *(_DWORD *)(a2 + 4) = task->channel;
+  v12 = (KKND::TaskFn)g_script_handlers[0];
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v13 = g_script_handlers;
     do
     {
-      if ( v12 == (void *)v9[16] )
+      if ( v12 == task->entry_point )
         break;
-      v12 = v13[1];
+      v12 = (KKND::TaskFn)v13[1];
       ++v13;
       ++v11;
     }
-    while ( v12 != (void *)-1 );
+    while ( v12 != (KKND::TaskFn)-1 );
   }
   if ( g_script_handlers[v11] == (void *)-1 )
     v14 = 0;
   else
     v14 = v11 + 1;
   *(_DWORD *)(a2 + 8) = v14;
-  v15 = g_script_handlers[0];
+  v15 = (KKND::MessageHandler)g_script_handlers[0];
   v16 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v17 = g_script_handlers;
     do
     {
-      if ( v15 == (void *)v9[13] )
+      if ( v15 == task->message_handler )
         break;
-      v15 = v17[1];
+      v15 = (KKND::MessageHandler)v17[1];
       ++v17;
       ++v16;
     }
-    while ( v15 != (void *)-1 );
+    while ( v15 != (KKND::MessageHandler)-1 );
   }
   if ( g_script_handlers[v16] == (void *)-1 )
     v18 = 0;
   else
     v18 = v16 + 1;
   *(_DWORD *)(a2 + 12) = v18;
-  *(_DWORD *)(a2 + 16) = v9[8];
-  *(_DWORD *)(a2 + 20) = v9[5];
-  *(_DWORD *)(a2 + 24) = v9[9];
-  *(_DWORD *)(a2 + 28) = v9[10];
-  *(_DWORD *)(a2 + 32) = v9[11];
-  *(_DWORD *)(a2 + 36) = *(_DWORD *)(a1 + 16);
-  *(_DWORD *)(a2 + 40) = *(_DWORD *)(a1 + 20);
-  v19 = *(_DWORD *)(a1 + 28);
+  *(_DWORD *)(a2 + 16) = task->flags_20;
+  *(_DWORD *)(a2 + 20) = task->sleep;
+  *(_DWORD *)(a2 + 24) = task->flags_24;
+  *(_DWORD *)(a2 + 28) = task->wait_flags;
+  *(_DWORD *)(a2 + 32) = task->field_2C;
+  *(_DWORD *)(a2 + 36) = unit->type;
+  *(_DWORD *)(a2 + 40) = unit->player_num;
+  turret = unit->turret;
   v20 = 0;
-  v127 = v19;
-  if ( v19 )
+  v127 = turret;
+  if ( turret )
   {
-    v21 = *(_DWORD **)v19;
-    if ( *(_DWORD *)(*(_DWORD *)v19 + 24) != 1 )
+    v21 = turret->task;
+    if ( turret->task->kind != TaskKind_Callback )
     {
-      off_467260 = aTaskIsWrongTyp;
+      off_467260 = "task is wrong type";
       return 0;
     }
-    *(_DWORD *)(a2 + 44) = v21[3];
-    v22 = g_script_handlers[0];
+    *(_DWORD *)(a2 + 44) = v21->channel;
+    v22 = (KKND::TaskFn)g_script_handlers[0];
     if ( g_script_handlers[0] != (void *)-1 )
     {
       v23 = g_script_handlers;
       do
       {
-        if ( v22 == (void *)v21[16] )
+        if ( v22 == v21->entry_point )
           break;
-        v22 = v23[1];
+        v22 = (KKND::TaskFn)v23[1];
         ++v23;
         ++v20;
       }
-      while ( v22 != (void *)-1 );
+      while ( v22 != (KKND::TaskFn)-1 );
     }
     if ( g_script_handlers[v20] == (void *)-1 )
       v24 = 0;
     else
       v24 = v20 + 1;
     *(_DWORD *)(a2 + 48) = v24;
-    v25 = g_script_handlers[0];
+    v25 = (KKND::MessageHandler)g_script_handlers[0];
     v26 = 0;
     if ( g_script_handlers[0] != (void *)-1 )
     {
       v27 = g_script_handlers;
       do
       {
-        if ( v25 == (void *)v21[13] )
+        if ( v25 == v21->message_handler )
           break;
-        v25 = v27[1];
+        v25 = (KKND::MessageHandler)v27[1];
         ++v27;
         ++v26;
       }
-      while ( v25 != (void *)-1 );
+      while ( v25 != (KKND::MessageHandler)-1 );
     }
     if ( g_script_handlers[v26] == (void *)-1 )
       v28 = 0;
     else
       v28 = v26 + 1;
     *(_DWORD *)(a2 + 52) = v28;
-    *(_DWORD *)(a2 + 56) = v21[8];
-    *(_DWORD *)(a2 + 60) = v21[5];
-    *(_DWORD *)(a2 + 64) = v21[9];
-    *(_DWORD *)(a2 + 68) = v21[10];
-    *(_DWORD *)(a2 + 72) = v21[11];
-    result = sub_41DA20(*(_DWORD **)(v127 + 4), (_DWORD *)(a2 + 76));
+    *(_DWORD *)(a2 + 56) = v21->flags_20;
+    *(_DWORD *)(a2 + 60) = v21->sleep;
+    *(_DWORD *)(a2 + 64) = v21->flags_24;
+    *(_DWORD *)(a2 + 68) = v21->wait_flags;
+    *(_DWORD *)(a2 + 72) = v21->field_2C;
+    result = sub_41DA20(v127->entity, (KKND::MobdId *)(a2 + 76));
     if ( !result )
       return result;
-    v29 = *(_DWORD *)(v127 + 12);
-    v30 = *(_DWORD *)(v127 + 48);
-    if ( !v29 || (v31 = *(_DWORD *)(v29 + 304), v30 != -1) && (!v31 || v31 != v30 || *(_DWORD *)(v29 + 140)) )
+    target = v127->target;
+    target_unit_id = v127->target_unit_id;
+    if ( !target
+      || (v31 = target->unit_id, target_unit_id != -1) && (!v31 || v31 != target_unit_id || target->destroyed) )
+    {
       v31 = -1;
+    }
     *(_DWORD *)(a2 + 116) = v31;
-    v32 = g_script_handlers[0];
+    v32 = (KKND::TurretMode)g_script_handlers[0];
     v33 = 0;
     if ( g_script_handlers[0] != (void *)-1 )
     {
       v34 = g_script_handlers;
       do
       {
-        if ( v32 == *(void **)(v127 + 16) )
+        if ( v32 == v127->mode )
           break;
-        v32 = v34[1];
+        v32 = (KKND::TurretMode)v34[1];
         ++v34;
         ++v33;
       }
-      while ( v32 != (void *)-1 );
+      while ( v32 != (KKND::TurretMode)-1 );
     }
     if ( g_script_handlers[v33] == (void *)-1 )
       v35 = 0;
@@ -30188,37 +28952,37 @@ LABEL_9:
     *(_DWORD *)(a2 + 120) = v35;
     if ( !v35 )
     {
-      sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownTurretM);
+      sprintf(byte_479EF8, "unit %d %s", unit->type, "unknown turret mode");
 LABEL_224:
       off_467260 = byte_479EF8;
       return 0;
     }
-    *(_DWORD *)(a2 + 124) = *(_DWORD *)(v127 + 20);
-    *(_DWORD *)(a2 + 128) = *(_DWORD *)(v127 + 24);
-    *(_DWORD *)(a2 + 132) = *(_DWORD *)(v127 + 28);
-    *(_DWORD *)(a2 + 136) = *(_DWORD *)(v127 + 32);
-    *(_DWORD *)(a2 + 140) = *(_DWORD *)(v127 + 44);
-    *(_DWORD *)(a2 + 144) = *(_DWORD *)(v127 + 48);
-    *(_DWORD *)(a2 + 148) = *(_DWORD *)(v127 + 52);
+    *(_DWORD *)(a2 + 124) = v127->current_mobd_frame;
+    *(_DWORD *)(a2 + 128) = v127->reload_timer;
+    *(_DWORD *)(a2 + 132) = v127->volley_remaining;
+    *(_DWORD *)(a2 + 136) = v127->volley_reload_time;
+    *(_DWORD *)(a2 + 140) = v127->_turret_field_2C_unused;
+    *(_DWORD *)(a2 + 144) = v127->target_unit_id;
+    *(_DWORD *)(a2 + 148) = v127->_turret_field_34_unused;
   }
   else
   {
     *(_DWORD *)(a2 + 48) = 0;
   }
-  v36 = g_script_handlers[0];
+  v36 = (void (__fastcall *)(KKND::Unit *))g_script_handlers[0];
   v37 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v38 = g_script_handlers;
     do
     {
-      if ( v36 == *(void **)(a1 + 64) )
+      if ( v36 == unit->mode )
         break;
-      v36 = v38[1];
+      v36 = (void (__fastcall *)(KKND::Unit *))v38[1];
       ++v38;
       ++v37;
     }
-    while ( v36 != (void *)-1 );
+    while ( v36 != (void (__fastcall *)(KKND::Unit *))-1 );
   }
   if ( g_script_handlers[v37] == (void *)-1 )
     v39 = 0;
@@ -30227,23 +28991,23 @@ LABEL_224:
   *(_DWORD *)(a2 + 152) = v39;
   if ( !v39 )
   {
-    sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownMode);
+    sprintf(byte_479EF8, "unit %d %s", unit->type, "unknown mode");
     goto LABEL_224;
   }
-  v40 = g_script_handlers[0];
+  v40 = (void (__fastcall *)(KKND::Unit *))g_script_handlers[0];
   v41 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v42 = g_script_handlers;
     do
     {
-      if ( v40 == *(void **)(a1 + 68) )
+      if ( v40 == unit->mode_idle )
         break;
-      v40 = v42[1];
+      v40 = (void (__fastcall *)(KKND::Unit *))v42[1];
       ++v42;
       ++v41;
     }
-    while ( v40 != (void *)-1 );
+    while ( v40 != (void (__fastcall *)(KKND::Unit *))-1 );
   }
   if ( g_script_handlers[v41] == (void *)-1 )
     v43 = 0;
@@ -30252,23 +29016,23 @@ LABEL_224:
   *(_DWORD *)(a2 + 156) = v43;
   if ( !v43 )
   {
-    sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownIdleMod);
+    sprintf(byte_479EF8, "unit %d %s", unit->type, "unknown idle mode");
     goto LABEL_224;
   }
-  v44 = g_script_handlers[0];
+  v44 = (void (__fastcall *)(KKND::Unit *))g_script_handlers[0];
   v45 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v46 = g_script_handlers;
     do
     {
-      if ( v44 == *(void **)(a1 + 72) )
+      if ( v44 == unit->mode_arrive )
         break;
-      v44 = v46[1];
+      v44 = (void (__fastcall *)(KKND::Unit *))v46[1];
       ++v46;
       ++v45;
     }
-    while ( v44 != (void *)-1 );
+    while ( v44 != (void (__fastcall *)(KKND::Unit *))-1 );
   }
   if ( g_script_handlers[v45] == (void *)-1 )
     v47 = 0;
@@ -30277,23 +29041,23 @@ LABEL_224:
   *(_DWORD *)(a2 + 160) = v47;
   if ( !v47 )
   {
-    sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownArriveM);
+    sprintf(byte_479EF8, "unit %d %s", unit->type, "unknown arrive mode");
     goto LABEL_224;
   }
-  v48 = g_script_handlers[0];
+  v48 = (void (__fastcall *)(KKND::Unit *))g_script_handlers[0];
   v49 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v50 = g_script_handlers;
     do
     {
-      if ( v48 == *(void **)(a1 + 76) )
+      if ( v48 == unit->mode_attacked )
         break;
-      v48 = v50[1];
+      v48 = (void (__fastcall *)(KKND::Unit *))v50[1];
       ++v50;
       ++v49;
     }
-    while ( v48 != (void *)-1 );
+    while ( v48 != (void (__fastcall *)(KKND::Unit *))-1 );
   }
   if ( g_script_handlers[v49] == (void *)-1 )
     v51 = 0;
@@ -30302,23 +29066,23 @@ LABEL_224:
   *(_DWORD *)(a2 + 164) = v51;
   if ( !v51 )
   {
-    sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownAttacke);
+    sprintf(byte_479EF8, "unit %d %s", unit->type, "unknown attacked mode");
     goto LABEL_224;
   }
-  v52 = g_script_handlers[0];
+  v52 = (void (__fastcall *)(KKND::Unit *))g_script_handlers[0];
   v53 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v54 = g_script_handlers;
     do
     {
-      if ( v52 == *(void **)(a1 + 80) )
+      if ( v52 == unit->mode_return )
         break;
-      v52 = v54[1];
+      v52 = (void (__fastcall *)(KKND::Unit *))v54[1];
       ++v54;
       ++v53;
     }
-    while ( v52 != (void *)-1 );
+    while ( v52 != (void (__fastcall *)(KKND::Unit *))-1 );
   }
   if ( g_script_handlers[v53] == (void *)-1 )
     v55 = 0;
@@ -30327,23 +29091,23 @@ LABEL_224:
   *(_DWORD *)(a2 + 168) = v55;
   if ( !v55 )
   {
-    sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownReturnM);
+    sprintf(byte_479EF8, "unit %d %s", unit->type, "unknown return mode");
     goto LABEL_224;
   }
-  v56 = g_script_handlers[0];
+  v56 = (void (__fastcall *)(KKND::Unit *))g_script_handlers[0];
   v57 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v58 = g_script_handlers;
     do
     {
-      if ( v56 == *(void **)(a1 + 84) )
+      if ( v56 == unit->mode_turn_return )
         break;
-      v56 = v58[1];
+      v56 = (void (__fastcall *)(KKND::Unit *))v58[1];
       ++v58;
       ++v57;
     }
-    while ( v56 != (void *)-1 );
+    while ( v56 != (void (__fastcall *)(KKND::Unit *))-1 );
   }
   if ( g_script_handlers[v57] == (void *)-1 )
     v59 = 0;
@@ -30352,23 +29116,23 @@ LABEL_224:
   *(_DWORD *)(a2 + 172) = v59;
   if ( !v59 )
   {
-    sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownTurnRet);
+    sprintf(byte_479EF8, "unit %d %s", unit->type, "unknown turn-return mode");
     goto LABEL_224;
   }
-  v60 = g_script_handlers[0];
+  v60 = (void (__fastcall *)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *))g_script_handlers[0];
   v61 = 0;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     v62 = g_script_handlers;
     do
     {
-      if ( v60 == *(void **)(a1 + 88) )
+      if ( v60 == unit->message_handler )
         break;
-      v60 = v62[1];
+      v60 = (void (__fastcall *)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *))v62[1];
       ++v62;
       ++v61;
     }
-    while ( v60 != (void *)-1 );
+    while ( v60 != (void (__fastcall *)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *))-1 );
   }
   if ( g_script_handlers[v61] == (void *)-1 )
     v63 = 0;
@@ -30377,165 +29141,160 @@ LABEL_224:
   *(_DWORD *)(a2 + 176) = v63;
   if ( !v63 )
   {
-    sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aUnknownMessage);
+    sprintf(byte_479EF8, "unit %d %s", unit->type, aUnknownMessage);
     goto LABEL_224;
   }
-  result = sub_41DA20(*(_DWORD **)(a1 + 92), (_DWORD *)(a2 + 180));
+  result = sub_41DA20(unit->entity, (KKND::MobdId *)(a2 + 180));
   if ( !result )
     return result;
-  *(_DWORD *)(a2 + 220) = *(_DWORD *)(a1 + 120);
-  *(_DWORD *)(a2 + 224) = *(_DWORD *)(a1 + 124);
-  *(_DWORD *)(a2 + 228) = *(_DWORD *)(a1 + 128);
-  *(_DWORD *)(a2 + 232) = *(_DWORD *)(a1 + 132);
-  *(_DWORD *)(a2 + 236) = *(_DWORD *)(a1 + 136);
-  *(_DWORD *)(a2 + 240) = *(_DWORD *)(a1 + 144);
-  *(_DWORD *)(a2 + 244) = *(_DWORD *)(a1 + 148);
-  *(_DWORD *)(a2 + 248) = *(_DWORD *)(a1 + 152);
-  *(_DWORD *)(a2 + 252) = *(_DWORD *)(a1 + 156);
-  *(_DWORD *)(a2 + 256) = *(_DWORD *)(a1 + 160);
-  *(_DWORD *)(a2 + 260) = *(_DWORD *)(a1 + 164);
-  *(_DWORD *)(a2 + 264) = *(_DWORD *)(a1 + 168);
-  *(_DWORD *)(a2 + 268) = *(_DWORD *)(a1 + 172);
-  *(_DWORD *)(a2 + 272) = *(_DWORD *)(a1 + 176);
-  *(_DWORD *)(a2 + 276) = *(_DWORD *)(a1 + 180);
-  *(_DWORD *)(a2 + 280) = *(_DWORD *)(a1 + 184);
-  *(_DWORD *)(a2 + 284) = *(_DWORD *)(a1 + 188);
-  *(_DWORD *)(a2 + 288) = *(_DWORD *)(a1 + 192);
-  *(_DWORD *)(a2 + 292) = *(_DWORD *)(a1 + 196);
-  *(_DWORD *)(a2 + 296) = *(_DWORD *)(a1 + 200);
-  *(_DWORD *)(a2 + 300) = *(_DWORD *)(a1 + 204);
-  *(_DWORD *)(a2 + 304) = *(_DWORD *)(a1 + 208);
-  *(_DWORD *)(a2 + 308) = *(_DWORD *)(a1 + 212);
-  *(_DWORD *)(a2 + 312) = *(_DWORD *)(a1 + 216);
-  *(_DWORD *)(a2 + 316) = *(_DWORD *)(a1 + 220);
-  v64 = *(_DWORD *)(a1 + 224);
-  v65 = *(_DWORD *)(a1 + 236);
-  if ( !v64 )
+  *(_DWORD *)(a2 + 220) = unit->_unit_field_78_unused;
+  *(_DWORD *)(a2 + 224) = unit->orientation;
+  *(_DWORD *)(a2 + 228) = unit->_unit_field_80_unused;
+  *(_DWORD *)(a2 + 232) = unit->_unit_field_84_unused;
+  *(_DWORD *)(a2 + 236) = unit->target_orientation;
+  *(_DWORD *)(a2 + 240) = unit->hitpoints;
+  *(_DWORD *)(a2 + 244) = unit->experience;
+  *(_DWORD *)(a2 + 248) = unit->veterancy;
+  *(_DWORD *)(a2 + 252) = unit->hp_regen_accumulator;
+  *(_DWORD *)(a2 + 256) = unit->hp_regen_rate;
+  *(_DWORD *)(a2 + 260) = unit->tile_position;
+  *(_DWORD *)(a2 + 264) = unit->map_x;
+  *(_DWORD *)(a2 + 268) = unit->map_y;
+  *(_DWORD *)(a2 + 272) = unit->order_next_waypoint_x;
+  *(_DWORD *)(a2 + 276) = unit->order_next_waypoint_y;
+  *(_DWORD *)(a2 + 280) = unit->order_starting_x;
+  *(_DWORD *)(a2 + 284) = unit->order_starting_y;
+  *(_DWORD *)(a2 + 288) = unit->base_anim_speed;
+  *(_DWORD *)(a2 + 292) = unit->path_next_tile_x;
+  *(_DWORD *)(a2 + 296) = unit->path_next_tile_y;
+  *(_DWORD *)(a2 + 300) = unit->path_next_waypoint_tile_x;
+  *(_DWORD *)(a2 + 304) = unit->path_next_waypoint_tile_y;
+  *(_DWORD *)(a2 + 308) = unit->path_scan_direction;
+  *(_DWORD *)(a2 + 312) = unit->path_scan_orientation;
+  *(_DWORD *)(a2 + 316) = unit->order;
+  order_target = unit->order_target;
+  order_target_id = unit->order_target_id;
+  if ( !order_target )
     goto LABEL_131;
-  if ( v65 == -1 )
+  if ( order_target_id == -1 )
   {
-    v66 = *(_DWORD *)(v64 + 304);
+    v66 = order_target->unit_id;
     goto LABEL_132;
   }
-  v67 = *(_DWORD *)(v64 + 304);
-  if ( v67 && v67 == v65 && !*(_DWORD *)(v64 + 140) )
-    v66 = *(_DWORD *)(v64 + 304);
+  v67 = order_target->unit_id;
+  if ( v67 && v67 == order_target_id && !order_target->destroyed )
+    v66 = order_target->unit_id;
   else
 LABEL_131:
     v66 = -1;
 LABEL_132:
   *(_DWORD *)(a2 + 320) = v66;
-  v68 = *(_DWORD *)(a1 + 228);
-  v69 = *(_DWORD *)(a1 + 240);
-  if ( !v68 )
+  opportunity_target = unit->opportunity_target;
+  opportunity_target_id = unit->opportunity_target_id;
+  if ( !opportunity_target )
     goto LABEL_139;
-  if ( v69 != -1 )
+  if ( opportunity_target_id != -1 )
   {
-    v71 = *(_DWORD *)(v68 + 304);
-    if ( v71 && v71 == v69 && !*(_DWORD *)(v68 + 140) )
+    v71 = opportunity_target->unit_id;
+    if ( v71 && v71 == opportunity_target_id && !opportunity_target->destroyed )
     {
-      v70 = *(_DWORD *)(v68 + 304);
+      v70 = opportunity_target->unit_id;
       goto LABEL_140;
     }
 LABEL_139:
     v70 = -1;
     goto LABEL_140;
   }
-  v70 = *(_DWORD *)(v68 + 304);
+  v70 = opportunity_target->unit_id;
 LABEL_140:
   *(_DWORD *)(a2 + 324) = v70;
-  *(_DWORD *)(a2 + 328) = *(_DWORD *)(a1 + 236);
-  *(_DWORD *)(a2 + 332) = *(_DWORD *)(a1 + 240);
-  *(_DWORD *)(a2 + 336) = *(_DWORD *)(a1 + 244);
-  *(_DWORD *)(a2 + 340) = *(_DWORD *)(a1 + 252);
-  *(_DWORD *)(a2 + 344) = *(_DWORD *)(a1 + 256);
-  v72 = *(_DWORD *)(a1 + 280);
-  v73 = *(_DWORD *)(a1 + 244);
-  if ( !v72 )
+  *(_DWORD *)(a2 + 328) = unit->order_target_id;
+  *(_DWORD *)(a2 + 332) = unit->opportunity_target_id;
+  *(_DWORD *)(a2 + 336) = unit->active_target_id;
+  *(_DWORD *)(a2 + 340) = unit->order_target_x;
+  *(_DWORD *)(a2 + 344) = unit->order_target_y;
+  last_attacker = unit->last_attacker;
+  v73 = unit->active_target_id;
+  if ( !last_attacker )
     goto LABEL_147;
   if ( v73 == -1 )
   {
-    v74 = *(_DWORD *)(v72 + 304);
+    v74 = last_attacker->unit_id;
     goto LABEL_148;
   }
-  v75 = *(_DWORD *)(v72 + 304);
-  if ( v75 && v75 == v73 && !*(_DWORD *)(v72 + 140) )
-    v74 = *(_DWORD *)(v72 + 304);
+  v75 = last_attacker->unit_id;
+  if ( v75 && v75 == v73 && !last_attacker->destroyed )
+    v74 = last_attacker->unit_id;
   else
 LABEL_147:
     v74 = -1;
 LABEL_148:
   *(_DWORD *)(a2 + 348) = v74;
-  *(_DWORD *)(a2 + 352) = *(_DWORD *)(a1 + 284);
-  *(_DWORD *)(a2 + 356) = *(_DWORD *)(a1 + 288);
-  *(_DWORD *)(a2 + 360) = *(_DWORD *)(a1 + 292);
-  *(_DWORD *)(a2 + 364) = *(_DWORD *)(a1 + 296);
-  *(_DWORD *)(a2 + 368) = *(_DWORD *)(a1 + 300);
-  *(_DWORD *)(a2 + 372) = *(_DWORD *)(a1 + 304);
-  *(_DWORD *)(a2 + 376) = *(_DWORD *)(a1 + 308);
-  *(_DWORD *)(a2 + 380) = *(_DWORD *)(a1 + 312);
-  *(_DWORD *)(a2 + 384) = *(_DWORD *)(a1 + 316);
-  *(_DWORD *)(a2 + 388) = *(_DWORD *)(a1 + 320);
-  *(_DWORD *)(a2 + 392) = *(_DWORD *)(a1 + 324);
-  *(_DWORD *)(a2 + 396) = *(_DWORD *)(a1 + 328);
-  *(_DWORD *)(a2 + 400) = *(_DWORD *)(a1 + 332);
-  *(_DWORD *)(a2 + 404) = *(_DWORD *)(a1 + 336);
-  *(_DWORD *)(a2 + 408) = *(_DWORD *)(a1 + 340);
-  *(_DWORD *)(a2 + 412) = *(_DWORD *)(a1 + 344);
-  qmemcpy((void *)(a2 + 416), (const void *)(a1 + 348), 0x28u);
-  qmemcpy((void *)(a2 + 456), (const void *)(a1 + 388), 0x28u);
-  qmemcpy((void *)(a2 + 496), (const void *)(a1 + 428), 0x28u);
-  qmemcpy((void *)(a2 + 536), (const void *)(a1 + 468), 0x28u);
-  qmemcpy((void *)(a2 + 576), (const void *)(a1 + 508), 0x28u);
-  qmemcpy((void *)(a2 + 616), (const void *)(a1 + 548), 0x58u);
-  v76 = *(_DWORD *)(a1 + 636);
-  v77 = *(_DWORD *)(a1 + 640);
-  if ( !v76 )
+  *(KKND::UnitUnion1 *)(a2 + 352) = unit->_u1;
+  *(_DWORD *)(a2 + 360) = unit->path_flags;
+  *(_DWORD *)(a2 + 364) = unit->multi_purpose_field_1;
+  *(_DWORD *)(a2 + 368) = unit->cplc_spawn_param;
+  *(_DWORD *)(a2 + 372) = unit->unit_id;
+  *(_DWORD *)(a2 + 376) = unit->multi_purpose_field_3;
+  *(_DWORD *)(a2 + 380) = unit->path_scan_origin_tile_x;
+  *(_DWORD *)(a2 + 384) = unit->path_scan_origin_tile_y;
+  *(_DWORD *)(a2 + 388) = unit->path_scan_iteration;
+  *(_DWORD *)(a2 + 392) = unit->path_scan_max_iterations;
+  *(_DWORD *)(a2 + 396) = unit->path_scan_best_distance;
+  *(_DWORD *)(a2 + 400) = unit->path_scan_best_tile_x;
+  *(_DWORD *)(a2 + 404) = unit->path_scan_best_tile_y;
+  *(_DWORD *)(a2 + 408) = unit->path_scan_best_iteration;
+  *(_DWORD *)(a2 + 412) = unit->path_scan_cur_distance;
+  qmemcpy((void *)(a2 + 416), unit->ray_exit_map_xs, 0x28u);
+  qmemcpy((void *)(a2 + 456), unit->ray_exit_map_ys, 0x28u);
+  qmemcpy((void *)(a2 + 496), unit->ray_unit_obstacle_map_xs, 0x28u);
+  qmemcpy((void *)(a2 + 536), unit->ray_unit_obstacle_map_ys, 0x28u);
+  qmemcpy((void *)(a2 + 576), unit->ray_terrain_obstacle_xs, 0x28u);
+  qmemcpy((void *)(a2 + 616), unit->ray_terrain_obstacle_ys, 0x58u);
+  nav_obstacle = unit->nav_obstacle;
+  nav_obstacle_id = unit->nav_obstacle_id;
+  if ( !nav_obstacle )
     goto LABEL_155;
-  if ( v77 != -1 )
+  if ( nav_obstacle_id != -1 )
   {
-    v79 = *(_DWORD *)(v76 + 304);
-    if ( v79 && v79 == v77 && !*(_DWORD *)(v76 + 140) )
+    v79 = nav_obstacle->unit_id;
+    if ( v79 && v79 == nav_obstacle_id && !nav_obstacle->destroyed )
     {
-      v78 = *(_DWORD *)(v76 + 304);
+      v78 = nav_obstacle->unit_id;
       goto LABEL_156;
     }
 LABEL_155:
     v78 = -1;
     goto LABEL_156;
   }
-  v78 = *(_DWORD *)(v76 + 304);
+  v78 = nav_obstacle->unit_id;
 LABEL_156:
   *(_DWORD *)(a2 + 704) = v78;
-  *(_DWORD *)(a2 + 708) = *(_DWORD *)(a1 + 640);
+  *(_DWORD *)(a2 + 708) = unit->nav_obstacle_id;
   v80 = 0;
   v81 = (_DWORD *)(a2 + 712);
   do
-  {
-    *v81 = *(char *)(v80 + a1 + 660);
-    ++v80;
-    ++v81;
-  }
+    *v81++ = (char)unit->control_groups[v80++];
   while ( v80 < 7 );
-  *(_WORD *)(a2 + 740) = *(_WORD *)(a1 + 668);
-  *(_WORD *)(a2 + 742) = *(_WORD *)(a1 + 670);
-  *(_WORD *)(a2 + 744) = *(_WORD *)(a1 + 672);
-  *(_WORD *)(a2 + 746) = *(_WORD *)(a1 + 674);
-  v82 = *(_DWORD *)(a1 + 16);
-  switch ( v82 )
+  *(_WORD *)(a2 + 740) = unit->idle_fidget_timer;
+  *(_WORD *)(a2 + 742) = unit->last_stuck_tile_x;
+  *(_WORD *)(a2 + 744) = unit->last_stuck_tile_y;
+  *(_WORD *)(a2 + 746) = unit->stuck_timer;
+  type = unit->type;
+  switch ( type )
   {
-    case 23:
-    case 24:
-      v83 = *(char **)(a1 + 32);
+    case UnitType_Surv_Tanker:
+    case UnitType_Mute_Tanker:
+      state = (char *)unit->state;
       v84 = (_DWORD *)(a2 + 748);
-      if ( !v83 )
+      if ( !state )
       {
         *v84 = -67108864;
         return 1;
       }
-      *v84 = *(_DWORD *)v83;
-      v85 = *((_DWORD *)v83 + 1);
-      v86 = *((_DWORD *)v83 + 6);
+      *v84 = *(_DWORD *)state;
+      v85 = *((_DWORD *)state + 1);
+      v86 = *((_DWORD *)state + 6);
       if ( !v85 )
         goto LABEL_167;
       if ( v86 == -1 )
@@ -30552,8 +29311,8 @@ LABEL_167:
           v87 = -1;
       }
       v84[1] = v87;
-      v89 = *((_DWORD *)v83 + 2);
-      v90 = *((_DWORD *)v83 + 5);
+      v89 = *((_DWORD *)state + 2);
+      v90 = *((_DWORD *)state + 5);
       if ( !v89 )
         goto LABEL_175;
       if ( v90 == -1 )
@@ -30570,8 +29329,8 @@ LABEL_175:
           v91 = -1;
       }
       v84[2] = v91;
-      v93 = *((_DWORD *)v83 + 3);
-      v94 = *((_DWORD *)v83 + 4);
+      v93 = *((_DWORD *)state + 3);
+      v94 = *((_DWORD *)state + 4);
       if ( !v93 )
         goto LABEL_183;
       if ( v94 == -1 )
@@ -30588,12 +29347,12 @@ LABEL_183:
           v95 = -1;
       }
       v84[3] = v95;
-      v84[4] = *((_DWORD *)v83 + 4);
-      v84[5] = *((_DWORD *)v83 + 5);
-      v84[6] = *((_DWORD *)v83 + 6);
-      v84[7] = *((_DWORD *)v83 + 7);
+      v84[4] = *((_DWORD *)state + 4);
+      v84[5] = *((_DWORD *)state + 5);
+      v84[6] = *((_DWORD *)state + 6);
+      v84[7] = *((_DWORD *)state + 7);
       v97 = v84 + 8;
-      v98 = v83 - (char *)v84;
+      v98 = state - (char *)v84;
       v99 = 20;
       do
       {
@@ -30608,55 +29367,55 @@ LABEL_183:
       while ( v99 );
       result = 1;
       break;
-    case 25:
-      v102 = *(_DWORD **)(a1 + 32);
+    case UnitType_TankerConvoy:
+      v102 = unit->state;
       *(_DWORD *)(a2 + 748) = *v102;
       *(_DWORD *)(a2 + 752) = v102[1];
       *(_DWORD *)(a2 + 756) = v102[2];
       return 1;
-    case 46:
-    case 47:
-    case 48:
-    case 49:
-    case 50:
-    case 51:
-    case 58:
-    case 59:
-    case 60:
-    case 61:
-    case 62:
-    case 63:
-    case 64:
-    case 65:
-    case 66:
-      v103 = *(_DWORD *)(a1 + 32);
-      if ( v82 == 46 || v82 == 47 )
+    case UnitType_Surv_Drillrig:
+    case UnitType_Mute_Drillrig:
+    case UnitType_Surv_PowerStation:
+    case UnitType_Mute_PowerStation:
+    case UnitType_Surv_DetentionCenter:
+    case UnitType_Mute_HoldingPens:
+    case UnitType_Surv_Outpost:
+    case UnitType_Mute_Clanhall:
+    case UnitType_Surv_MachineShop:
+    case UnitType_Mute_Blacksmith:
+    case UnitType_Mute_BeastEnclosure:
+    case UnitType_Surv_RepairBay:
+    case UnitType_Mute_Menagerie:
+    case UnitType_Surv_ResearchLab:
+    case UnitType_Surv_AlchemyHall:
+      v103 = unit->state;
+      if ( type == UnitType_Surv_Drillrig || type == UnitType_Mute_Drillrig )
       {
-        v104 = g_oil_patch_list_head;
+        v104 = g_oil_patch_head;
         v105 = 0;
-        if ( g_oil_patch_list_head == (KKND::OilPatch *)&g_oil_patch_list_head )
+        if ( g_oil_patch_head == (KKND::OilPatch *)&g_oil_patch_head )
         {
 LABEL_197:
           v105 = -1;
         }
         else
         {
-          while ( v104 != *(KKND::OilPatch **)v103 )
+          while ( v104 != (KKND::OilPatch *)*v103 )
           {
             v104 = v104->next;
             ++v105;
-            if ( v104 == (KKND::OilPatch *)&g_oil_patch_list_head )
+            if ( v104 == (KKND::OilPatch *)&g_oil_patch_head )
               goto LABEL_197;
           }
         }
         *(_DWORD *)(a2 + 748) = v105;
       }
-      *(_DWORD *)(a2 + 752) = *(_DWORD *)(v103 + 4);
-      *(_DWORD *)(a2 + 756) = *(_DWORD *)(v103 + 8);
-      *(_WORD *)(a2 + 760) = *(_WORD *)(v103 + 12);
-      *(_WORD *)(a2 + 762) = *(_WORD *)(v103 + 14);
-      v106 = *(_DWORD *)(v103 + 24);
-      v107 = *(_DWORD *)(v103 + 28);
+      *(_DWORD *)(a2 + 752) = v103[1];
+      *(_DWORD *)(a2 + 756) = v103[2];
+      *(_WORD *)(a2 + 760) = *((_WORD *)v103 + 6);
+      *(_WORD *)(a2 + 762) = *((_WORD *)v103 + 7);
+      v106 = v103[6];
+      v107 = v103[7];
       if ( !v106 )
         goto LABEL_206;
       if ( v107 == -1 )
@@ -30673,14 +29432,14 @@ LABEL_206:
           v108 = -1;
       }
       *(_DWORD *)(a2 + 764) = v108;
-      *(_DWORD *)(a2 + 768) = *(_DWORD *)(v103 + 28);
-      *(_DWORD *)(a2 + 772) = *(_DWORD *)(v103 + 36);
-      v110 = *(_DWORD *)(a1 + 16);
-      if ( v110 != 65 && v110 != 66 || !*(_DWORD *)(v103 + 8) )
+      *(_DWORD *)(a2 + 768) = v103[7];
+      *(_DWORD *)(a2 + 772) = v103[9];
+      v110 = unit->type;
+      if ( v110 != UnitType_Surv_ResearchLab && v110 != UnitType_Surv_AlchemyHall || !v103[2] )
         return 1;
       v111 = g_script_handlers[0];
       v112 = 0;
-      v113 = *(_DWORD *)(*(_DWORD *)v103 + 60);
+      v113 = *(_DWORD *)(*v103 + 60);
       if ( g_script_handlers[0] != (void *)-1 )
       {
         v114 = g_script_handlers;
@@ -30708,14 +29467,14 @@ LABEL_206:
       else
         v117 = -1;
       *(_DWORD *)(a2 + 792) = v117;
-      result = sub_41DA20(*(_DWORD **)(v113 + 24), (_DWORD *)(a2 + 796));
+      result = sub_41DA20(*(KKND::Entity **)(v113 + 24), (KKND::MobdId *)(a2 + 796));
       if ( result )
       {
         v118 = *(_DWORD **)(v113 + 28);
         if ( v118[6] != 1 )
         {
-          off_467260 = aTaskIsWrongTyp;
-          sprintf(byte_479EF8, "unit %d %s", *(_DWORD *)(a1 + 16), aBadUpgradeTask);
+          off_467260 = "task is wrong type";
+          sprintf(byte_479EF8, "unit %d %s", unit->type, "bad upgrade task");
           goto LABEL_224;
         }
         *(_DWORD *)(a2 + 836) = v118[3];
@@ -30775,29 +29534,29 @@ LABEL_206:
 // 467260: using guessed type char *off_467260;
 
 //----- (0041DA20) --------------------------------------------------------
-int __fastcall sub_41DA20(_DWORD *a1, _DWORD *a2)
+int __fastcall sub_41DA20(KKND::Entity *a1, KKND::MobdId *a2)
 {
-  int v2; // eax
-  int v3; // eax
+  KKND::MobdAnimation *anim; // eax
+  KKND::MobdAnimFrame *anim_current_frame; // eax
 
-  *a2 = a1[3];
-  a2[1] = a1[4];
-  a2[2] = a1[5];
-  a2[3] = a1[6];
-  a2[4] = a1[7];
-  a2[5] = a1[8];
-  a2[6] = a1[9];
-  v2 = a1[19];
-  if ( v2 )
-    a2[7] = v2 - (unsigned int)g_current_lvl_mobd[*a2].layers[0];
+  *a2 = a1->mobd_id;
+  a2[1] = (KKND::MobdId)a1->x;
+  a2[2] = (KKND::MobdId)a1->y;
+  a2[3] = (KKND::MobdId)a1->z;
+  a2[4] = (KKND::MobdId)a1->x_speed;
+  a2[5] = (KKND::MobdId)a1->y_speed;
+  a2[6] = (KKND::MobdId)a1->z_speed;
+  anim = a1->anim;
+  if ( anim )
+    *((_DWORD *)a2 + 7) = (char *)anim - (char *)g_mobd[*a2].layers[0];
   else
-    a2[7] = -1;
-  v3 = a1[21];
-  if ( v3 )
-    a2[8] = v3 - (unsigned int)g_current_lvl_mobd[*a2].layers[0];
+    *((_DWORD *)a2 + 7) = -1;
+  anim_current_frame = a1->anim_current_frame;
+  if ( anim_current_frame )
+    *((_DWORD *)a2 + 8) = (char *)anim_current_frame - (char *)g_mobd[*a2].layers[0];
   else
-    a2[8] = -1;
-  a2[9] = a1[24];
+    *((_DWORD *)a2 + 8) = -1;
+  a2[9] = (KKND::MobdId)a1->anim_speed;
   return 1;
 }
 
@@ -31312,8 +30071,8 @@ LABEL_125:
           *(_DWORD *)(result + 8) = data[1].task_channel;
           unit_rendering_default(unit);
 LABEL_131:
-          unit->entity->is_on_collision_grid = 1;
-          BOXD_40DE80(unit, unit->entity->x, unit->entity->y, UnitPosition_Slot0);
+          unit->entity->is_collidable = 1;
+          BOXD_place_unit_world_coords(unit, unit->entity->x, unit->entity->y, UnitPosition_Slot0);
           goto LABEL_207;
         case UnitType_Mute_Wasp:
         case UnitType_Surv_Bomber:
@@ -31344,9 +30103,9 @@ LABEL_131:
           unit->state = v55;
           if ( v56 != UnitType_Surv_Drillrig && v56 != UnitType_Mute_Drillrig )
             goto LABEL_143;
-          v57 = g_oil_patch_list_head;
+          v57 = g_oil_patch_head;
           v58 = 0;
-          if ( g_oil_patch_list_head == (KKND::OilPatch *)&g_oil_patch_list_head )
+          if ( g_oil_patch_head == (KKND::OilPatch *)&g_oil_patch_head )
             goto LABEL_139;
           break;
         case UnitType_Surv_GuardTower:
@@ -31378,15 +30137,15 @@ LABEL_131:
 LABEL_206:
           unit->state = nullptr;
           unit_rendering_default(unit);
-          unit->entity->is_on_collision_grid = 1;
-          BOXD_40DE80(unit, unit->entity->x, unit->entity->y, UnitPosition_Slot0);
+          unit->entity->is_collidable = 1;
+          BOXD_place_unit_world_coords(unit, unit->entity->x, unit->entity->y, UnitPosition_Slot0);
           goto LABEL_207;
       }
       while ( v58 != data->field_2EC )
       {
         v57 = v57->next;
         ++v58;
-        if ( v57 == (KKND::OilPatch *)&g_oil_patch_list_head )
+        if ( v57 == (KKND::OilPatch *)&g_oil_patch_head )
         {
 LABEL_139:
           v57 = nullptr;
@@ -31572,13 +30331,13 @@ KKND::Entity *__fastcall GAME_load_entity(const KKND::EntitySaveStruct *data)
     _54_inside_mobd_ptr4 = data->_54_inside_mobd_ptr4;
     if ( _54_inside_mobd_ptr4 != -1 )
     {
-      v12 = (KKND::MobdAnimFrame *)((char *)g_current_lvl_mobd[data->mobd_id].layers[0]->frames + _54_inside_mobd_ptr4);
+      v12 = (KKND::MobdAnimFrame *)((char *)g_mobd[data->mobd_id].layers[0]->frames + _54_inside_mobd_ptr4);
       v3->anim_current_frame = v12;
       v3->shape = v12->shape;
     }
     goto LABEL_9;
   }
-  entity_anim_load(v2, mobd_offset);
+  entity_anim_init(v2, mobd_offset);
   v5 = data->_54_inside_mobd_ptr4;
   if ( v5 == -1 )
   {
@@ -31586,7 +30345,7 @@ LABEL_9:
     v3->anim_speed = data->anim_speed;
     return v3;
   }
-  v6 = (KKND::MobdAnimFrame *)((char *)g_current_lvl_mobd[data->mobd_id].layers[0]->frames + v5);
+  v6 = (KKND::MobdAnimFrame *)((char *)g_mobd[data->mobd_id].layers[0]->frames + v5);
   frames = v3->anim->frames;
   v3->anim_current_frame = v6;
   v3->anim_cursor = frames;
@@ -31698,7 +30457,7 @@ _DWORD *__thiscall sub_41E9B0(size_t *this)
   }
   else
   {
-    off_467260 = aMemory;
+    off_467260 = "memory";
   }
   return result;
 }
@@ -31749,10 +30508,10 @@ LABEL_41:
   }
   while ( 1 )
   {
-    v4 = g_prod_free_list;
+    v4 = g_prod_free_head;
     v25 = data;
-    if ( g_prod_free_list )
-      g_prod_free_list = g_prod_free_list->next;
+    if ( g_prod_free_head )
+      g_prod_free_head = g_prod_free_head->next;
     else
       v4 = nullptr;
     if ( !v4 )
@@ -31843,10 +30602,10 @@ LABEL_11:
       do
       {
         if ( p_production_list_head->next == p_production_list_head )
-          TASK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_production_buttons[v4->type]->task);
-        v18 = g_prod_options_free_list;
-        if ( g_prod_options_free_list )
-          g_prod_options_free_list = g_prod_options_free_list->next;
+          TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_production_buttons[v4->type]->task);
+        v18 = g_prod_options_free_head;
+        if ( g_prod_options_free_head )
+          g_prod_options_free_head = g_prod_options_free_head->next;
         else
           v18 = nullptr;
         v18->key = v4->key;
@@ -31938,18 +30697,18 @@ int __fastcall sub_41ED90(_DWORD *a1, _DWORD *a2)
 }
 
 //----- (0041EE20) --------------------------------------------------------
-KKND::Ai_stru160_Node *__fastcall sub_41EE20(
+KKND::AiSquadNode *__fastcall sub_41EE20(
         KKND::AiController *ai,
         const KKND::AiPlayersSaveStruct *data,
-        KKND::Ai_stru160_Node *node)
+        KKND::AiSquadNode *node)
 {
   KKND::Unit *v3; // eax
   int ai_players_save_struct_4; // edi
   KKND::Unit *v5; // esi
   int ai_players_save_struct_8; // edi
   void *v7; // eax
-  KKND::Ai_stru160_Node *v8; // edi
-  KKND::Ai_stru160_Node *result; // eax
+  KKND::AiSquadNode *v8; // edi
+  KKND::AiSquadNode *result; // eax
   KKND::AiEnemyNode **p_enemy_tail; // edi
   KKND::AiEnemyNode *enemy_tail; // ecx
   int ai_players_save_struct_14; // ecx
@@ -31988,11 +30747,11 @@ LABEL_10:
   }
   if ( v3 && (v7 = v3->ai_node_per_side[ai->player_num]) != nullptr )
   {
-    v8 = *((KKND::Ai_stru160_Node **)v7 + 2);
+    v8 = *((KKND::AiSquadNode **)v7 + 2);
     result = node;
     if ( v8 )
     {
-      node->_ai_stru160_node_8 = v8;
+      node->merge_target_squad = v8;
       goto LABEL_19;
     }
   }
@@ -32001,12 +30760,12 @@ LABEL_10:
     if ( ai_players_save_struct_8 == -2 )
     {
       result = node;
-      node->_ai_stru160_node_8 = ai->_ai_controller_24C;
+      node->merge_target_squad = ai->_ai_controller_24C;
       goto LABEL_19;
     }
     result = node;
   }
-  result->_ai_stru160_node_8 = nullptr;
+  result->merge_target_squad = nullptr;
 LABEL_19:
   p_enemy_tail = &ai->enemy_tail;
   result->_ai_stru160_node_24 = nullptr;
@@ -32034,8 +30793,8 @@ LABEL_24:
   ai_players_save_struct_24 = data->_ai_players_save_struct_24;
   result->_ai_stru160_node_1C = 0;
   result->_ai_stru160_node_40 = ai_players_save_struct_24;
-  result->_ai_stru160_node_C = (KKND::AiAttackerNode *)&result->_ai_stru160_node_C;
-  result->_ai_stru160_node_10 = &result->_ai_stru160_node_C;
+  result->attacker_list_head = (KKND::AiAttackerNode *)&result->attacker_list_head;
+  result->attacker_list_tail = (KKND::AiAttackerNode *)&result->attacker_list_head;
   return result;
 }
 
@@ -32043,97 +30802,97 @@ LABEL_24:
 _DWORD *__thiscall sub_41EF20(size_t *this)
 {
   KKND::Task **v1; // ebp
-  _DWORD *ctx; // ebx
-  _DWORD *i; // eax
-  _DWORD *j; // edx
-  int v5; // eax
-  _DWORD *v6; // esi
-  _DWORD *v7; // eax
-  _DWORD *k; // eax
-  _DWORD *m; // eax
-  _DWORD *n; // eax
-  _DWORD *ii; // eax
-  _DWORD *jj; // eax
-  _DWORD *kk; // eax
-  _DWORD *mm; // edx
-  int v15; // eax
+  KKND::AiController *ai; // ebx
+  KKND::AiController *i; // eax
+  KKND::AiController *j; // edx
+  KKND::AiController_struC *ai_controller_C; // eax
+  KKND::AiAttackerNode **p_ai_controller_strucC_C; // esi
+  KKND::AiAttackerNode **p_next; // eax
+  KKND::AiController *k; // eax
+  KKND::AiController *m; // eax
+  KKND::AiController *n; // eax
+  KKND::AiController *ii; // eax
+  KKND::AiController *jj; // eax
+  KKND::AiController *kk; // eax
+  KKND::AiController *mm; // edx
+  int ai_controller_24; // eax
   _DWORD *v16; // esi
   _DWORD *v17; // eax
-  _DWORD *nn; // eax
-  _DWORD *i1; // eax
-  _DWORD *i2; // esi
-  _DWORD *i3; // eax
-  _DWORD *i4; // esi
-  _DWORD *i5; // eax
-  _DWORD *i6; // esi
-  _DWORD *i7; // eax
-  int v26; // eax
-  _DWORD *v27; // edx
-  _DWORD *v28; // eax
-  _DWORD *i8; // eax
-  _DWORD *i9; // eax
-  _DWORD *i10; // eax
+  KKND::Unit *nn; // eax
+  KKND::AiController *i1; // eax
+  KKND::AiController *i2; // esi
+  KKND::AiController_struC *i3; // eax
+  KKND::AiController *i4; // esi
+  KKND::AiController_struC *i5; // eax
+  KKND::AiController *i6; // esi
+  KKND::AiController_struC *i7; // eax
+  KKND::AiSquadNode *ai_controller_24C; // eax
+  KKND::AiAttackerNode **p_attacker_list_head; // edx
+  KKND::AiSquadNode *attacker_list_head; // eax
+  KKND::AiController *i8; // eax
+  KKND::AiController *i9; // eax
+  KKND::AiController *i10; // eax
   _DWORD *result; // eax
   int v33; // ecx
   int *v34; // ebx
   KKND::Task *v35; // eax
-  _DWORD *v36; // esi
+  KKND::AiController *ai_; // esi
   int *v37; // ebp
   KKND::TaskFn v38; // eax
   int v39; // edi
   KKND::TaskFn entry_point; // edx
   void **v41; // ecx
   int v42; // eax
-  _DWORD *i11; // eax
-  _DWORD *v44; // edi
+  KKND::AiController *i11; // eax
+  KKND::AiController *next; // edi
   int *v45; // eax
-  _DWORD *v46; // edx
+  KKND::AiController_struC *v46; // edx
   _DWORD *v47; // esi
-  _DWORD *v48; // ecx
-  _DWORD *v49; // eax
-  _DWORD *i12; // eax
-  _DWORD *i13; // eax
-  _DWORD *i14; // eax
-  _DWORD *i15; // eax
-  _DWORD *i16; // eax
-  _DWORD *i17; // eax
-  _DWORD *v56; // edi
+  KKND::AiAttackerNode **v48; // ecx
+  KKND::AiAttackerNode **v49; // eax
+  KKND::AiController *i12; // eax
+  KKND::AiController *i13; // eax
+  KKND::AiController *i14; // eax
+  KKND::AiController *i15; // eax
+  KKND::AiController *i16; // eax
+  KKND::AiController *i17; // eax
+  KKND::AiDrillrigNode *drillrig_head; // edi
   int v57; // eax
   int *v58; // ecx
-  int v59; // eax
-  int v60; // eax
-  int v61; // eax
+  KKND::AiPowerPlantNode *ai_drillrig_node_28; // eax
+  KKND::Unit *unit; // eax
+  int ai_drillrig_node_2C; // eax
   _DWORD *v62; // eax
-  _DWORD *v63; // edx
+  KKND::AiSquadNode *ai_drillrig_node_24; // edx
   _DWORD *v64; // esi
-  _DWORD *v65; // ecx
-  _DWORD *v66; // eax
-  _DWORD *i19; // eax
-  _DWORD *i20; // eax
-  _DWORD *i21; // edi
+  KKND::AiAttackerNode **v65; // ecx
+  KKND::AiAttackerNode **v66; // eax
+  KKND::AiTankerNode *i19; // eax
+  KKND::AiTankerNode *i20; // eax
+  KKND::AiSquadNode *i21; // edi
   int *v70; // esi
-  _DWORD *v71; // eax
-  _DWORD *i22; // edi
+  KKND::AiAttackerNode *v71; // eax
+  int *i22; // edi
   int *v73; // esi
-  _DWORD *v74; // eax
-  _DWORD *v75; // edx
-  _DWORD *v76; // ecx
-  _DWORD *v77; // eax
-  _DWORD *v78; // ecx
-  _DWORD *v79; // edi
+  int *v74; // eax
+  KKND::AiSquadNode *v75; // edx
+  KKND::AiAttackerNode **v76; // ecx
+  KKND::AiAttackerNode **v77; // eax
+  KKND::AiController *v78; // ecx
+  KKND::AiSquadNode *ai_controller_1B4_head; // edi
   int *v80; // esi
-  _DWORD *v81; // eax
-  _DWORD *i23; // eax
-  _DWORD *i24; // ecx
-  _DWORD *i25; // ecx
-  int v85; // edx
-  int v86; // edx
-  int v87; // ecx
-  int v88; // ecx
-  _DWORD *v89; // [esp+10h] [ebp-30h]
+  KKND::AiAttackerNode *v81; // eax
+  KKND::AiBuildOrderNode *i23; // eax
+  KKND::AiMobileDerrickNode *i24; // ecx
+  KKND::AiMobileDerrickNode *i25; // ecx
+  KKND::Unit *v85; // edx
+  int unit_id; // edx
+  KKND::Task *ai_controller_358_unit_task; // ecx
+  _DWORD *ctx; // ecx
+  KKND::AiController *v89; // [esp+10h] [ebp-30h]
   int v90; // [esp+14h] [ebp-2Ch]
   _DWORD *v91; // [esp+18h] [ebp-28h]
-  _DWORD *i18; // [esp+1Ch] [ebp-24h]
+  KKND::AiDrillrigNode **i18; // [esp+1Ch] [ebp-24h]
   _DWORD *v93; // [esp+20h] [ebp-20h]
   _DWORD v94[7]; // [esp+24h] [ebp-1Ch]
 
@@ -32143,49 +30902,65 @@ _DWORD *__thiscall sub_41EF20(size_t *this)
   {
     if ( *v1 )
     {
-      ctx = (*v1)->ctx;
+      ai = (KKND::AiController *)(*v1)->ctx;
       *this += 284;
-      for ( i = (_DWORD *)ctx[66]; i != ctx + 66; i = (_DWORD *)*i )
+      for ( i = (KKND::AiController *)ai->enemy_tail; i != (KKND::AiController *)&ai->enemy_tail; i = i->next )
         *this += 4;
-      for ( j = (_DWORD *)*ctx; j != ctx; j = (_DWORD *)*j )
+      for ( j = ai->next; j != ai; j = j->next )
       {
         *this += 44;
-        v5 = j[3];
-        if ( v5 )
+        ai_controller_C = j->_ai_controller_C;
+        if ( ai_controller_C )
         {
-          v6 = (_DWORD *)(v5 + 12);
-          v7 = *(_DWORD **)(v5 + 12);
-          if ( v7 != v6 )
+          p_ai_controller_strucC_C = &ai_controller_C->_ai_controller_strucC_C;
+          p_next = &ai_controller_C->_ai_controller_strucC_C->next;
+          if ( p_next != p_ai_controller_strucC_C )
           {
             do
             {
               *this += 4;
-              v7 = (_DWORD *)*v7;
+              p_next = (KKND::AiAttackerNode **)*p_next;
             }
-            while ( v7 != (_DWORD *)(j[3] + 12) );
+            while ( p_next != &j->_ai_controller_C->_ai_controller_strucC_C );
           }
         }
       }
-      for ( k = (_DWORD *)ctx[6]; k != ctx + 6; k = (_DWORD *)*k )
+      for ( k = (KKND::AiController *)ai->_ai_controller_18_head;
+            k != (KKND::AiController *)&ai->_ai_controller_18_head;
+            k = k->next )
+      {
         *this += 4;
-      for ( m = (_DWORD *)ctx[12]; m != ctx + 12; m = (_DWORD *)*m )
+      }
+      for ( m = (KKND::AiController *)ai->_ai_controller_30_head;
+            m != (KKND::AiController *)&ai->_ai_controller_30_head;
+            m = m->next )
+      {
         *this += 4;
-      for ( n = (_DWORD *)ctx[18]; n != ctx + 18; n = (_DWORD *)*n )
+      }
+      for ( n = (KKND::AiController *)ai->_ai_controller_58_head;
+            n != (KKND::AiController *)&ai->_ai_controller_58_head;
+            n = n->next )
+      {
         *this += 4;
-      for ( ii = (_DWORD *)ctx[24]; ii != ctx + 24; ii = (_DWORD *)*ii )
+      }
+      for ( ii = (KKND::AiController *)ai->_ai_controller_60_head;
+            ii != (KKND::AiController *)&ai->_ai_controller_60_head;
+            ii = ii->next )
+      {
         *this += 4;
-      for ( jj = (_DWORD *)ctx[30]; jj != ctx + 30; jj = (_DWORD *)*jj )
+      }
+      for ( jj = (KKND::AiController *)ai->build_head; jj != (KKND::AiController *)&ai->build_head; jj = jj->next )
         *this += 20;
-      for ( kk = (_DWORD *)ctx[61]; kk != ctx + 61; kk = (_DWORD *)*kk )
+      for ( kk = (KKND::AiController *)ai->powerplant_head; kk != (KKND::AiController *)&ai->powerplant_head; kk = kk->next )
         *this += 4;
-      for ( mm = (_DWORD *)ctx[39]; mm != ctx + 39; mm = (_DWORD *)*mm )
+      for ( mm = (KKND::AiController *)ai->drillrig_head; mm != (KKND::AiController *)&ai->drillrig_head; mm = mm->next )
       {
         *this += 60;
-        v15 = mm[9];
-        if ( v15 )
+        ai_controller_24 = mm->_ai_controller_24;
+        if ( ai_controller_24 )
         {
-          v16 = (_DWORD *)(v15 + 12);
-          v17 = *(_DWORD **)(v15 + 12);
+          v16 = (_DWORD *)(ai_controller_24 + 12);
+          v17 = *(_DWORD **)(ai_controller_24 + 12);
           if ( v17 != v16 )
           {
             do
@@ -32193,53 +30968,83 @@ _DWORD *__thiscall sub_41EF20(size_t *this)
               *this += 4;
               v17 = (_DWORD *)*v17;
             }
-            while ( v17 != (_DWORD *)(mm[9] + 12) );
+            while ( v17 != (_DWORD *)(mm->_ai_controller_24 + 12) );
           }
         }
-        for ( nn = (_DWORD *)mm[2]; nn != mm + 2; nn = (_DWORD *)*nn )
+        for ( nn = mm->_ai_controller_8; nn != (KKND::Unit *)&mm->_ai_controller_8; nn = nn->next )
           *this += 4;
       }
-      for ( i1 = (_DWORD *)ctx[55]; i1 != ctx + 55; i1 = (_DWORD *)*i1 )
+      for ( i1 = (KKND::AiController *)ai->tanker_head; i1 != (KKND::AiController *)&ai->tanker_head; i1 = i1->next )
         *this += 4;
-      for ( i2 = (_DWORD *)ctx[71]; i2 != ctx + 71; i2 = (_DWORD *)*i2 )
+      for ( i2 = (KKND::AiController *)ai->_ai_controller_11C_head;
+            i2 != (KKND::AiController *)&ai->_ai_controller_11C_head;
+            i2 = i2->next )
       {
         *this += 40;
-        for ( i3 = (_DWORD *)i2[3]; i3 != i2 + 3; i3 = (_DWORD *)*i3 )
+        for ( i3 = i2->_ai_controller_C;
+              i3 != (KKND::AiController_struC *)&i2->_ai_controller_C;
+              i3 = (KKND::AiController_struC *)i3->_ai_controller_strucC_0 )
+        {
           *this += 4;
+        }
       }
-      for ( i4 = (_DWORD *)ctx[90]; i4 != ctx + 90; i4 = (_DWORD *)*i4 )
+      for ( i4 = (KKND::AiController *)ai->_ai_controller_168_head;
+            i4 != (KKND::AiController *)&ai->_ai_controller_168_head;
+            i4 = i4->next )
       {
         *this += 40;
-        for ( i5 = (_DWORD *)i4[3]; i5 != i4 + 3; i5 = (_DWORD *)*i5 )
+        for ( i5 = i4->_ai_controller_C;
+              i5 != (KKND::AiController_struC *)&i4->_ai_controller_C;
+              i5 = (KKND::AiController_struC *)i5->_ai_controller_strucC_0 )
+        {
           *this += 4;
+        }
       }
-      for ( i6 = (_DWORD *)ctx[109]; i6 != ctx + 109; i6 = (_DWORD *)*i6 )
+      for ( i6 = (KKND::AiController *)ai->_ai_controller_1B4_head;
+            i6 != (KKND::AiController *)&ai->_ai_controller_1B4_head;
+            i6 = i6->next )
       {
         *this += 40;
-        for ( i7 = (_DWORD *)i6[3]; i7 != i6 + 3; i7 = (_DWORD *)*i7 )
+        for ( i7 = i6->_ai_controller_C;
+              i7 != (KKND::AiController_struC *)&i6->_ai_controller_C;
+              i7 = (KKND::AiController_struC *)i7->_ai_controller_strucC_0 )
+        {
           *this += 4;
+        }
       }
-      v26 = ctx[147];
-      if ( v26 )
+      ai_controller_24C = ai->_ai_controller_24C;
+      if ( ai_controller_24C )
       {
-        v27 = (_DWORD *)(v26 + 12);
-        v28 = *(_DWORD **)(v26 + 12);
-        if ( v28 != v27 )
+        p_attacker_list_head = &ai_controller_24C->attacker_list_head;
+        attacker_list_head = (KKND::AiSquadNode *)ai_controller_24C->attacker_list_head;
+        if ( attacker_list_head != (KKND::AiSquadNode *)p_attacker_list_head )
         {
           do
           {
             *this += 4;
-            v28 = (_DWORD *)*v28;
+            attacker_list_head = attacker_list_head->next;
           }
-          while ( v28 != (_DWORD *)(ctx[147] + 12) );
+          while ( attacker_list_head != (KKND::AiSquadNode *)&ai->_ai_controller_24C->attacker_list_head );
         }
       }
-      for ( i8 = (_DWORD *)ctx[152]; i8 != ctx + 152; i8 = (_DWORD *)*i8 )
+      for ( i8 = (KKND::AiController *)ai->_ai_controller_26C_head;
+            i8 != (KKND::AiController *)&ai->_ai_controller_26C_head;
+            i8 = i8->next )
+      {
         *this += 4;
-      for ( i9 = (_DWORD *)ctx[187]; i9 != ctx + 187; i9 = (_DWORD *)*i9 )
+      }
+      for ( i9 = (KKND::AiController *)ai->_ai_controller_2EC_head;
+            i9 != (KKND::AiController *)&ai->_ai_controller_2EC_head;
+            i9 = i9->next )
+      {
         *this += 28;
-      for ( i10 = (_DWORD *)ctx[198]; i10 != ctx + 198; i10 = (_DWORD *)*i10 )
+      }
+      for ( i10 = (KKND::AiController *)ai->_ai_controller_318_head;
+            i10 != (KKND::AiController *)&ai->_ai_controller_318_head;
+            i10 = i10->next )
+      {
         *this += 28;
+      }
     }
     ++v1;
   }
@@ -32248,7 +31053,7 @@ _DWORD *__thiscall sub_41EF20(size_t *this)
   v93 = result;
   if ( !result )
   {
-    off_467260 = aMemory;
+    off_467260 = "memory";
     return result;
   }
   v33 = 0;
@@ -32264,14 +31069,14 @@ LABEL_140:
     if ( v33 >= 7 )
       return v93;
   }
-  v36 = v35->ctx;
+  ai_ = (KKND::AiController *)v35->ctx;
   v37 = v34;
   v94[v33] = v34;
   memset(v34, 0, 0x11Cu);
   v38 = (KKND::TaskFn)g_script_handlers[0];
   v34 += 71;
   v39 = 0;
-  v89 = v36;
+  v89 = ai_;
   if ( g_script_handlers[0] != (void *)-1 )
   {
     entry_point = g_ai_players_tasks[v33]->entry_point;
@@ -32293,104 +31098,114 @@ LABEL_140:
   *v37 = v42;
   if ( v42 )
   {
-    for ( i11 = (_DWORD *)v36[66]; i11 != v36 + 66; i11 = (_DWORD *)*i11 )
+    for ( i11 = (KKND::AiController *)ai_->enemy_tail; i11 != (KKND::AiController *)&ai_->enemy_tail; i11 = i11->next )
     {
       ++v34;
       ++v37[10];
-      *(v34 - 1) = *(_DWORD *)(i11[2] + 304);
+      *(v34 - 1) = i11->_ai_controller_8->unit_id;
     }
-    v44 = (_DWORD *)*v36;
-    if ( (_DWORD *)*v36 != v36 )
+    next = ai_->next;
+    if ( ai_->next != ai_ )
     {
       do
       {
         v45 = v34;
         v34 += 11;
         ++v37[1];
-        *(v34 - 11) = *(_DWORD *)(v44[2] + 304);
-        v46 = (_DWORD *)v44[3];
+        *(v34 - 11) = next->_ai_controller_8->unit_id;
+        v46 = next->_ai_controller_C;
         if ( v46 )
         {
           v47 = v45 + 1;
           sub_41ED90(v45 + 1, v46);
-          v48 = (_DWORD *)(v44[3] + 12);
-          v49 = (_DWORD *)*v48;
-          if ( (_DWORD *)*v48 != v48 )
+          v48 = &next->_ai_controller_C->_ai_controller_strucC_C;
+          v49 = (KKND::AiAttackerNode **)*v48;
+          if ( *v48 != (KKND::AiAttackerNode *)v48 )
           {
             do
             {
               ++v34;
               ++*v47;
-              *(v34 - 1) = *(_DWORD *)(v49[3] + 304);
-              v49 = (_DWORD *)*v49;
+              *(v34 - 1) = (int)v49[3][19].next;
+              v49 = (KKND::AiAttackerNode **)*v49;
             }
-            while ( v49 != (_DWORD *)(v44[3] + 12) );
+            while ( v49 != &next->_ai_controller_C->_ai_controller_strucC_C );
           }
         }
         else
         {
           v45[1] = 0;
         }
-        v44 = (_DWORD *)*v44;
+        next = next->next;
       }
-      while ( v44 != v89 );
-      v36 = v89;
+      while ( next != v89 );
+      ai_ = v89;
     }
-    for ( i12 = (_DWORD *)v36[6]; i12 != v36 + 6; i12 = (_DWORD *)*i12 )
+    for ( i12 = (KKND::AiController *)ai_->_ai_controller_18_head;
+          i12 != (KKND::AiController *)&ai_->_ai_controller_18_head;
+          i12 = i12->next )
     {
       ++v34;
       ++v37[2];
-      *(v34 - 1) = *(_DWORD *)(i12[3] + 304);
+      *(v34 - 1) = i12->_ai_controller_C->_ai_controller_strucC_130;
     }
-    for ( i13 = (_DWORD *)v36[12]; i13 != v36 + 12; i13 = (_DWORD *)*i13 )
+    for ( i13 = (KKND::AiController *)ai_->_ai_controller_30_head;
+          i13 != (KKND::AiController *)&ai_->_ai_controller_30_head;
+          i13 = i13->next )
     {
       ++v34;
       ++v37[3];
-      *(v34 - 1) = *(_DWORD *)(i13[3] + 304);
+      *(v34 - 1) = i13->_ai_controller_C->_ai_controller_strucC_130;
     }
-    for ( i14 = (_DWORD *)v36[18]; i14 != v36 + 18; i14 = (_DWORD *)*i14 )
+    for ( i14 = (KKND::AiController *)ai_->_ai_controller_58_head;
+          i14 != (KKND::AiController *)&ai_->_ai_controller_58_head;
+          i14 = i14->next )
     {
       ++v34;
       ++v37[4];
-      *(v34 - 1) = *(_DWORD *)(i14[3] + 304);
+      *(v34 - 1) = i14->_ai_controller_C->_ai_controller_strucC_130;
     }
-    for ( i15 = (_DWORD *)v36[24]; i15 != v36 + 24; i15 = (_DWORD *)*i15 )
+    for ( i15 = (KKND::AiController *)ai_->_ai_controller_60_head;
+          i15 != (KKND::AiController *)&ai_->_ai_controller_60_head;
+          i15 = i15->next )
     {
       ++v34;
       ++v37[5];
-      *(v34 - 1) = *(_DWORD *)(i15[3] + 304);
+      *(v34 - 1) = i15->_ai_controller_C->_ai_controller_strucC_130;
     }
-    for ( i16 = (_DWORD *)v36[30]; i16 != v36 + 30; i16 = (_DWORD *)*i16 )
+    for ( i16 = (KKND::AiController *)ai_->build_head; i16 != (KKND::AiController *)&ai_->build_head; i16 = i16->next )
     {
       v34 += 5;
       ++v37[6];
-      *(v34 - 5) = *(_DWORD *)(i16[2] + 304);
-      *(v34 - 4) = i16[3];
-      *(v34 - 3) = i16[5];
-      *(v34 - 2) = i16[6];
-      *(v34 - 1) = i16[4];
+      *(v34 - 5) = i16->_ai_controller_8->unit_id;
+      *(v34 - 4) = (int)i16->_ai_controller_C;
+      *(v34 - 3) = (int)i16->_ai_controller_10_free;
+      *(v34 - 2) = (int)i16->_ai_controller_18_head;
+      *(v34 - 1) = (int)i16->_ai_controller_10_pool;
     }
-    for ( i17 = (_DWORD *)v36[61]; i17 != v36 + 61; i17 = (_DWORD *)*i17 )
+    for ( i17 = (KKND::AiController *)ai_->powerplant_head;
+          i17 != (KKND::AiController *)&ai_->powerplant_head;
+          i17 = i17->next )
     {
       ++v34;
       ++v37[9];
-      *(v34 - 1) = *(_DWORD *)(i17[2] + 304);
+      *(v34 - 1) = i17->_ai_controller_8->unit_id;
     }
-    v56 = (_DWORD *)v36[39];
-    for ( i18 = v36 + 39; v56 != i18; v56 = (_DWORD *)*v56 )
+    drillrig_head = ai_->drillrig_head;
+    for ( i18 = &ai_->drillrig_head; drillrig_head != (KKND::AiDrillrigNode *)i18; drillrig_head = drillrig_head->next )
     {
       v57 = v37[7] + 1;
       v58 = v34;
       v37[7] = v57;
-      if ( (_DWORD *)v89[186] == v56 )
+      if ( v89->_ai_controller_2E8 == drillrig_head )
         v37[57] = v57;
-      *v34 = *(_DWORD *)(v56[8] + 304);
-      v59 = v56[10];
-      if ( v59 )
+      *v34 = drillrig_head->unit->unit_id;
+      ai_drillrig_node_28 = drillrig_head->_ai_drillrig_node_28;
+      if ( ai_drillrig_node_28 )
       {
-        v60 = *(_DWORD *)(v59 + 8);
-        if ( v60 )
-          v34[11] = *(_DWORD *)(v60 + 304);
+        unit = ai_drillrig_node_28->unit;
+        if ( unit )
+          v34[11] = unit->unit_id;
         else
           v34[11] = -1;
       }
@@ -32398,91 +31213,91 @@ LABEL_140:
       {
         v34[11] = -1;
       }
-      v61 = v56[11];
+      ai_drillrig_node_2C = drillrig_head->_ai_drillrig_node_2C;
       v34[13] = 0;
-      v34[12] = v61;
+      v34[12] = ai_drillrig_node_2C;
       v62 = v34 + 13;
-      v34[14] = v56[13];
-      v63 = (_DWORD *)v56[9];
+      v34[14] = drillrig_head->_ai_drillrig_node_34;
+      ai_drillrig_node_24 = drillrig_head->_ai_drillrig_node_24;
       v34 += 15;
       v91 = v62;
-      if ( v63 )
+      if ( ai_drillrig_node_24 )
       {
         v64 = v58 + 1;
-        sub_41ED90(v58 + 1, v63);
-        v65 = (_DWORD *)(v56[9] + 12);
-        v66 = (_DWORD *)*v65;
-        if ( (_DWORD *)*v65 != v65 )
+        sub_41ED90(v58 + 1, ai_drillrig_node_24);
+        v65 = &drillrig_head->_ai_drillrig_node_24->attacker_list_head;
+        v66 = (KKND::AiAttackerNode **)*v65;
+        if ( *v65 != (KKND::AiAttackerNode *)v65 )
         {
           do
           {
             ++v34;
             ++*v64;
-            *(v34 - 1) = *(_DWORD *)(v66[3] + 304);
-            v66 = (_DWORD *)*v66;
+            *(v34 - 1) = (int)v66[3][19].next;
+            v66 = (KKND::AiAttackerNode **)*v66;
           }
-          while ( v66 != (_DWORD *)(v56[9] + 12) );
+          while ( v66 != &drillrig_head->_ai_drillrig_node_24->attacker_list_head );
         }
       }
       else
       {
         v58[1] = 0;
       }
-      for ( i19 = (_DWORD *)v56[2]; i19 != v56 + 2; i19 = (_DWORD *)*i19 )
+      for ( i19 = drillrig_head->tanker_next; i19 != (KKND::AiTankerNode *)&drillrig_head->tanker_next; i19 = i19->next )
       {
         ++v34;
         ++*v91;
-        *(v34 - 1) = *(_DWORD *)(i19[3] + 304);
+        *(v34 - 1) = i19->unit->unit_id;
       }
     }
-    for ( i20 = (_DWORD *)v89[55]; i20 != v89 + 55; i20 = (_DWORD *)*i20 )
+    for ( i20 = v89->tanker_head; i20 != (KKND::AiTankerNode *)&v89->tanker_head; i20 = i20->next )
     {
       ++v34;
       ++v37[8];
-      *(v34 - 1) = *(_DWORD *)(i20[3] + 304);
+      *(v34 - 1) = i20->unit->unit_id;
     }
-    for ( i21 = (_DWORD *)v89[71]; i21 != v89 + 71; i21 = (_DWORD *)*i21 )
+    for ( i21 = v89->_ai_controller_11C_head; i21 != (KKND::AiSquadNode *)&v89->_ai_controller_11C_head; i21 = i21->next )
     {
       v70 = v34;
       ++v37[11];
       sub_41ED90(v34, i21);
-      v71 = (_DWORD *)i21[3];
-      for ( v34 += 10; v71 != i21 + 3; v71 = (_DWORD *)*v71 )
+      v71 = i21->attacker_list_head;
+      for ( v34 += 10; v71 != (KKND::AiAttackerNode *)&i21->attacker_list_head; v71 = v71->next )
       {
         ++v34;
         ++*v70;
-        *(v34 - 1) = *(_DWORD *)(v71[3] + 304);
+        *(v34 - 1) = v71->unit->unit_id;
       }
     }
-    for ( i22 = (_DWORD *)v89[90]; i22 != v89 + 90; i22 = (_DWORD *)*i22 )
+    for ( i22 = (int *)v89->_ai_controller_168_head; i22 != &v89->_ai_controller_168_head; i22 = (int *)*i22 )
     {
       v73 = v34;
       ++v37[12];
       sub_41ED90(v34, i22);
-      v74 = (_DWORD *)i22[3];
-      for ( v34 += 10; v74 != i22 + 3; v74 = (_DWORD *)*v74 )
+      v74 = (int *)i22[3];
+      for ( v34 += 10; v74 != i22 + 3; v74 = (int *)*v74 )
       {
         ++v34;
         ++*v73;
         *(v34 - 1) = *(_DWORD *)(v74[3] + 304);
       }
     }
-    v75 = (_DWORD *)v89[147];
+    v75 = v89->_ai_controller_24C;
     if ( v75 )
     {
       sub_41ED90(v37 + 14, v75);
-      v76 = (_DWORD *)(v89[147] + 12);
-      v77 = (_DWORD *)*v76;
-      if ( (_DWORD *)*v76 != v76 )
+      v76 = &v89->_ai_controller_24C->attacker_list_head;
+      v77 = (KKND::AiAttackerNode **)*v76;
+      if ( *v76 != (KKND::AiAttackerNode *)v76 )
       {
         do
         {
           ++v34;
           ++v37[14];
-          *(v34 - 1) = *(_DWORD *)(v77[3] + 304);
-          v77 = (_DWORD *)*v77;
+          *(v34 - 1) = (int)v77[3][19].next;
+          v77 = (KKND::AiAttackerNode **)*v77;
         }
-        while ( v77 != (_DWORD *)(v89[147] + 12) );
+        while ( v77 != &v89->_ai_controller_24C->attacker_list_head );
       }
     }
     else
@@ -32490,97 +31305,101 @@ LABEL_140:
       v37[14] = 0;
     }
     v78 = v89;
-    v79 = (_DWORD *)v89[109];
-    if ( v79 != v89 + 109 )
+    ai_controller_1B4_head = v89->_ai_controller_1B4_head;
+    if ( ai_controller_1B4_head != (KKND::AiSquadNode *)&v89->_ai_controller_1B4_head )
     {
       do
       {
         v80 = v34;
         ++v37[13];
-        sub_41ED90(v34, v79);
-        v81 = (_DWORD *)v79[3];
-        for ( v34 += 10; v81 != v79 + 3; v81 = (_DWORD *)*v81 )
+        sub_41ED90(v34, ai_controller_1B4_head);
+        v81 = ai_controller_1B4_head->attacker_list_head;
+        for ( v34 += 10; v81 != (KKND::AiAttackerNode *)&ai_controller_1B4_head->attacker_list_head; v81 = v81->next )
         {
           ++v34;
           ++*v80;
-          *(v34 - 1) = *(_DWORD *)(v81[3] + 304);
+          *(v34 - 1) = v81->unit->unit_id;
         }
-        v79 = (_DWORD *)*v79;
+        ai_controller_1B4_head = ai_controller_1B4_head->next;
       }
-      while ( v79 != v89 + 109 );
+      while ( ai_controller_1B4_head != (KKND::AiSquadNode *)&v89->_ai_controller_1B4_head );
       v78 = v89;
     }
-    v37[24] = v78[148];
-    v37[25] = v78[149];
-    v37[26] = v78[150];
-    v37[27] = v78[151];
+    v37[24] = v78->base_area_min_x;
+    v37[25] = v78->base_area_min_y;
+    v37[26] = v78->base_area_max_x;
+    v37[27] = v78->base_area_max_y;
     v37[28] = 0;
-    for ( i23 = (_DWORD *)v78[152]; i23 != v78 + 152; i23 = (_DWORD *)*i23 )
+    for ( i23 = v78->_ai_controller_26C_head;
+          i23 != (KKND::AiBuildOrderNode *)&v78->_ai_controller_26C_head;
+          i23 = i23->next )
     {
       ++v34;
       ++v37[28];
-      *(v34 - 1) = i23[2];
-      if ( (_DWORD *)v78[157] == i23 )
+      *(v34 - 1) = i23->_ai_stru26C_node_8;
+      if ( v78->_ai_controller_274 == i23 )
         v37[29] = v37[28];
     }
-    v37[30] = v89[158];
-    v37[31] = v89[159];
-    qmemcpy(v37 + 32, v89 + 160, 0x28u);
-    v37[42] = v89[171];
-    v37[43] = v89[172];
-    v37[44] = v89[173];
-    v37[45] = v89[174];
-    v37[46] = v89[175];
-    v37[47] = v89[176];
-    v37[48] = v89[177];
-    qmemcpy(v37 + 49, v89 + 178, 0x20u);
-    for ( i24 = (_DWORD *)v89[187]; i24 != v89 + 187; i24 = (_DWORD *)*i24 )
+    v37[30] = v89->rally_x;
+    v37[31] = v89->rally_y;
+    qmemcpy(v37 + 32, v89->patrol_waypoints, 0x28u);
+    v37[42] = v89->attacker_count;
+    v37[43] = v89->max_attackers;
+    v37[44] = v89->squad_threshold;
+    v37[45] = v89->attack_confidence;
+    v37[46] = v89->base_threat;
+    v37[47] = v89->max_squad_threat;
+    v37[48] = v89->best_patrol_waypoint_idx;
+    qmemcpy(v37 + 49, v89->patrol_threat, 0x20u);
+    for ( i24 = v89->_ai_controller_2EC_head;
+          i24 != (KKND::AiMobileDerrickNode *)&v89->_ai_controller_2EC_head;
+          i24 = i24->next )
     {
       v34 += 7;
       ++v37[58];
-      *(v34 - 6) = i24[3];
-      *(v34 - 5) = i24[4];
-      *(v34 - 4) = i24[5];
-      *(v34 - 3) = i24[6];
-      *(v34 - 2) = i24[7];
-      *(v34 - 1) = i24[8];
+      *(v34 - 6) = i24->unit_type;
+      *(v34 - 5) = i24->_ai_stru310_node_10_unit_x;
+      *(v34 - 4) = i24->_ai_stru310_node_14_unit_y;
+      *(v34 - 3) = i24->_ai_stru310_node_18_unit_grid_anchor_x;
+      *(v34 - 2) = i24->_ai_stru310_node_1C_unit_grid_anchor_y;
+      *(v34 - 1) = i24->_ai_stru310_node_20_unit_ai_strategic_value;
     }
-    for ( i25 = (_DWORD *)v89[198]; i25 != v89 + 198; v34 += 7 )
+    for ( i25 = v89->_ai_controller_318_head; i25 != (KKND::AiMobileDerrickNode *)&v89->_ai_controller_318_head; v34 += 7 )
     {
       ++v37[59];
-      v85 = i25[2];
+      v85 = i25->unit;
       if ( v85 )
-        v86 = *(_DWORD *)(v85 + 304);
+        unit_id = v85->unit_id;
       else
-        v86 = -1;
-      *v34 = v86;
-      v34[1] = i25[3];
-      v34[2] = i25[4];
-      v34[3] = i25[5];
-      v34[4] = i25[6];
-      v34[5] = i25[7];
-      v34[6] = i25[8];
-      i25 = (_DWORD *)*i25;
+        unit_id = -1;
+      *v34 = unit_id;
+      v34[1] = i25->unit_type;
+      v34[2] = i25->_ai_stru310_node_10_unit_x;
+      v34[3] = i25->_ai_stru310_node_14_unit_y;
+      v34[4] = i25->_ai_stru310_node_18_unit_grid_anchor_x;
+      v34[5] = i25->_ai_stru310_node_1C_unit_grid_anchor_y;
+      v34[6] = i25->_ai_stru310_node_20_unit_ai_strategic_value;
+      i25 = i25->next;
     }
-    v37[60] = v89[209];
-    v37[61] = v89[210];
-    v37[62] = v89[211];
-    v37[63] = v89[212];
-    v37[65] = v89[213];
-    v87 = v89[214];
-    if ( v87 )
+    v37[60] = v89->_ai_controller_344;
+    v37[61] = v89->_ai_controller_348_base_cost;
+    v37[62] = v89->_ai_controller_34C_remaining_cost;
+    v37[63] = v89->_ai_controller_350;
+    v37[65] = v89->_ai_controller_354;
+    ai_controller_358_unit_task = v89->_ai_controller_358_unit_task;
+    if ( ai_controller_358_unit_task )
     {
-      v88 = *(_DWORD *)(v87 + 60);
-      if ( v88 )
+      ctx = ai_controller_358_unit_task->ctx;
+      if ( ctx )
       {
-        v37[64] = *(_DWORD *)(v88 + 304);
+        v37[64] = ctx[76];
       }
       else
       {
         v37[64] = -1;
-        *(_DWORD *)(*(_DWORD *)(v89[214] + 56) + 136) = 1;
-        v37[67] = *(_DWORD *)(*(_DWORD *)(v89[214] + 56) + 16);
-        v37[68] = *(_DWORD *)(*(_DWORD *)(v89[214] + 56) + 20);
+        v89->_ai_controller_358_unit_task->entity->is_collidable = 1;
+        v37[67] = v89->_ai_controller_358_unit_task->entity->x;
+        v37[68] = v89->_ai_controller_358_unit_task->entity->y;
       }
     }
     else
@@ -32588,12 +31407,12 @@ LABEL_140:
       v37[64] = -1;
       v37[66] = -1;
     }
-    v37[69] = v89[215];
+    v37[69] = v89->airstrike_interval;
     v33 = v90;
-    v37[70] = v89[216];
+    v37[70] = v89->airstrike_count;
     goto LABEL_140;
   }
-  off_467260 = aUnknownMode;
+  off_467260 = "unknown mode";
   return nullptr;
 }
 // 467260: using guessed type char *off_467260;
@@ -32616,7 +31435,7 @@ BOOL __fastcall GAME_load_ai_players(const KKND::AiPlayersSaveStruct *data)
   KKND::Ai_stru10_Node *ai_controller_10_free; // esi
   KKND::Unit *v15; // eax
   const KKND::AiPlayersSaveStruct *p_ai_players_save_struct_120; // ebp
-  KKND::Ai_stru160_Node *ai_controller_160_free; // eax
+  KKND::AiSquadNode *ai_controller_160_free; // eax
   int v18; // edi
   KKND::AiAttackerNode *ai_controller_58_free; // eax
   int ai_players_save_struct_148; // edx
@@ -32657,7 +31476,7 @@ BOOL __fastcall GAME_load_ai_players(const KKND::AiPlayersSaveStruct *data)
   const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x14C) p_ai_players_save_struct_14C; // ebp
   const KKND::AiPlayersSaveStruct *p_ai_players_save_struct_184; // edi
   KKND::AiDrillrigNode *drillrig_head; // ecx
-  KKND::Ai_stru160_Node *v58; // eax
+  KKND::AiSquadNode *v58; // eax
   KKND::AiAttackerNode *v59; // eax
   int v60; // edx
   KKND::Unit *v61; // ecx
@@ -32671,28 +31490,28 @@ BOOL __fastcall GAME_load_ai_players(const KKND::AiPlayersSaveStruct *data)
   KKND::AiTankerNode *v69; // eax
   int v70; // edx
   KKND::Unit *v71; // ecx
-  KKND::Ai_stru160_Node *v72; // esi
+  KKND::AiSquadNode *v72; // esi
   const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148) v73; // edi
   int v74; // ebp
   KKND::AiAttackerNode *v75; // eax
   int v76; // edx
   KKND::Unit *v77; // ecx
   KKND::Unit *v78; // edx
-  KKND::Ai_stru160_Node *v79; // esi
+  KKND::AiSquadNode *v79; // esi
   const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148) v80; // edi
   int v81; // ebp
   KKND::AiAttackerNode *v82; // eax
   int v83; // edx
   KKND::Unit *v84; // ecx
   KKND::Unit *v85; // edx
-  KKND::Ai_stru160_Node *v86; // eax
-  KKND::Ai_stru160_Node *ai_controller_24C; // eax
+  KKND::AiSquadNode *v86; // eax
+  KKND::AiSquadNode *ai_controller_24C; // eax
   int *p_ai_players_save_struct_154; // esi
   int v89; // ebp
   KKND::AiAttackerNode *v90; // eax
   int v91; // edx
   KKND::Unit *v92; // ecx
-  KKND::Ai_stru160_Node *v93; // esi
+  KKND::AiSquadNode *v93; // esi
   const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148) v94; // edi
   int v95; // ebp
   KKND::AiAttackerNode *v96; // eax
@@ -32701,7 +31520,7 @@ BOOL __fastcall GAME_load_ai_players(const KKND::AiPlayersSaveStruct *data)
   KKND::Unit *v99; // ecx
   int v100; // edx
   const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148) v101; // edi
-  KKND::Ai_stru26C_Node *ai_controller_26C_free; // eax
+  KKND::AiBuildOrderNode *ai_controller_26C_free; // eax
   int v103; // ecx
   int v104; // ecx
   const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148) v105; // esi
@@ -32833,10 +31652,10 @@ LABEL_46:
               {
                 ai_controller_58_free->_ai_attacker_node_8 = ai_controller_10_free->_ai_stru10_node_C;
                 ai_controller_58_free->unit->ai_node_per_side[ai->player_num] = ai_controller_58_free;
-                ai_controller_58_free->next = ai_controller_10_free->_ai_stru10_node_C->_ai_stru160_node_C;
-                ai_controller_58_free->prev = (KKND::AiAttackerNode *)&ai_controller_10_free->_ai_stru10_node_C->_ai_stru160_node_C;
-                ai_controller_10_free->_ai_stru10_node_C->_ai_stru160_node_C->prev = ai_controller_58_free;
-                ai_controller_10_free->_ai_stru10_node_C->_ai_stru160_node_C = ai_controller_58_free;
+                ai_controller_58_free->next = ai_controller_10_free->_ai_stru10_node_C->attacker_list_head;
+                ai_controller_58_free->prev = (KKND::AiAttackerNode *)&ai_controller_10_free->_ai_stru10_node_C->attacker_list_head;
+                ai_controller_10_free->_ai_stru10_node_C->attacker_list_head->prev = ai_controller_58_free;
+                ai_controller_10_free->_ai_stru10_node_C->attacker_list_head = ai_controller_58_free;
               }
               else
               {
@@ -32847,7 +31666,7 @@ LABEL_46:
             while ( ++v18 < p_ai_players_save_struct_120->_ai_players_save_struct_0 );
           }
           ai_controller_10_free->_ai_stru10_node_C->next = ai->_ai_controller_11C_head;
-          ai_controller_10_free->_ai_stru10_node_C->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+          ai_controller_10_free->_ai_stru10_node_C->prev = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
           ai->_ai_controller_11C_head->prev = ai_controller_10_free->_ai_stru10_node_C;
           ai->_ai_controller_11C_head = ai_controller_10_free->_ai_stru10_node_C;
         }
@@ -33241,10 +32060,10 @@ LABEL_166:
               {
                 v59->_ai_attacker_node_8 = drillrig_free->_ai_drillrig_node_24;
                 v59->unit->ai_node_per_side[ai->player_num] = v59;
-                v59->next = drillrig_free->_ai_drillrig_node_24->_ai_stru160_node_C;
-                v59->prev = (KKND::AiAttackerNode *)&drillrig_free->_ai_drillrig_node_24->_ai_stru160_node_C;
-                drillrig_free->_ai_drillrig_node_24->_ai_stru160_node_C->prev = v59;
-                drillrig_free->_ai_drillrig_node_24->_ai_stru160_node_C = v59;
+                v59->next = drillrig_free->_ai_drillrig_node_24->attacker_list_head;
+                v59->prev = (KKND::AiAttackerNode *)&drillrig_free->_ai_drillrig_node_24->attacker_list_head;
+                drillrig_free->_ai_drillrig_node_24->attacker_list_head->prev = v59;
+                drillrig_free->_ai_drillrig_node_24->attacker_list_head = v59;
               }
               else
               {
@@ -33353,7 +32172,7 @@ LABEL_194:
           return 0;
         sub_41EE20(ai, data_148, v72);
         v72->next = ai->_ai_controller_11C_head;
-        v72->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_11C_head;
+        v72->prev = (KKND::AiSquadNode *)&ai->_ai_controller_11C_head;
         data_148 = (const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148))((char *)data_148 + 40);
         v74 = 0;
         ai->_ai_controller_11C_head->prev = v72;
@@ -33392,10 +32211,10 @@ LABEL_210:
               v78 = v75->unit;
               v75->_ai_attacker_node_8 = v72;
               v78->ai_node_per_side[ai->player_num] = v75;
-              v75->next = v72->_ai_stru160_node_C;
-              v75->prev = (KKND::AiAttackerNode *)&v72->_ai_stru160_node_C;
-              v72->_ai_stru160_node_C->prev = v75;
-              v72->_ai_stru160_node_C = v75;
+              v75->next = v72->attacker_list_head;
+              v75->prev = (KKND::AiAttackerNode *)&v72->attacker_list_head;
+              v72->attacker_list_head->prev = v75;
+              v72->attacker_list_head = v75;
             }
             else
             {
@@ -33426,8 +32245,8 @@ LABEL_210:
         if ( !v79 )
           return 0;
         sub_41EE20(ai, data_148, v79);
-        v79->next = (KKND::Ai_stru160_Node *)ai->_ai_controller_168_head;
-        v79->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_168_head;
+        v79->next = (KKND::AiSquadNode *)ai->_ai_controller_168_head;
+        v79->prev = (KKND::AiSquadNode *)&ai->_ai_controller_168_head;
         data_148 = (const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148))((char *)data_148 + 40);
         v81 = 0;
         *(_DWORD *)(ai->_ai_controller_168_head + 4) = v79;
@@ -33466,10 +32285,10 @@ LABEL_231:
               v85 = v82->unit;
               v82->_ai_attacker_node_8 = v79;
               v85->ai_node_per_side[ai->player_num] = v82;
-              v82->next = v79->_ai_stru160_node_C;
-              v82->prev = (KKND::AiAttackerNode *)&v79->_ai_stru160_node_C;
-              v79->_ai_stru160_node_C->prev = v82;
-              v79->_ai_stru160_node_C = v82;
+              v82->next = v79->attacker_list_head;
+              v82->prev = (KKND::AiAttackerNode *)&v79->attacker_list_head;
+              v79->attacker_list_head->prev = v82;
+              v79->attacker_list_head = v82;
             }
             else
             {
@@ -33533,10 +32352,10 @@ LABEL_251:
           {
             v90->_ai_attacker_node_8 = ai->_ai_controller_24C;
             v90->unit->ai_node_per_side[ai->player_num] = v90;
-            v90->next = ai->_ai_controller_24C->_ai_stru160_node_C;
-            v90->prev = (KKND::AiAttackerNode *)&ai->_ai_controller_24C->_ai_stru160_node_C;
-            ai->_ai_controller_24C->_ai_stru160_node_C->prev = v90;
-            ai->_ai_controller_24C->_ai_stru160_node_C = v90;
+            v90->next = ai->_ai_controller_24C->attacker_list_head;
+            v90->prev = (KKND::AiAttackerNode *)&ai->_ai_controller_24C->attacker_list_head;
+            ai->_ai_controller_24C->attacker_list_head->prev = v90;
+            ai->_ai_controller_24C->attacker_list_head = v90;
           }
           else
           {
@@ -33549,10 +32368,10 @@ LABEL_251:
     }
     else
     {
-      ai_controller_24C->_ai_stru160_node_C = (KKND::AiAttackerNode *)&ai_controller_24C->_ai_stru160_node_C;
-      ai->_ai_controller_24C->_ai_stru160_node_10 = &ai->_ai_controller_24C->_ai_stru160_node_C;
+      ai_controller_24C->attacker_list_head = (KKND::AiAttackerNode *)&ai_controller_24C->attacker_list_head;
+      ai->_ai_controller_24C->attacker_list_tail = &ai->_ai_controller_24C->attacker_list_head;
       ai->_ai_controller_24C->_ai_stru160_node_1C = 0;
-      ai->_ai_controller_24C->_ai_stru160_node_8 = nullptr;
+      ai->_ai_controller_24C->merge_target_squad = nullptr;
       ai->_ai_controller_24C->_ai_stru160_node_24 = nullptr;
       ai->_ai_controller_24C->_ai_stru160_node_2C_ai_threat_weight_total = 0;
     }
@@ -33571,7 +32390,7 @@ LABEL_251:
           return 0;
         sub_41EE20(ai, data_148, v93);
         v93->next = ai->_ai_controller_1B4_head;
-        v93->prev = (KKND::Ai_stru160_Node *)&ai->_ai_controller_1B4_head;
+        v93->prev = (KKND::AiSquadNode *)&ai->_ai_controller_1B4_head;
         data_148 = (const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148))((char *)data_148 + 40);
         v95 = 0;
         ai->_ai_controller_1B4_head->prev = v93;
@@ -33610,10 +32429,10 @@ LABEL_272:
               v99 = v96->unit;
               v96->_ai_attacker_node_8 = v93;
               v99->ai_node_per_side[ai->player_num] = v96;
-              v96->next = v93->_ai_stru160_node_C;
-              v96->prev = (KKND::AiAttackerNode *)&v93->_ai_stru160_node_C;
-              v93->_ai_stru160_node_C->prev = v96;
-              v93->_ai_stru160_node_C = v96;
+              v96->next = v93->attacker_list_head;
+              v96->prev = (KKND::AiAttackerNode *)&v93->attacker_list_head;
+              v93->attacker_list_head->prev = v96;
+              v93->attacker_list_head = v96;
             }
             else
             {
@@ -33647,7 +32466,7 @@ LABEL_272:
         v101 = (const KKND::AiPlayersSaveStruct *__shifted(KKND::AiPlayersSaveStruct,0x148))((char *)v101 + 4);
         ai_controller_26C_free->_ai_stru26C_node_8 = v103;
         ai_controller_26C_free->next = ai->_ai_controller_26C_head;
-        ai_controller_26C_free->prev = (KKND::Ai_stru26C_Node *)&ai->_ai_controller_26C_head;
+        ai_controller_26C_free->prev = (KKND::AiBuildOrderNode *)&ai->_ai_controller_26C_head;
         data_148 = v101;
         ai->_ai_controller_26C_head->prev = ai_controller_26C_free;
         ai->_ai_controller_26C_head = ai_controller_26C_free;
@@ -33658,18 +32477,18 @@ LABEL_272:
       }
       while ( v104 < ADJ(v117)->_ai_players_save_struct_18C );
     }
-    ai->_ai_controller_278_x = ADJ(v117)->_ai_players_save_struct_194;
-    ai->_ai_controller_27C_y = ADJ(v117)->_ai_players_save_struct_198;
-    qmemcpy(ai->_ai_controller_280, ADJ(v117)->_ai_players_save_struct_19C, sizeof(ai->_ai_controller_280));
+    ai->rally_x = ADJ(v117)->_ai_players_save_struct_194;
+    ai->rally_y = ADJ(v117)->_ai_players_save_struct_198;
+    qmemcpy(ai->patrol_waypoints, ADJ(v117)->_ai_players_save_struct_19C, sizeof(ai->patrol_waypoints));
     ai->player_race = ADJ(v117)->_ai_players_save_struct_1D0;
-    ai->_ai_controller_2AC = ADJ(v117)->_ai_players_save_struct_1D4;
-    ai->_ai_controller_2B0 = ADJ(v117)->_ai_players_save_struct_1D8;
-    ai->_ai_controller_2B4 = ADJ(v117)->_ai_players_save_struct_1DC;
-    ai->_ai_controller_2B8 = ADJ(v117)[1]._ai_players_save_struct_0;
-    ai->_ai_controller_2BC_ai_importance = ADJ(v117)[1]._ai_players_save_struct_4;
-    ai->_ai_controller_2C0_threat_in_area = ADJ(v117)[1]._ai_players_save_struct_8;
-    ai->_ai_controller_2C4_2C8_idx = ADJ(v117)[1]._ai_players_save_struct_C;
-    qmemcpy(ai->_ai_controller_2C8, &ADJ(v117)[1]._ai_players_save_struct_10, sizeof(ai->_ai_controller_2C8));
+    ai->attacker_count = ADJ(v117)->_ai_players_save_struct_1D4;
+    ai->max_attackers = ADJ(v117)->_ai_players_save_struct_1D8;
+    ai->squad_threshold = ADJ(v117)->_ai_players_save_struct_1DC;
+    ai->attack_confidence = ADJ(v117)[1]._ai_players_save_struct_0;
+    ai->base_threat = ADJ(v117)[1]._ai_players_save_struct_4;
+    ai->max_squad_threat = ADJ(v117)[1]._ai_players_save_struct_8;
+    ai->best_patrol_waypoint_idx = ADJ(v117)[1]._ai_players_save_struct_C;
+    qmemcpy(ai->patrol_threat, &ADJ(v117)[1]._ai_players_save_struct_10, sizeof(ai->patrol_threat));
     v105 = data_148;
     ai->last_unit_produced = ADJ(v117)[1]._ai_players_save_struct_24;
     ai->last_unit_produced_factory = ADJ(v117)[1]._ai_players_save_struct_28;
@@ -33859,7 +32678,7 @@ _BYTE *__thiscall sub_420A90(signed int *this)
         if ( !v2->flags )
           goto LABEL_12;
         v5 = 0;
-        while ( g_fog_of_war_scrl_2->tiles[v5] != (KKND::MapdScrlImageTile *)v2->flags )
+        while ( g_shroud_backup->tiles[v5] != (KKND::MapdScrlImageTile *)v2->flags )
         {
           if ( ++v5 >= 16 )
             goto LABEL_11;
@@ -33879,7 +32698,7 @@ LABEL_12:
   }
   else
   {
-    off_467260 = aMemory;
+    off_467260 = "memory";
   }
   return result;
 }
@@ -33890,14 +32709,14 @@ LABEL_12:
 //----- (00420B30) --------------------------------------------------------
 int *__thiscall sub_420B30(_DWORD *this)
 {
-  void **param; // ebp
+  void *ctx; // ebp
   int v3; // eax
   int *result; // eax
   int *v5; // ebx
-  int v6; // eax
+  int unit_id; // eax
   KKND::Unit **v7; // eax
   int *v8; // edx
-  int unit_id; // ecx
+  int v9; // ecx
   void *v10; // eax
   int v11; // edx
   void **v12; // ecx
@@ -33911,7 +32730,7 @@ int *__thiscall sub_420B30(_DWORD *this)
   void **v20; // ecx
   int v21; // eax
 
-  param = (void **)g_47C970_sidebar_task->ctx;
+  ctx = g_47C970_sidebar_task->ctx;
   v3 = sub_4287B0();
   *this = v3 + 376;
   result = (int *)malloc(v3 + 376);
@@ -33938,19 +32757,19 @@ int *__thiscall sub_420B30(_DWORD *this)
     v5[63] = g_num_convoy_tankers_destroyed;
     v5[64] = g_num_convoy_tankers_en_route;
     if ( g_scout )
-      v6 = *(_DWORD *)(g_scout + 304);
+      unit_id = g_scout->unit_id;
     else
-      v6 = -1;
-    v5[65] = v6;
+      unit_id = -1;
+    v5[65] = unit_id;
     v7 = g_player_bases;
     v8 = v5 + 66;
     do
     {
       if ( *v7 )
-        unit_id = (*v7)->unit_id;
+        v9 = (*v7)->unit_id;
       else
-        unit_id = -1;
-      *v8 = unit_id;
+        v9 = -1;
+      *v8 = v9;
       ++v7;
       ++v8;
     }
@@ -33965,7 +32784,7 @@ int *__thiscall sub_420B30(_DWORD *this)
       v12 = g_script_handlers;
       do
       {
-        if ( v10 == *param )
+        if ( v10 == *(void **)ctx )
           break;
         v10 = v12[1];
         ++v12;
@@ -33980,11 +32799,11 @@ int *__thiscall sub_420B30(_DWORD *this)
     v5[73] = (int)result;
     if ( result )
     {
-      v5[74] = (int)param[1];
-      result = (int *)sub_41DA20(param[2], v5 + 75);
+      v5[74] = *((_DWORD *)ctx + 1);
+      result = (int *)sub_41DA20(*((KKND::Entity **)ctx + 2), (KKND::MobdId *)v5 + 75);
       if ( result )
       {
-        v13 = param[4];
+        v13 = *((_DWORD **)ctx + 4);
         if ( v13[6] == 1 )
         {
           v5[85] = v13[3];
@@ -34033,7 +32852,7 @@ int *__thiscall sub_420B30(_DWORD *this)
           v5[90] = v13[9];
           v5[91] = v13[10];
           v5[92] = v13[11];
-          if ( sub_4287D0(v5 + 94) )
+          if ( sub_4287D0((KKND::BuildingConstructionStage *)v5 + 94) )
           {
             return v5;
           }
@@ -34046,32 +32865,28 @@ int *__thiscall sub_420B30(_DWORD *this)
         }
         else
         {
-          off_467260 = aTaskIsWrongTyp;
+          off_467260 = "task is wrong type";
           return nullptr;
         }
       }
     }
     else
     {
-      off_467260 = aBadMode;
+      off_467260 = "bad mode";
     }
   }
   else
   {
-    off_467260 = aMemory;
+    off_467260 = "memory";
   }
   return result;
 }
-// 41DA20: using guessed type int __fastcall sub_41DA20(_DWORD, _DWORD);
-// 4287B0: using guessed type int sub_4287B0(void);
-// 4287D0: using guessed type int __thiscall sub_4287D0(_DWORD);
 // 467260: using guessed type char *off_467260;
 // 47A2F8: using guessed type int dword_47A2F8;
 // 47A370: using guessed type int dword_47A370;
 // 47A3D0: using guessed type int dword_47A3D0;
 // 47A3D4: using guessed type int g_num_convoy_tankers_destroyed;
 // 47A3D8: using guessed type int g_num_convoy_tankers_en_route;
-// 47A3E0: using guessed type int dword_47A3E0;
 // 47B3D8: using guessed type int dword_47B3D8;
 // 47CA2C: using guessed type int dword_47CA2C;
 // 47DC68: using guessed type int dword_47DC68;
@@ -34209,24 +33024,24 @@ LABEL_13:
           task->ctx = v13;
           v13->task->entity = v13->_sidebar_payload_8;
           v13->_sidebar_payload_8->task = v13->task;
-          v13->airstrike_button_entity->is_on_collision_grid = 1;
+          v13->airstrike_button_entity->is_collidable = 1;
           v13->airstrike_button_entity->x = 155648;
-          v13->airstrike_button_entity->is_on_collision_grid = 1;
+          v13->airstrike_button_entity->is_collidable = 1;
           v13->airstrike_button_entity->y = 73728;
           v13->airstrike_button_entity->z = 2;
-          v13->_sidebar_payload_8->is_on_collision_grid = 1;
+          v13->_sidebar_payload_8->is_collidable = 1;
           v13->_sidebar_payload_8->x = 156672;
-          v13->_sidebar_payload_8->is_on_collision_grid = 1;
+          v13->_sidebar_payload_8->is_collidable = 1;
           v13->_sidebar_payload_8->y = 79872;
           v13->_sidebar_payload_8->z = 3;
           v13->_sidebar_payload_8->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
           if ( v13->_sidebar_payload_4 <= 1 )
             v13->_sidebar_payload_8->rend->flags |= 0x40000000u;
           if ( v13->_sidebar_payload_4 > 0 )
-            TASK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_help_button[1]->task);
+            TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_help_button[1]->task);
           v13->_sidebar_payload_8->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
           v13->_sidebar_payload_8->rend->flags |= 0x10000000u;
-          entity_anim_start(v13->_sidebar_payload_8, 2276, 0);
+          entity_anim_init_directional(v13->_sidebar_payload_8, 2276, 0);
           return sub_428820((int)(data + 376), *(_DWORD *)data) != 0;
         }
       }
@@ -34246,7 +33061,7 @@ LABEL_13:
 // 47DCD0: using guessed type int g_num_towers;
 
 //----- (004211D0) --------------------------------------------------------
-int sub_4211D0()
+int GAME_save()
 {
   int *v0; // ebp
   int *v2; // ebx
@@ -34299,7 +33114,7 @@ int sub_4211D0()
   v28 = v0;
   if ( !v0 )
   {
-    off_46725C[0] = aCouldnTAllocat;
+    off_46725C[0] = "Couldn't allocate temporary buffer";
     return 0;
   }
   Buffer[1] = g_mapd_camera.y;
@@ -34308,7 +33123,7 @@ int sub_4211D0()
   Block = v2;
   if ( !v2 )
   {
-    off_46725C[0] = aCouldNotSaveOi;
+    off_46725C[0] = "Could not save oil information";
     goto LABEL_40;
   }
   for ( i = g_unit_list_head; i != (KKND::Unit *)&g_unit_list_head; i = i->next )
@@ -34368,7 +33183,7 @@ int sub_4211D0()
   v23 = v6;
   if ( !v6 )
   {
-    off_46725C[0] = aCouldNotAlloca;
+    off_46725C[0] = "Could not allocate buffer for units";
     free(v2);
     goto LABEL_40;
   }
@@ -34381,12 +33196,12 @@ int sub_4211D0()
     {
       if ( !v8->destroyed )
       {
-        if ( !sub_41CCE0((int)v8, v9, *v10) )
+        if ( !sub_41CCE0(v8, v9, *v10) )
         {
           free(v7);
           free(Block);
           dword_479FC0 = 0;
-          off_46725C[0] = aCouldNotSaveUn;
+          off_46725C[0] = "Could not save unit information";
           return 0;
         }
         v9 += *v10;
@@ -34401,7 +33216,7 @@ int sub_4211D0()
   v24 = v11;
   if ( !v11 )
   {
-    off_46725C[0] = aCouldNotSaveCp;
+    off_46725C[0] = "Could not save cpu player information";
 LABEL_33:
     free(v7);
     free(v2);
@@ -34411,7 +33226,7 @@ LABEL_33:
   v25 = v12;
   if ( !v12 )
   {
-    off_46725C[0] = aCouldNotSavePr;
+    off_46725C[0] = "Could not save production information";
     free(v11);
     goto LABEL_33;
   }
@@ -34426,7 +33241,7 @@ LABEL_33:
     }
     else
     {
-      off_46725C[0] = aCouldNotSaveMi;
+      off_46725C[0] = "Could not save miscellaneous information";
       free(v13);
       free(v12);
       free(v11);
@@ -34436,7 +33251,7 @@ LABEL_33:
   }
   else
   {
-    off_46725C[0] = aCouldNotSaveMa;
+    off_46725C[0] = "Could not save map information";
     free(v12);
     free(v11);
     free(v7);
@@ -34458,15 +33273,15 @@ LABEL_80:
   if ( !v14 )
   {
     dword_479FC0 = 0;
-    off_46725C[0] = aCouldnTOpenSav;
+    off_46725C[0] = "couldn't open save-game file";
     return 0;
   }
-  if ( !sub_44DB80(&g_player_num, 1u, 4u, v14)
-    || !sub_44DB80(&g_cash, 1u, 0x1Cu, v15)
-    || !sub_44DB80(&g_diplomacy, 1u, 0xC4u, v15)
-    || !sub_44DB80(Buffer, 1u, 8u, v15)
-    || !sub_44DB80(&ElementCount, 1u, 4u, v15)
-    || !sub_44DB80(v2, 1u, ElementCount, v15) )
+  if ( !kknd_fwrite(&g_player_num, 1u, 4u, v14)
+    || !kknd_fwrite(&g_cash, 1u, 0x1Cu, v15)
+    || !kknd_fwrite(&g_diplomacy, 1u, 0xC4u, v15)
+    || !kknd_fwrite(Buffer, 1u, 8u, v15)
+    || !kknd_fwrite(&ElementCount, 1u, 4u, v15)
+    || !kknd_fwrite(v2, 1u, ElementCount, v15) )
   {
     goto LABEL_78;
   }
@@ -34479,7 +33294,7 @@ LABEL_80:
     {
       if ( !v16->destroyed )
       {
-        if ( !sub_44DB80(v17, 1u, 4u, v15) )
+        if ( !kknd_fwrite(v17, 1u, 4u, v15) )
         {
           free(v27);
           free(v26);
@@ -34494,12 +33309,12 @@ LABEL_80:
     }
     while ( v16 != (KKND::Unit *)&g_unit_list_head );
   }
-  if ( !sub_44DB80(&v36, 1u, 4u, v15) || !sub_44DB80(&v30, 1u, 4u, v15) )
+  if ( !kknd_fwrite(&v36, 1u, 4u, v15) || !kknd_fwrite(&v30, 1u, 4u, v15) )
   {
 LABEL_78:
     fclose(v15);
     if ( !v22 )
-      off_46725C[0] = aCouldnTWriteTo;
+      off_46725C[0] = "couldn't write to save-game file";
     goto LABEL_80;
   }
   v18 = g_unit_list_head;
@@ -34508,24 +33323,24 @@ LABEL_78:
   {
 LABEL_69:
     free(v23);
-    if ( sub_44DB80(&v32, 1u, 4u, v15) )
+    if ( kknd_fwrite(&v32, 1u, 4u, v15) )
     {
-      if ( sub_44DB80(v24, 1u, v32, v15) )
+      if ( kknd_fwrite(v24, 1u, v32, v15) )
       {
         free(v24);
-        if ( sub_44DB80(&v33, 1u, 4u, v15) )
+        if ( kknd_fwrite(&v33, 1u, 4u, v15) )
         {
-          if ( sub_44DB80(v25, 1u, v33, v15) )
+          if ( kknd_fwrite(v25, 1u, v33, v15) )
           {
             free(v25);
-            if ( sub_44DB80(&v34, 1u, 4u, v15) )
+            if ( kknd_fwrite(&v34, 1u, 4u, v15) )
             {
-              if ( sub_44DB80(v26, 1u, v34, v15) )
+              if ( kknd_fwrite(v26, 1u, v34, v15) )
               {
                 free(v26);
-                if ( sub_44DB80(&v35, 1u, 4u, v15) )
+                if ( kknd_fwrite(&v35, 1u, 4u, v15) )
                 {
-                  if ( sub_44DB80(v27, 1u, v35, v15) )
+                  if ( kknd_fwrite(v27, 1u, v35, v15) )
                   {
                     free(v27);
                     v22 = 1;
@@ -34547,7 +33362,7 @@ LABEL_65:
     if ( v18 == (KKND::Unit *)&g_unit_list_head )
       goto LABEL_69;
   }
-  if ( sub_44DB80(v20, 1u, 4u, v15) && sub_44DB80(v19, 1u, *v20, v15) )
+  if ( kknd_fwrite(v20, 1u, 4u, v15) && kknd_fwrite(v19, 1u, *v20, v15) )
   {
     v19 += *v20;
     v20 += 2;
@@ -34709,7 +33524,7 @@ LABEL_33:
                               if ( *v20 <= 0 || v22 >= 16 )
                                 v23 = nullptr;
                               else
-                                v23 = g_fog_of_war_scrl_2->tiles[v22];
+                                v23 = g_shroud_backup->tiles[v22];
                               v19->flags = (int)v23;
                               v19 = (KKND::MapdScrlImageTile *)((char *)v19 + 4);
                               ++v20;
@@ -34795,14 +33610,14 @@ void __cdecl sub_421D60(KKND::Task *a1)
   KKND::UiString *v5; // eax
   KKND::UiString *v6; // esi
 
-  sprintf(byte_479F38, "%s (%s)", off_46725C[0], off_467260);
+  sprintf(byte_479F38, "%s (%s)", "unknown error", "non-specific");
   v1 = (unsigned int)g_screen_width >> 1;
   v2 = (unsigned int)g_screen_height >> 1;
   v3 = ui_string_445C00(byte_479F38, 128);
   v4 = ui_string_445C80(byte_479F38, 128);
   v5 = ui_string_create(
          nullptr,
-         g_current_lvl_mobd[27].layers[0],
+         g_mobd[27].layers[0],
          (char *)(v1 - ((8 * (v4 + 2)) >> 1)),
          v2 - 32,
          v4 + 2,
@@ -34818,8 +33633,6 @@ void __cdecl sub_421D60(KKND::Task *a1)
     ui_string_free(v6);
   }
 }
-// 46725C: using guessed type char *off_46725C[2];
-// 467260: using guessed type char *off_467260;
 // 478A88: using guessed type int g_screen_height;
 // 478A8C: using guessed type int g_screen_width;
 
@@ -34951,7 +33764,7 @@ LABEL_11:
           unit_destroy((KKND::Unit *)receiver->ctx, unit_mode_machine_shop_on_death);
           break;
         case 0x5FFu:
-          owner->entity->is_on_collision_grid = 1;
+          owner->entity->is_collidable = 1;
           if ( entity_create_by_unit_type(
                  (KKND::UnitType)payload,
                  owner->mobd_anchors.rally->x + owner->entity->x,
@@ -34981,7 +33794,7 @@ int __thiscall sub_4220B0(int this)
 
   v2 = *(_DWORD *)(this + 32);
   *(_WORD *)(v2 + 12) = 0;
-  result = TASK_broadcast_message(
+  result = TSK_broadcast_message(
              *(KKND::Task **)(this + 12),
              TaskMessage_BuildingComplete,
              nullptr,
@@ -35017,7 +33830,7 @@ void __cdecl UNIT_Handler_MachineShop(KKND::Task *task)
       unit_building_init(unit, 2, unit_mode_machine_shop_downgrade_production, unit_mode_machine_shop_on_completed);
       state = (KKND::BuildingState *)unit->state;
       state->same_building_count = 0;
-      TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_MachineShop);
+      TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_MachineShop);
       if ( !state->same_building_count && g_player_num == unit->player_num )
       {
         g_machineshop_levels.max_level = 1;
@@ -35050,7 +33863,7 @@ void __fastcall unit_mode_machine_shop_on_completed(KKND::Unit *unit)
     if ( unit->mode_arrive == unit_mode_machine_shop_on_completed )
     {
       state->same_building_count = 0;
-      TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_MachineShop);
+      TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_MachineShop);
       if ( !state->same_building_count && g_player_num == unit->player_num )
       {
         g_machineshop_levels.max_level = 1;
@@ -35188,28 +34001,26 @@ void __fastcall unit_mode_machine_shop_on_death(KKND::Unit *unit)
 }
 
 //----- (004224B0) --------------------------------------------------------
-FILE *sub_4224B0()
+void sub_4224B0()
 {
-  FILE *result; // eax
+  KKND::LevelId v0; // eax
 
-  result = (FILE *)g_is_single_player;
   if ( g_is_single_player )
   {
-    result = (FILE *)g_current_lvl_id;
+    v0 = g_current_lvl_id;
     if ( (int)g_current_lvl_id >= (int)LevelId_Mute_01_TheReturnOfTheSlugs
       && (int)g_current_lvl_id <= (int)LevelId_Mute_15_CounterAttack )
     {
       g_current_mute_level = g_current_lvl_id - 14;
       sub_4243C0("kknd.sve");
-      result = (FILE *)g_current_lvl_id;
+      v0 = g_current_lvl_id;
     }
-    if ( (unsigned int)result <= 0xE )
+    if ( v0 <= LevelId_Surv_15_Beseiged )
     {
-      g_current_surv_level = (_WORD)result + 1;
-      return sub_4243C0("kknd.sve");
+      g_current_surv_level = v0 + 1;
+      sub_4243C0("kknd.sve");
     }
   }
-  return result;
 }
 // 47A2DC: using guessed type __int16 g_current_mute_level;
 // 47A2E0: using guessed type __int16 g_current_surv_level;
@@ -35296,8 +34107,8 @@ BOOL GAME_WaitScreen()
   dword_468B60 = 0;
   v4 = sub_40E3E0();
   sprintf(Buffer, "%s\\LEVELS\\%s\\wait.lvl", g_game_path, v4);
-  g_wait_lvl = LVL_LoadLevel(Buffer);
-  if ( !g_wait_lvl )
+  g_splash_lvl = LVL_LoadLevel(Buffer);
+  if ( !g_splash_lvl )
   {
     sub_42F9A0();
     LVL_SysCleanup();
@@ -35305,11 +34116,11 @@ BOOL GAME_WaitScreen()
       printf("%s", "LVL_LoadLevel(wait.lvl) failed\n");
     exit(0);
   }
-  node[0] = nullptr;
-  node[1] = nullptr;
-  node[2] = nullptr;
+  dword_47A010[0] = nullptr;
+  dword_47A010[1] = nullptr;
+  dword_47A010[2] = nullptr;
   OS_MessagePump();
-  if ( !LVL_RunLevel(g_wait_lvl) )
+  if ( !LVL_RunLevel(g_splash_lvl) )
   {
     sub_42F9A0();
     LVL_SysCleanup();
@@ -35318,8 +34129,8 @@ BOOL GAME_WaitScreen()
     exit(0);
   }
   mapd = (KKND::LevelMapd *)LVL_FindSection("MAPD");
-  palette_40E400(mapd->layers->palette.entries);
-  node[0] = MAPD_Draw(MenuId_Main, 0, 0);
+  PAL_apply(mapd->layers->palette.entries);
+  dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, 0);
   g_mapd_camera.y = 125440;
   v6 = 180;
   do
@@ -35329,7 +34140,7 @@ BOOL GAME_WaitScreen()
     --v6;
   }
   while ( v6 );
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   LVL_cleanup();
   return 1;
 }
@@ -35341,7 +34152,7 @@ BOOL GAME_WaitScreen()
 // 47A008: using guessed type char g_game_path_drive_letter;
 
 //----- (00422860) --------------------------------------------------------
-KKND::CplcEntity *__fastcall GAME_PrepareSuperLvl(KKND::MenuId mapd_id)
+void __fastcall GAME_PrepareSuperLvl(KKND::MenuId mapd_id)
 {
   const char *v2; // eax
   KKND::LevelId v3; // ebx
@@ -35391,9 +34202,9 @@ KKND::CplcEntity *__fastcall GAME_PrepareSuperLvl(KKND::MenuId mapd_id)
     v7 = ~(_BYTE)v4;
     v8 = &v5[v4 + 1];
     v9 = (unsigned int)~v4 >> 2;
-    qmemcpy(byte_47A020, v8, 4 * v9);
+    qmemcpy(g_level_base_path, v8, 4 * v9);
     v11 = &v8[4 * v9];
-    v10 = &byte_47A020[4 * v9];
+    v10 = &g_level_base_path[4 * v9];
     v12 = v7;
   }
   else
@@ -35409,14 +34220,14 @@ KKND::CplcEntity *__fastcall GAME_PrepareSuperLvl(KKND::MenuId mapd_id)
     v13 = ~(_BYTE)v4;
     v14 = &v5[v4 + 1];
     v15 = (unsigned int)~v4 >> 2;
-    qmemcpy(byte_47A020, v14, 4 * v15);
+    qmemcpy(g_level_base_path, v14, 4 * v15);
     v11 = &v14[4 * v15];
-    v10 = &byte_47A020[4 * v15];
+    v10 = &g_level_base_path[4 * v15];
     v12 = v13;
   }
   qmemcpy(v10, v11, v12 & 3);
   v16 = sub_40E3E0();
-  sprintf(Buffer, "%s\\LEVELS\\%s\\%s", byte_47A020, v16, "super.lvl");
+  sprintf(Buffer, "%s\\LEVELS\\%s\\%s", g_level_base_path, v16, "super.lvl");
   g_current_lvl_id = v3;
   Level = LVL_LoadLevel(Buffer);
   g_level = Level;
@@ -35447,17 +34258,17 @@ KKND::CplcEntity *__fastcall GAME_PrepareSuperLvl(KKND::MenuId mapd_id)
     exit(0);
   }
   mapd = (KKND::LevelMapd *)LVL_FindSection("MAPD");
-  palette_40E400(mapd[mapd_id].layers->palette.entries);
+  PAL_apply(mapd[mapd_id].layers->palette.entries);
   g_default_draw_ctx->flags &= ~0x40000000u;
-  node[0] = MAPD_Draw(mapd_id, 0, 0);
+  dword_47A010[0] = MAPD_Draw(mapd_id, 0, 0);
   g_default_draw_ctx->clip_w = g_screen_width;
   g_default_draw_ctx->clip_y = 0;
   g_default_draw_ctx->clip_h = g_screen_height;
   g_default_entity.collider = g_ui_collision_handlers;
   if ( mapd_id && mapd_id != MenuId_MissionComplete )
-    sub_444080((void *)mapd_id);
+    MAPD_animated_overlay_init((void *)mapd_id);
   CPLC_select(mapd_id);
-  return cplc_406320();
+  CPLC_viewport_update();
 }
 // 478A88: using guessed type int g_screen_height;
 // 478A8C: using guessed type int g_screen_width;
@@ -35590,25 +34401,25 @@ LABEL_42:
       g_default_draw_ctx->clip_h = g_screen_height;
       if ( (int)g_current_lvl_id >= (int)LevelId_Mute_01_TheReturnOfTheSlugs )
       {
-        node[0] = MAPD_Draw(MenuId_Main, 0, 0);
+        dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, 0);
         v8 = *(KKND::PaletteEntry **)LVL_FindSection("MAPD");
       }
       else
       {
-        node[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
+        dword_47A010[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
         v8 = *((KKND::PaletteEntry **)LVL_FindSection("MAPD") + 1);
       }
-      palette_40E400(v8 + 3);
+      PAL_apply(v8 + 3);
       qmemcpy(&stru_477980.cbSize, g_pal_4785DC, 0x400u);
       g_default_entity.collider = g_ui_collision_handlers;
       CPLC_select(0);
-      cplc_406320();
+      CPLC_viewport_update();
       sprintf(FileName, "%s\\FMV\\%s", g_app_root, g_lvl_desc[g_current_lvl_id].vbc_filename);
       viewport = REND_viewport_create(0, 38, 31, 320, 240);
       v10 = REND_viewport_create(0, 240, 313, 160, 128);
       v11 = ui_string_create(
               nullptr,
-              g_current_lvl_mobd[MobdId_Font_26].layers[MobdId_Mute_AlchemyHall],
+              g_mobd[MobdId_Font_26].layers[MobdId_Mute_AlchemyHall],
               (char *)0x190,
               40,
               25,
@@ -35638,9 +34449,9 @@ LABEL_30:
       ui_string_free(v11);
       REND_viewport_free(v10);
       REND_viewport_free(viewport);
-      MAPD_RemoveRenderable(node[0]);
+      MAPD_RemoveRenderable(dword_47A010[0]);
       LVL_cleanup();
-      kknd_mfree(v7);
+      KKND_free(v7);
       goto LABEL_44;
     }
   }
@@ -35654,21 +34465,21 @@ LABEL_30:
 // 47A18C: using guessed type int dword_47A18C;
 
 //----- (00422F60) --------------------------------------------------------
-void sub_422F60()
+void GAME_mission_load()
 {
   KKND::LevelId v0; // edx
   const char *v1; // eax
   const char *v2; // eax
   KKND::LevelHunk *Level; // eax
   BOOL v4; // eax
-  void *Section; // eax
+  KKND::PaletteEntry **Section; // eax
   const char *lvl_filename; // [esp-4h] [ebp-84h]
   char Buffer[120]; // [esp+8h] [ebp-78h] BYREF
 
   v0 = g_current_lvl_id;
-  if ( g_current_lvl_id != g_prev_level_id )
+  if ( g_current_lvl_id != g_last_loaded_level_id )
   {
-    g_prev_level_id = g_current_lvl_id;
+    g_last_loaded_level_id = g_current_lvl_id;
     if ( !g_supspr_lvl )
     {
       v1 = sub_40E3E0();
@@ -35679,8 +34490,8 @@ void sub_422F60()
         LVL_cleanup();
         sub_42F9A0();
         LVL_SysCleanup();
-        if ( aSpriteLoadFail )
-          printf("%s", aSpriteLoadFail);
+        if ( "sprite load failed\n" )
+          printf("%s", "sprite load failed\n");
         exit(0);
       }
       v0 = g_current_lvl_id;
@@ -35690,16 +34501,16 @@ void sub_422F60()
       || v0 >= (LevelId_Mute_14_TheFinalAssault|LevelId_Surv_03_WithstandTheRaidingParty)
       && ((int)v0 < (int)LevelId_Surv_16 || (int)v0 > (int)LevelId_Mute_25) )
     {
-      strcpy(byte_47A020, g_game_path);
+      strcpy(g_level_base_path, g_game_path);
     }
     else
     {
-      sprintf(byte_47A020, "%c", g_game_path_drive_letter);
+      sprintf(g_level_base_path, "%c", g_game_path_drive_letter);
       v0 = g_current_lvl_id;
     }
     lvl_filename = g_lvl_desc[v0].lvl_filename;
     v2 = sub_40E3E0();
-    sprintf(Buffer, "%s\\LEVELS\\%s\\%s", byte_47A020, v2, lvl_filename);
+    sprintf(Buffer, "%s\\LEVELS\\%s\\%s", g_level_base_path, v2, lvl_filename);
     Level = LVL_LoadLevel(Buffer);
     g_level = Level;
     if ( !Level )
@@ -35733,10 +34544,10 @@ void sub_422F60()
     exit(0);
   }
   FADE_Reset();
-  Section = LVL_FindSection("MAPD");
-  palette_40E400((infantr *)(*(_DWORD *)Section + 16));
+  Section = (KKND::PaletteEntry **)LVL_FindSection("MAPD");
+  PAL_apply(*Section + 4);
   sidebar_init();
-  LVL_InitBoxdTerrain();
+  LVL_terrain_init();
   sub_44C010();
   GAME_sidebar_init();
   aircraft_list_init();
@@ -35744,8 +34555,8 @@ void sub_422F60()
   {
     sub_42F9A0();
     LVL_SysCleanup();
-    if ( aUnitInitFailed )
-      printf("%s", aUnitInitFailed);
+    if ( "UNIT_Init() failed\n" )
+      printf("%s", "UNIT_Init() failed\n");
     exit(0);
   }
   sub_427CA0();
@@ -35753,20 +34564,20 @@ void sub_422F60()
   if ( dword_4690AC )
   {
     sprintf(Buffer, "%s\\LEVELS\\%s", g_app_root, g_lvl_desc[g_current_lvl_id].wav_filename);
-    dword_47A01C = sub_439AA0(dword_4690AC, 16, 0);
+    dword_47A01C = sub_439AA0(Buffer, 1, dword_4690AC, 16, 0);
   }
   g_default_draw_ctx->flags &= ~0x40000000u;
-  node[0] = MAPD_Draw(MenuId_Main, 0, 0);
-  node[1] = MAPD_Draw(MenuId_Main, 1, 0x20000000);
-  node[1]->job->render_state_handler = (KKND::RenderStateUpdater)sub_448360;
-  sub_44BD50();
+  dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, 0);
+  dword_47A010[1] = MAPD_Draw(MenuId_Main, 1, 0x20000000);
+  dword_47A010[1]->job->render_state_handler = (KKND::RenderStateUpdater)MAPD_render_shroud;
+  MAPD_enable_tile_blending();
   g_default_draw_ctx->clip_w = g_screen_width;
   g_default_draw_ctx->clip_y = 0;
   g_default_draw_ctx->clip_h = g_screen_height;
   g_default_entity.collider = g_ui_collision_handlers;
   if ( GAME_IsLoading() )
   {
-    g_prev_level_id = LevelId_Invalid;
+    g_last_loaded_level_id = LevelId_Invalid;
     cplc_init_subset();
     if ( !GAME_load() )
     {
@@ -35784,12 +34595,6 @@ void sub_422F60()
     cplc_init_all();
   }
 }
-// 412850: using guessed type int sub_412850(void);
-// 42F9A0: using guessed type int sub_42F9A0(void);
-// 439610: using guessed type int __thiscall sub_439610(_DWORD);
-// 439AA0: using guessed type _DWORD __stdcall sub_439AA0(_DWORD, _DWORD, _DWORD);
-// 448360: using guessed type int sub_448360();
-// 44BD50: using guessed type int sub_44BD50(void);
 // 4660A8: using guessed type char *off_4660A8[5];
 // 4690AC: using guessed type int dword_4690AC;
 // 478A88: using guessed type int g_screen_height;
@@ -35799,12 +34604,12 @@ void sub_422F60()
 // 47A2E4: using guessed type int dword_47A2E4;
 
 //----- (00423320) --------------------------------------------------------
-BOOL sub_423320()
+BOOL GAME_mission_cleanup()
 {
   KKND::MapdRenderNode **v0; // esi
   KKND::MapdRenderNode *v1; // ecx
 
-  v0 = node;
+  v0 = dword_47A010;
   do
   {
     v1 = *v0;
@@ -35827,8 +34632,8 @@ BOOL sub_423320()
   if ( g_game_state == 2
     && ((int)g_current_lvl_id < (int)LevelId_Surv_16 || (int)g_current_lvl_id > (int)LevelId_Mute_25) )
   {
-    g_prev_level_id = g_current_lvl_id;
-    cplc_4060F0();
+    g_last_loaded_level_id = g_current_lvl_id;
+    CPLC_restore_from_backup();
     LVL_cleanup();
     sub_43A320();
   }
@@ -35836,10 +34641,10 @@ BOOL sub_423320()
   {
     LVL_cleanup();
     sub_43A320();
-    kknd_mfree(g_level);
-    kknd_mfree(g_supspr_lvl);
+    KKND_free(g_level);
+    KKND_free(g_supspr_lvl);
     g_supspr_lvl = nullptr;
-    g_prev_level_id = LevelId_Invalid;
+    g_last_loaded_level_id = LevelId_Invalid;
   }
   if ( !g_is_single_player && !dword_47A778 )
   {
@@ -35851,7 +34656,7 @@ BOOL sub_423320()
     return g_game_state == 2;
   if ( GAME_IsLoading() )
   {
-    g_prev_level_id = LevelId_Invalid;
+    g_last_loaded_level_id = LevelId_Invalid;
     g_current_lvl_id = GAME_GetSaveLoadLevelId();
     GAME_SetPlayerSideFromLevel();
     return 1;
@@ -35932,7 +34737,7 @@ LABEL_5:
       TIME_tick();
     }
     while ( !g_os_quit_signal_received && g_game_state == GameState_MainMenu );
-    v2 = node;
+    v2 = dword_47A010;
     do
     {
       if ( *v2 )
@@ -35945,12 +34750,12 @@ LABEL_5:
     while ( (int)v2 < (int)&dword_47A01C );
     LVL_cleanup();
     g_mission_outcome = MissionOutcome_NotStarted;
-    kknd_mfree(g_level);
-    kknd_mfree(g_supspr_lvl);
+    KKND_free(g_level);
+    KKND_free(g_supspr_lvl);
     g_supspr_lvl = nullptr;
     if ( GAME_IsLoading() )
     {
-      g_prev_level_id = LevelId_Invalid;
+      g_last_loaded_level_id = LevelId_Invalid;
       g_current_lvl_id = GAME_GetSaveLoadLevelId();
       GAME_SetPlayerSideFromLevel();
     }
@@ -35984,7 +34789,7 @@ LABEL_5:
               TIME_tick();
             }
             while ( !g_os_quit_signal_received && g_game_state == GameState_MainMenu );
-            v3 = node;
+            v3 = dword_47A010;
             do
             {
               if ( *v3 )
@@ -35997,12 +34802,12 @@ LABEL_5:
             while ( (int)v3 < (int)&dword_47A01C );
             LVL_cleanup();
             g_mission_outcome = MissionOutcome_NotStarted;
-            kknd_mfree(g_level);
-            kknd_mfree(g_supspr_lvl);
+            KKND_free(g_level);
+            KKND_free(g_supspr_lvl);
             g_supspr_lvl = nullptr;
             if ( GAME_IsLoading() )
             {
-              g_prev_level_id = LevelId_Invalid;
+              g_last_loaded_level_id = LevelId_Invalid;
               g_current_lvl_id = GAME_GetSaveLoadLevelId();
               GAME_SetPlayerSideFromLevel();
             }
@@ -36010,7 +34815,7 @@ LABEL_5:
           if ( g_os_quit_signal_received )
             break;
         }
-        sub_422F60();
+        GAME_mission_load();
         g_game_state = GameState_MainMenu;
         do
         {
@@ -36031,13 +34836,13 @@ LABEL_5:
           if ( sub_41CAD0() )
           {
             sub_43A800(0);
-            if ( !sub_4211D0() )
+            if ( !GAME_save() )
               sub_421D40();
             sub_43A800(dword_4690AC);
           }
         }
         while ( !g_os_quit_signal_received && g_game_state == GameState_MainMenu );
-        if ( !sub_423320() )
+        if ( !GAME_mission_cleanup() )
         {
           dword_47CB0C = 0;
           MOVIE_Play(2);
@@ -36049,7 +34854,7 @@ LABEL_5:
     }
     sub_42F9A0();
     dword_468B60 = 1;
-    kknd_mfree(g_wait_lvl);
+    KKND_free(g_splash_lvl);
     sub_43A320();
     LVL_SysCleanup();
     timeEndPeriod(1u);
@@ -36058,21 +34863,12 @@ LABEL_5:
   else
   {
     dword_468B60 = 1;
-    kknd_mfree(g_wait_lvl);
+    KKND_free(g_splash_lvl);
     sub_43A320();
     LVL_SysCleanup();
     return 1;
   }
 }
-// 41CAD0: using guessed type int sub_41CAD0(void);
-// 4211D0: using guessed type int sub_4211D0(void);
-// 421D40: using guessed type int sub_421D40(void);
-// 423320: using guessed type int sub_423320(void);
-// 4284A0: using guessed type int INPUT_ProcessMouse(void);
-// 42F9A0: using guessed type int sub_42F9A0(void);
-// 43A320: using guessed type int sub_43A320(void);
-// 43A370: using guessed type int SOUND_ProcessSounds(void);
-// 43A800: using guessed type int __thiscall sub_43A800(_DWORD);
 // 468B60: using guessed type int dword_468B60;
 // 468B68: using guessed type int dword_468B68;
 // 4690AC: using guessed type int dword_4690AC;
@@ -36084,7 +34880,7 @@ LABEL_5:
 // 47CB0C: using guessed type int dword_47CB0C;
 
 //----- (004237F0) --------------------------------------------------------
-BOOL task_message_pool_init()
+BOOL TSK_message_pool_init()
 {
   KKND::TaskMessage *result; // eax
   int i; // ecx
@@ -36107,7 +34903,7 @@ BOOL task_message_pool_init()
 // 47A190: using guessed type int g_next_free_task_message;
 
 //----- (00423840) --------------------------------------------------------
-BOOL __fastcall TASK_send_message(
+BOOL __fastcall TSK_send_message(
         KKND::Task *sender,
         KKND::TaskMessageType message,
         void *payload,
@@ -36146,7 +34942,7 @@ BOOL __fastcall TASK_send_message(
 }
 
 //----- (004238C0) --------------------------------------------------------
-BOOL __fastcall TASK_broadcast_message(
+BOOL __fastcall TSK_broadcast_message(
         KKND::Task *task,
         KKND::TaskMessageType message,
         void *payload,
@@ -36231,7 +35027,7 @@ BOOL __fastcall TASK_broadcast_message(
 }
 
 //----- (00423A00) --------------------------------------------------------
-KKND::TaskMessage *__fastcall TASK_pop_message(KKND::Task *task)
+KKND::TaskMessage *__fastcall TSK_pop_message(KKND::Task *task)
 {
   KKND::TaskMessage *result; // eax
 
@@ -36245,14 +35041,14 @@ KKND::TaskMessage *__fastcall TASK_pop_message(KKND::Task *task)
 }
 
 //----- (00423A20) --------------------------------------------------------
-void __fastcall task_message_recycle(KKND::TaskMessage *msg)
+void __fastcall TSK_message_recycle(KKND::TaskMessage *msg)
 {
   msg->next = g_next_free_task_message;
   g_next_free_task_message = msg;
 }
 
 //----- (00423A30) --------------------------------------------------------
-void __fastcall task_discard_queue(KKND::Task *task)
+void __fastcall TSK_discard_queue(KKND::Task *task)
 {
   KKND::TaskMessage *i; // eax
 
@@ -36265,7 +35061,7 @@ void __fastcall task_discard_queue(KKND::Task *task)
 }
 
 //----- (00423A60) --------------------------------------------------------
-void TASK_message_pool_cleanup()
+void TSK_message_pool_cleanup()
 {
   free(g_task_message_pool);
 }
@@ -36295,18 +35091,18 @@ void __cdecl sub_423A70(KKND::Task *task)
   srand(TickCount);
   g_mapd_camera.y = 122880 * (rand() % 6);
   FADE_4084A0(task);
-  dword_47C65C = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x54, 84, 39, 19, 90, 14, 16);
+  dword_47C65C = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x54, 84, 39, 19, 90, 14, 16);
   sub_445AE0(dword_47C65C);
   dword_47C65C->_ui_string_field_18 = 0;
   dword_47C65C->num_lines = 0;
   dword_47A1B0 = 0;
   dword_47A1A4 = 0;
   dword_47A1A0 = 480;
-  sub_423C60(0);
+  sub_423C60(nullptr);
   dword_47A19C = 0;
   v3 = 0;
   sprintf(Buffer, "%s\\LEVELS\\%s", g_app_root, (&off_46773C[20 * dword_47A1AC])[2 * dword_47A1A8]);
-  dword_47A198 = sub_439AA0(16, 16, 0);
+  dword_47A198 = sub_439AA0(Buffer, 0, 16, 16, 0);
   while ( 1 )
   {
     TASK_yield(task, Task_Sleep, 1);
@@ -36322,10 +35118,10 @@ void __cdecl sub_423A70(KKND::Task *task)
         if ( !--dword_47A19C )
           break;
       }
-      sub_423C60(1);
+      sub_423C60((void *)1);
     }
   }
-  sub_43A2B0(dword_47A198);
+  sub_43A2B0((void *)dword_47A198);
   dword_47A198 = 0;
   ui_string_free(dword_47C65C);
   dword_47C65C = nullptr;
@@ -36334,11 +35130,6 @@ void __cdecl sub_423A70(KKND::Task *task)
   FADE_408500(task);
   g_game_state = GameState_PreviousScreen;
 }
-// 4084A0: using guessed type int __thiscall sub_4084A0(_DWORD);
-// 408500: using guessed type int __thiscall sub_408500(_DWORD);
-// 423C60: using guessed type int __thiscall sub_423C60(_DWORD);
-// 439AA0: using guessed type _DWORD __stdcall sub_439AA0(_DWORD, _DWORD, _DWORD);
-// 43A2B0: using guessed type int __thiscall sub_43A2B0(_DWORD);
 // 46773C: using guessed type char *off_46773C[39];
 // 47A198: using guessed type int dword_47A198;
 // 47A19C: using guessed type int dword_47A19C;
@@ -36690,9 +35481,9 @@ FILE *__thiscall sub_4240E0(const char *this)
   int v8; // [esp+Ch] [ebp-108h] BYREF
   CHAR FileName[260]; // [esp+10h] [ebp-104h] BYREF
 
-  wsprintfA(FileName, "%s\\%s", (const char *)g_game_path, this);
+  wsprintfA(FileName, "%s\\%s", g_game_path, this);
   SetFileAttributesA(FileName, 0x80u);
-  result = fopen(FileName, asc_464DA8);
+  result = fopen(FileName, "r");
   v2 = result;
   if ( result )
   {
@@ -36755,9 +35546,8 @@ LABEL_17:
 }
 // 4630AC: using guessed type _DWORD dword_4630AC[15];
 // 4630E8: using guessed type int dword_4630E8;
-// 47A070: using guessed type BYTE Data[256];
-// 47A2DC: using guessed type __int16 word_47A2DC;
-// 47A2E0: using guessed type __int16 word_47A2E0;
+// 47A2DC: using guessed type __int16 g_current_mute_level;
+// 47A2E0: using guessed type __int16 g_current_surv_level;
 
 //----- (00424270) --------------------------------------------------------
 FILE *__fastcall sub_424270(char *FileName, _WORD *a2, _WORD *a3)
@@ -36860,33 +35650,33 @@ FILE *__thiscall sub_4243C0(const char *this)
     if ( (unsigned __int16)g_current_surv_level <= (int)(unsigned __int16)v8 )
     {
       v3 = 47 - (unsigned __int16)v8;
-      sub_44E570(result, (int)a03d, (unsigned __int16)v8);
+      fprintf(result, "%03d", (unsigned __int16)v8);
       g_current_surv_level = v8;
     }
     else
     {
       v3 = 47 - (unsigned __int16)g_current_surv_level;
-      sub_44E570(result, (int)a03d, (unsigned __int16)g_current_surv_level);
+      fprintf(result, "%03d", (unsigned __int16)g_current_surv_level);
     }
     v4 = &unk_463070;
     do
-      sub_44E570(v2, (int)a03d, *v4++ ^ v3);
+      fprintf(v2, "%03d", *v4++ ^ v3);
     while ( (int)v4 < (int)dword_4630AC );
     if ( (unsigned __int16)g_current_mute_level <= (int)(unsigned __int16)v7 )
     {
       v5 = 69 - (unsigned __int16)v7;
-      sub_44E570(v2, (int)a03d, (unsigned __int16)v7);
+      fprintf(v2, "%03d", (unsigned __int16)v7);
       g_current_mute_level = v7;
     }
     else
     {
       v5 = 69 - (unsigned __int16)g_current_mute_level;
-      sub_44E570(v2, (int)a03d, (unsigned __int16)g_current_mute_level);
+      fprintf(v2, "%03d", (unsigned __int16)g_current_mute_level);
     }
     v6 = dword_4630AC;
     do
-      sub_44E570(v2, (int)a03d, *v6++ ^ v5);
-    while ( (int)v6 < (int)&dword_4630E8 );
+      fprintf(v2, "%03d", *v6++ ^ v5);
+    while ( (int)v6 < (int)&dword_4630E8 );     // BUG
     return (FILE *)fclose(v2);
   }
   return result;
@@ -36915,13 +35705,13 @@ int __thiscall sub_424560(char *FileName)
   int v15; // eax
   char *v16; // eax
   unsigned int v17; // eax
-  struct UnitAttachmentPoint *attach; // ecx
+  KKND::UnitAttachment *attachment; // ecx
   char *v19; // eax
   int v20; // eax
-  struct UnitAttachmentPoint *v21; // ecx
+  KKND::UnitAttachment *v21; // ecx
   char *v22; // eax
   int v23; // eax
-  struct UnitAttachmentPoint *v24; // ecx
+  KKND::UnitAttachment *v24; // ecx
   char *v25; // eax
   int v26; // eax
   char *v27; // eax
@@ -36930,16 +35720,16 @@ int __thiscall sub_424560(char *FileName)
   int v30; // eax
   char *v31; // eax
   int v32; // eax
-  struct UnitAttachmentPoint *v33; // ecx
-  struct UnitDamageSource *dmg_source; // ecx
+  KKND::UnitAttachment *v33; // ecx
+  KKND::UnitProjectileType *projectile_type; // ecx
   char *v35; // eax
   int v36; // eax
-  struct UnitAttachmentPoint *v37; // ecx
-  struct UnitDamageSource *v38; // ecx
+  KKND::UnitAttachment *v37; // ecx
+  KKND::UnitProjectileType *projectile; // ecx
   char *v39; // eax
   int v40; // eax
-  struct UnitAttachmentPoint *v41; // ecx
-  struct UnitDamageSource *v42; // ecx
+  KKND::UnitAttachment *v41; // ecx
+  KKND::UnitProjectileType *v42; // ecx
   char String[1024]; // [esp+8h] [ebp-400h] BYREF
 
   v2 = fopen(FileName, "rb");
@@ -37034,9 +35824,9 @@ int __thiscall sub_424560(char *FileName)
                         v17 = atoi(v16);
                         if ( v17 <= 0x2710 )
                         {
-                          attach = v7->attachment;
-                          if ( attach && *((_DWORD *)attach + 8) )
-                            *((_DWORD *)attach + 3) = v17;
+                          attachment = v7->attachment;
+                          if ( attachment && attachment->projectile_type )
+                            attachment->fire_delay = v17;
                         }
                         else
                         {
@@ -37053,8 +35843,8 @@ int __thiscall sub_424560(char *FileName)
                           if ( v20 >= 5 && v20 <= 10000 )
                           {
                             v21 = v7->attachment;
-                            if ( v21 && *((_DWORD *)v21 + 8) )
-                              *((_DWORD *)v21 + 4) = v20;
+                            if ( v21 && v21->projectile_type )
+                              v21->reload_time = v20;
                             else
                               v7->reload_time = v20;
                           }
@@ -37073,8 +35863,8 @@ int __thiscall sub_424560(char *FileName)
                             if ( v23 >= 1 && v23 <= 10000 )
                             {
                               v24 = v7->attachment;
-                              if ( v24 && *((_DWORD *)v24 + 8) )
-                                *((_DWORD *)v24 + 5) = v23;
+                              if ( v24 && v24->projectile_type )
+                                v24->volley_size = v23;
                             }
                             else
                             {
@@ -37127,10 +35917,10 @@ int __thiscall sub_424560(char *FileName)
                                     if ( v32 >= 1 && v32 <= 60000 )
                                     {
                                       v33 = v7->attachment;
-                                      if ( v33 && (dmg_source = *((struct UnitDamageSource **)v33 + 8)) != nullptr
-                                        || (dmg_source = v7->projectile) != nullptr )
+                                      if ( v33 && (projectile_type = v33->projectile_type) != nullptr
+                                        || (projectile_type = v7->projectile) != nullptr )
                                       {
-                                        *((_DWORD *)dmg_source + 5) = v32;
+                                        projectile_type->damage_infantry = v32;
                                       }
                                     }
                                     else
@@ -37153,10 +35943,10 @@ int __thiscall sub_424560(char *FileName)
                                       if ( v36 >= 1 && v36 <= 60000 )
                                       {
                                         v37 = v7->attachment;
-                                        if ( v37 && (v38 = *((struct UnitDamageSource **)v37 + 8)) != nullptr
-                                          || (v38 = v7->projectile) != nullptr )
+                                        if ( v37 && (projectile = v37->projectile_type) != nullptr
+                                          || (projectile = v7->projectile) != nullptr )
                                         {
-                                          *((_DWORD *)v38 + 6) = v36;
+                                          projectile->damage_vehicle = v36;
                                         }
                                       }
                                       else
@@ -37177,10 +35967,10 @@ int __thiscall sub_424560(char *FileName)
                                       if ( v40 >= 1 && v40 <= 60000 )
                                       {
                                         v41 = v7->attachment;
-                                        if ( v41 && (v42 = *((struct UnitDamageSource **)v41 + 8)) != nullptr
+                                        if ( v41 && (v42 = v41->projectile_type) != nullptr
                                           || (v42 = v7->projectile) != nullptr )
                                         {
-                                          *((_DWORD *)v42 + 7) = v40;
+                                          v42->damage_building = v40;
                                         }
                                       }
                                       else
@@ -37232,7 +36022,7 @@ void __cdecl sub_424B90(KKND::Task *task)
 
   if ( dword_47A3E8 < 12 )
   {
-    task->entity->is_on_collision_grid = 1;
+    task->entity->is_collidable = 1;
     v1 = dword_47A3E8;
     dword_47A300[2 * dword_47A3E8] = task->entity->x;
     y = task->entity->y;
@@ -37254,7 +36044,7 @@ void __cdecl sub_424BF0(KKND::Task *task)
   int player_side_or_stru49_array_idx; // edx
   KKND::Task *i; // eax
 
-  task->entity->is_on_collision_grid = 1;
+  task->entity->is_collidable = 1;
   v1 = 3 * dword_47A3E4;
   v2 = dword_47A3E4 + 1;
   dword_47A378[v1] = task->entity->x;
@@ -37267,7 +36057,7 @@ void __cdecl sub_424BF0(KKND::Task *task)
     TASK_yield(task, Task_Sleep, 1);
     for ( i = g_47A3CC; !g_47A3CC; i = g_47A3CC )
       TASK_yield(task, Task_Sleep, 1);
-    TASK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, i);
+    TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, i);
   }
   entity_remove(task->entity);
   TASK_Terminate(task);
@@ -37281,53 +36071,53 @@ void __cdecl sub_424BF0(KKND::Task *task)
 void sub_424CA0()
 {
   if ( g_47A3CC )
-    TASK_send_message(nullptr, TaskMessage_MissionFailed, nullptr, g_47A3CC);
+    TSK_send_message(nullptr, TaskMessage_MissionFailed, nullptr, g_47A3CC);
 }
 
 //----- (00424CC0) --------------------------------------------------------
 void sub_424CC0()
 {
   if ( g_47A3CC )
-    TASK_send_message(nullptr, TaskMessage_MoveOrder, nullptr, g_47A3CC);
+    TSK_send_message(nullptr, TaskMessage_MoveOrder, nullptr, g_47A3CC);
 }
 
 //----- (00424CE0) --------------------------------------------------------
-void __cdecl __noreturn sub_424CE0(int task)
+void __cdecl __noreturn task_424CE0(KKND::Task *task)
 {
   KKND::Task *v1; // esi
-  char *v2; // eax
-  KKND::Entity *v3; // ebp
-  char *v4; // eax
-  char *v5; // eax
+  int ctx; // eax
+  KKND::Entity *entity; // ebp
+  int v4; // eax
+  int v5; // eax
   ptrdiff_t v6; // ebx
   int v7; // edi
   int v8; // [esp+10h] [ebp-8h]
-  char *v9; // [esp+14h] [ebp-4h]
+  int v9; // [esp+14h] [ebp-4h]
 
-  v1 = (KKND::Task *)task;
-  v2 = *(char **)(task + 60);
-  v3 = *(KKND::Entity **)(task + 56);
-  v9 = v2;
-  if ( ((unsigned __int8)v2 & 1) != 0 && ((unsigned __int8)v2 & 2) != 0 )
+  v1 = task;
+  ctx = (int)task->ctx;
+  entity = task->entity;
+  v9 = ctx;
+  if ( (ctx & 1) != 0 && (ctx & 2) != 0 )
   {
-    LOBYTE(v2) = (unsigned __int8)v2 & 0xFE;
-    v9 = v2;
+    LOBYTE(ctx) = ctx & 0xFE;
+    v9 = ctx;
   }
-  v4 = v2 - 1;
+  v4 = ctx - 1;
   if ( v4 )
   {
     v5 = v4 - 1;
     if ( !v5 )
     {
       v6 = 72;
-      task = 81920;
+      task = (KKND::Task *)81920;
       v8 = 61440;
       g_mission_outcome = MissionOutcome_Defeat;
       goto LABEL_10;
     }
-    if ( v5 != (char *)6 )
+    if ( v5 != 6 )
     {
-      v6 = task;
+      v6 = (ptrdiff_t)task;
 LABEL_10:
       v7 = 7;
       do
@@ -37338,11 +36128,11 @@ LABEL_10:
       }
       while ( v7 );
       TASK_yield(v1, Task_Sleep, 30);
-      entity_anim_load(v3, v6);
-      v3->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-      v3->x = task;
-      v3->y = v8;
-      v3->z = 999;
+      entity_anim_init(entity, v6);
+      entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
+      entity->x = (int)task;
+      entity->y = v8;
+      entity->z = 999;
       TASK_yield(v1, Task_Yield_10000000, 0);
       SOUND_play(SoundId_166, 0, g_4690A8_sfx_volume, 16, 0);
       TASK_yield(v1, Task_Sleep, 200);
@@ -37354,7 +36144,7 @@ LABEL_10:
           g_is_demo_build = 0;
           g_game_state = GameState_PreviousScreen;
         }
-        else if ( v9 == (char *)2 )
+        else if ( v9 == 2 )
         {
           g_game_state = 2;
         }
@@ -37387,7 +36177,7 @@ LABEL_10:
     }
   }
   v6 = 60;
-  task = 87040;
+  task = (KKND::Task *)87040;
   v8 = 61440;
   g_mission_outcome = MissionOutcome_Victory;
   goto LABEL_10;
@@ -37474,10 +36264,10 @@ int sub_424FD0()
   KKND::Unit *v0; // eax
   int v1; // edi
   int v2; // ebx
-  int type; // ecx
+  KKND::UnitType type; // ecx
   int player_num; // ecx
-  int v5; // ecx
-  int v7; // ecx
+  KKND::UnitType v5; // ecx
+  KKND::UnitType v7; // ecx
 
   v0 = g_unit_list_head;
   v1 = 0;
@@ -37487,7 +36277,8 @@ int sub_424FD0()
     while ( 1 )
     {
       type = v0->type;
-      if ( type <= 66 || type >= 74 && type <= 78 )
+      if ( (int)type <= (int)UnitType_Surv_AlchemyHall
+        || (int)type >= (int)UnitType_Gort && (int)type <= (int)UnitType_Mech )
       {
         player_num = v0->player_num;
         if ( player_num == g_player_num )
@@ -37519,8 +36310,11 @@ LABEL_14:
         if ( !g_diplomacy.is_ally[g_player_num][v0->player_num] )
         {
           v7 = v0->type;
-          if ( v7 <= 66 || v7 >= 74 && v7 <= 78 )
+          if ( (int)v7 <= (int)UnitType_Surv_AlchemyHall
+            || (int)v7 >= (int)UnitType_Gort && (int)v7 <= (int)UnitType_Mech )
+          {
             break;
+          }
         }
         v0 = v0->next;
         if ( v0 == (KKND::Unit *)&g_unit_list_head )
@@ -37537,7 +36331,7 @@ LABEL_14:
     if ( v0->player_num == g_player_num )
     {
       v5 = v0->type;
-      if ( v5 <= 66 || v5 >= 74 && v5 <= 78 )
+      if ( (int)v5 <= (int)UnitType_Surv_AlchemyHall || (int)v5 >= (int)UnitType_Gort && (int)v5 <= (int)UnitType_Mech )
         break;
     }
     v0 = v0->next;
@@ -37554,9 +36348,9 @@ int sub_4250E0()
   KKND::Unit *v0; // eax
   int v1; // esi
   int v2; // edi
-  int type; // ecx
-  int v4; // ecx
-  int v6; // ecx
+  KKND::UnitType type; // ecx
+  KKND::UnitType v4; // ecx
+  KKND::UnitType v6; // ecx
 
   v0 = g_unit_list_head;
   v1 = 0;
@@ -37566,8 +36360,11 @@ int sub_4250E0()
     while ( 1 )
     {
       type = v0->type;
-      if ( type <= 66 || type >= 74 && type <= 78 )
+      if ( (int)type <= (int)UnitType_Surv_AlchemyHall
+        || (int)type >= (int)UnitType_Gort && (int)type <= (int)UnitType_Mech )
+      {
         break;
+      }
       v0 = v0->next;
       if ( v0 == (KKND::Unit *)&g_unit_list_head )
         goto LABEL_11;
@@ -37590,8 +36387,11 @@ LABEL_11:
         if ( v0->player_num != g_player_num )
         {
           v6 = v0->type;
-          if ( v6 <= 66 || v6 >= 74 && v6 <= 78 )
+          if ( (int)v6 <= (int)UnitType_Surv_AlchemyHall
+            || (int)v6 >= (int)UnitType_Gort && (int)v6 <= (int)UnitType_Mech )
+          {
             break;
+          }
         }
         v0 = v0->next;
         if ( v0 == (KKND::Unit *)&g_unit_list_head )
@@ -37608,7 +36408,7 @@ LABEL_11:
     if ( v0->player_num == g_player_num )
     {
       v4 = v0->type;
-      if ( v4 <= 66 || v4 >= 74 && v4 <= 78 )
+      if ( (int)v4 <= (int)UnitType_Surv_AlchemyHall || (int)v4 >= (int)UnitType_Gort && (int)v4 <= (int)UnitType_Mech )
         break;
     }
     v0 = v0->next;
@@ -37697,7 +36497,7 @@ LABEL_11:
 }
 
 //----- (004252C0) --------------------------------------------------------
-BOOL __fastcall sub_4252C0(int a1, void *a2)
+BOOL __fastcall sub_4252C0(KKND::Task *task, int a2)
 {
   KKND::Entity *v3; // eax
   KKND::Entity *v4; // esi
@@ -37707,16 +36507,16 @@ BOOL __fastcall sub_4252C0(int a1, void *a2)
   KKND::Entity *v8; // esi
   KKND::Entity *v9; // eax
 
-  *(_DWORD *)(a1 + 28) = 1;
+  task->netz_flags = TaskNetzFlags_EnabledForMultiplayer;
   g_netz_synchronized_lockstep_mode = 1;
   while ( sub_408400() )
-    TASK_yield((KKND::Task *)a1, Task_Sleep, 1);
+    TASK_yield(task, Task_Sleep, 1);
   v3 = entity_create(MobdId_MissionOutcomeModal, nullptr, nullptr);
   v4 = v3;
   if ( v3 )
   {
     v3->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-    entity_anim_load(v3, 0);
+    entity_anim_init(v3, 0);
     v4->x = 81920;
     v4->y = 61440;
     v4->z = 997;
@@ -37725,7 +36525,7 @@ BOOL __fastcall sub_4252C0(int a1, void *a2)
   v6 = v5;
   if ( v5 )
   {
-    entity_anim_load(v5, 12);
+    entity_anim_init(v5, 12);
     v6->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
     v6->x = 81920;
     v6->y = 61440;
@@ -37735,17 +36535,17 @@ BOOL __fastcall sub_4252C0(int a1, void *a2)
   v8 = v7;
   if ( v7 )
   {
-    entity_anim_load(v7, 24);
-    entity_anim_load(v8, 24);
+    entity_anim_init(v7, 24);
+    entity_anim_init(v8, 24);
     v8->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
     v8->x = 81920;
     v8->y = 61440;
     v8->z = 998;
   }
-  v9 = entity_create_ex(MobdId_MissionOutcomeModal, nullptr, (KKND::TaskFn)sub_424CE0, TaskKind_Coroutine, nullptr);
-  v9->task->ctx = a2;
+  v9 = entity_create_ex(MobdId_MissionOutcomeModal, nullptr, task_424CE0, TaskKind_Coroutine, nullptr);
+  v9->task->ctx = (void *)a2;
   v9->task->netz_flags = TaskNetzFlags_EnabledForMultiplayer;
-  return TASK_send_message(nullptr, TaskMessage_MissionOutcomePopup, nullptr, g_task_47C028);
+  return TSK_send_message(nullptr, TaskMessage_MissionOutcomePopup, nullptr, g_task_47C028);
 }
 // 47C764: using guessed type __int16 g_netz_synchronized_lockstep_mode;
 
@@ -37814,7 +36614,7 @@ LABEL_52:
       while ( TASK_yield(task, Task_Sleep, 30) != 0x80000000 )
       {
         v3 = 0;
-        for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+        for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
         {
           if ( i->type == TaskMessage_MissionFailed )
           {
@@ -37824,7 +36624,7 @@ LABEL_52:
           {
             v3 |= 1u;
           }
-          task_message_recycle(i);
+          TSK_message_recycle(i);
         }
         if ( v3 )
         {
@@ -37884,12 +36684,6 @@ LABEL_54:
   TASK_Terminate(v1);
 }
 // 4255B0: conditional instruction was optimized away because eax.4==1
-// 424EC0: using guessed type int sub_424EC0(void);
-// 424FD0: using guessed type int sub_424FD0(void);
-// 4250E0: using guessed type int sub_4250E0(void);
-// 4251B0: using guessed type int sub_4251B0(void);
-// 425BE0: using guessed type int __cdecl sub_425BE0(KKND::Task *task);
-// 425F50: using guessed type _DWORD __cdecl sub_425F50(KKND::Task *task);
 // 47A3D0: using guessed type int dword_47A3D0;
 // 47DC68: using guessed type int dword_47DC68;
 
@@ -37989,11 +36783,11 @@ LABEL_27:
   if ( mission_accomplished )
   {
     if ( g_47A3CC )
-      TASK_send_message(nullptr, TaskMessage_MoveOrder, nullptr, g_47A3CC);
+      TSK_send_message(nullptr, TaskMessage_MoveOrder, nullptr, g_47A3CC);
   }
   else if ( mission_failed && g_47A3CC )
   {
-    TASK_send_message(nullptr, TaskMessage_MissionFailed, nullptr, g_47A3CC);
+    TSK_send_message(nullptr, TaskMessage_MissionFailed, nullptr, g_47A3CC);
   }
 }
 // 47A3D4: using guessed type int g_num_convoy_tankers_destroyed;
@@ -38015,7 +36809,7 @@ KKND::Unit *__fastcall unit_425820(KKND::Unit *unit, int radius)
   int v11; // edi
   int y; // [esp+10h] [ebp-4h]
 
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   entity = unit->entity;
   result = g_unit_list_head;
   x = entity->x;
@@ -38026,10 +36820,10 @@ KKND::Unit *__fastcall unit_425820(KKND::Unit *unit, int radius)
   {
     if ( !result->destroyed && result->player_num == g_player_num )
     {
-      result->entity->is_on_collision_grid = 1;
+      result->entity->is_collidable = 1;
       v5 = result->entity;
       v6 = v5->x;
-      v5->is_on_collision_grid = 1;
+      v5->is_collidable = 1;
       v7 = v6 - x <= 0;
       v8 = result->entity;
       v9 = v7 ? x - v8->x : v8->x - x;
@@ -38091,7 +36885,7 @@ void __fastcall unit_mode_scout_init(KKND::Unit *unit)
       if ( turret )
         turret->entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[v3]];
       unit_reveal_fog_of_war(unit);
-      TASK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
+      TSK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
       unit_mode_415540(unit);
       if ( unit->type == UnitType_Surv_Scout )
       {
@@ -38115,7 +36909,10 @@ void __fastcall unit_scout_425A50(KKND::Unit *unit, int a2, int a3)
 {
   KKND::Entity *entity; // ecx
 
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   entity = unit->entity;
   unit->mode = unit_mode_scout_init;
   entity->x_speed = 0;
@@ -38139,7 +36936,7 @@ void __cdecl UNIT_Handler_General(KKND::Task *task)
     unit_rendering_default(unit);
     unit->player_num = g_player_num;
     unit->entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
-    TASK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
+    TSK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
     unit->task->message_handler = MessageHandler_Scout;
     unit_mode_415540(unit);
   }
@@ -38163,7 +36960,10 @@ void __cdecl UNIT_Handler_Scout(KKND::Task *task)
     unit = unit_create(task);
     unit_init_default(unit);
     unit_rendering_default(unit);
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_idle,
+      g_angle_to_orientation[unit->orientation]);
     entity = unit->entity;
     unit->mode = unit_mode_scout_init;
     entity->x_speed = 0;
@@ -38209,7 +37009,7 @@ void __cdecl sub_425BE0(KKND::Task *task)
         do
           TASK_yield(task, Task_Sleep, 30);
         while ( !g_scout );
-        g_scout->entity->is_on_collision_grid = 1;
+        g_scout->entity->is_collidable = 1;
         entity = g_scout->entity;
         x = entity->x;
         y = entity->y;
@@ -38259,7 +37059,7 @@ LABEL_16:
           {
             if ( v10->player_num == g_player_num )
             {
-              v10->entity->is_on_collision_grid = 1;
+              v10->entity->is_collidable = 1;
               v11 = v10->entity;
               if ( v11->x > 76800 || v11->y <= 604160 )
                 break;
@@ -38291,7 +37091,7 @@ LABEL_24:
           if ( v12->type == UnitType_Mute_Tanker )
           {
             ++v13;
-            v12->entity->is_on_collision_grid = 1;
+            v12->entity->is_collidable = 1;
             v15 = v12->entity;
             if ( v15->x <= 118784 && v15->y >= 414208 )
               ++i;
@@ -38300,7 +37100,7 @@ LABEL_24:
         if ( v13 <= 1 )
         {
           if ( g_47A3CC )
-            TASK_send_message(nullptr, TaskMessage_MissionFailed, nullptr, g_47A3CC);
+            TSK_send_message(nullptr, TaskMessage_MissionFailed, nullptr, g_47A3CC);
           goto LABEL_51;
         }
       }
@@ -38321,7 +37121,7 @@ LABEL_24:
           {
             if ( v17->type == UnitType_Surv_ElPresidente )
             {
-              v17->entity->is_on_collision_grid = 1;
+              v17->entity->is_collidable = 1;
               v18 = v17->entity;
               if ( v18->x >= 866816 && v18->y >= 484864 )
                 break;
@@ -38339,7 +37139,7 @@ LABEL_48:
       v4 = g_47A3CC;
       if ( g_47A3CC )
 LABEL_50:
-        TASK_send_message(nullptr, TaskMessage_MoveOrder, nullptr, v4);
+        TSK_send_message(nullptr, TaskMessage_MoveOrder, nullptr, v4);
       break;
     default:
       break;
@@ -38474,11 +37274,11 @@ int __cdecl sub_425F50(KKND::Task *task)
   {
     v1 = 0;
     TASK_yield(task, Task_Wait, 0);
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       if ( i->type == TaskMessage_1514_sidebar )
         v1 = 1;
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
   }
   while ( !v1 );
@@ -38596,7 +37396,7 @@ LABEL_36:
   while ( v13 < 6 );
   if ( g_is_demo_build )
   {
-    p_cmd = &node[0]->job->cmd;
+    p_cmd = &dword_47A010[0]->job->cmd;
     v25 = dword_47A37C[3 * v78];
     v77 = 3 * v78;
     g_mapd_camera.x = dword_47A378[3 * v78] - ((g_screen_width & 0xFFFFFF) << 7);
@@ -38702,7 +37502,7 @@ LABEL_36:
             }
 LABEL_85:
             if ( !v41 )
-              sub_426F90(v36);
+              entity_remove_with_task(v36);
           }
         }
         v36 = (KKND::Entity *)p_next;
@@ -38753,7 +37553,7 @@ LABEL_85:
           if ( v53 == 4 || v53 == 5 || v53 >= 91 && v53 <= 156 && v53 != 123 )
             v54 = 1;
           if ( v54 )
-            sub_426F90(v50);
+            entity_remove_with_task(v50);
         }
         v50 = (KKND::Entity *)v52;
       }
@@ -38768,7 +37568,7 @@ LABEL_85:
       if ( *(v74 - 2) )
       {
         v56 = *v71;
-        v57 = &node[0]->job->cmd;
+        v57 = &dword_47A010[0]->job->cmd;
         ++v71;
         v56 *= 12;
         v58 = *(int *)((char *)dword_47A378 + v56);
@@ -38885,13 +37685,13 @@ void __cdecl __noreturn task_draw_x_mark_2(KKND::Task *task)
   entity = task->entity;
   entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
   entity->z = 5;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v2 = g_screen_width;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   entity->x = v2 << 7;
   entity->y = g_screen_height << 7;
   entity->collider = &g_null_collision;
-  entity_anim_load(entity, g_current_lvl_id != LevelId_Mute_04_RaidTheFort ? 852 : 868);
+  entity_anim_init(entity, g_current_lvl_id != LevelId_Mute_04_RaidTheFort ? 852 : 868);
   TASK_yield(task, Task_Sleep, 600);
   entity_remove(entity);
   TASK_Terminate(task);
@@ -38918,7 +37718,7 @@ void __cdecl __noreturn task_draw_x_mark(KKND::Task *task)
       v2->entity = entity;
       v2->task = task;
       v2->mode = (void (__fastcall *)(KKND::XMark *))mode_null;
-      entity_anim_load(entity, 820);
+      entity_anim_init(entity, 820);
       entity->z = 0;
       entity->collider = &g_null_collision;
       entity_create_ex(MobdId_Cursors, nullptr, task_draw_x_mark_2, TaskKind_Coroutine, nullptr);
@@ -38926,18 +37726,18 @@ void __cdecl __noreturn task_draw_x_mark(KKND::Task *task)
       {
         case LevelId_Surv_04_RescueTheScout:
           entity->x = 47616;
-          entity->is_on_collision_grid = 1;
+          entity->is_collidable = 1;
           entity->y = 390400;
           break;
         case LevelId_Surv_06_ExterminateTheVillage:
           entity->x = 38400;
-          entity->is_on_collision_grid = 1;
+          entity->is_collidable = 1;
           entity->y = 628736;
           ((void (__thiscall *)(KKND::XMark *))x_mark->mode)(x_mark);
           return;
         case LevelId_Mute_04_RaidTheFort:
           entity->x = 59392;
-          entity->is_on_collision_grid = 1;
+          entity->is_collidable = 1;
           entity->y = 465408;
           ((void (__thiscall *)(KKND::XMark *))x_mark->mode)(x_mark);
           return;
@@ -38959,7 +37759,7 @@ KKND::Entity *__fastcall sub_4267F0(int a1, int a2, int a3, int a4)
     v7 = a1 | (a4 << 16);
     result->x = a2;
     BYTE1(v7) = BYTE1(a1) | 0x80;
-    result->is_on_collision_grid = 1;
+    result->is_collidable = 1;
     result->y = a3;
     result->cplc_meta = nullptr;
     result->ctx = (void *)v7;
@@ -39034,7 +37834,7 @@ unsigned int __thiscall sub_4268B0(void *this)
     v7 = entity_create_ex(g_unit_stats[v3].mobd_id, nullptr, g_unit_stats[v3].task_fn, TaskKind_Callback, nullptr);
     if ( v7 )
     {
-      v7->is_on_collision_grid = 1;
+      v7->is_collidable = 1;
       v7->x = v9;
       v7->y = v6;
       v7->cplc_meta = nullptr;
@@ -39080,9 +37880,9 @@ int __cdecl sub_4269B0(KKND::Task *a1)
   entity = a1->entity;
   a1a = (KKND::Task *)entity->y;
   player_side_or_stru49_array_idx = entity->cplc_spawn_params->player_side_or_stru49_array_idx;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   x = a1->entity->x;
-  cmd = &node[0]->job->cmd;
+  cmd = &dword_47A010[0]->job->cmd;
   if ( x < (REND_get_width(cmd) + 16777152) << 8 )
   {
     if ( x <= 0x40 )
@@ -39222,15 +38022,15 @@ void __fastcall render_state_handler_entity(KKND::Entity *entity, KKND::RenderNo
 }
 
 //----- (00426CB0) --------------------------------------------------------
-BOOL LVL_InitMobd()
+BOOL LVL_mobd_init()
 {
   KKND::Entity *result; // eax
   int v1; // edx
 
-  g_current_lvl_mobd = (KKND::LevelMobd *)LVL_FindSection("MOBD");
-  if ( g_current_lvl_mobd )
+  g_mobd = (KKND::LevelMobd *)LVL_FindSection("MOBD");
+  if ( g_mobd )
   {
-    g_current_lvl_mobd_verified = 1;
+    g_mobd_active = 1;
     result = (KKND::Entity *)malloc(0x48440u);  // 2000
     g_entity_pool = result;
     if ( result )
@@ -39248,21 +38048,21 @@ BOOL LVL_InitMobd()
       result->next = (KKND::Entity *)&g_entity_free_pool_head;
       g_entity_tail = (KKND::Entity *)&g_entity_head;
       g_entity_head = (KKND::Entity *)&g_entity_head;
-      mobd_init_default_entity();
+      entity_init_default_template();
       entity_render = render_state_handler_entity;
       return 1;
     }
   }
   else
   {
-    g_current_lvl_mobd_verified = 0;
+    g_mobd_active = 0;
     return 1;
   }
   return (BOOL)result;
 }
 
 //----- (00426D40) --------------------------------------------------------
-void mobd_init_default_entity()
+void entity_init_default_template()
 {
   g_default_entity.parent = nullptr;
   g_default_entity.z = 0;
@@ -39294,7 +38094,7 @@ void mobd_init_default_entity()
   g_default_entity._80_unit_id = 0;
   g_default_entity.collider = g_unit_collision_handlers;
   g_default_entity.shape = nullptr;
-  g_default_entity.is_on_collision_grid = 0;
+  g_default_entity.is_collidable = 0;
   g_default_entity.infantry_damage = 0;
   g_default_entity.vehicle_damage = 0;
   g_default_entity.building_damage = 0;
@@ -39387,7 +38187,7 @@ void __fastcall entity_remove(KKND::Entity *entity)
     cplc_meta->spawn_params.entity = nullptr;
   cplc_view = entity->cplc_view;
   if ( cplc_view )
-    cplc_4062E0(cplc_view);
+    CPLC_viewport_remove(cplc_view);
   entity->prev->next = entity->next;
   entity->next->prev = entity->prev;
   entity->next = g_entity_free_pool_head;
@@ -39395,35 +38195,32 @@ void __fastcall entity_remove(KKND::Entity *entity)
 }
 
 //----- (00426F90) --------------------------------------------------------
-KKND::Entity *__thiscall sub_426F90(KKND::Entity *this)
+void __fastcall entity_remove_with_task(KKND::Entity *entity)
 {
   KKND::Task *task; // ecx
   KKND::RenderNode *rend; // eax
   KKND::CplcEntity *cplc_meta; // eax
   KKND::CplcEntityInViewport *cplc_view; // ecx
-  KKND::Entity *result; // eax
 
-  task = this->task;
+  task = entity->task;
   if ( task )
   {
-    task_445310(task);
-    this->task = nullptr;
+    TASK_terminate(task);
+    entity->task = nullptr;
   }
-  rend = this->rend;
+  rend = entity->rend;
   if ( rend )
     rend->flags |= 0x80000000;
-  cplc_meta = this->cplc_meta;
-  if ( cplc_meta && cplc_meta->spawn_params.entity == this )
+  cplc_meta = entity->cplc_meta;
+  if ( cplc_meta && cplc_meta->spawn_params.entity == entity )
     cplc_meta->spawn_params.entity = nullptr;
-  cplc_view = this->cplc_view;
+  cplc_view = entity->cplc_view;
   if ( cplc_view )
-    cplc_4062E0(cplc_view);
-  this->prev->next = this->next;
-  result = this->prev;
-  this->next->prev = result;
-  this->next = g_entity_free_pool_head;
-  g_entity_free_pool_head = this;
-  return result;
+    CPLC_viewport_remove(cplc_view);
+  entity->prev->next = entity->next;
+  entity->next->prev = entity->prev;
+  entity->next = g_entity_free_pool_head;
+  g_entity_free_pool_head = entity;
 }
 
 //----- (00427000) --------------------------------------------------------
@@ -39478,7 +38275,7 @@ void GAME_AdvanceEntityPositions()
   int v29; // edx
   int z_speed_limit; // eax
 
-  if ( g_current_lvl_mobd_verified )
+  if ( g_mobd_active )
   {
     BOXD_rebuild_collision_grid(&g_entity_head);
     for ( i = g_entity_head; i != (KKND::Entity *)&g_entity_head; i = i->next )
@@ -39496,11 +38293,11 @@ void GAME_AdvanceEntityPositions()
       {
         if ( i->x_speed >= 0 )
           goto LABEL_13;
-        BOXD_collide_entity(i, BoxCollisionDirection_PositiveX, 1);
+        BOXD_collide_entity(i, BoxCollisionAxis_PosX, 1);
       }
       else
       {
-        BOXD_collide_entity(i, BoxCollisionDirection_NegativeX, 1);
+        BOXD_collide_entity(i, BoxCollisionAxis_NegX, 1);
       }
       v4 = 1;
 LABEL_13:
@@ -39510,24 +38307,24 @@ LABEL_13:
       {
         if ( i->y_speed >= 0 )
           goto LABEL_18;
-        BOXD_collide_entity(i, BoxCollisionDirection_PositiveY, 1);
+        BOXD_collide_entity(i, BoxCollisionAxis_PosY, 1);
       }
       else
       {
-        BOXD_collide_entity(i, BoxCollisionDirection_NegativeY, 1);
+        BOXD_collide_entity(i, BoxCollisionAxis_NegY, 1);
       }
       v4 = 1;
 LABEL_18:
       i->z += i->z_speed;
       if ( !v4 )
       {
-        if ( i->is_on_collision_grid )
-          BOXD_collide_entity(i, BoxCollisionDirection_NegativeX, 1);
+        if ( i->is_collidable )
+          BOXD_collide_entity(i, BoxCollisionAxis_NegX, 1);
         else
-          BOXD_collide_entity(i, BoxCollisionDirection_NegativeX, 0);
+          BOXD_collide_entity(i, BoxCollisionAxis_NegX, 0);
       }
       v6 = i->x_speed;
-      i->is_on_collision_grid = 1;
+      i->is_collidable = 1;
       if ( v6 < 0 )
       {
         v8 = i->x_drag + i->x_speed;
@@ -39676,7 +38473,7 @@ LABEL_53:
 // 47C764: using guessed type __int16 g_netz_synchronized_lockstep_mode;
 
 //----- (004272A0) --------------------------------------------------------
-void __fastcall entity_anim_load(KKND::Entity *entity, ptrdiff_t offset)
+void __fastcall entity_anim_init(KKND::Entity *entity, ptrdiff_t offset)
 {
   KKND::MobdAnimation *v2; // eax
   int anim_speed; // eax
@@ -39684,33 +38481,33 @@ void __fastcall entity_anim_load(KKND::Entity *entity, ptrdiff_t offset)
 
   if ( entity )
   {
-    v2 = (KKND::MobdAnimation *)((char *)g_current_lvl_mobd[entity->mobd_id].layers[0] + offset);
+    v2 = (KKND::MobdAnimation *)((char *)g_mobd[entity->mobd_id].layers[0] + offset);
     entity->anim = v2;
     anim_speed = v2->anim_speed;
     if ( anim_speed )
       entity->anim_speed = anim_speed;
     anim = entity->anim;
     entity->anim_timer = -1;
-    entity->anim_cursor = (KKND::MobdAnimFrame **)anim;
+    entity->anim_cursor = anim;
     entity_anim_tick(entity);
   }
 }
 
 //----- (004272E0) --------------------------------------------------------
-void __fastcall entity_anim_start(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t idx)
+void __fastcall entity_anim_init_directional(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t direction)
 {
   KKND::MobdAnimation *v3; // eax
   int anim_speed; // eax
-  KKND::MobdAnimFrame **anim; // edx
+  KKND::MobdAnimation *anim; // edx
 
-  v3 = *(KKND::MobdAnimation **)((char *)&g_current_lvl_mobd[entity->mobd_id].layers[0]->frames[0].x + 4 * idx + offset);
+  v3 = *(KKND::MobdAnimation **)((char *)&g_mobd[entity->mobd_id].layers[0]->frames[0].x + 4 * direction + offset);
   entity->anim = v3;
   if ( v3 )
   {
     anim_speed = v3->anim_speed;
     if ( anim_speed )
       entity->anim_speed = anim_speed;
-    anim = (KKND::MobdAnimFrame **)entity->anim;
+    anim = entity->anim;
     entity->anim_timer = -1;
     entity->anim_cursor = anim;
     entity_anim_tick(entity);
@@ -39733,7 +38530,7 @@ void __fastcall entity_anim_advance(KKND::Entity *entity, ptrdiff_t offset)
   anim = entity->anim;
   if ( anim )
   {
-    v6 = (KKND::MobdAnimation *)((char *)g_current_lvl_mobd[entity->mobd_id].layers[0] + offset);
+    v6 = (KKND::MobdAnimation *)((char *)g_mobd[entity->mobd_id].layers[0] + offset);
     v7 = (KKND::MobdAnimFrame **)((char *)v6 + (char *)entity->anim_cursor - (char *)anim);
     entity->anim = v6;
     entity->anim_cursor = v7;
@@ -39741,14 +38538,14 @@ void __fastcall entity_anim_advance(KKND::Entity *entity, ptrdiff_t offset)
     entity->anim_current_frame = v8;
     anim_current_frame = entity->anim_current_frame;
     shape = v8->shape;
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     entity->shape = shape;
     if ( anim_current_frame->sound_id )
-      entity_408800_play_sound(entity, 16, 0);
+      entity_play_sound(entity, 16, 0);
   }
   else if ( entity )
   {
-    v3 = (KKND::MobdAnimation *)((char *)g_current_lvl_mobd[entity->mobd_id].layers[0] + offset);
+    v3 = (KKND::MobdAnimation *)((char *)g_mobd[entity->mobd_id].layers[0] + offset);
     entity->anim = v3;
     anim_speed = v3->anim_speed;
     if ( anim_speed )
@@ -39761,7 +38558,7 @@ void __fastcall entity_anim_advance(KKND::Entity *entity, ptrdiff_t offset)
 }
 
 //----- (004273B0) --------------------------------------------------------
-void __fastcall entity_anim_switch_direction(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t idx)
+void __fastcall entity_anim_change_direction(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t idx)
 {
   KKND::MobdAnimation *anim; // esi
   KKND::MobdAnimation *v4; // eax
@@ -39778,7 +38575,7 @@ void __fastcall entity_anim_switch_direction(KKND::Entity *entity, ptrdiff_t off
   if ( anim )
   {
     v7 = (char *)((char *)entity->anim_cursor - (char *)anim);
-    v8 = *(KKND::MobdAnimation **)((char *)&g_current_lvl_mobd[entity->mobd_id].layers[0]->frames[0].x + 4 * idx + offset);
+    v8 = *(KKND::MobdAnimation **)((char *)&g_mobd[entity->mobd_id].layers[0]->frames[0].x + 4 * idx + offset);
     entity->anim = v8;
     if ( v8 )
     {
@@ -39788,15 +38585,15 @@ void __fastcall entity_anim_switch_direction(KKND::Entity *entity, ptrdiff_t off
       entity->anim_current_frame = v10;
       anim_current_frame = entity->anim_current_frame;
       shape = v10->shape;
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       entity->shape = shape;
       if ( anim_current_frame->sound_id )
-        entity_408800_play_sound(entity, 16, 0);
+        entity_play_sound(entity, 16, 0);
     }
   }
   else
   {
-    v4 = *(KKND::MobdAnimation **)((char *)&g_current_lvl_mobd[entity->mobd_id].layers[0]->frames[0].x + 4 * idx + offset);
+    v4 = *(KKND::MobdAnimation **)((char *)&g_mobd[entity->mobd_id].layers[0]->frames[0].x + 4 * idx + offset);
     entity->anim = v4;
     if ( v4 )
     {
@@ -39872,10 +38669,10 @@ void __fastcall entity_anim_tick(KKND::Entity *entity)
           entity->shape = v11->shape;
         }
         anim_current_frame = entity->anim_current_frame;
-        entity->is_on_collision_grid = 1;
+        entity->is_collidable = 1;
         sound_id = anim_current_frame->sound_id;
         if ( sound_id )
-          entity_408800_play_sound(entity, sound_id, 16, 0);
+          entity_play_sound(entity, sound_id, 16, 0);
         id = (void *)entity->anim_current_frame->points[0].id;
         if ( id )
         {
@@ -39884,7 +38681,7 @@ void __fastcall entity_anim_tick(KKND::Entity *entity)
           {
             if ( (v15->wait_flags & 0x40000) != 0 )
             {
-              TASK_send_message(nullptr, TaskMessage_MouseHover|0x1, id, entity->task);
+              TSK_send_message(nullptr, TaskMessage_MouseHover|0x1, id, entity->task);
               entity->task->flags_20 |= 0x40000u;
               entity->task->flags_24 |= entity->task->flags_20;
             }
@@ -39916,7 +38713,7 @@ void GAME_AdvanceEntityAnimations()
   KKND::Task *task; // eax
   __int16 can_run; // ax
 
-  if ( g_current_lvl_mobd_verified )
+  if ( g_mobd_active )
   {
     for ( entity = g_entity_head; entity != (KKND::Entity *)&g_entity_head; entity = entity->next )
     {
@@ -39934,12 +38731,12 @@ void GAME_AdvanceEntityAnimations()
 //----- (004275D0) --------------------------------------------------------
 void MOBD_Deinit()
 {
-  if ( g_current_lvl_mobd_verified )
+  if ( g_mobd_active )
   {
     if ( g_entity_pool )
     {
       free(g_entity_pool);
-      g_current_lvl_mobd_verified = 0;
+      g_mobd_active = 0;
       g_entity_pool = nullptr;
     }
   }
@@ -40016,7 +38813,7 @@ void __fastcall unit_init_mobile_base(KKND::Unit *unit)
       v9 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
     else
       v9 = v8->size != UnitSize_Regular ? 7424 : 4096;
-    v10 = BOXD_40DE80(
+    v10 = BOXD_place_unit_world_coords(
             unit,
             v9 + (unit->entity->x & 0xFFFFE000),
             v7 + (unit->entity->y & 0xFFFFE000),
@@ -40040,7 +38837,7 @@ void __fastcall unit_init_mobile_base(KKND::Unit *unit)
     }
     goto LABEL_17;
   }
-  if ( !BOXD_413860(unit) )
+  if ( !BOXD_find_nearby_clear_tile(unit) )
   {
 LABEL_17:
     unit_mode_destroy(unit);
@@ -40157,38 +38954,38 @@ void __fastcall unit_mobile_base_plant(KKND::Unit *unit)
   unit->type = v7;
   anchor->x = -11776;
   unit->mobd_anchors.grid->y = -1280;
-  entity_408800_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
+  entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
   if ( unit_build_40DD00(unit) )
   {
-    TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+    TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
     unit_on_deselected(unit);
     unit->task->message_handler = MessageHandler_Dummy;
     if ( unit->type == UnitType_Surv_Outpost )
     {
       unit->entity->mobd_id = MobdId_Surv_Outpost;
-      entity_anim_start(unit->entity, 1232, 0);
+      entity_anim_init_directional(unit->entity, 1232, 0);
     }
     else
     {
       unit->entity->mobd_id = MobdId_Mute_Clanhall;
     }
-    entity_anim_load(unit->entity, 0);
-    unit->entity->is_on_collision_grid = 1;
-    unit->entity->is_on_collision_grid = 1;
+    entity_anim_init(unit->entity, 0);
+    unit->entity->is_collidable = 1;
+    unit->entity->is_collidable = 1;
     v9 = unit->entity;
     x = unit->mobd_anchors.grid->x;
     v11 = v9->x;
     if ( v7 == UnitType_Surv_Outpost )
     {
       v9->x = ((v11 + x) & 0xFFFFE000) - x + 2048;
-      unit->entity->is_on_collision_grid = 1;
+      unit->entity->is_collidable = 1;
       v12 = unit->entity;
       v13 = ((v12->y + unit->mobd_anchors.grid->y) & 0xFFFFE000) - unit->mobd_anchors.grid->y + 4096;
     }
     else
     {
       v9->x = ((v11 + x) & 0xFFFFE000) - x + 7936;
-      unit->entity->is_on_collision_grid = 1;
+      unit->entity->is_collidable = 1;
       v12 = unit->entity;
       v13 = ((v12->y + unit->mobd_anchors.grid->y) & 0xFFFFE000) - unit->mobd_anchors.grid->y + 3328;
     }
@@ -40201,7 +38998,7 @@ void __fastcall unit_mobile_base_plant(KKND::Unit *unit)
   {
     v8 = unit->entity;
     unit->type = unit->multi_purpose_field_3;
-    BOXD_40DE80(unit, v8->x, v8->y, UnitPosition_Slot0);
+    BOXD_place_unit_world_coords(unit, v8->x, v8->y, UnitPosition_Slot0);
     unit->entity->x_speed = x_speed;
     unit->entity->y_speed = y_speed;
   }
@@ -40216,7 +39013,7 @@ unsigned int __thiscall sub_427BB0(int this)
   v2 = 1232;
   if ( *(_DWORD *)(this + 16) != 58 )
     v2 = 968;
-  entity_anim_start(*(KKND::Entity **)(this + 92), v2, 1);
+  entity_anim_init_directional(*(KKND::Entity **)(this + 92), v2, 1);
   v3 = *(KKND::Task **)(this + 12);
   *(_DWORD *)(this + 64) = sub_427BF0;
   return TASK_yield(v3, Task_Sleep, 30);
@@ -40231,7 +39028,7 @@ unsigned int __thiscall sub_427BF0(int this)
   v2 = 1232;
   if ( *(_DWORD *)(this + 16) != 58 )
     v2 = 968;
-  entity_anim_start(*(KKND::Entity **)(this + 92), v2, 2);
+  entity_anim_init_directional(*(KKND::Entity **)(this + 92), v2, 2);
   v3 = *(KKND::Task **)(this + 12);
   *(_DWORD *)(this + 64) = unit_mode_427C30;
   return TASK_yield(v3, Task_Sleep, 30);
@@ -40602,7 +39399,7 @@ unsigned int __cdecl sub_4280A0(KKND::Task *sender)
                 {
                   v7 = 0;
                   if ( production_list_head->notification_task )
-                    TASK_send_message(
+                    TSK_send_message(
                       sender,
                       TaskMessage_UnitReady,
                       production_list_head->notification_arg,
@@ -41087,7 +39884,7 @@ void __cdecl __noreturn task_game_update_loop(KKND::Task *task)
     v1 = g_game_event_pool;
   }
   g_game_event_pool[7].next = nullptr;
-  g_game_event_free_pool = g_game_event_pool;
+  g_game_event_free_head = g_game_event_pool;
   g_game_event_queue.next = nullptr;
   selection_pool = (KKND::CursorUnitSelection *)TASK_Alloc(task, 0x4B0u);
   cursor.selection_pool = selection_pool;
@@ -41096,7 +39893,7 @@ void __cdecl __noreturn task_game_update_loop(KKND::Task *task)
     TASK_Terminate(task);
     selection_pool = nullptr;
   }
-  cursor.selection_free_pool = selection_pool;
+  cursor.selection_free_head = selection_pool;
   for ( j = 0; j < 99; ++j )
   {
     selection_pool[j].next = &selection_pool[j + 1];
@@ -41119,14 +39916,14 @@ void __cdecl __noreturn task_game_update_loop(KKND::Task *task)
   cursor.cursor_hitbox_tester = entity_create(MobdId_Cursors, nullptr, nullptr);
   cursor.cursor_hitbox_tester->task = task;
   cursor.cursor_hitbox_tester->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_cursor;
-  entity_anim_load(cursor.cursor_hitbox_tester, 12);
+  entity_anim_init(cursor.cursor_hitbox_tester, 12);
   cursor.cursor_hitbox_tester->z = 1;
   cursor.cursor_entity = entity_create(MobdId_Cursors, nullptr, nullptr);
   cursor.cursor_entity->task = task;
   cursor_entity = cursor.cursor_entity;
   task->entity = cursor.cursor_entity;
   cursor_entity->z = 1001;
-  entity_anim_load(cursor.cursor_entity, 0);
+  entity_anim_init(cursor.cursor_entity, 0);
   cursor.cursor_entity->rend->flags |= 0x40000000u;
   while ( 1 )
   {
@@ -41142,7 +39939,7 @@ void __cdecl __noreturn task_game_update_loop(KKND::Task *task)
       dword_47A5A0 = 10;
       if ( g_netz_synchronized_lockstep_mode )
         goto LABEL_29;
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, receiver);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, receiver);
     }
     v7 = g_netz_synchronized_lockstep_mode;
     if ( !g_netz_synchronized_lockstep_mode )
@@ -41168,7 +39965,7 @@ void __cdecl __noreturn task_game_update_loop(KKND::Task *task)
       if ( cursor.cursor_mobd_offset == 12 )
         goto LABEL_30;
       cursor.cursor_mobd_offset = 12;
-      entity_anim_load(cursor.cursor_hitbox_tester, 12);
+      entity_anim_init(cursor.cursor_hitbox_tester, 12);
       v7 = g_netz_synchronized_lockstep_mode;
     }
 LABEL_29:
@@ -41193,7 +39990,7 @@ LABEL_30:
                 if ( v7 )
                 {
 LABEL_165:
-                  cursor.cursor_hitbox_tester->is_on_collision_grid = 1;
+                  cursor.cursor_hitbox_tester->is_collidable = 1;
                   if ( sub_44B0D0(cursor.cursor_hitbox_tester->x, cursor.cursor_hitbox_tester->y)
                     && cursor.hovered_unit_task
                     && !g_netz_synchronized_lockstep_mode
@@ -41203,17 +40000,17 @@ LABEL_165:
                     if ( cursor.cursor_mobd_offset != 48 )
                     {
                       cursor.cursor_mobd_offset = 48;
-                      entity_anim_load(cursor.cursor_hitbox_tester, 48);
+                      entity_anim_init(cursor.cursor_hitbox_tester, 48);
                     }
                     if ( cursor_429C40(&cursor) )
                     {
                       next = g_game_event_queue.next;
                       *(_DWORD *)g_game_event_queue.evt.payload = ctx->unit_id;
                       g_game_event_queue.evt.type = GameEvent_SelectedUnit;
-                      v53 = g_game_event_free_pool;
-                      if ( g_game_event_free_pool )
+                      v53 = g_game_event_free_head;
+                      if ( g_game_event_free_head )
                       {
-                        g_game_event_free_pool = g_game_event_free_pool->next;
+                        g_game_event_free_head = g_game_event_free_head->next;
                         *(_DWORD *)&v53->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
                         *(_DWORD *)&v53->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
                         *(_DWORD *)&v53->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -41233,18 +40030,18 @@ LABEL_165:
                       }
                       if ( (KKND::CursorState *)cursor.selection_head == &cursor )
                       {
-                        selection_free_pool = cursor.selection_free_pool;
+                        selection_free_pool = cursor.selection_free_head;
                       }
                       else
                       {
-                        cursor.selection_tail->next = cursor.selection_free_pool;
+                        cursor.selection_tail->next = cursor.selection_free_head;
                         selection_free_pool = cursor.selection_head;
-                        cursor.selection_free_pool = cursor.selection_head;
+                        cursor.selection_free_head = cursor.selection_head;
                         cursor.selection_head = (KKND::CursorUnitSelection *)&cursor;
                         cursor.selection_tail = (KKND::CursorUnitSelection *)&cursor;
                       }
                       if ( selection_free_pool )
-                        cursor.selection_free_pool = selection_free_pool->next;
+                        cursor.selection_free_head = selection_free_pool->next;
                       else
                         selection_free_pool = nullptr;
                       if ( selection_free_pool )
@@ -41254,7 +40051,7 @@ LABEL_165:
                         selection_free_pool->prev = (KKND::CursorUnitSelection *)&cursor;
                         cursor.selection_head->prev = selection_free_pool;
                         cursor.selection_head = selection_free_pool;
-                        TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, ctx->task);
+                        TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, ctx->task);
                         v57 = ctx->player_num == g_player_num;
                         cursor.are_own_units_selected = v57;
                         if ( v57 )
@@ -41268,18 +40065,18 @@ LABEL_165:
                     if ( cursor.cursor_mobd_offset != 12 )
                     {
                       cursor.cursor_mobd_offset = 12;
-                      entity_anim_load(cursor.cursor_hitbox_tester, 12);
+                      entity_anim_init(cursor.cursor_hitbox_tester, 12);
                     }
                     if ( (g_game_mouse_state.new_actions_mask & 0x10) != 0 && !g_netz_synchronized_lockstep_mode )
                     {
-                      cursor.cursor_hitbox_tester->is_on_collision_grid = 1;
+                      cursor.cursor_hitbox_tester->is_collidable = 1;
                       cursor_42C9E0(&cursor, cursor.cursor_hitbox_tester->x, cursor.cursor_hitbox_tester->y);
                     }
                   }
                   else if ( cursor.cursor_mobd_offset != 12 )
                   {
                     cursor.cursor_mobd_offset = 12;
-                    entity_anim_load(cursor.cursor_hitbox_tester, 12);
+                    entity_anim_init(cursor.cursor_hitbox_tester, 12);
                   }
                 }
                 else if ( current_combo == 30 && cursor.hovered_unit_task && !dword_47A730 )
@@ -41292,10 +40089,10 @@ LABEL_165:
                       *(_DWORD *)g_game_event_queue.evt.payload = v46->player_num;
                       v47 = g_game_event_queue.next;
                       g_game_event_queue.evt.type = GameEvent_SwearAllegiance;
-                      v48 = g_game_event_free_pool;
-                      if ( g_game_event_free_pool )
+                      v48 = g_game_event_free_head;
+                      if ( g_game_event_free_head )
                       {
-                        g_game_event_free_pool = g_game_event_free_pool->next;
+                        g_game_event_free_head = g_game_event_free_head->next;
                         *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
                         *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
                         *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -41354,12 +40151,12 @@ LABEL_165:
               }
               if ( v38 )
               {
-                p_cmd = &node[0]->job->cmd;
+                p_cmd = &dword_47A010[0]->job->cmd;
                 v44 = v39 / v38 - (g_screen_width << 7) + 4096;
                 v45 = n / v38 - (g_screen_height << 7);
                 if ( v44 >= 0 )
                 {
-                  if ( v44 > (32 - g_screen_width + REND_get_width(&node[0]->job->cmd)) << 8 )
+                  if ( v44 > (32 - g_screen_width + REND_get_width(&dword_47A010[0]->job->cmd)) << 8 )
                     v44 = (32 - g_screen_width + REND_get_width(p_cmd)) << 8;
                 }
                 else
@@ -41382,25 +40179,25 @@ LABEL_165:
             }
           }
           else if ( cursor.hovered_unit_task
-                 && (cursor.cursor_hitbox_tester->is_on_collision_grid = 1,
+                 && (cursor.cursor_hitbox_tester->is_collidable = 1,
                      sub_44B0D0(cursor.cursor_hitbox_tester->x, cursor.cursor_hitbox_tester->y)) )
           {
             if ( cursor.cursor_mobd_offset != 36 )
             {
               cursor.cursor_mobd_offset = 36;
-              entity_anim_load(cursor.cursor_hitbox_tester, 36);
+              entity_anim_init(cursor.cursor_hitbox_tester, 36);
             }
             if ( cursor.hovered_unit_task && !cursor.hovered_ui_task )
-              TASK_send_message(nullptr, TaskMessage_ShowHint, nullptr, cursor.hovered_unit_task);
+              TSK_send_message(nullptr, TaskMessage_ShowHint, nullptr, cursor.hovered_unit_task);
           }
           else if ( cursor.cursor_mobd_offset != 24 )
           {
             cursor.cursor_mobd_offset = 24;
-            entity_anim_load(cursor.cursor_hitbox_tester, 24);
+            entity_anim_init(cursor.cursor_hitbox_tester, 24);
           }
         }
         else if ( !cursor.hovered_unit_task
-               || (cursor.cursor_hitbox_tester->is_on_collision_grid = 1,
+               || (cursor.cursor_hitbox_tester->is_collidable = 1,
                    !sub_44B0D0(cursor.cursor_hitbox_tester->x, cursor.cursor_hitbox_tester->y))
                || (v31 = (KKND::Unit *)cursor.hovered_unit_task->ctx, v31->player_num != g_player_num)
                || v31->stats->speed
@@ -41411,7 +40208,7 @@ LABEL_165:
           if ( cursor.cursor_mobd_offset != 448 )
           {
             cursor.cursor_mobd_offset = 448;
-            entity_anim_load(cursor.cursor_hitbox_tester, 448);
+            entity_anim_init(cursor.cursor_hitbox_tester, 448);
           }
         }
         else
@@ -41419,17 +40216,17 @@ LABEL_165:
           if ( cursor.cursor_mobd_offset != 304 )
           {
             cursor.cursor_mobd_offset = 304;
-            entity_anim_load(cursor.cursor_hitbox_tester, 304);
+            entity_anim_init(cursor.cursor_hitbox_tester, 304);
           }
           if ( cursor_429C40(&cursor) )
           {
             v33 = g_game_event_queue.next;
             g_game_event_queue.evt.type = GameEvent_BuildingSold;
             *(_DWORD *)g_game_event_queue.evt.payload = v31->unit_id;
-            v34 = g_game_event_free_pool;
-            if ( !g_game_event_free_pool )
+            v34 = g_game_event_free_head;
+            if ( !g_game_event_free_head )
               goto LABEL_110;
-            g_game_event_free_pool = g_game_event_free_pool->next;
+            g_game_event_free_head = g_game_event_free_head->next;
             *(_DWORD *)&v34->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
             *(_DWORD *)&v34->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
             *(_DWORD *)&v34->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -41459,20 +40256,20 @@ LABEL_110:
         if ( cursor.cursor_mobd_offset != 304 )
         {
           cursor.cursor_mobd_offset = 304;
-          entity_anim_load(cursor.cursor_hitbox_tester, 304);
+          entity_anim_init(cursor.cursor_hitbox_tester, 304);
         }
         if ( cursor_429C40(&cursor) )
         {
           *(_DWORD *)g_game_event_queue.evt.payload = g_player_num;
-          cursor.cursor_hitbox_tester->is_on_collision_grid = 1;
+          cursor.cursor_hitbox_tester->is_collidable = 1;
           *(_DWORD *)&g_game_event_queue.evt.payload[4] = cursor.cursor_hitbox_tester->x;
           v27 = g_game_event_queue.next;
           *(_DWORD *)&g_game_event_queue.evt.payload[8] = cursor.cursor_hitbox_tester->y;
           g_game_event_queue.evt.type = GameEvent_AirstrikeCalled;
-          v28 = g_game_event_free_pool;
-          if ( g_game_event_free_pool )
+          v28 = g_game_event_free_head;
+          if ( g_game_event_free_head )
           {
-            g_game_event_free_pool = g_game_event_free_pool->next;
+            g_game_event_free_head = g_game_event_free_head->next;
             *(_DWORD *)&v28->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
             *(_DWORD *)&v28->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
             *(_DWORD *)&v28->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -41517,7 +40314,7 @@ LABEL_110:
       while ( v12 );
       v10->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
       v10->rend->flags |= 0x10000000u;
-      entity_anim_start(v10, v9->mobd_lookup_offset_move, 8);
+      entity_anim_init_directional(v10, v9->mobd_lookup_offset_move, 8);
       v10->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_explosion;
       v10->z = 2;
       while ( 1 )
@@ -41567,14 +40364,14 @@ LABEL_110:
         id = v10->anim_current_frame->points[0].id;
         if ( g_netz_synchronized_lockstep_mode )
           goto LABEL_75;
-        v10->is_on_collision_grid = 1;
-        cursor.cursor_hitbox_tester->is_on_collision_grid = 1;
+        v10->is_collidable = 1;
+        cursor.cursor_hitbox_tester->is_collidable = 1;
         v20 = *(_DWORD *)(id + 4);
         x = cursor.cursor_hitbox_tester->x;
-        v10->is_on_collision_grid = 1;
+        v10->is_collidable = 1;
         v10->x = ((v20 + x) & 0xFFFFE000) - v20 + 4096;
         v10->y = ((*(_DWORD *)(id + 8) + cursor.cursor_hitbox_tester->y) & 0xFFFFE000) - *(_DWORD *)(id + 8) + 4096;
-        cursor.cursor_hitbox_tester->is_on_collision_grid = 1;
+        cursor.cursor_hitbox_tester->is_collidable = 1;
         v22 = sub_42C810(
                 v59,
                 *(_DWORD *)(id + 4) + cursor.cursor_hitbox_tester->x,
@@ -41588,12 +40385,12 @@ LABEL_110:
           if ( cursor.cursor_mobd_offset != 12 )
           {
             cursor.cursor_mobd_offset = 12;
-            entity_anim_load(cursor.cursor_hitbox_tester, 12);
+            entity_anim_init(cursor.cursor_hitbox_tester, 12);
           }
         }
         else
         {
-          cursor_load_mobd(&cursor, 448);
+          cursor_anim_set(&cursor, 448);
         }
         if ( (g_game_mouse_state.new_actions_mask & 0x10) != 0 && v22 )
           break;
@@ -41621,7 +40418,7 @@ LABEL_110:
           SOUND_play(SoundId_129|SoundId_64, 0, g_4690A8_sfx_volume, 16, 0);
           *(_WORD *)g_game_event_queue.evt.payload = cursor.planner->type;
           v25 = v10->x;
-          v10->is_on_collision_grid = 1;
+          v10->is_collidable = 1;
           *(_DWORD *)&g_game_event_queue.evt.payload[2] = v25;
           y = v10->y;
           g_game_event_queue.evt.type = GameEvent_BuildingPlaced;
@@ -41636,9 +40433,9 @@ LABEL_110:
 LABEL_75:
       entity_remove(v10);
       sub_42C9C0(v59);
-      cursor_load_mobd(&cursor, 12);
+      cursor_anim_set(&cursor, 12);
       if ( g_netz_synchronized_lockstep_mode )
-        cursor_load_mobd(&cursor, 12);
+        cursor_anim_set(&cursor, 12);
       else
         cursor.is_placing_building = 0;
     }
@@ -41666,12 +40463,12 @@ GameEventNode *__thiscall sub_429770(_DWORD *this)
   GameEventNode *v3; // esi
   char v4; // cl
 
-  result = g_game_event_free_pool;
+  result = g_game_event_free_head;
   next = g_game_event_queue.next;
-  v3 = g_game_event_free_pool;
-  if ( g_game_event_free_pool )
+  v3 = g_game_event_free_head;
+  if ( g_game_event_free_head )
   {
-    g_game_event_free_pool = g_game_event_free_pool->next;
+    g_game_event_free_head = g_game_event_free_head->next;
     *(_DWORD *)&v3->evt.type = *this;
     *(_DWORD *)&v3->evt.payload[3] = *(this + 1);
     *(_DWORD *)&v3->evt.payload[7] = *(this + 2);
@@ -41729,10 +40526,10 @@ int __fastcall cursor_select_control_group(void *cursor, int group)
     *(_DWORD *)g_game_event_queue.evt.payload = group;
     v27 = 0;
     g_game_event_queue.evt.type = GameEvent_RecalledControlGroup;
-    v5 = g_game_event_free_pool;
-    if ( g_game_event_free_pool )
+    v5 = g_game_event_free_head;
+    if ( g_game_event_free_head )
     {
-      g_game_event_free_pool = g_game_event_free_pool->next;
+      g_game_event_free_head = g_game_event_free_head->next;
       *(_DWORD *)&v5->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
       *(_DWORD *)&v5->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
       *(_DWORD *)&v5->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -41757,7 +40554,7 @@ int __fastcall cursor_select_control_group(void *cursor, int group)
     *((_DWORD *)cursor + 17) = 0;
     *((_DWORD *)cursor + 18) = 0;
     for ( *((_DWORD *)cursor + 27) = 0; v8 != cursor; v8 = v8->next )
-      TASK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, (KKND::Task *)v8->locals);
+      TSK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, (KKND::Task *)v8->locals);
     if ( *(void **)cursor != cursor )
     {
       **((_DWORD **)cursor + 1) = *((_DWORD *)cursor + 4);
@@ -41782,7 +40579,7 @@ int __fastcall cursor_select_control_group(void *cursor, int group)
           *(_DWORD *)(v11 + 4) = cursor;
           *(_DWORD *)(*(_DWORD *)cursor + 4) = v11;
           *(_DWORD *)cursor = v11;
-          TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, *(KKND::Task **)(v11 + 8));
+          TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, *(KKND::Task **)(v11 + 8));
           if ( v9->player_num == g_player_num )
             *((_DWORD *)cursor + 14) = 1;
           ++v27;
@@ -41861,13 +40658,13 @@ LABEL_44:
       }
       if ( v18 )
       {
-        p_cmd = &node[0]->job->cmd;
+        p_cmd = &dword_47A010[0]->job->cmd;
         v23 = result / v18 - (g_screen_width << 7) + 4096;
         result = g_screen_height << 7;
         v24 = k / v18 - (g_screen_height << 7);
         if ( v23 >= 0 )
         {
-          result = (32 - g_screen_width + REND_get_width(&node[0]->job->cmd)) << 8;
+          result = (32 - g_screen_width + REND_get_width(&dword_47A010[0]->job->cmd)) << 8;
           if ( v23 > result )
           {
             result = REND_get_width(p_cmd);
@@ -41908,12 +40705,12 @@ LABEL_44:
 // 478A8C: using guessed type int g_screen_width;
 
 //----- (00429C20) --------------------------------------------------------
-void __fastcall cursor_load_mobd(KKND::CursorState *cursor, int offset)
+void __fastcall cursor_anim_set(KKND::CursorState *cursor, ptrdiff_t offset)
 {
   if ( offset != cursor->cursor_mobd_offset )
   {
     cursor->cursor_mobd_offset = offset;
-    entity_anim_load((KKND::Entity *)cursor[3].selection_tail, offset);
+    entity_anim_init(cursor->cursor_hitbox_tester, offset);
   }
 }
 
@@ -41932,7 +40729,7 @@ BOOL __thiscall cursor_429C40(KKND::CursorState *cursor)
 
   if ( (g_game_mouse_state.new_actions_mask & 0x10) == 0 )
     return 0;
-  cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+  cursor->cursor_hitbox_tester->is_collidable = 1;
   cursor_hitbox_tester = cursor->cursor_hitbox_tester;
   v3 = 0;
   v4 = 0;
@@ -41943,7 +40740,7 @@ BOOL __thiscall cursor_429C40(KKND::CursorState *cursor)
     while ( 1 )
     {
       game_process_events(cursor, 0);
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       v6 = cursor->cursor_hitbox_tester;
       v7 = v6->x - x;
       if ( v7 < 0 )
@@ -41960,7 +40757,7 @@ BOOL __thiscall cursor_429C40(KKND::CursorState *cursor)
         && cursor->cursor_mobd_offset != 12 )
       {
         cursor->cursor_mobd_offset = 12;
-        entity_anim_load(v6, 12);
+        entity_anim_init(v6, 12);
       }
       if ( (g_game_mouse_state.released_actions_mask & 0x10) != 0 )
         return 1;
@@ -41969,7 +40766,7 @@ BOOL __thiscall cursor_429C40(KKND::CursorState *cursor)
     {
       v10 = cursor->cursor_hitbox_tester;
       cursor->cursor_mobd_offset = 12;
-      entity_anim_load(v10, 12);
+      entity_anim_init(v10, 12);
     }
     cursor_42C9E0(cursor, x, y);
     v3 = 1;
@@ -42261,10 +41058,10 @@ void __fastcall cursor_group_orders(KKND::CursorState *cursor)
     next = g_game_event_queue.next;
     *(_DWORD *)g_game_event_queue.evt.payload = current_combo - 1;
     g_game_event_queue.evt.type = GameEvent_AssignedControlGroup;
-    v8 = g_game_event_free_pool;
-    if ( g_game_event_free_pool )
+    v8 = g_game_event_free_head;
+    if ( g_game_event_free_head )
     {
-      g_game_event_free_pool = g_game_event_free_pool->next;
+      g_game_event_free_head = g_game_event_free_head->next;
       *(_DWORD *)&v8->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
       *(_DWORD *)&v8->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
       *(_DWORD *)&v8->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42289,7 +41086,7 @@ void __fastcall cursor_group_orders(KKND::CursorState *cursor)
     return;
   v11 = 1;
   if ( !cursor->hovered_unit_task
-    || (cursor->cursor_hitbox_tester->is_on_collision_grid = 1,
+    || (cursor->cursor_hitbox_tester->is_collidable = 1,
         !sub_44B0D0(cursor->cursor_hitbox_tester->x, cursor->cursor_hitbox_tester->y)) )
   {
     if ( !cursor->are_own_units_selected || !cursor->are_movable_units_selected )
@@ -42301,20 +41098,20 @@ void __fastcall cursor_group_orders(KKND::CursorState *cursor)
         {
           cursor_hitbox_tester = cursor->cursor_hitbox_tester;
           cursor->cursor_mobd_offset = 12;
-          entity_anim_load(cursor_hitbox_tester, 12);
+          entity_anim_init(cursor_hitbox_tester, 12);
         }
-        cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+        cursor->cursor_hitbox_tester->is_collidable = 1;
         cursor_42C9E0(cursor, cursor->cursor_hitbox_tester->x, cursor->cursor_hitbox_tester->y);
       }
       else if ( cursor_mobd_offset != 12 )
       {
         v77 = cursor->cursor_hitbox_tester;
         cursor->cursor_mobd_offset = 12;
-        entity_anim_load(v77, 12);
+        entity_anim_init(v77, 12);
       }
       return;
     }
-    cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+    cursor->cursor_hitbox_tester->is_collidable = 1;
     if ( !sub_44B0D0(cursor->cursor_hitbox_tester->x, cursor->cursor_hitbox_tester->y) )
       goto LABEL_232;
     if ( cursor->is_cursor_over_impassable_terrain )
@@ -42323,13 +41120,13 @@ void __fastcall cursor_group_orders(KKND::CursorState *cursor)
       {
         v72 = cursor->cursor_hitbox_tester;
         cursor->cursor_mobd_offset = 448;
-        entity_anim_load(v72, 448);
+        entity_anim_init(v72, 448);
       }
       cursor_429C40(cursor);
       return;
     }
     if ( cursor->selection_executing_archetype == UnitCommandArchetype_MobileDerrick
-      && (cursor->cursor_hitbox_tester->is_on_collision_grid = 1,
+      && (cursor->cursor_hitbox_tester->is_collidable = 1,
           oil_patch_407040_find(cursor->cursor_hitbox_tester->x, cursor->cursor_hitbox_tester->y)) )
     {
       v73 = 572;
@@ -42345,7 +41142,7 @@ LABEL_232:
     }
     v74 = cursor->cursor_hitbox_tester;
     cursor->cursor_mobd_offset = v73;
-    entity_anim_load(v74, v73);
+    entity_anim_init(v74, v73);
 LABEL_234:
     if ( cursor_429C40(cursor) )
       sub_42B230(cursor);
@@ -42377,7 +41174,7 @@ LABEL_234:
     {
       v20 = cursor->cursor_hitbox_tester;
       cursor->cursor_mobd_offset = 244;
-      entity_anim_load(v20, 244);
+      entity_anim_init(v20, 244);
     }
     if ( cursor_429C40(cursor) )
     {
@@ -42392,10 +41189,10 @@ LABEL_234:
         *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
         *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
         v22 = g_game_event_queue.next;
-        v23 = g_game_event_free_pool;
-        if ( g_game_event_free_pool )
+        v23 = g_game_event_free_head;
+        if ( g_game_event_free_head )
         {
-          g_game_event_free_pool = g_game_event_free_pool->next;
+          g_game_event_free_head = g_game_event_free_head->next;
           *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
           *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
           *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42435,17 +41232,17 @@ LABEL_175:
     {
       v27 = cursor->cursor_hitbox_tester;
       cursor->cursor_mobd_offset = 304;
-      entity_anim_load(v27, 304);
+      entity_anim_init(v27, 304);
     }
     if ( !cursor_429C40(cursor) )
       return;
     *(_DWORD *)g_game_event_queue.evt.payload = unit->unit_id;
     v28 = g_game_event_queue.next;
     g_game_event_queue.evt.type = GameEvent_AttackCommand;
-    v29 = g_game_event_free_pool;
-    if ( g_game_event_free_pool )
+    v29 = g_game_event_free_head;
+    if ( g_game_event_free_head )
     {
-      g_game_event_free_pool = g_game_event_free_pool->next;
+      g_game_event_free_head = g_game_event_free_head->next;
       *(_DWORD *)&v29->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
       *(_DWORD *)&v29->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
       *(_DWORD *)&v29->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42579,7 +41376,7 @@ LABEL_108:
     {
       v38 = cursor->cursor_hitbox_tester;
       cursor->cursor_mobd_offset = 144;
-      entity_anim_load(v38, 144);
+      entity_anim_init(v38, 144);
     }
     if ( !cursor_429C40(cursor) )
       return;
@@ -42594,10 +41391,10 @@ LABEL_108:
     *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
     *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
     v22 = g_game_event_queue.next;
-    v23 = g_game_event_free_pool;
-    if ( !g_game_event_free_pool )
+    v23 = g_game_event_free_head;
+    if ( !g_game_event_free_head )
       return;
-    g_game_event_free_pool = g_game_event_free_pool->next;
+    g_game_event_free_head = g_game_event_free_head->next;
     *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
     *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
     *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42630,7 +41427,7 @@ LABEL_108:
         {
           v43 = cursor->cursor_hitbox_tester;
           cursor->cursor_mobd_offset = 572;
-          entity_anim_load(v43, 572);
+          entity_anim_init(v43, 572);
         }
         if ( !cursor_429C40(cursor) )
           return;
@@ -42640,10 +41437,10 @@ LABEL_108:
         *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
         *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
         v22 = g_game_event_queue.next;
-        v23 = g_game_event_free_pool;
-        if ( !g_game_event_free_pool )
+        v23 = g_game_event_free_head;
+        if ( !g_game_event_free_head )
           return;
-        g_game_event_free_pool = g_game_event_free_pool->next;
+        g_game_event_free_head = g_game_event_free_head->next;
         *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
         *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
         *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42679,7 +41476,7 @@ LABEL_149:
         {
           v47 = cursor->cursor_hitbox_tester;
           cursor->cursor_mobd_offset = 572;
-          entity_anim_load(v47, 572);
+          entity_anim_init(v47, 572);
         }
         if ( !cursor_429C40(cursor) )
           return;
@@ -42689,10 +41486,10 @@ LABEL_149:
         v22 = g_game_event_queue.next;
         *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
         *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
-        v23 = g_game_event_free_pool;
-        if ( !g_game_event_free_pool )
+        v23 = g_game_event_free_head;
+        if ( !g_game_event_free_head )
           return;
-        g_game_event_free_pool = g_game_event_free_pool->next;
+        g_game_event_free_head = g_game_event_free_head->next;
         *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
         *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
         *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42736,17 +41533,17 @@ LABEL_161:
     {
       v53 = cursor->cursor_hitbox_tester;
       cursor->cursor_mobd_offset = 188;
-      entity_anim_load(v53, 188);
+      entity_anim_init(v53, 188);
     }
     if ( cursor_429C40(cursor) )
     {
       v22 = g_game_event_queue.next;
       g_game_event_queue.evt.type = GameEvent_MobileBaseDeployed;
       *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
-      v23 = g_game_event_free_pool;
-      if ( g_game_event_free_pool )
+      v23 = g_game_event_free_head;
+      if ( g_game_event_free_head )
       {
-        g_game_event_free_pool = g_game_event_free_pool->next;
+        g_game_event_free_head = g_game_event_free_head->next;
         *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
         *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
         *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42777,7 +41574,7 @@ LABEL_161:
       {
         v60 = cursor->cursor_hitbox_tester;
         cursor->cursor_mobd_offset = 448;
-        entity_anim_load(v60, 448);
+        entity_anim_init(v60, 448);
       }
       v61 = cursor->selection_executing_representative;
       if ( v61 && v57[2] && v61->entity->parent == (KKND::Entity *)unit->unit_id )
@@ -42786,14 +41583,10 @@ LABEL_161:
         {
           v62 = cursor->cursor_hitbox_tester;
           cursor->cursor_mobd_offset = 280;
-          entity_anim_load(v62, 280);
+          entity_anim_init(v62, 280);
         }
         if ( cursor_429C40(cursor) )
-          TASK_broadcast_message(
-            cursor->cursor_task,
-            TaskMessage_UpgradeCancelled,
-            nullptr,
-            TaskChannel_UpgradeProgress);
+          TSK_broadcast_message(cursor->cursor_task, TaskMessage_UpgradeCancelled, nullptr, TaskChannel_UpgradeProgress);
       }
     }
     else
@@ -42802,13 +41595,13 @@ LABEL_161:
       {
         v58 = cursor->cursor_hitbox_tester;
         cursor->cursor_mobd_offset = 216;
-        entity_anim_load(v58, 216);
+        entity_anim_init(v58, 216);
       }
       if ( cursor_429C40(cursor) )
       {
         v59 = cursor->selection_executing_representative;
         if ( v59 )
-          TASK_send_message(cursor->cursor_task, TaskMessage_UpgradeStarted, unit, v59->task);
+          TSK_send_message(cursor->cursor_task, TaskMessage_UpgradeStarted, unit, v59->task);
       }
     }
   }
@@ -42818,7 +41611,7 @@ LABEL_161:
     {
       v63 = cursor->cursor_hitbox_tester;
       cursor->cursor_mobd_offset = 48;
-      entity_anim_load(v63, 48);
+      entity_anim_init(v63, 48);
     }
     if ( cursor_429C40(cursor) )
     {
@@ -42831,10 +41624,10 @@ LABEL_161:
         v65 = g_game_event_queue.next;
         *(_DWORD *)g_game_event_queue.evt.payload = unit->unit_id;
         g_game_event_queue.evt.type = GameEvent_SelectedUnit;
-        v66 = g_game_event_free_pool;
-        if ( g_game_event_free_pool )
+        v66 = g_game_event_free_head;
+        if ( g_game_event_free_head )
         {
-          g_game_event_free_pool = g_game_event_free_pool->next;
+          g_game_event_free_head = g_game_event_free_head->next;
           *(_DWORD *)&v66->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
           *(_DWORD *)&v66->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
           *(_DWORD *)&v66->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -42856,17 +41649,17 @@ LABEL_161:
         cursor->selection_executing_archetype = UnitCommandArchetype_None;
         dword_468980 = -1;
         for ( n = (KKND::CursorState *)cursor->selection_head; n != cursor; n = (KKND::CursorState *)n->selection_head )
-          TASK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, n->_cursor_state_task_8);
+          TSK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, n->_cursor_state_task_8);
         if ( (KKND::CursorState *)cursor->selection_head != cursor )
         {
-          cursor->selection_tail->next = cursor->selection_free_pool;
-          cursor->selection_free_pool = cursor->selection_head;
+          cursor->selection_tail->next = cursor->selection_free_head;
+          cursor->selection_free_head = cursor->selection_head;
           cursor->selection_head = (KKND::CursorUnitSelection *)cursor;
           cursor->selection_tail = (KKND::CursorUnitSelection *)cursor;
         }
-        selection_free_pool = cursor->selection_free_pool;
+        selection_free_pool = cursor->selection_free_head;
         if ( selection_free_pool )
-          cursor->selection_free_pool = selection_free_pool->next;
+          cursor->selection_free_head = selection_free_pool->next;
         else
           selection_free_pool = nullptr;
         if ( selection_free_pool )
@@ -42876,7 +41669,7 @@ LABEL_161:
           selection_free_pool->prev = (KKND::CursorUnitSelection *)cursor;
           cursor->selection_head->prev = selection_free_pool;
           cursor->selection_head = selection_free_pool;
-          TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, unit->task);
+          TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, unit->task);
           v71 = unit->player_num == g_player_num;
           cursor->are_own_units_selected = v71;
           if ( v71 )
@@ -42922,14 +41715,14 @@ void __fastcall cursor_42AFD0(KKND::CursorState *cursor, KKND::Unit *unit)
 LABEL_27:
     cursor_hitbox_tester = cursor->cursor_hitbox_tester;
     cursor->cursor_mobd_offset = 292;
-    entity_anim_load(cursor_hitbox_tester, 292);
+    entity_anim_init(cursor_hitbox_tester, 292);
     return;
   }
   if ( cursor->cursor_mobd_offset != 144 )
   {
     v5 = cursor->cursor_hitbox_tester;
     cursor->cursor_mobd_offset = 144;
-    entity_anim_load(v5, 144);
+    entity_anim_init(v5, 144);
   }
   if ( cursor_429C40(cursor) && cursor->selection_executing_representative )
   {
@@ -42937,10 +41730,10 @@ LABEL_27:
     *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
     next = g_game_event_queue.next;
     *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
-    v7 = g_game_event_free_pool;
-    if ( g_game_event_free_pool )
+    v7 = g_game_event_free_head;
+    if ( g_game_event_free_head )
     {
-      g_game_event_free_pool = g_game_event_free_pool->next;
+      g_game_event_free_head = g_game_event_free_head->next;
       *(_DWORD *)&v7->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
       *(_DWORD *)&v7->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
       *(_DWORD *)&v7->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43022,15 +41815,15 @@ void __thiscall sub_42B230(KKND::CursorState *cursor)
   int v25; // [esp-Ch] [ebp-1Ch]
   int v26; // [esp-Ch] [ebp-1Ch]
 
-  cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+  cursor->cursor_hitbox_tester->is_collidable = 1;
   *(_DWORD *)g_game_event_queue.evt.payload = cursor->cursor_hitbox_tester->x;
   *(_DWORD *)&g_game_event_queue.evt.payload[4] = cursor->cursor_hitbox_tester->y;
   next = g_game_event_queue.next;
   g_game_event_queue.evt.type = GameEvent_MoveCommand;
-  v3 = g_game_event_free_pool;
-  if ( g_game_event_free_pool )
+  v3 = g_game_event_free_head;
+  if ( g_game_event_free_head )
   {
-    g_game_event_free_pool = g_game_event_free_pool->next;
+    g_game_event_free_head = g_game_event_free_head->next;
     *(_DWORD *)&v3->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
     *(_DWORD *)&v3->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
     *(_DWORD *)&v3->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43150,12 +41943,12 @@ LABEL_46:
 LABEL_53:
       v18 = entity_create(MobdId_Cursors, nullptr, nullptr);
       v18->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_cursor;
-      entity_anim_load(v18, 508);
-      v18->is_on_collision_grid = 1;
+      entity_anim_init(v18, 508);
+      v18->is_collidable = 1;
       v19 = 10;
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       x = cursor->cursor_hitbox_tester->x;
-      v18->is_on_collision_grid = 1;
+      v18->is_collidable = 1;
       v18->x = x;
       v18->y = cursor->cursor_hitbox_tester->y;
       v18->z = cursor->cursor_hitbox_tester->z - 1;
@@ -43187,15 +41980,15 @@ char __thiscall sub_42B600(KKND::CursorState *this)
   {
     cursor_hitbox_tester = this->cursor_hitbox_tester;
     this->cursor_mobd_offset = 12;
-    entity_anim_load(cursor_hitbox_tester, 12);
+    entity_anim_init(cursor_hitbox_tester, 12);
   }
   if ( (g_game_mouse_state.new_actions_mask & 0x10) != 0 )
   {
     hovered_ui_task = this->hovered_ui_task;
-    TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, hovered_ui_task);
+    TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, hovered_ui_task);
     while ( (g_game_mouse_state.released_actions_mask & 0x10) == 0 )
       game_process_events(this, 0);
-    TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, hovered_ui_task);
+    TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, hovered_ui_task);
   }
   LOBYTE(is_help_mode) = g_game_mouse_state.new_actions_mask;
   if ( (g_game_mouse_state.new_actions_mask & 0x20) != 0 )
@@ -43203,7 +41996,7 @@ char __thiscall sub_42B600(KKND::CursorState *this)
     v5 = this->hovered_ui_task;
     while ( (g_game_mouse_state.released_actions_mask & 0x20) == 0 )
       game_process_events(this, 0);
-    TASK_send_message(nullptr, TaskMessage_1513_sidebar, nullptr, v5);
+    TSK_send_message(nullptr, TaskMessage_1513_sidebar, nullptr, v5);
     if ( this->is_airstrike_targeting )
       this->is_airstrike_targeting = 0;
     is_help_mode = this->is_help_mode;
@@ -43216,7 +42009,7 @@ char __thiscall sub_42B600(KKND::CursorState *this)
     {
       LOBYTE(is_help_mode) = dword_47A5A0;
       if ( !dword_47A5A0 )
-        LOBYTE(is_help_mode) = TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, receiver);
+        LOBYTE(is_help_mode) = TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, receiver);
       dword_47A5A0 = 10;
     }
     else
@@ -43230,7 +42023,7 @@ char __thiscall sub_42B600(KKND::CursorState *this)
         {
           is_help_mode = (int)this->hovered_ui_task->entity;
           if ( is_help_mode )
-            LOBYTE(is_help_mode) = TASK_send_message(
+            LOBYTE(is_help_mode) = TSK_send_message(
                                      nullptr,
                                      TaskMessage_UnitSelected,
                                      *(void **)(is_help_mode + 124),
@@ -43346,7 +42139,7 @@ void __fastcall game_process_events(KKND::CursorState *cursor, BOOL process_ui_e
   int v88; // edx
   KKND::RenderCommand *cmd; // [esp+10h] [ebp-Ch]
 
-  cmd = &node[0]->job->cmd;
+  cmd = &dword_47A010[0]->job->cmd;
   cursor->hovered_ui_task = nullptr;
   cursor->hovered_unit_task = nullptr;
   v3 = g_construction_active_list_head;
@@ -43362,10 +42155,10 @@ void __fastcall game_process_events(KKND::CursorState *cursor, BOOL process_ui_e
         next = g_game_event_queue.next;
         *(_DWORD *)&g_game_event_queue.evt.payload[4] = BuildingConstructionStage_Complete;
         g_game_event_queue.evt.type = GameEvent_BuildingConstructionProgressed;
-        v7 = g_game_event_free_pool;
-        if ( g_game_event_free_pool )
+        v7 = g_game_event_free_head;
+        if ( g_game_event_free_head )
         {
-          g_game_event_free_pool = g_game_event_free_pool->next;
+          g_game_event_free_head = g_game_event_free_head->next;
           *(_DWORD *)&v7->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
           *(_DWORD *)&v7->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
           *(_DWORD *)&v7->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43402,10 +42195,10 @@ void __fastcall game_process_events(KKND::CursorState *cursor, BOOL process_ui_e
         *(_DWORD *)g_game_event_queue.evt.payload = unit_id;
         v12 = g_game_event_queue.next;
         g_game_event_queue.evt.type = GameEvent_BuildingConstructionProgressed;
-        v13 = g_game_event_free_pool;
-        if ( !g_game_event_free_pool )
+        v13 = g_game_event_free_head;
+        if ( !g_game_event_free_head )
           goto LABEL_25;
-        g_game_event_free_pool = g_game_event_free_pool->next;
+        g_game_event_free_head = g_game_event_free_head->next;
         *(_DWORD *)&v13->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
         *(_DWORD *)&v13->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
         *(_DWORD *)&v13->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43449,10 +42242,10 @@ LABEL_26:
     *(_DWORD *)g_game_event_queue.evt.payload = v17;
     *(_DWORD *)&g_game_event_queue.evt.payload[4] = BuildingConstructionStage_1;
     g_game_event_queue.evt.type = GameEvent_BuildingConstructionProgressed;
-    v13 = g_game_event_free_pool;
-    if ( !g_game_event_free_pool )
+    v13 = g_game_event_free_head;
+    if ( !g_game_event_free_head )
       goto LABEL_25;
-    g_game_event_free_pool = g_game_event_free_pool->next;
+    g_game_event_free_head = g_game_event_free_head->next;
     *(_DWORD *)&v13->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
     *(_DWORD *)&v13->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
     *(_DWORD *)&v13->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43528,14 +42321,14 @@ LABEL_27:
     {
 LABEL_81:
       v24 = cmd;
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       cursor->cursor_hitbox_tester->x = g_mapd_camera.x + g_game_mouse_state.cursor_x;
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       cursor->cursor_hitbox_tester->y = g_mapd_camera.y + g_game_mouse_state.cursor_y;
-      cursor->cursor_entity->is_on_collision_grid = 1;
+      cursor->cursor_entity->is_collidable = 1;
       cursor->cursor_entity->x = g_game_mouse_state.cursor_x;
       cursor_entity = cursor->cursor_entity;
-      cursor_entity->is_on_collision_grid = 1;
+      cursor_entity->is_collidable = 1;
       cursor->cursor_entity->y = g_game_mouse_state.cursor_y;
       goto LABEL_82;
     }
@@ -43607,13 +42400,13 @@ LABEL_71:
   {
     g_mapd_camera.y = 0;
   }
-  cursor->cursor_hitbox_tester->is_on_collision_grid = BuildingConstructionStage_1;
+  cursor->cursor_hitbox_tester->is_collidable = BuildingConstructionStage_1;
   cursor->cursor_hitbox_tester->x = cursor->rmb_scrolling_initial_x + g_mapd_camera.x;
-  cursor->cursor_hitbox_tester->is_on_collision_grid = BuildingConstructionStage_1;
+  cursor->cursor_hitbox_tester->is_collidable = BuildingConstructionStage_1;
   cursor->cursor_hitbox_tester->y = cursor->rmb_scrolling_initial_y + g_mapd_camera.y;
-  cursor->cursor_entity->is_on_collision_grid = BuildingConstructionStage_1;
+  cursor->cursor_entity->is_collidable = BuildingConstructionStage_1;
   cursor->cursor_entity->x = cursor->rmb_scrolling_initial_x;
-  cursor->cursor_entity->is_on_collision_grid = BuildingConstructionStage_1;
+  cursor->cursor_entity->is_collidable = BuildingConstructionStage_1;
   cursor->cursor_entity->y = cursor->rmb_scrolling_initial_y;
   v25 = g_game_mouse_state.cursor_x - (g_screen_width << 7) + cursor->rmb_scrolling_dx;
   v26 = v25;
@@ -43660,10 +42453,10 @@ LABEL_82:
   {
     v33 = g_game_event_queue.next;
     g_game_event_queue.evt.type = GameEvent_SelectionCleared;
-    v34 = g_game_event_free_pool;
-    if ( g_game_event_free_pool )
+    v34 = g_game_event_free_head;
+    if ( g_game_event_free_head )
     {
-      g_game_event_free_pool = g_game_event_free_pool->next;
+      g_game_event_free_head = g_game_event_free_head->next;
       *(_DWORD *)&v34->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
       *(_DWORD *)&v34->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
       *(_DWORD *)&v34->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43686,17 +42479,17 @@ LABEL_82:
     cursor->selection_executing_archetype = UnitCommandArchetype_None;
     dword_468980 = -1;
     for ( m = (KKND::CursorState *)cursor->selection_head; m != cursor; m = (KKND::CursorState *)m->selection_head )
-      TASK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, m->_cursor_state_task_8);
+      TSK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, m->_cursor_state_task_8);
     if ( (KKND::CursorState *)cursor->selection_head != cursor )
     {
-      cursor->selection_tail->next = cursor->selection_free_pool;
-      cursor->selection_free_pool = cursor->selection_head;
+      cursor->selection_tail->next = cursor->selection_free_head;
+      cursor->selection_free_head = cursor->selection_head;
       cursor->selection_head = (KKND::CursorUnitSelection *)cursor;
       cursor->selection_tail = (KKND::CursorUnitSelection *)cursor;
     }
     TASK_yield(cursor->cursor_task, Task_Yield, BuildingConstructionStage_1);
   }
-  cursor->cursor_hitbox_tester->is_on_collision_grid = BuildingConstructionStage_1;
+  cursor->cursor_hitbox_tester->is_collidable = BuildingConstructionStage_1;
   cursor_hitbox_tester = cursor->cursor_hitbox_tester;
   v39 = cursor_hitbox_tester->x >> 13;
   v40 = cursor_hitbox_tester->y >> 13;
@@ -43721,7 +42514,7 @@ LABEL_82:
   flags1 = g_terrain[v39 + g_map_num_tiles_x * v40].flags1;
   cursor_task = cursor->cursor_task;
   cursor->is_cursor_over_impassable_terrain = flags1 & 0x60;
-  for ( n = TASK_pop_message(cursor_task); n; n = TASK_pop_message(cursor->cursor_task) )
+  for ( n = TSK_pop_message(cursor_task); n; n = TSK_pop_message(cursor->cursor_task) )
   {
     type = n->type;
     if ( (int)type > (int)TaskMessage_RepairTick )
@@ -43761,8 +42554,8 @@ LABEL_162:
               --g_num_units_in_group[v61];
             selection_head->selection_head->prev = selection_head->selection_tail;
             selection_head->selection_tail->next = selection_head->selection_head;
-            selection_head->selection_head = cursor->selection_free_pool;
-            cursor->selection_free_pool = (KKND::CursorUnitSelection *)selection_head;
+            selection_head->selection_head = cursor->selection_free_head;
+            cursor->selection_free_head = (KKND::CursorUnitSelection *)selection_head;
           }
 LABEL_169:
           v62 = (KKND::CursorState *)cursor->selection_head;
@@ -43852,10 +42645,10 @@ LABEL_169:
         case TaskMessage_PauseGame:
           v47 = g_game_event_queue.next;
           g_game_event_queue.evt.type = GameEvent_GamePaused;
-          v48 = g_game_event_free_pool;
-          if ( g_game_event_free_pool )
+          v48 = g_game_event_free_head;
+          if ( g_game_event_free_head )
           {
-            g_game_event_free_pool = g_game_event_free_pool->next;
+            g_game_event_free_head = g_game_event_free_head->next;
             *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
             *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
             *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43879,10 +42672,10 @@ LABEL_169:
         case TaskMessage_ResumeGame:
           v47 = g_game_event_queue.next;
           g_game_event_queue.evt.type = GameEvent_GameResumed;
-          v48 = g_game_event_free_pool;
-          if ( g_game_event_free_pool )
+          v48 = g_game_event_free_head;
+          if ( g_game_event_free_head )
           {
-            g_game_event_free_pool = g_game_event_free_pool->next;
+            g_game_event_free_head = g_game_event_free_head->next;
             *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
             *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
             *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43907,10 +42700,10 @@ LABEL_169:
           v47 = g_game_event_queue.next;
           *(_DWORD *)g_game_event_queue.evt.payload = *(_DWORD *)n->payload;
           g_game_event_queue.evt.type = GameEvent_18;
-          v48 = g_game_event_free_pool;
-          if ( g_game_event_free_pool )
+          v48 = g_game_event_free_head;
+          if ( g_game_event_free_head )
           {
-            g_game_event_free_pool = g_game_event_free_pool->next;
+            g_game_event_free_head = g_game_event_free_head->next;
             *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
             *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
             *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43930,10 +42723,10 @@ LABEL_169:
           v47 = g_game_event_queue.next;
           *(_DWORD *)&g_game_event_queue.evt.payload[4] = v69[3];
           g_game_event_queue.evt.type = GameEvent_UnitProduced;
-          v48 = g_game_event_free_pool;
-          if ( g_game_event_free_pool )
+          v48 = g_game_event_free_head;
+          if ( g_game_event_free_head )
           {
-            g_game_event_free_pool = g_game_event_free_pool->next;
+            g_game_event_free_head = g_game_event_free_head->next;
             *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
             *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
             *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43956,12 +42749,12 @@ LABEL_169:
           break;
         case TaskMessage_UpgradeComplete:
           g_game_event_queue.evt.type = GameEvent_UpgradeCompleted;
-          v48 = g_game_event_free_pool;
+          v48 = g_game_event_free_head;
           *(_DWORD *)g_game_event_queue.evt.payload = n->payload;
           v47 = g_game_event_queue.next;
-          if ( g_game_event_free_pool )
+          if ( g_game_event_free_head )
           {
-            g_game_event_free_pool = g_game_event_free_pool->next;
+            g_game_event_free_head = g_game_event_free_head->next;
             *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
             *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
             *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -43992,10 +42785,10 @@ LABEL_169:
       *(_DWORD *)g_game_event_queue.evt.payload = *((_DWORD *)n->payload + 76);
       v47 = g_game_event_queue.next;
       *(_WORD *)&g_game_event_queue.evt.payload[4] = g_cash.cash[*((_DWORD *)n->payload + 5)] != 0 ? 4 : 0;
-      v48 = g_game_event_free_pool;
-      if ( g_game_event_free_pool )
+      v48 = g_game_event_free_head;
+      if ( g_game_event_free_head )
       {
-        g_game_event_free_pool = g_game_event_free_pool->next;
+        g_game_event_free_head = g_game_event_free_head->next;
         *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
         *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
         *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -44042,7 +42835,7 @@ LABEL_210:
         cursor->hovered_ui_task = (KKND::Task *)v45;
       }
     }
-    task_message_recycle(n);
+    TSK_message_recycle(n);
   }
   v84 = g_game_event_queue.next;
   if ( g_game_event_queue.next )
@@ -44052,8 +42845,8 @@ LABEL_210:
     *(_DWORD *)&g_47CAE0.payload[7] = *(_DWORD *)&g_game_event_queue.next->evt.payload[7];
     g_47CAE0.payload[11] = g_game_event_queue.next->evt.payload[11];
     g_game_event_queue.next = g_game_event_queue.next->next;
-    v84->next = g_game_event_free_pool;
-    g_game_event_free_pool = v84;
+    v84->next = g_game_event_free_head;
+    g_game_event_free_head = v84;
     if ( dword_47CB0C )
     {
       v85 = g_47A660_num_items;
@@ -44134,7 +42927,7 @@ int __fastcall sub_42C810(KKND::Entity **a1, int a2, int a3, int a4, int a5, int
       {
         while ( 1 )
         {
-          v13 = BOXD_40EE10(v12, v9);
+          v13 = BOXD_find_building_at_tile(v12, v9);
           if ( v13 )
           {
             if ( v13->player_num == g_player_num )
@@ -44179,18 +42972,18 @@ LABEL_15:
           else
           {
             (*v19)->rend->flags &= ~0x40000000u;
-            if ( BOXD_40EE70(v18, v7) && v21 )
+            if ( BOXD_is_tile_free_for_building(v18, v7) && v21 )
             {
-              entity_anim_load(*v19, 560);
+              entity_anim_init(*v19, 560);
             }
             else
             {
-              entity_anim_load(*v19, 548);
+              entity_anim_init(*v19, 548);
               v22 = 0;
             }
-            (*v19)->is_on_collision_grid = 1;
+            (*v19)->is_collidable = 1;
             (*v19)->x = v18 << 13;
-            (*v19)->is_on_collision_grid = 1;
+            (*v19)->is_collidable = 1;
             (*v19)->y = v7 << 13;
           }
           ++v18;
@@ -44267,33 +43060,33 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
   cursor->unit_type_to_voice_response = UnitType_Surv_Rifleman;
   cursor->are_attacker_units_selected = 0;
   v4 = entity_create(MobdId_Cursors, nullptr, nullptr);
-  entity_anim_load(v4, 460);
+  entity_anim_init(v4, 460);
   entity = entity_create(MobdId_Cursors, nullptr, nullptr);
-  entity_anim_load(entity, 472);
+  entity_anim_init(entity, 472);
   v34 = entity_create(MobdId_Cursors, nullptr, nullptr);
-  entity_anim_load(v34, 484);
+  entity_anim_init(v34, 484);
   v5 = entity_create(MobdId_Cursors, nullptr, nullptr);
-  entity_anim_load(v5, 496);
+  entity_anim_init(v5, 496);
   v4->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_cursor;
   entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_cursor;
   v34->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_cursor;
   v5->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_cursor;
   while ( (g_game_mouse_state.released_actions_mask & 0x10) == 0 )
   {
-    cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+    cursor->cursor_hitbox_tester->is_collidable = 1;
     v6 = cursor->cursor_hitbox_tester->x;
-    v4->is_on_collision_grid = 1;
+    v4->is_collidable = 1;
     if ( v6 < x )
     {
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       v4->x = cursor->cursor_hitbox_tester->x;
-      v34->is_on_collision_grid = 1;
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      v34->is_collidable = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       v34->x = cursor->cursor_hitbox_tester->x;
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       entity->x = x;
       v5->x = x;
-      v5->is_on_collision_grid = 1;
+      v5->is_collidable = 1;
       v7 = entity;
     }
     else
@@ -44301,34 +43094,34 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
       v4->x = x;
       v34->x = x;
       v7 = entity;
-      v34->is_on_collision_grid = 1;
-      entity->is_on_collision_grid = 1;
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      v34->is_collidable = 1;
+      entity->is_collidable = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       entity->x = cursor->cursor_hitbox_tester->x;
-      v5->is_on_collision_grid = 1;
-      cursor->cursor_hitbox_tester->is_on_collision_grid = 1;
+      v5->is_collidable = 1;
+      cursor->cursor_hitbox_tester->is_collidable = 1;
       v5->x = cursor->cursor_hitbox_tester->x;
     }
     v8 = y;
     v9 = cursor->cursor_hitbox_tester->y < y;
-    v4->is_on_collision_grid = 1;
+    v4->is_collidable = 1;
     if ( v9 )
     {
       v4->y = cursor->cursor_hitbox_tester->y;
-      v7->is_on_collision_grid = 1;
+      v7->is_collidable = 1;
       v7->y = cursor->cursor_hitbox_tester->y;
-      v34->is_on_collision_grid = 1;
+      v34->is_collidable = 1;
       v34->y = y;
-      v5->is_on_collision_grid = 1;
+      v5->is_collidable = 1;
     }
     else
     {
       v4->y = y;
-      v7->is_on_collision_grid = 1;
+      v7->is_collidable = 1;
       v7->y = y;
-      v34->is_on_collision_grid = 1;
+      v34->is_collidable = 1;
       v34->y = cursor->cursor_hitbox_tester->y;
-      v5->is_on_collision_grid = 1;
+      v5->is_collidable = 1;
       v8 = cursor->cursor_hitbox_tester->y;
     }
     v5->y = v8;
@@ -44336,11 +43129,11 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
   }
   next = g_game_event_queue.next;
   g_game_event_queue.evt.type = GameEvent_SelectionCleared;
-  ya = g_game_event_free_pool;
-  if ( g_game_event_free_pool )
+  ya = g_game_event_free_head;
+  if ( g_game_event_free_head )
   {
-    p_evt = &g_game_event_free_pool->evt;
-    g_game_event_free_pool = g_game_event_free_pool->next;
+    p_evt = &g_game_event_free_head->evt;
+    g_game_event_free_head = g_game_event_free_head->next;
     *(_DWORD *)&p_evt->type = *(_DWORD *)&g_game_event_queue.evt.type;
     *(_DWORD *)&p_evt->payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
     *(_DWORD *)&p_evt->payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -44367,7 +43160,7 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
   {
     while ( 1 )
     {
-      TASK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, selection_head->unit_task);
+      TSK_send_message(g_game_update_loop_task, TaskMessage_UnitDeselected, nullptr, selection_head->unit_task);
       yb = (KKND::CursorState *)yb->selection_head;
       if ( yb == cursor )
         break;
@@ -44376,15 +43169,15 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
   }
   if ( (KKND::CursorState *)cursor->selection_head != cursor )
   {
-    cursor->selection_tail->next = cursor->selection_free_pool;
-    cursor->selection_free_pool = cursor->selection_head;
+    cursor->selection_tail->next = cursor->selection_free_head;
+    cursor->selection_free_head = cursor->selection_head;
     cursor->selection_head = (KKND::CursorUnitSelection *)cursor;
     cursor->selection_tail = (KKND::CursorUnitSelection *)cursor;
   }
   game_process_events(cursor, 0);
-  v5->is_on_collision_grid = 1;
+  v5->is_collidable = 1;
   v14 = v4->y;
-  v4->is_on_collision_grid = 1;
+  v4->is_collidable = 1;
   sub_44C970(v14, v4->x, v5->x, v5->y);
   v36 = 0;
   v38 = nullptr;
@@ -44395,9 +43188,9 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
   {
     while ( 1 )
     {
-      selection_free_pool = cursor->selection_free_pool;
+      selection_free_pool = cursor->selection_free_head;
       if ( selection_free_pool )
-        cursor->selection_free_pool = selection_free_pool->next;
+        cursor->selection_free_head = selection_free_pool->next;
       else
         selection_free_pool = nullptr;
       if ( selection_free_pool )
@@ -44407,7 +43200,7 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
         selection_free_pool->prev = (KKND::CursorUnitSelection *)cursor;
         cursor->selection_head->prev = selection_free_pool;
         cursor->selection_head = selection_free_pool;
-        TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, v15);
+        TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, v15);
         unit = (KKND::Unit *)yc->ctx;
         if ( unit->player_num == g_player_num )
         {
@@ -44498,20 +43291,20 @@ LABEL_57:
     }
   }
   v25 = v4->x;
-  v4->is_on_collision_grid = 1;
+  v4->is_collidable = 1;
   *(_WORD *)g_game_event_queue.evt.payload = v25 >> 8;
   *(_WORD *)&g_game_event_queue.evt.payload[2] = v4->y >> 8;
   v26 = v5->x >> 8;
-  v5->is_on_collision_grid = 1;
+  v5->is_collidable = 1;
   *(_WORD *)&g_game_event_queue.evt.payload[4] = v26;
   v27 = v5->y;
   v28 = g_game_event_queue.next;
   g_game_event_queue.evt.type = GameEvent_SelectedBox;
   *(_WORD *)&g_game_event_queue.evt.payload[6] = v27 >> 8;
-  v29 = g_game_event_free_pool;
-  if ( g_game_event_free_pool )
+  v29 = g_game_event_free_head;
+  if ( g_game_event_free_head )
   {
-    g_game_event_free_pool = g_game_event_free_pool->next;
+    g_game_event_free_head = g_game_event_free_head->next;
     *(_DWORD *)&v29->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
     *(_DWORD *)&v29->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
     *(_DWORD *)&v29->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
@@ -44538,7 +43331,7 @@ LABEL_57:
   {
     cursor_hitbox_tester = cursor->cursor_hitbox_tester;
     cursor->cursor_mobd_offset = 12;
-    entity_anim_load(cursor_hitbox_tester, 12);
+    entity_anim_init(cursor_hitbox_tester, 12);
   }
 }
 // 468980: using guessed type int dword_468980;
@@ -44574,14 +43367,14 @@ void __cdecl __noreturn sub_42D030(KKND::Task *task)
     do
     {
       TASK_yield(task, Task_Wait, 0);
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         if ( i->type == TaskMessage_UnitSelected )
         {
           payload = i->payload;
           v2 = 1;
         }
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v2 );
@@ -44596,7 +43389,7 @@ void __cdecl __noreturn sub_42D030(KKND::Task *task)
           v7 = 1;
           if ( v6 == 87 )
           {
-            v7 = *(KKND::LevelMobdSurface **)(payload[9] + 76) != (KKND::LevelMobdSurface *)&g_current_lvl_mobd[*(_DWORD *)(payload[9] + 12)].layers[0][49].frames[0].sound_id;
+            v7 = *(KKND::LevelMobdSurface **)(payload[9] + 76) != (KKND::LevelMobdSurface *)&g_mobd[*(_DWORD *)(payload[9] + 12)].layers[0][49].frames[0].sound_id;
             name = nullptr;
           }
           if ( v7 )
@@ -44623,7 +43416,7 @@ void __cdecl __noreturn sub_42D030(KKND::Task *task)
       *(_DWORD *)(payload[9] + 136) = 1;
       v11 = ui_string_create(
               nullptr,
-              g_current_lvl_mobd[27].layers[0],
+              g_mobd[27].layers[0],
               (char *)((*(int *)(payload[9] + 16) >> 8) - (8 * v10 + 8)),
               (*(int *)(payload[9] + 20) >> 8) + 22,
               v10 + 2,
@@ -44638,11 +43431,11 @@ void __cdecl __noreturn sub_42D030(KKND::Task *task)
       do
       {
         TASK_yield(task, Task_Wait, 0);
-        for ( j = TASK_pop_message(task); j; j = TASK_pop_message(task) )
+        for ( j = TSK_pop_message(task); j; j = TSK_pop_message(task) )
         {
           if ( j->type == TaskMessage_UnitDeselected )
             v12 = 1;
-          task_message_recycle(j);
+          TSK_message_recycle(j);
         }
       }
       while ( !v12 );
@@ -44764,7 +43557,7 @@ void __cdecl sub_42D390(KKND::Task *task)
   char v5[56]; // [esp+Ch] [ebp-38h] BYREF
 
   memset(&text, 0, 0x38u);
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[27].layers[0], (char *)0x90, 304, 42, 3, 536870917, 8, 8);
+  v1 = ui_string_create(nullptr, g_mobd[27].layers[0], (char *)0x90, 304, 42, 3, 536870917, 8, 8);
   dword_47A730 = v1;
   if ( !v1 )
   {
@@ -44970,7 +43763,7 @@ void __fastcall MessageHandler_AiController_Mute08_SmashTheConvoy(
   int v19; // ecx
   KKND::AiEnemyNode *v20; // eax
   KKND::Ai_stru10_Node *v21; // ecx
-  KKND::Ai_stru160_Node *ai_stru10_node_C; // edi
+  KKND::AiSquadNode *ai_stru10_node_C; // edi
   KKND::AiAttackerNode *ai_stru160_node_C; // eax
   KKND::AiAttackerNode *p_ai_controller_30_head; // edx
   KKND::AiAttackerNode *prev; // edi
@@ -44980,12 +43773,12 @@ void __fastcall MessageHandler_AiController_Mute08_SmashTheConvoy(
   bool v29; // zf
   int player_num; // ecx
   KKND::AiAttackerNode *v31; // ecx
-  KKND::Ai_stru160_Node *ai_attacker_node_8; // edi
+  KKND::AiSquadNode *ai_attacker_node_8; // edi
   KKND::AiAttackerNode *v33; // eax
   KKND::Entity *entity; // ecx
   KKND::AiAttackerNode *v35; // eax
   KKND::TaskMessageType messagea; // [esp+14h] [ebp+4h]
-  KKND::Ai_stru160_Node *payloada; // [esp+18h] [ebp+8h]
+  KKND::AiSquadNode *payloada; // [esp+18h] [ebp+8h]
 
   ai = (KKND::AiController *)receiver->ctx;
   if ( message == TaskMessage_UnitDeselected )
@@ -45001,8 +43794,8 @@ void __fastcall MessageHandler_AiController_Mute08_SmashTheConvoy(
         payloada = ai_stru10_node_C;
         if ( ai_stru10_node_C )
         {
-          ai_stru160_node_C = ai_stru10_node_C->_ai_stru160_node_C;
-          if ( ai_stru160_node_C != (KKND::AiAttackerNode *)&ai_stru10_node_C->_ai_stru160_node_C )
+          ai_stru160_node_C = ai_stru10_node_C->attacker_list_head;
+          if ( ai_stru160_node_C != (KKND::AiAttackerNode *)&ai_stru10_node_C->attacker_list_head )
           {
             p_ai_controller_30_head = (KKND::AiAttackerNode *)&ai->_ai_controller_30_head;
             do
@@ -45023,7 +43816,7 @@ void __fastcall MessageHandler_AiController_Mute08_SmashTheConvoy(
               ai_stru160_node_C = prev->next;
               ai_stru10_node_C = payloada;
             }
-            while ( ai_stru160_node_C != (KKND::AiAttackerNode *)&payloada->_ai_stru160_node_C );
+            while ( ai_stru160_node_C != (KKND::AiAttackerNode *)&payloada->attacker_list_head );
             v21 = (KKND::Ai_stru10_Node *)messagea;
           }
           ai_stru10_node_C->next->prev = ai_stru10_node_C->prev;
@@ -45057,14 +43850,14 @@ void __fastcall MessageHandler_AiController_Mute08_SmashTheConvoy(
             ai_attacker_node_8 = v31->_ai_attacker_node_8;
             if ( ai_attacker_node_8 )
             {
-              v33 = ai_attacker_node_8->_ai_stru160_node_C;
-              if ( v33 != (KKND::AiAttackerNode *)&ai_attacker_node_8->_ai_stru160_node_C )
+              v33 = ai_attacker_node_8->attacker_list_head;
+              if ( v33 != (KKND::AiAttackerNode *)&ai_attacker_node_8->attacker_list_head )
               {
                 entity = v31->unit->entity;
                 while ( entity != v33->unit->entity )
                 {
                   v33 = v33->next;
-                  if ( v33 == (KKND::AiAttackerNode *)&ai_attacker_node_8->_ai_stru160_node_C )
+                  if ( v33 == (KKND::AiAttackerNode *)&ai_attacker_node_8->attacker_list_head )
                     return;
                 }
                 v33->next->prev = v33->prev;
@@ -45258,9 +44051,9 @@ void __cdecl __noreturn ai_task_42DA90(KKND::Task *task)
   int v13; // edx
   int v14; // ebx
   int v15; // ecx
-  KKND::Ai_stru160_Node *ai_controller_C; // edx
-  KKND::Ai_stru160_Node *ai_controller_160_free; // eax
-  KKND::Ai_stru160_Node **p_ai_controller_strucC_0; // ecx
+  KKND::AiSquadNode *ai_controller_C; // edx
+  KKND::AiSquadNode *ai_controller_160_free; // eax
+  KKND::AiSquadNode **p_ai_controller_strucC_0; // ecx
   KKND::Unit *v19; // eax
   KKND::Unit *v20; // edx
   int y; // [esp+8h] [ebp-18h]
@@ -45282,7 +44075,7 @@ void __cdecl __noreturn ai_task_42DA90(KKND::Task *task)
       unit = ai_controller_60_head->unit;
       v4 = nullptr;
       v22 = 0x7FFFFFFF;
-      unit->entity->is_on_collision_grid = 1;
+      unit->entity->is_collidable = 1;
       entity = unit->entity;
       x = entity->x;
       y = entity->y;
@@ -45291,10 +44084,10 @@ void __cdecl __noreturn ai_task_42DA90(KKND::Task *task)
         ai_controller_8 = j->_ai_controller_8;
         if ( !ai_controller_8->destroyed )
         {
-          ai_controller_8->entity->is_on_collision_grid = 1;
+          ai_controller_8->entity->is_collidable = 1;
           v9 = j->_ai_controller_8->entity;
           v10 = v9->x;
-          v9->is_on_collision_grid = 1;
+          v9->is_collidable = 1;
           v11 = j->_ai_controller_8->entity;
           if ( v10 - x <= 0 )
             v12 = x - v11->x;
@@ -45316,7 +44109,7 @@ void __cdecl __noreturn ai_task_42DA90(KKND::Task *task)
       if ( v4 )
       {
         prev = ai_controller_60_head->prev;
-        ai_controller_C = (KKND::Ai_stru160_Node *)v4->_ai_controller_C;
+        ai_controller_C = (KKND::AiSquadNode *)v4->_ai_controller_C;
         if ( !ai_controller_C )
         {
           ai_controller_160_free = ai->_ai_controller_160_free;
@@ -45334,8 +44127,8 @@ void __cdecl __noreturn ai_task_42DA90(KKND::Task *task)
           {
             *p_ai_controller_strucC_0 = ai->_ai_controller_11C_head;
             v4->_ai_controller_C->_ai_controller_strucC_4 = (int)&ai->_ai_controller_11C_head;
-            ai->_ai_controller_11C_head->prev = (KKND::Ai_stru160_Node *)v4->_ai_controller_C;
-            ai->_ai_controller_11C_head = (KKND::Ai_stru160_Node *)v4->_ai_controller_C;
+            ai->_ai_controller_11C_head->prev = (KKND::AiSquadNode *)v4->_ai_controller_C;
+            ai->_ai_controller_11C_head = (KKND::AiSquadNode *)v4->_ai_controller_C;
             v4->_ai_controller_C->_ai_controller_strucC_C = (KKND::AiAttackerNode *)&v4->_ai_controller_C->_ai_controller_strucC_C;
             v4->_ai_controller_C->_ai_controller_strucC_10 = (int)&v4->_ai_controller_C->_ai_controller_strucC_C;
             v4->_ai_controller_C->_ai_controller_strucC_1C = 0;
@@ -45346,7 +44139,7 @@ void __cdecl __noreturn ai_task_42DA90(KKND::Task *task)
         v20 = ai_controller_60_head->unit;
         param[0] = ai->player_num;
         param[1] = v19;
-        TASK_send_message(v19->task, TaskMessage_Follow, param, v20->task);
+        TSK_send_message(v19->task, TaskMessage_Follow, param, v20->task);
         ai_controller_60_head->next->prev = ai_controller_60_head->prev;
         ai_controller_60_head->prev->next = ai_controller_60_head->next;
         ai_controller_60_head->next = v4->_ai_controller_C->_ai_controller_strucC_C;
@@ -45538,7 +44331,7 @@ void __cdecl __noreturn ai_task_42DE80(KKND::Task *task)
           unit = v4->unit;
           p_next = &v4->prev->next;
           unit_4258C0(unit, g_player_num);
-          TASK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
+          TSK_broadcast_message(unit->task, TaskMessage_UnitCreated, unit, TaskChannel_UnitLifecycle);
           unit_mode_415540(unit);
           v4->next->prev = v4->prev;
           v4->prev->next = v4->next;
@@ -45584,7 +44377,7 @@ KKND::Unit *__fastcall sub_42DF40(KKND::AiController *ai, KKND::Unit *unit, int 
 
   v3 = unit;
   v19 = nullptr;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   entity = unit->entity;
   x = entity->x;
   y = entity->y;
@@ -45600,10 +44393,10 @@ KKND::Unit *__fastcall sub_42DF40(KKND::AiController *ai, KKND::Unit *unit, int 
         ai_controller_8 = ai_controller_114_head->_ai_controller_8;
         if ( !ai_controller_8->destroyed && ai_controller_8->player_num != v3->player_num )
         {
-          ai_controller_8->entity->is_on_collision_grid = 1;
+          ai_controller_8->entity->is_collidable = 1;
           v9 = ai_controller_114_head->_ai_controller_8->entity;
           v10 = v9->x;
-          v9->is_on_collision_grid = 1;
+          v9->is_collidable = 1;
           v11 = v10 - x <= 0;
           v12 = ai_controller_114_head->_ai_controller_8->entity;
           if ( v11 )
@@ -45648,7 +44441,7 @@ KKND::Unit *__fastcall sub_42E030(KKND::AiController *a1, KKND::Unit *a2)
     task = a2->task;
     param[1] = result;
     param[0] = player_num;
-    return (KKND::Unit *)TASK_send_message(nullptr, TaskMessage_AttackOrder, param, task);
+    return (KKND::Unit *)TSK_send_message(nullptr, TaskMessage_AttackOrder, param, task);
   }
   return result;
 }
@@ -45708,7 +44501,7 @@ void __fastcall ai_42E070_attack_order(KKND::AiController *ai)
         task = v9->task;
         attack_order.target = v10;
         attack_order.player_num = player_num;
-        TASK_send_message(nullptr, TaskMessage_AttackOrder, &attack_order, task);
+        TSK_send_message(nullptr, TaskMessage_AttackOrder, &attack_order, task);
       }
     }
   }
@@ -46328,7 +45121,7 @@ LABEL_14:
               v9 += 28;
               ++v8;
             }
-            while ( (int)v9 < 4696105 );
+            while ( (int)v9 < (int)((char *)&dword_47A828 + 1) );// bug
             v10 = 0;
             v11 = rand() % 15;
             while ( v79[v11] )
@@ -46580,7 +45373,7 @@ LABEL_123:
           }
           dword_47C030 = 1;
           dword_47050C = 1;
-          TASK_send_message(nullptr, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
+          TSK_send_message(nullptr, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
           return 0;
         case 0x3F:
           v65 = *(_DWORD **)(this + 52);
@@ -46643,7 +45436,7 @@ LABEL_123:
         case 0x43:
           if ( dword_468B54 < 0 )
             return 0;
-          TASK_broadcast_message(nullptr, TaskMessage_Infiltrate, nullptr, TaskChannel_MenuCancel);
+          TSK_broadcast_message(nullptr, TaskMessage_Infiltrate, nullptr, TaskChannel_MenuCancel);
           return 0;
         case 0x44:
           v21 = dword_47A790;
@@ -46691,7 +45484,7 @@ LABEL_62:
           __setargv();
           return 0;
         case 0x48:
-          TASK_broadcast_message(nullptr, TaskMessage_Infiltrate, nullptr, TaskChannel_MenuCancel);
+          TSK_broadcast_message(nullptr, TaskMessage_Infiltrate, nullptr, TaskChannel_MenuCancel);
           sub_42F650();
           return 0;
         case 0x49:
@@ -48653,7 +47446,7 @@ LABEL_15:
           }
           else
           {
-            unit->entity->is_on_collision_grid = 1;
+            unit->entity->is_collidable = 1;
             if ( entity_create_by_unit_type(
                    (KKND::UnitType)payload,
                    unit->entity->x + unit->mobd_anchors.rally->x,
@@ -48691,7 +47484,7 @@ void __fastcall unit_mode_outpost_set_default_prod(KKND::Unit *unit)
   {
     state = (KKND::BuildingState *)unit->state;
     state->same_building_count = 0;
-    TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Outpost);
+    TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Outpost);
     if ( !state->same_building_count )
     {
       if ( !dword_47B3D8 && !g_sidebar_buildings_prod )
@@ -48992,14 +47785,12 @@ int __thiscall sub_431980(char *this)
   BYTE *v5; // eax
   IDirectDrawPalette *v6; // eax
   char *v7; // ecx
-  _BYTE *v8; // eax
+  char *v8; // eax
   HGDIOBJ v9; // esi
   KKND::Coroutine *v10; // et1
   int v11; // [esp-Ch] [ebp-410h] BYREF
-  char v12; // [esp+0h] [ebp-404h] BYREF
-  char v13; // [esp+1h] [ebp-403h] BYREF
-  _BYTE v14[1022]; // [esp+2h] [ebp-402h] BYREF
-  int v15; // [esp+400h] [ebp-4h]
+  char v12[1024]; // [esp+0h] [ebp-404h] BYREF
+  int v13; // [esp+400h] [ebp-4h]
 
   result = g_window_bpp;
   v2 = this;
@@ -49030,8 +47821,8 @@ int __thiscall sub_431980(char *this)
         p_peGreen += 4;
         v5 += 4;
       }
-      while ( (int)p_peGreen < (int)((BYTE *)&g_window_hdc + 1) );
-      v6 = (IDirectDrawPalette *)sub_4122B0();
+      while ( (int)p_peGreen < (int)((BYTE *)&g_window_hdc + 1) );// BUG
+      v6 = (IDirectDrawPalette *)REND_4122B0();
       if ( !v6 )
       {
         v6 = g_ddpal;
@@ -49041,30 +47832,30 @@ int __thiscall sub_431980(char *this)
     }
     else
     {
-      v7 = &v12;
+      v7 = v12;
       v8 = v2 + 1;
-      v15 = 256;
+      v13 = 256;
       do
       {
-        v8[v14 - v2] = 0;
+        v8[&v12[2] - v2] = 0;
         *v7 = v8[1];
-        v8[&v12 - v2] = *v8;
-        v8[&v13 - v2] = *(v8 - 1);
+        v8[v12 - v2] = *v8;
+        v8[&v12[1] - v2] = *(v8 - 1);
         v7 += 4;
         v8 += 4;
-        --v15;
+        --v13;
       }
-      while ( v15 );
+      while ( v13 );
       v9 = ho;
       if ( ho )
       {
-        ho = sub_431B60(&v12, 256);
+        ho = pal_431B60(v12, 256);
         SelectPalette(g_window_hdc, (HPALETTE)ho, 0);
         DeleteObject(v9);
       }
       else
       {
-        ho = sub_431B60(&v12, 256);
+        ho = pal_431B60(v12, 256);
         dword_47C014 = SelectPalette(g_window_hdc, (HPALETTE)ho, 0);
       }
       v6 = (IDirectDrawPalette *)RealizePalette(g_window_hdc);
@@ -49088,37 +47879,38 @@ int __thiscall sub_431980(char *this)
 // 47C018: using guessed type int dword_47C018;
 
 //----- (00431B60) --------------------------------------------------------
-HPALETTE __fastcall sub_431B60(_BYTE *a1, int a2)
+// local variable allocation has failed, the output may be wrong!
+HPALETTE __fastcall pal_431B60(_BYTE *a1, int a2)
 {
-  _BYTE *v3; // ecx
-  _BYTE *v4; // esi
-  _BYTE *v5; // edi
+  int v3; // ecx
+  int v4; // esi
+  int v5; // edi
   _BYTE *v6; // eax
-  _BYTE *v7; // ebp
+  int v7; // ebp
   int v8; // edx
   _BYTE *v9; // eax
   int v10; // edx
   _BYTE *v11; // eax
   int v12; // edx
   int v14; // [esp+14h] [ebp-408h]
-  _BYTE plpal[1028]; // [esp+18h] [ebp-404h] BYREF
+  LOGPALETTE plpal; // [esp+18h] [ebp-404h] OVERLAPPED BYREF 256 PALETTEENTRY allocated on stack
 
-  *(_WORD *)plpal = 768;
-  *(_WORD *)&plpal[2] = 256;
-  memset(&plpal[4], 0, 0x400u);
+  plpal.palVersion = 0x300;
+  plpal.palNumEntries = 256;
+  memset(plpal.palPalEntry, 0, 0x400u);
   v14 = a2 - 10;
-  v3 = (_BYTE *)(&plpal[6] - a1);
-  v4 = (_BYTE *)(&plpal[3] - a1);
-  v5 = (_BYTE *)(&plpal[4] - a1);
+  v3 = &plpal.palPalEntry[0].peBlue - a1;
+  v4 = (char *)&plpal.palNumEntries + 1 - a1;
+  v5 = (char *)plpal.palPalEntry - a1;
   v6 = a1 + 1;
-  v7 = (_BYTE *)(&plpal[5] - a1);
+  v7 = &plpal.palPalEntry[0].peGreen - a1;
   v8 = 10;
   do
   {
-    v6[(_DWORD)v3] = 0;
-    v6[1] = v6[(_DWORD)v4];
-    *v6 = v6[(_DWORD)v5];
-    *(v6 - 1) = v6[(_DWORD)v7];
+    v6[v3] = 0;
+    v6[1] = v6[v4];
+    *v6 = v6[v5];
+    *(v6 - 1) = v6[v7];
     v6 += 4;
     --v8;
   }
@@ -49129,10 +47921,10 @@ HPALETTE __fastcall sub_431B60(_BYTE *a1, int a2)
     v10 = v14 - 10;
     do
     {
-      v4[(_DWORD)v9] = v9[1];
-      v5[(_DWORD)v9] = *v9;
-      v7[(_DWORD)v9] = *(v9 - 1);
-      v3[(_DWORD)v9] = 5;
+      v9[v4] = v9[1];
+      v9[v5] = *v9;
+      v9[v7] = *(v9 - 1);
+      v9[v3] = 5;
       v9 += 4;
       --v10;
     }
@@ -49142,16 +47934,17 @@ HPALETTE __fastcall sub_431B60(_BYTE *a1, int a2)
   v12 = 10;
   do
   {
-    v3[(_DWORD)v11] = 0;
-    v11[1] = v4[(_DWORD)v11];
-    *v11 = v5[(_DWORD)v11];
-    *(v11 - 1) = v7[(_DWORD)v11];
+    v11[v3] = 0;
+    v11[1] = v11[v4];
+    *v11 = v11[v5];
+    *(v11 - 1) = v11[v7];
     v11 += 4;
     --v12;
   }
   while ( v12 );
-  return CreatePalette((const LOGPALETTE *)plpal);
+  return CreatePalette(&plpal);
 }
+// 431B60: variables would overlap: stkvar "plpal" ^1C.8 and ^20.1024(user-defined)
 
 //----- (00431C40) --------------------------------------------------------
 int __usercall sub_431C40@<eax>(int result@<eax>)
@@ -49211,7 +48004,7 @@ int __usercall sub_431C40@<eax>(int result@<eax>)
         v6 += 4;
       }
       while ( (int)p_peGreen < 4701193 );
-      v7 = (IDirectDrawPalette *)sub_4122B0(v12[0], v12[1], v12[2]);
+      v7 = (IDirectDrawPalette *)REND_4122B0(v12[0], v12[1], v12[2]);
       if ( !v7 )
       {
         v7 = g_ddpal;
@@ -49238,13 +48031,13 @@ int __usercall sub_431C40@<eax>(int result@<eax>)
       v10 = ho;
       if ( ho )
       {
-        ho = (HGDIOBJ)sub_431B60(&v13, 256);
+        ho = (HGDIOBJ)pal_431B60(&v13, 256);
         SelectPalette(g_window_hdc, (HPALETTE)ho, 0);
         DeleteObject(v10);
       }
       else
       {
-        ho = (HGDIOBJ)sub_431B60(&v13, 256);
+        ho = (HGDIOBJ)pal_431B60(&v13, 256);
         dword_47C014 = SelectPalette(g_window_hdc, (HPALETTE)ho, 0);
       }
       v7 = (IDirectDrawPalette *)RealizePalette(g_window_hdc);
@@ -49294,7 +48087,7 @@ void __cdecl __noreturn sub_431E60(KKND::Task *sender)
       if ( !v1 && (BYTE1(v3.new_actions_mask) & 2) != 0 )
       {
         v1 = 4;
-        TASK_send_message(sender, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
+        TSK_send_message(sender, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
       }
       if ( (new_actions_mask & 0x100) == 0x100 )
         sub_44A700(sender);
@@ -49332,13 +48125,13 @@ void __cdecl sub_431F10(KKND::Task *task)
   v16 = 0;
   entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
   entity->z += 768;
-  entity_anim_load(entity, 36);
+  entity_anim_init(entity, 36);
   v2 = entity_create(MobdId_IngameMenuUi, nullptr, nullptr);
   v3 = v2;
   if ( v2 )
   {
     v2->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-    entity_anim_load(v2, 48);
+    entity_anim_init(v2, 48);
     ctx = entity->ctx;
     if ( ctx == (void *)2 )
     {
@@ -49359,7 +48152,7 @@ void __cdecl sub_431F10(KKND::Task *task)
   {
     if ( (TASK_yield(task, Task_Yield, 1) & 0x40000000) != 0 )
     {
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
         if ( type > 1511 )
@@ -49379,12 +48172,12 @@ void __cdecl sub_431F10(KKND::Task *task)
         {
           v16 = 1;
         }
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     if ( v16 )
     {
-      g_game_update_loop_task->entity->is_on_collision_grid = 1;
+      g_game_update_loop_task->entity->is_collidable = 1;
       x = g_game_update_loop_task->entity->x;
       v3->x = x;
       v11 = entity->x;
@@ -49463,8 +48256,8 @@ KKND::Entity *__thiscall sub_4321A0(KKND::Task *this)
 
   entity = this->entity;
   dword_47C6C4 = 1;
-  TASK_broadcast_message(this, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
-  dword_47C65C = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0xF8, 88, 22, 8, 536871913, 14, 5);
+  TSK_broadcast_message(this, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
+  dword_47C65C = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0xF8, 88, 22, 8, 536871913, 14, 5);
   sub_445AE0(dword_47C65C);
   dword_47C65C->_ui_string_field_18 = 0;
   dword_47C65C->num_lines = 0;
@@ -49516,8 +48309,8 @@ void __thiscall sub_4322D0(KKND::Task *this)
   char v12[100]; // [esp+18h] [ebp-64h] BYREF
 
   v1 = this;
-  TASK_broadcast_message(this, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
-  v2 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x78, 70, 42, 15, 536871913, 14, 5);
+  TSK_broadcast_message(this, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
+  v2 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x78, 70, 42, 15, 536871913, 14, 5);
   dword_47C65C = v2;
   if ( v2 )
   {
@@ -49564,7 +48357,7 @@ void __thiscall sub_4322D0(KKND::Task *this)
   v9 = entity_create_ex(MobdId_IngameMenuUi, v1->entity, (KKND::TaskFn)sub_433D20, TaskKind_Coroutine, nullptr);
   if ( v9 )
     v9->task->netz_flags = TaskNetzFlags_EnabledForMultiplayer;
-  entity_anim_load(g_task_47C028->entity, 12);
+  entity_anim_init(g_task_47C028->entity, 12);
 }
 // 469030: using guessed type char *off_469030[30];
 
@@ -49605,7 +48398,7 @@ void __thiscall sub_432400(KKND::Entity **this)
     if ( v8 )
       v8->task->netz_flags = TaskNetzFlags_EnabledForMultiplayer;
   }
-  entity_anim_load(v1, 0);
+  entity_anim_init(v1, 0);
 }
 
 //----- (00432510) --------------------------------------------------------
@@ -49629,11 +48422,11 @@ BOOL __thiscall sub_4325B0(KKND::Task *task)
 {
   dword_47C6F8 = 0;
   sub_443BF0();
-  TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000006);
-  TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000007);
-  TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_SaveLoaad_DA000008);
-  TASK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenu);
-  return TASK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenuLoad);
+  TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000006);
+  TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000007);
+  TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_SaveLoaad_DA000008);
+  TSK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenu);
+  return TSK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenuLoad);
 }
 // 47C6F8: using guessed type int dword_47C6F8;
 
@@ -49648,7 +48441,7 @@ KKND::Entity *__thiscall sub_432620(KKND::Task *this)
   KKND::Entity *result; // eax
   KKND::Entity *v8; // edi
 
-  TASK_broadcast_message(this, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
+  TSK_broadcast_message(this, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
   v2 = entity_create_ex(MobdId_FontItalic, this->entity, sub_432F20, TaskKind_Coroutine, nullptr);
   if ( v2 )
     v2->task->netz_flags = TaskNetzFlags_EnabledForMultiplayer;
@@ -49672,7 +48465,7 @@ KKND::Entity *__thiscall sub_432620(KKND::Task *this)
     result->x = this->entity->x;
     result->y = this->entity->y;
     result->z = this->entity->z + 1;
-    entity_anim_load(result, 24);
+    entity_anim_init(result, 24);
     result = (KKND::Entity *)g_task_47C028;
     g_task_47C028->ctx = v8;
   }
@@ -49693,7 +48486,7 @@ void __cdecl sub_432730(KKND::Task *task)
   entity = task->entity;
   task = (KKND::Task *)task->ctx;
   entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-  entity_anim_load(entity, 696);
+  entity_anim_init(entity, 696);
   dword_47C668[(_DWORD)task] = (int)v1->entity;
   while ( 1 )
   {
@@ -49702,7 +48495,7 @@ void __cdecl sub_432730(KKND::Task *task)
     do
     {
       TASK_yield(v1, Task_Wait, 0);
-      v5 = TASK_pop_message(v1);
+      v5 = TSK_pop_message(v1);
       if ( v5 )
       {
         while ( 1 )
@@ -49716,8 +48509,8 @@ void __cdecl sub_432730(KKND::Task *task)
               break;
           }
 LABEL_9:
-          task_message_recycle(v5);
-          v5 = TASK_pop_message(v1);
+          TSK_message_recycle(v5);
+          v5 = TSK_pop_message(v1);
           if ( !v5 )
             goto LABEL_10;
         }
@@ -49732,7 +48525,7 @@ LABEL_10:
     while ( !v4 );
     if ( v3 )
       break;
-    TASK_send_message(v1, TaskMessage_UnitSelected, &task, dword_47C024);
+    TSK_send_message(v1, TaskMessage_UnitSelected, &task, dword_47C024);
   }
   dword_47C668[(_DWORD)task] = 0;
   entity_remove(entity);
@@ -49756,7 +48549,7 @@ void __cdecl sub_432800(KKND::Task *sender)
   sender = (KKND::Task *)sender->ctx;
   entity = v2;
   v2->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-  entity_anim_load(v2, 696);
+  entity_anim_init(v2, 696);
   dword_47C668[(_DWORD)sender] = (int)v1->entity;
   while ( 1 )
   {
@@ -49765,7 +48558,7 @@ void __cdecl sub_432800(KKND::Task *sender)
     do
     {
       TASK_yield(v1, Task_Wait, 0);
-      for ( i = TASK_pop_message(v1); i; i = TASK_pop_message(v1) )
+      for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
         switch ( type )
@@ -49781,13 +48574,13 @@ void __cdecl sub_432800(KKND::Task *sender)
             v4 = 1;
             break;
         }
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v4 );
     if ( v3 )
       break;
-    TASK_send_message(v1, TaskMessage_UnitSelected, &sender, dword_47C024);
+    TSK_send_message(v1, TaskMessage_UnitSelected, &sender, dword_47C024);
   }
   dword_47C668[(_DWORD)sender] = 0;
   entity_remove(entity);
@@ -49805,9 +48598,9 @@ KKND::Entity *__fastcall sub_4328F0(char *a1, unsigned __int16 a2)
   sub_443D80(dword_47C65C, asc_46BB14, 0);
   dword_47C65C->_ui_string_field_18 = 0;
   sub_443D80(dword_47C65C, a1, 0);
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   dword_47C664->x = sub_443EE0((int)dword_47C65C, a2, 6) << 8;
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   result = dword_47C664;
   dword_47C664->y = 49664;
   return result;
@@ -49857,16 +48650,7 @@ void __fastcall __noreturn sub_432990(int a1, int a2, int a3)
   else
     *(_DWORD *)(a1 + 12) = -637534207;
   dword_47C024 = (KKND::Task *)a1;
-  v5 = ui_string_create(
-         nullptr,
-         g_current_lvl_mobd[80].layers[0],
-         (char *)0xD8,
-         a2 != 0 ? 240 : 80,
-         22,
-         10,
-         536872912,
-         14,
-         5);
+  v5 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0xD8, a2 != 0 ? 240 : 80, 22, 10, 536872912, 14, 5);
   dword_47C65C = v5;
   dword_47C664 = v3;
   v25 = dword_47C330 - 4;
@@ -49925,7 +48709,7 @@ void __fastcall __noreturn sub_432990(int a1, int a2, int a3)
         dword_47C65C->num_lines = 0;
         entity->x = 59392;
         entity->y = (16 * v24 + v31 + 14) << 8;
-        entity_anim_load(entity, 1064);
+        entity_anim_init(entity, 1064);
         v9 = v25;
         v10 = 5;
         v11 = (char *)(24 * v25 + 4702288);
@@ -49962,7 +48746,7 @@ void __fastcall __noreturn sub_432990(int a1, int a2, int a3)
         v13 = 0;
         v14 = 0;
         v15 = 0;
-        for ( i = TASK_pop_message((KKND::Task *)a1); i; i = TASK_pop_message((KKND::Task *)a1) )
+        for ( i = TSK_pop_message((KKND::Task *)a1); i; i = TSK_pop_message((KKND::Task *)a1) )
         {
           switch ( i->type )
           {
@@ -50021,7 +48805,7 @@ void __fastcall __noreturn sub_432990(int a1, int a2, int a3)
             default:
               break;
           }
-          task_message_recycle(i);
+          TSK_message_recycle(i);
         }
         if ( v30 )
         {
@@ -50041,25 +48825,25 @@ void __fastcall __noreturn sub_432990(int a1, int a2, int a3)
           if ( a2 )
           {
             __setargv();
-            task_445310(g_47C6E0_mobd79_task);
+            TASK_terminate(g_47C6E0_mobd79_task);
             g_47C6E0_mobd79_task = nullptr;
             sub_443B10();
           }
           else
           {
-            TASK_broadcast_message((KKND::Task *)a1, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+            TSK_broadcast_message((KKND::Task *)a1, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
             entity_remove((KKND::Entity *)g_task_47C028->ctx);
             if ( (KKND::Task *)a1 != g_task_47C028 )
-              TASK_send_message((KKND::Task *)a1, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+              TSK_send_message((KKND::Task *)a1, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
           }
         }
       }
       if ( !v13 )
         break;
 LABEL_60:
-      dword_47C664->is_on_collision_grid = 1;
+      dword_47C664->is_collidable = 1;
       dword_47C664->y = 49664;
-      entity_anim_load(entity, 1096);
+      entity_anim_init(entity, 1096);
       dword_47C6C4 = 1;
       if ( sub_41AC50(
              (char *)(24 * dword_47C330 + 4702288),
@@ -50090,7 +48874,7 @@ LABEL_70:
           qmemcpy(&byte_47C050[v22 * 4], v33, v18);
           dword_47C064[v22] = g_current_lvl_id;
           if ( sub_438840() )
-            TASK_send_message(v12, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
+            TSK_send_message(v12, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
         }
       }
       dword_47C6C4 = 0;
@@ -50135,7 +48919,7 @@ KKND::Entity *__cdecl sub_432F40(KKND::Task *task)
   KKND::Entity *result; // eax
   KKND::Entity *v7; // edi
 
-  TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
+  TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
   v1 = entity_create_ex(MobdId_FontItalic, task->entity, sub_432F30, TaskKind_Coroutine, nullptr);
   if ( v1 )
     v1->task->netz_flags = TaskNetzFlags_EnabledForMultiplayer;
@@ -50159,7 +48943,7 @@ KKND::Entity *__cdecl sub_432F40(KKND::Task *task)
     result->x = task->entity->x;
     result->y = task->entity->y;
     result->z = task->entity->z + 256;
-    entity_anim_load(result, 24);
+    entity_anim_init(result, 24);
     result = (KKND::Entity *)g_task_47C028;
     g_task_47C028->ctx = v7;
   }
@@ -50188,9 +48972,9 @@ void __cdecl __noreturn sub_433060(KKND::Task *sender)
   g_task_47C028 = sender;
   sender->channel = TaskChannel_IngameMenuController;
   rend = entity->rend;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v4 = g_screen_width;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   LOBYTE(v4) = v4 & 0xFE;
   entity->y = 0x4000;
   entity->x = v4 << 7;
@@ -50207,17 +48991,17 @@ void __cdecl __noreturn sub_433060(KKND::Task *sender)
     {
       sendera = 0;
       g_netz_synchronized_lockstep_mode = 0;
-      TASK_send_message(sender, TaskMessage_ResumeGame, nullptr, g_game_update_loop_task);
+      TSK_send_message(sender, TaskMessage_ResumeGame, nullptr, g_game_update_loop_task);
       palette_408460();
-      entity_anim_load(entity, 60);
+      entity_anim_init(entity, 60);
     }
     else
     {
       if ( dword_47C030 )
       {
         dword_47C030 = 0;
-        TASK_send_message(sender, TaskMessage_ResumeGame, nullptr, g_game_update_loop_task);
-        entity_anim_load(entity, 60);
+        TSK_send_message(sender, TaskMessage_ResumeGame, nullptr, g_game_update_loop_task);
+        entity_anim_init(entity, 60);
       }
       sendera = 0;
       palette_408460();
@@ -50225,7 +49009,7 @@ void __cdecl __noreturn sub_433060(KKND::Task *sender)
     do
     {
       TASK_yield(sender, Task_Yield, 1);
-      for ( i = TASK_pop_message(sender); i; i = TASK_pop_message(sender) )
+      for ( i = TSK_pop_message(sender); i; i = TSK_pop_message(sender) )
       {
         if ( i->type == TaskMessage_ToggleIngameMenu )
         {
@@ -50235,7 +49019,7 @@ void __cdecl __noreturn sub_433060(KKND::Task *sender)
         {
           v13 = 1;
         }
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
       if ( g_netz_synchronized_lockstep_mode )
         sendera = 1;
@@ -50247,7 +49031,7 @@ void __cdecl __noreturn sub_433060(KKND::Task *sender)
       break;
     if ( !g_netz_synchronized_lockstep_mode )
     {
-      TASK_send_message(sender, TaskMessage_PauseGame, nullptr, g_game_update_loop_task);
+      TSK_send_message(sender, TaskMessage_PauseGame, nullptr, g_game_update_loop_task);
       while ( !g_netz_synchronized_lockstep_mode )
         TASK_yield(sender, Task_Sleep, 1);
       if ( dword_47050C == 1 )
@@ -50266,7 +49050,7 @@ LABEL_27:
     {
       if ( (TASK_yield(sender, Task_Yield, 1) & 0x40000000) != 0 )
       {
-        v7 = TASK_pop_message(sender);
+        v7 = TSK_pop_message(sender);
         if ( v7 )
         {
           while ( 1 )
@@ -50285,10 +49069,10 @@ LABEL_27:
                 goto LABEL_47;
               case TaskMessage_AttackOrder:
                 v6 = 3;
-                TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
+                TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
                 dword_47C65C = ui_string_create(
                                  nullptr,
-                                 g_current_lvl_mobd[80].layers[0],
+                                 g_mobd[80].layers[0],
                                  (char *)0x100,
                                  96,
                                  22,
@@ -50327,10 +49111,10 @@ LABEL_27:
                 goto LABEL_64;
               case TaskMessage_Follow:
                 v6 = 4;
-                TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
+                TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
                 dword_47C65C = ui_string_create(
                                  nullptr,
-                                 g_current_lvl_mobd[80].layers[0],
+                                 g_mobd[80].layers[0],
                                  (char *)0x100,
                                  96,
                                  22,
@@ -50375,23 +49159,23 @@ LABEL_51:
                       ui_string_free(dword_47C65C);
                       dword_47C65C = nullptr;
                     }
-                    TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+                    TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
                     goto LABEL_45;
                   case 3:
                   case 4:
-                    TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuYesNo);
+                    TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuYesNo);
                     if ( !dword_47C65C )
                       goto LABEL_45;
                     ui_string_free(dword_47C65C);
                     dword_47C65C = nullptr;
                     if ( sender == g_task_47C028 )
                       goto LABEL_47;
-                    TASK_send_message(sender, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+                    TSK_send_message(sender, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
                     v6 = 1;
                     sub_432400((KKND::Entity **)sender);
                     goto LABEL_64;
                   case 5:
-                    TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+                    TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
                     if ( dword_47C65C )
                     {
                       ui_string_free(dword_47C65C);
@@ -50407,25 +49191,25 @@ LABEL_45:
                         goto LABEL_47;
                     }
 LABEL_46:
-                    TASK_send_message(sender, TaskMessage_BuildingPlacementModeBegin, nullptr, v8);
+                    TSK_send_message(sender, TaskMessage_BuildingPlacementModeBegin, nullptr, v8);
 LABEL_47:
                     v6 = 1;
                     sub_432400((KKND::Entity **)sender);
 LABEL_64:
-                    task_message_recycle(v7);
-                    v7 = TASK_pop_message(sender);
+                    TSK_message_recycle(v7);
+                    v7 = TSK_pop_message(sender);
                     if ( !v7 )
                       goto LABEL_65;
                     break;
                   case 6:
-                    TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+                    TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
                     entity_remove((KKND::Entity *)g_task_47C028->ctx);
                     v8 = g_task_47C028;
                     if ( sender != g_task_47C028 )
                       goto LABEL_46;
                     goto LABEL_47;
                   case 7:
-                    TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+                    TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
                     entity_remove((KKND::Entity *)g_task_47C028->ctx);
                     v8 = g_task_47C028;
                     if ( sender != g_task_47C028 )
@@ -50448,11 +49232,11 @@ LABEL_65:
         sendera = 0;
     }
     while ( sendera );
-    TASK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
+    TSK_broadcast_message(sender, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuButton);
     entity = v14;
   }
   g_netz_synchronized_lockstep_mode = 1;
-  TASK_send_message(sender, TaskMessage_PauseGame, nullptr, g_game_update_loop_task);
+  TSK_send_message(sender, TaskMessage_PauseGame, nullptr, g_game_update_loop_task);
   goto LABEL_26;
 }
 // 433278: the default case was optimized away because edi.4 is in (1..7)
@@ -50538,7 +49322,7 @@ void __cdecl sub_433780(KKND::Task *task)
   sub_433640(task, -637534206, -92, v1, 1);
   if ( sub_434500(task, 864, 0, 0) )
   {
-    TASK_send_message(task, TaskMessage_MoveOrder, nullptr, g_task_47C028);
+    TSK_send_message(task, TaskMessage_MoveOrder, nullptr, g_task_47C028);
     TASK_yield(task, Task_Sleep, 1);
   }
   entity = task->entity;
@@ -50555,7 +49339,7 @@ void __cdecl sub_433810(KKND::Task *task)
   sub_433640(task, -637534206, -92, 42, 2);
   if ( sub_434500(task, 888, 0, 0) )
   {
-    TASK_send_message(task, TaskMessage_EscortEnd, nullptr, g_task_47C028);
+    TSK_send_message(task, TaskMessage_EscortEnd, nullptr, g_task_47C028);
     TASK_yield(task, Task_Sleep, 1);
   }
   entity = task->entity;
@@ -50572,7 +49356,7 @@ void __cdecl sub_433880(KKND::Task *task)
   sub_433640(task, -637534206, -92, 66, 3);
   if ( sub_434500(task, 900, 0, 0) )
   {
-    TASK_send_message(task, TaskMessage_EscortBegin, nullptr, g_task_47C028);
+    TSK_send_message(task, TaskMessage_EscortBegin, nullptr, g_task_47C028);
     TASK_yield(task, Task_Sleep, 1);
   }
   entity = task->entity;
@@ -50589,7 +49373,7 @@ void __cdecl sub_4338F0(KKND::Task *task)
   sub_433640(task, -637534206, -92, 90, 4);
   if ( sub_434500(task, 852, 0, 0) )
   {
-    TASK_send_message(task, TaskMessage_Infiltrate, nullptr, g_task_47C028);
+    TSK_send_message(task, TaskMessage_Infiltrate, nullptr, g_task_47C028);
     TASK_yield(task, Task_Sleep, 1);
   }
   entity = task->entity;
@@ -50609,7 +49393,7 @@ void __cdecl sub_433960(KKND::Task *task)
   sub_433640(task, -637534206, -92, v1, 5);
   if ( sub_434500(task, 840, 0, 0) )
   {
-    TASK_send_message(task, TaskMessage_Retreat, nullptr, g_task_47C028);
+    TSK_send_message(task, TaskMessage_Retreat, nullptr, g_task_47C028);
     TASK_yield(task, Task_Sleep, 1);
   }
   entity = task->entity;
@@ -50626,7 +49410,7 @@ void __cdecl sub_4339F0(KKND::Task *task)
   sub_433640(task, -637534206, -92, 138, 6);
   if ( sub_434500(task, 876, 0, 0) )
   {
-    TASK_send_message(task, TaskMessage_Follow, nullptr, g_task_47C028);
+    TSK_send_message(task, TaskMessage_Follow, nullptr, g_task_47C028);
     TASK_yield(task, Task_Sleep, 1);
   }
   entity = task->entity;
@@ -50646,7 +49430,7 @@ void __cdecl sub_433A60(KKND::Task *task)
   sub_433640(task, -637534206, -92, v1, 7);
   if ( sub_434500(task, 828, 0, 0) )
   {
-    TASK_send_message(task, TaskMessage_AttackOrder, nullptr, g_task_47C028);
+    TSK_send_message(task, TaskMessage_AttackOrder, nullptr, g_task_47C028);
     TASK_yield(task, Task_Sleep, 1);
   }
   entity = task->entity;
@@ -50700,14 +49484,14 @@ void __cdecl sub_433BA0(KKND::Task *task)
   sub_433640(task, -637534205, 0, 120, 1);
   if ( sub_434500(task, 768, 1, 0) )
   {
-    TASK_broadcast_message(nullptr, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuYesNo);
+    TSK_broadcast_message(nullptr, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuYesNo);
     if ( dword_47C65C )
     {
       ui_string_free(dword_47C65C);
       dword_47C65C = nullptr;
     }
     if ( g_task_47C028 )
-      TASK_send_message(nullptr, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+      TSK_send_message(nullptr, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -50737,14 +49521,14 @@ void __cdecl sub_433C90(KKND::Task *task)
   sub_433640(task, -637534205, 0, 120, 1);
   if ( sub_434500(task, 768, 1, 0) )
   {
-    TASK_broadcast_message(nullptr, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuYesNo);
+    TSK_broadcast_message(nullptr, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenuYesNo);
     if ( dword_47C65C )
     {
       ui_string_free(dword_47C65C);
       dword_47C65C = nullptr;
     }
     if ( g_task_47C028 )
-      TASK_send_message(nullptr, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+      TSK_send_message(nullptr, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -50760,11 +49544,11 @@ void __cdecl sub_433D20(KKND::Task *task)
   sub_433640(task, -637534207, -55, 185, 3);
   if ( sub_434500(task, 756, 1, 0) )
   {
-    TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+    TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
     if ( dword_47C65C )
       ui_string_free(dword_47C65C);
     if ( task != g_task_47C028 )
-      TASK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+      TSK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -50787,9 +49571,9 @@ void __cdecl sub_433DB0(KKND::Task *task)
       ui_string_free(dword_47C65C);
       dword_47C65C = nullptr;
     }
-    TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+    TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
     if ( task != g_task_47C028 )
-      TASK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+      TSK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -50806,7 +49590,7 @@ void __cdecl sub_433E60(KKND::Task *task)
   sub_438630();
   sub_433640(task, -637534207, -80, 153, 3);
   while ( sub_434500(task, 792, 1, 0) )
-    TASK_send_message(task, TaskMessage_MoveOrder, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_MoveOrder, nullptr, dword_47C024);
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
   entity_remove(entity);
@@ -50823,7 +49607,7 @@ void __cdecl sub_433ED0(KKND::Task *task)
   do
   {
     v1 = sub_434500(task, 744, 2, 0);
-    TASK_send_message(task, TaskMessage_ShowHint, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_ShowHint, nullptr, dword_47C024);
   }
   while ( v1 );
   entity = task->entity;
@@ -50842,7 +49626,7 @@ void __cdecl sub_433F40(KKND::Task *task)
   do
   {
     v1 = sub_434500(task, 732, 2, 0);
-    TASK_send_message(task, TaskMessage_UnitDeselected, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_UnitDeselected, nullptr, dword_47C024);
   }
   while ( v1 );
   entity = task->entity;
@@ -50859,10 +49643,10 @@ void __cdecl sub_433FB0(KKND::Task *task)
   sub_433640(task, -637534207, 0, 153, 3);
   if ( sub_434500(task, 816, 1, 0) )
   {
-    TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+    TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
     entity_remove((KKND::Entity *)g_task_47C028->ctx);
     if ( task != g_task_47C028 )
-      TASK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+      TSK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -50878,7 +49662,7 @@ void __cdecl sub_434040(KKND::Task *task)
   sub_438630();
   sub_433640(task, -637534207, -80, 153, 3);
   while ( sub_434500(task, 804, 1, 0) )
-    TASK_send_message(task, TaskMessage_SpawnTanker, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_SpawnTanker, nullptr, dword_47C024);
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
   entity_remove(entity);
@@ -50895,7 +49679,7 @@ void __cdecl sub_4340B0(KKND::Task *task)
   do
   {
     v1 = sub_434500(task, 744, 2, 0);
-    TASK_send_message(task, TaskMessage_ShowHint, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_ShowHint, nullptr, dword_47C024);
   }
   while ( v1 );
   entity = task->entity;
@@ -50914,7 +49698,7 @@ void __cdecl sub_434120(KKND::Task *task)
   do
   {
     v1 = sub_434500(task, 732, 2, 0);
-    TASK_send_message(task, TaskMessage_UnitDeselected, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_UnitDeselected, nullptr, dword_47C024);
   }
   while ( v1 );
   entity = task->entity;
@@ -50931,10 +49715,10 @@ void __cdecl sub_434190(KKND::Task *task)
   sub_433640(task, -637534207, 0, 153, 3);
   if ( sub_434500(task, 816, 1, 0) )
   {
-    TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
+    TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_UiSlider);
     entity_remove((KKND::Entity *)g_task_47C028->ctx);
     if ( task != g_task_47C028 )
-      TASK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
+      TSK_send_message(task, TaskMessage_BuildingPlacementModeBegin, nullptr, g_task_47C028);
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -50951,7 +49735,7 @@ void __cdecl sub_434220(KKND::Task *task)
   sub_4336E0(task, -637534201, 100, 105, 3);
   sub_4439F0(&task->entity->next, 0, 0, 1, 0);
   while ( sub_434500(task, 1764, 1, 1) )
-    TASK_send_message(task, TaskMessage_SpawnTanker, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_SpawnTanker, nullptr, dword_47C024);
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
   entity_remove(entity);
@@ -50969,7 +49753,7 @@ void __cdecl sub_4342A0(KKND::Task *task)
   do
   {
     v1 = sub_434500(task, 1740, 2, 1);
-    TASK_send_message(task, TaskMessage_ShowHint, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_ShowHint, nullptr, dword_47C024);
   }
   while ( v1 );
   entity = task->entity;
@@ -50989,7 +49773,7 @@ void __cdecl sub_434310(KKND::Task *task)
   do
   {
     v1 = sub_434500(task, 1728, 2, 1);
-    TASK_send_message(task, TaskMessage_UnitDeselected, nullptr, dword_47C024);
+    TSK_send_message(task, TaskMessage_UnitDeselected, nullptr, dword_47C024);
   }
   while ( v1 );
   entity = task->entity;
@@ -51009,11 +49793,11 @@ void __cdecl sub_434390(KKND::Task *task)
   {
     dword_47C6F8 = 0;
     sub_443BF0();
-    TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000006);
-    TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000007);
-    TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_SaveLoaad_DA000008);
-    TASK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenu);
-    TASK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenuLoad);
+    TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000006);
+    TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_IngameMenu_DA000007);
+    TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_SaveLoaad_DA000008);
+    TSK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenu);
+    TSK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenuLoad);
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -51040,15 +49824,15 @@ void __cdecl sub_434460(KKND::Task *task)
   entity->x += 25600;
   entity->y = y - 12800;
   entity->z = z + 1;
-  entity_anim_load(entity, 1392);
+  entity_anim_init(entity, 1392);
   do
   {
     TASK_yield(task, Task_Wait, 0);
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       if ( i->type == TaskMessage_Retreat )
         v1 = 1;
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
   }
   while ( !v1 );
@@ -51081,10 +49865,10 @@ BOOL __fastcall sub_434500(KKND::Task *task, ptrdiff_t a2, ptrdiff_t a3, int a4)
       v6 = 0;
       if ( TASK_yield(task, Task_Yield, 1) != 0x80000000 )
         break;
-      entity_anim_start(ctx, a2, 0);
-      entity_anim_start(entity, 720, a3);
+      entity_anim_init_directional(ctx, a2, 0);
+      entity_anim_init_directional(entity, 720, a3);
     }
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       if ( type > 1511 )
@@ -51110,7 +49894,7 @@ BOOL __fastcall sub_434500(KKND::Task *task, ptrdiff_t a2, ptrdiff_t a3, int a4)
           sub_443AE0(entity);
         v6 |= 0x10u;
       }
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( (v6 & 1) != 0 )
       return 0;
@@ -51118,26 +49902,26 @@ BOOL __fastcall sub_434500(KKND::Task *task, ptrdiff_t a2, ptrdiff_t a3, int a4)
     {
       if ( (v6 & 0x10) != 0 )
       {
-        entity_anim_start(ctx, a2, 2);
-        entity_anim_start(entity, 720, a3);
+        entity_anim_init_directional(ctx, a2, 2);
+        entity_anim_init_directional(entity, 720, a3);
       }
       if ( (v6 & 4) != 0 )
         break;
     }
   }
-  entity_anim_start(ctx, a2, 1);
-  entity_anim_start(entity, 708, a3);
+  entity_anim_init_directional(ctx, a2, 1);
+  entity_anim_init_directional(entity, 708, a3);
   v10 = 1;
   do
   {
     v11 = TASK_yield(task, Task_Yield_10000000|Task_Wait, 0);
     if ( (v11 & 0x40000000) == 0 )
       break;
-    for ( j = TASK_pop_message(task); j; j = TASK_pop_message(task) )
+    for ( j = TSK_pop_message(task); j; j = TSK_pop_message(task) )
     {
       if ( j->type == TaskMessage_Retreat )
         v10 = 0;
-      task_message_recycle(j);
+      TSK_message_recycle(j);
     }
     if ( v10 )
       goto LABEL_31;
@@ -51146,19 +49930,19 @@ BOOL __fastcall sub_434500(KKND::Task *task, ptrdiff_t a2, ptrdiff_t a3, int a4)
   if ( !v10 )
     return 0;
 LABEL_31:
-  entity_anim_start(ctx, a2, 2);
-  entity_anim_start(entity, 720, a3);
+  entity_anim_init_directional(ctx, a2, 2);
+  entity_anim_init_directional(entity, 720, a3);
   v13 = 1;
   do
   {
     v14 = TASK_yield(task, Task_Yield_10000000|Task_Wait, 0);
     if ( (v14 & 0x40000000) == 0 )
       break;
-    for ( k = TASK_pop_message(task); k; k = TASK_pop_message(task) )
+    for ( k = TSK_pop_message(task); k; k = TSK_pop_message(task) )
     {
       if ( k->type == TaskMessage_Retreat )
         v13 = 0;
-      task_message_recycle(k);
+      TSK_message_recycle(k);
     }
     if ( v13 )
       return 1;
@@ -52069,14 +50853,14 @@ void __fastcall unit_mode_power_station_spawn_tanker(KKND::Unit *unit)
     unit->mode_arrive = nullptr;
     unit->mode = unit_mode_403650;
   }
-  TASK_broadcast_message(unit->task, TaskMessage_SpawnTanker, nullptr, TaskChannel_unused_tanker_broadcast);
+  TSK_broadcast_message(unit->task, TaskMessage_SpawnTanker, nullptr, TaskChannel_unused_tanker_broadcast);
   if ( unit->player_num )
   {
     entity = unit->entity;
     type = unit->type;
     if ( entity->cplc_spawn_params )
     {
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       v4 = unit->entity;
       y = v4->y;
       player_num = unit->player_num;
@@ -52087,7 +50871,7 @@ void __fastcall unit_mode_power_station_spawn_tanker(KKND::Unit *unit)
     }
     else
     {
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       v6 = unit->entity;
       v7 = v6->y;
       v9 = unit->player_num;
@@ -52131,7 +50915,7 @@ void __fastcall unit_mode_435980_power_station(KKND::Unit *unit)
 //----- (00435A20) --------------------------------------------------------
 void __fastcall unit_mode_power_station_on_death(KKND::Unit *unit)
 {
-  TASK_broadcast_message(unit->task, TaskMessage_PowerPlantDown, nullptr, TaskChannel_Tanker);
+  TSK_broadcast_message(unit->task, TaskMessage_PowerPlantDown, nullptr, TaskChannel_Tanker);
   unit_mode_building_on_death(unit);
 }
 
@@ -52173,9 +50957,9 @@ void __cdecl proj_mode_grenade(KKND::Task *task)
   unit = (KKND::Unit *)task->ctx;
   param = (KKND::UnitProjectileType *)entity->ctx;
   parent = (KKND::Unit *)entity->parent->ctx;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   y = entity->y;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v4 = unit->entity;
   v5 = (v4->y - y) >> 8;
   v6 = (v4->x - entity->x) >> 8;
@@ -52227,9 +51011,9 @@ void __cdecl proj_mode_grenade(KKND::Task *task)
     entity->z = 255;
     v23 = g_4690A8_sfx_volume;
     v21 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 120);
-    entity_408800_play_sound(entity, dword_46BB80[v21 % 2], v23, 0);
+    entity_play_sound(entity, dword_46BB80[v21 % 2], v23, 0);
     entity->mobd_id = MobdId_Explosions;
-    entity_anim_load(entity, v8->mobd_lookup_offset_impact);
+    entity_anim_init(entity, v8->mobd_lookup_offset_impact);
     entity->anim_speed = 0x20000000;
     if ( unit->unit_id == v30 )
     {
@@ -52237,7 +51021,7 @@ void __cdecl proj_mode_grenade(KKND::Task *task)
       if ( v22 )
         entity->z = v22->z + 256;
     }
-    entity_40D8B0(entity, v8->radius);
+    entity_apply_aoe_damage(entity, v8->radius);
   }
   TASK_yield(task, Task_Yield_10000000, 0);
   entity_remove(entity);
@@ -52256,7 +51040,7 @@ void __cdecl __noreturn task_rocket_proj_explosion(KKND::Task *task)
 
   entity = task->entity;
   ++g_num_active_explosions;
-  entity_anim_load(entity, 412);
+  entity_anim_init(entity, 412);
   TASK_yield(task, Task_Yield_10000000, 0);
   entity_remove(entity);
   --g_num_active_explosions;
@@ -52275,7 +51059,7 @@ void __fastcall sub_435D40(KKND::Entity *param, int a2)
     if ( (type == UnitType_Surv_Bomber || type == UnitType_Mute_Wasp) && !i->destroyed && i->task )
     {
       if ( entity_is_in_radius(param, i->entity, a2) )
-        TASK_send_message(param->task, TaskMessage_ReceiveDamage, param, i->task);
+        TSK_send_message(param->task, TaskMessage_ReceiveDamage, param, i->task);
     }
   }
 }
@@ -52329,17 +51113,17 @@ void __cdecl proj_mode_rocket(KKND::Task *task)
   v34 = parent;
   entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[parent->player_num]];
   entity->rend->flags |= 0x10000000u;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   x = entity->x;
   y = entity->y;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v6 = unit->entity;
   v7 = (v6->x - x) >> 8;
   v8 = (v6->y - y) >> 8;
   if ( parent->turret )
   {
     z = entity->z;
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     entity->z = z + 5120;
     entity->y = y + 2560;
   }
@@ -52375,7 +51159,7 @@ void __cdecl proj_mode_rocket(KKND::Task *task)
   v22 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 207);
   entity->collider = &g_null_collision;
   v23 = 16 * (v22 % (100 - v20) - (100 - v21) / 2);
-  entity_408800_play_sound(entity, SoundId_14, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_14, g_4690A8_sfx_volume, 0);
   entity->x_speed = (v18 + proj->speed * dword_4731A8[dword_47CFC8[v35]]) >> 1;
   entity->y_speed = (v23 - proj->speed * dword_4731C8[dword_47CFC8[v35]]) >> 1;
   if ( v36 > 0 )
@@ -52405,9 +51189,9 @@ void __cdecl proj_mode_rocket(KKND::Task *task)
   {
     v30 = g_4690A8_sfx_volume;
     v25 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 262);
-    entity_408800_play_sound(entity, dword_46BB80[v25 % 2], v30, 0);
+    entity_play_sound(entity, dword_46BB80[v25 % 2], v30, 0);
     entity->mobd_id = MobdId_Explosions;
-    entity_anim_load(entity, proj->mobd_lookup_offset_impact);
+    entity_anim_init(entity, proj->mobd_lookup_offset_impact);
     entity->anim_speed = 0x20000000;
     if ( v33 )
     {
@@ -52420,7 +51204,7 @@ void __cdecl proj_mode_rocket(KKND::Task *task)
           && v27->task
           && entity_is_in_radius(entity, v27->entity, i) )
         {
-          TASK_send_message(entity->task, TaskMessage_ReceiveDamage, entity, v27->task);
+          TSK_send_message(entity->task, TaskMessage_ReceiveDamage, entity, v27->task);
         }
       }
     }
@@ -52429,8 +51213,8 @@ void __cdecl proj_mode_rocket(KKND::Task *task)
       v26 = entity->rend;
       entity->z = 0;
       v26->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_explosion;
-      sub_4389A0(entity->x, entity->y);
-      entity_40D8B0(entity, proj->radius);
+      SCAR_apply(entity->x, entity->y);
+      entity_apply_aoe_damage(entity, proj->radius);
     }
   }
   TASK_yield(task, Task_Yield_10000000, 0);
@@ -52460,15 +51244,15 @@ void __cdecl __noreturn task_flamethrower_proj(KKND::Task *task)
   entity = task->entity;
   unit = (KKND::Unit *)task->ctx;
   proj = (KKND::UnitProjectileType *)entity->ctx;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v5 = unit->entity;
   v6 = (v5->y - entity->y) >> 8;
   v7 = (v5->x - x) >> 8;
   v9 = vec2_orientation(v7, v6);
-  entity_408800_play_sound(entity, SoundId_86, g_4690A8_sfx_volume, 0);
-  entity_anim_load(entity, 496);
+  entity_play_sound(entity, SoundId_86, g_4690A8_sfx_volume, 0);
+  entity_anim_init(entity, 496);
   entity->x_speed = (kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 301) & 0xF)
                   + proj->speed * dword_4731A8[dword_47CFC8[v9]]
                   - 8;
@@ -52504,8 +51288,8 @@ void __cdecl proj_mode_flamethrower(KKND::Task *task)
   proj = (KKND::UnitProjectileType *)entity->ctx;
   v4 = 0;
   parent = (KKND::Unit *)entity->parent->ctx;
-  unit->entity->is_on_collision_grid = 1;
-  entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
+  entity->is_collidable = 1;
   while ( !unit->destroyed && parent->unit_id && !parent->destroyed && g_num_active_projectiles < 200 )
   {
     ++g_num_active_projectiles;
@@ -52565,13 +51349,13 @@ void __cdecl __noreturn task_giant_beetle_proj(KKND::Task *task)
   entity = task->entity;
   proj = (KKND::UnitProjectileType *)entity->ctx;
   v11 = proj;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   y = entity->y;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v6 = MATH_vec2_length((unit->entity->x - entity->x) >> 8, (unit->entity->y - y) >> 8);
   v1 = unit->unit_id;
   v7 = v6 / proj->speed;
-  entity_anim_load(entity, 1784);
+  entity_anim_init(entity, 1784);
   entity->collider = &g_null_collision;
   entity->z_speed_limit = 512;
   entity->z_speed = 512;
@@ -52593,9 +51377,9 @@ void __cdecl __noreturn task_giant_beetle_proj(KKND::Task *task)
   entity->z_speed = 0;
   entity->z_acceleration = 0;
   entity->z = 255;
-  entity_408800_play_sound(entity, SoundId_161, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_161, g_4690A8_sfx_volume, 0);
   entity->mobd_id = MobdId_Explosions;
-  entity_anim_load(entity, 704);
+  entity_anim_init(entity, 704);
   entity->anim_speed = 0x20000000;
   if ( unit->unit_id == v1 )
   {
@@ -52603,7 +51387,7 @@ void __cdecl __noreturn task_giant_beetle_proj(KKND::Task *task)
     if ( v10 )
       entity->z = v10->z + 256;
   }
-  entity_40D8B0(entity, v11->radius);
+  entity_apply_aoe_damage(entity, v11->radius);
   TASK_yield(task, Task_Yield_10000000, 0);
   entity_remove(entity);
   --g_num_active_projectiles;
@@ -52643,15 +51427,15 @@ void __cdecl proj_mode_giant_beetle(KKND::Task *task)
   unit = (KKND::Unit *)task->ctx;
   proj = (KKND::UnitProjectileType *)entity->ctx;
   parent = (KKND::Unit *)entity->parent->ctx;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v5 = unit->entity;
   v25 = (v5->x - x) >> 8;
   v24 = (v5->y - entity->y) >> 8;
   v20 = vec2_orientation(v25, v24);
   v22 = 0;
-  entity_408800_play_sound(parent->entity, SoundId_161, g_4690A8_sfx_volume, 0);
+  entity_play_sound(parent->entity, SoundId_161, g_4690A8_sfx_volume, 0);
   if ( g_num_active_projectiles < 200 )
   {
     ++g_num_active_projectiles;
@@ -52751,12 +51535,12 @@ int __cdecl sub_4368B0(KKND::Task *a1)
   *(_DWORD *)(ctx[23] + 136) = 1;
   y = entity->y;
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v5 = ctx[23];
   v13 = ctx[76];
   v6 = (*(_DWORD *)(v5 + 16) - x) >> 8;
   v7 = (*(_DWORD *)(v5 + 20) - y) >> 8;
-  entity_anim_load(entity, 1152);
+  entity_anim_init(entity, 1152);
   entity->collider = &g_null_collision;
   v8 = MATH_vec2_length(v6, v7);
   TASK_yield(a1, Task_Sleep, v8 / v12[4]);
@@ -52767,13 +51551,13 @@ int __cdecl sub_4368B0(KKND::Task *a1)
   entity->z = 255;
   v11 = g_4690A8_sfx_volume;
   v9 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 515);
-  entity_408800_play_sound(entity, dword_46BB80[v9 % 2], v11, 0);
+  entity_play_sound(entity, dword_46BB80[v9 % 2], v11, 0);
   entity->mobd_id = MobdId_PlasmaTank;
-  entity_anim_load(entity, 2084);
+  entity_anim_init(entity, 2084);
   entity->anim_speed = 0x20000000;
   if ( v13 == ctx[76] )
     entity->z = *(_DWORD *)(ctx[23] + 24) + 256;
-  entity_40D8B0(entity, v12[8]);
+  entity_apply_aoe_damage(entity, v12[8]);
   TASK_yield(a1, Task_Yield_10000000, 0);
   entity_remove(entity);
   return --g_num_active_projectiles;
@@ -52852,16 +51636,16 @@ void __cdecl proj_mode_mech(KKND::Task *task)
   v47 = 0;
   if ( parent->turret->volley_remaining % 3 )
   {
-    v3->is_on_collision_grid = 1;
+    v3->is_collidable = 1;
     y = entity->y;
     x = entity->x;
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     v7 = unit->entity;
     v8 = (v7->x - x) >> 8;
     v56 = (v7->y - y) >> 8;
     v50 = vec2_orientation(v8, v56);
     entity->mobd_id = MobdId_Mech;
-    entity_anim_load(entity, 1152);
+    entity_anim_init(entity, 1152);
     entity->collider = &g_null_collision;
     v9 = parent->stats->accuracy + g_veterancy_accuracy_bonus[parent->veterancy];
     v48 = v9;
@@ -52882,7 +51666,7 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     v14 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 554);
     entity->z = parent->entity->z + 2560;
     v15 = 8 * (v14 % (100 - v13) - (100 - v49) / 2);
-    entity_408800_play_sound(parent->entity, SoundId_87, g_4690A8_sfx_volume, 0);
+    entity_play_sound(parent->entity, SoundId_87, g_4690A8_sfx_volume, 0);
     entity->x_speed = v54 + proj->speed * dword_4731A8[dword_47CFC8[v50]];
     entity->y_speed = v15 - proj->speed * dword_4731C8[dword_47CFC8[v50]];
     v16 = MATH_vec2_length(v8, v56);
@@ -52893,24 +51677,24 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     {
       v45 = g_4690A8_sfx_volume;
       v17 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 564);
-      entity_408800_play_sound(entity, dword_46BB80[v17 % 2], v45, 0);
+      entity_play_sound(entity, dword_46BB80[v17 % 2], v45, 0);
       entity->mobd_id = MobdId_Explosions;
-      entity_anim_load(entity, 2084);
+      entity_anim_init(entity, 2084);
       rend = entity->rend;
       entity->anim_speed = 0x20000000;
       entity->z = 0;
       rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_explosion;
-      sub_4389A0(entity->x, entity->y);
-      entity_40D8B0(entity, proj->radius);
+      SCAR_apply(entity->x, entity->y);
+      entity_apply_aoe_damage(entity, proj->radius);
     }
   }
   else
   {
     entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[parent->player_num]];
     entity->rend->flags |= 0x10000000u;
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     v19 = entity->x;
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     v20 = unit->entity;
     turret = parent->turret;
     v22 = (v20->x - v19) >> 8;
@@ -52950,7 +51734,7 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     v37 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 592);
     entity->collider = &g_null_collision;
     v38 = 16 * (v37 % (100 - v35) - (100 - v36) / 2);
-    entity_408800_play_sound(entity, SoundId_14, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_14, g_4690A8_sfx_volume, 0);
     entity->x_speed = (v33 + proj->speed * dword_4731A8[dword_47CFC8[v51]]) >> 1;
     entity->y_speed = (v38 - proj->speed * dword_4731C8[dword_47CFC8[v51]]) >> 1;
     if ( v57 > 0 )
@@ -52980,9 +51764,9 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     {
       v46 = g_4690A8_sfx_volume;
       v40 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 618);
-      entity_408800_play_sound(entity, dword_46BB80[v40 % 2], v46, 0);
+      entity_play_sound(entity, dword_46BB80[v40 % 2], v46, 0);
       entity->mobd_id = MobdId_Explosions;
-      entity_anim_load(entity, proj->mobd_lookup_offset_impact);
+      entity_anim_init(entity, proj->mobd_lookup_offset_impact);
       entity->anim_speed = 0x20000000;
       if ( v53 )
       {
@@ -52995,7 +51779,7 @@ void __cdecl proj_mode_mech(KKND::Task *task)
             && v42->task
             && entity_is_in_radius(entity, v42->entity, i) )
           {
-            TASK_send_message(entity->task, TaskMessage_ReceiveDamage, entity, v42->task);
+            TSK_send_message(entity->task, TaskMessage_ReceiveDamage, entity, v42->task);
           }
         }
       }
@@ -53004,8 +51788,8 @@ void __cdecl proj_mode_mech(KKND::Task *task)
         v41 = entity->rend;
         entity->z = 0;
         v41->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_explosion;
-        sub_4389A0(entity->x, entity->y);
-        entity_40D8B0(entity, proj->radius);
+        SCAR_apply(entity->x, entity->y);
+        entity_apply_aoe_damage(entity, proj->radius);
       }
     }
   }
@@ -53027,7 +51811,7 @@ int __cdecl sub_436FB0(KKND::Task *a1)
 
   entity = a1->entity;
   TASK_yield(a1, Task_Sleep, 30);
-  entity_408800_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
   entity_remove(entity);
   return --g_num_active_projectiles;
 }
@@ -53056,15 +51840,15 @@ void __cdecl __noreturn task_machinegun_proj(KKND::Task *task)
     if ( (task->flags_20 & 0x10000000) != 0 )
       break;
     turret = parent->turret;
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     if ( turret )
     {
-      parent->turret->entity->is_on_collision_grid = 1;
+      parent->turret->entity->is_collidable = 1;
       v4 = parent->turret;
       v5 = v4->entity;
       x = v4->projectile_spawn_anchor->x;
       v7 = v5->x;
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       entity->x = v7 + x;
       v8 = parent->turret;
       projectile_spawn_anchor = v8->projectile_spawn_anchor;
@@ -53072,10 +51856,10 @@ void __cdecl __noreturn task_machinegun_proj(KKND::Task *task)
     }
     else
     {
-      parent->entity->is_on_collision_grid = 1;
+      parent->entity->is_collidable = 1;
       v11 = parent->mobd_anchors.turret->x;
       v12 = parent->entity->x;
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       entity->x = v12 + v11;
       projectile_spawn_anchor = parent->mobd_anchors.turret;
       v10 = parent->entity;
@@ -53094,7 +51878,7 @@ void __cdecl sub_4370D0(KKND::Task *task)
   KKND::Entity *entity; // esi
 
   entity = task->entity;
-  entity_408800_play_sound(entity, SoundId_187, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_187, g_4690A8_sfx_volume, 0);
   TASK_yield(task, Task_Yield_10000000, 0);
   entity_remove(entity);
 }
@@ -53123,27 +51907,27 @@ int __cdecl sub_437110(KKND::Task *sender)
   v4->parent = entity->parent;
   task->ctx = ctx;
   v4->z = *(_DWORD *)(*((_DWORD *)v3 + 23) + 24) + 5120;
-  v4->is_on_collision_grid = 1;
+  v4->is_collidable = 1;
   ctx[23][2].next = (KKND::Task *)1;
   mode_turret = (int)ctx[23]->mode_turret;
-  v4->is_on_collision_grid = 1;
+  v4->is_collidable = 1;
   v4->x = mode_turret;
   v4->y = ctx[23]->sleep + 2560;
-  entity_anim_load(v4, 2112);
-  entity_408800_play_sound(*((KKND::Entity **)v3 + 23), SoundId_188, g_4690A8_sfx_volume, 0);
+  entity_anim_init(v4, 2112);
+  entity_play_sound(*((KKND::Entity **)v3 + 23), SoundId_188, g_4690A8_sfx_volume, 0);
   entity->z = *(_DWORD *)(*((_DWORD *)v3 + 23) + 24) + 5120;
   while ( !*((_DWORD *)v3 + 35) )
   {
     if ( (sender->flags_20 & 0x10000000) != 0 )
       break;
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     *(_DWORD *)(*((_DWORD *)v3 + 23) + 136) = 1;
     v7 = *(_DWORD *)(*((_DWORD *)v3 + 24) + 4) + *(_DWORD *)(*((_DWORD *)v3 + 23) + 16);
-    entity->is_on_collision_grid = 1;
+    entity->is_collidable = 1;
     entity->x = v7;
     entity->y = *(_DWORD *)(*((_DWORD *)v3 + 23) + 20) + *(_DWORD *)(*((_DWORD *)v3 + 24) + 8) + 2560;
     if ( !*((_DWORD *)v3 + 35) )
-      TASK_send_message(sender, TaskMessage_ReceiveDamage, entity, ctx[3]);
+      TSK_send_message(sender, TaskMessage_ReceiveDamage, entity, ctx[3]);
     TASK_yield(sender, Task_Sleep, 1);
   }
   entity_remove(entity);
@@ -53181,25 +51965,25 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
   {
     case UnitType_Mute_Shotgunner:
     case UnitType_Mute_DireWolf:
-      entity_408800_play_sound(parent->entity, SoundId_16|SoundId_1, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_16|SoundId_1, g_4690A8_sfx_volume, 0);
       break;
     case UnitType_Mute_CrazyHarry:
     case UnitType_Surv_Atv:
-      entity_408800_play_sound(parent->entity, SoundId_8, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_8, g_4690A8_sfx_volume, 0);
       break;
     case UnitType_Surv_DirkBike:
     case UnitType_Surv_4x4Pickup:
     case UnitType_Mute_MonsterTruck:
-      entity_408800_play_sound(parent->entity, SoundId_5, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_5, g_4690A8_sfx_volume, 0);
       break;
     case UnitType_Mute_BikeAndSidecar:
-      entity_408800_play_sound(parent->entity, SoundId_7, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_7, g_4690A8_sfx_volume, 0);
       break;
     case UnitType_Surv_AutocannonTank:
-      entity_408800_play_sound(parent->entity, SoundId_6, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_6, g_4690A8_sfx_volume, 0);
       break;
     default:
-      entity_408800_play_sound(parent->entity, SoundId_4, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_4, g_4690A8_sfx_volume, 0);
       break;
   }
   if ( !parent->destroyed )
@@ -53219,10 +52003,10 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
         v4->parent = entity->parent;
         v5->ctx = unit;
         z = parent->turret->entity->z;
-        v4->is_on_collision_grid = 1;
+        v4->is_collidable = 1;
         v4->z = z + 5120;
         v4->y = parent->turret->projectile_spawn_anchor->y + parent->turret->entity->y + 2560;
-        entity_anim_start(v4, 2184, g_angle_to_orientation[parent->turret->current_mobd_frame]);
+        entity_anim_init_directional(v4, 2184, g_angle_to_orientation[parent->turret->current_mobd_frame]);
       }
     }
     else if ( g_num_active_projectiles < 200 )
@@ -53238,21 +52022,21 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
       v7->parent = entity->parent;
       v8->ctx = unit;
       v9 = parent->entity->z;
-      v7->is_on_collision_grid = 1;
+      v7->is_collidable = 1;
       v7->z = v9 + 5120;
       v7->y = parent->entity->y + parent->mobd_anchors.turret->y + 2560;
       v10 = 2248;
       if ( !parent->stats->is_infantry )
         v10 = 2184;
-      entity_anim_start(v7, v10, g_angle_to_orientation[parent->orientation]);
+      entity_anim_init_directional(v7, v10, g_angle_to_orientation[parent->orientation]);
     }
   }
   if ( v16 )
     entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_aircraft;
-  entity->is_on_collision_grid = 1;
-  unit->entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
+  unit->entity->is_collidable = 1;
   entity->x = unit->entity->x + (((kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 805) & 0x1F) - 16) << 8);
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   entity->y = unit->entity->y + (((kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 806) & 0x1F) - 16) << 8);
   entity->z = unit->entity->z + 256;
   TASK_yield(task, Task_Sleep, 10);
@@ -53260,18 +52044,18 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
   entity->y_speed = 0;
   entity->mobd_id = MobdId_Explosions;
   v11 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 814);
-  entity_anim_load(entity, dword_46BB60[v11 % 3]);
+  entity_anim_init(entity, dword_46BB60[v11 % 3]);
   if ( !(kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 816) % 3) )
   {
     v15 = g_4690A8_sfx_volume;
     v12 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 817);
-    entity_408800_play_sound(entity, dword_46BB70[v12 % 3], v15, 0);
+    entity_play_sound(entity, dword_46BB70[v12 % 3], v15, 0);
   }
   type = parent->type;
   if ( (type == UnitType_Surv_Rifleman || type == UnitType_Mute_Shotgunner || type == UnitType_Mute_DireWolf)
     && !(kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 820) % 3) )
   {
-    entity_408800_play_sound(entity, SoundId_188|SoundId_2, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_188|SoundId_2, g_4690A8_sfx_volume, 0);
   }
   if ( !v16 )
     entity->z = 2048;
@@ -53281,7 +52065,7 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
     if ( v14 >= 100 )
       v14 = 99;
     if ( kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 828) % 100 < v14 )
-      TASK_send_message(task, TaskMessage_ReceiveDamage, entity, unit->task);
+      TSK_send_message(task, TaskMessage_ReceiveDamage, entity, unit->task);
   }
   TASK_yield(task, Task_Yield_10000000, 0);
   entity_remove(entity);
@@ -53317,7 +52101,7 @@ int __cdecl sub_437690(KKND::Task *a1)
   v3 = entity->parent->ctx;
   *(_DWORD *)(ctx[23] + 136) = 1;
   y = entity->y;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v17 = vec2_orientation((*(_DWORD *)(ctx[23] + 16) - entity->x) >> 8, (*(_DWORD *)(ctx[23] + 20) - y) >> 8);
   v5 = *(_DWORD *)(*((_DWORD *)v3 + 6) + 40) + g_veterancy_accuracy_bonus[*((_DWORD *)v3 + 38)];
   v6 = v5;
@@ -53339,7 +52123,7 @@ int __cdecl sub_437690(KKND::Task *a1)
   v13 = 8 * (kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 847) % (100 - v12) - (100 - v15) / 2);
   if ( v16[4] )
   {
-    entity_408800_play_sound(*((KKND::Entity **)v3 + 23), SoundId_87, g_4690A8_sfx_volume, 0);
+    entity_play_sound(*((KKND::Entity **)v3 + 23), SoundId_87, g_4690A8_sfx_volume, 0);
     entity->x_speed = v10 + v16[4] * dword_4731A8[dword_47CFC8[v17]];
     entity->y_speed = v13 - v16[4] * dword_4731C8[dword_47CFC8[v17]];
   }
@@ -53384,14 +52168,14 @@ void __cdecl proj_mode_bow(KKND::Task *task)
   unit = (KKND::Unit *)task->ctx;
   proj = (KKND::UnitProjectileType *)entity->ctx;
   parent = (KKND::Unit *)entity->parent->ctx;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v4 = unit->entity;
   v5 = (v4->y - entity->y) >> 8;
   v6 = (v4->x - x) >> 8;
   v21 = vec2_orientation(v6, v5);
-  entity_408800_play_sound(parent->entity, SoundId_89, g_4690A8_sfx_volume, 0);
+  entity_play_sound(parent->entity, SoundId_89, g_4690A8_sfx_volume, 0);
   entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[parent->player_num]];
   entity->rend->flags |= 0x10000000u;
   v7 = g_veterancy_accuracy_bonus[parent->veterancy] + parent->stats->accuracy;
@@ -53420,7 +52204,7 @@ void __cdecl proj_mode_bow(KKND::Task *task)
     v13 = MATH_vec2_length(v6, v5);
     v14 = task;
     TASK_yield(task, Task_Sleep, v13 / proj->speed);
-    entity_408800_play_sound(entity, SoundId_90, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_90, g_4690A8_sfx_volume, 0);
   }
   else
   {
@@ -53432,7 +52216,7 @@ void __cdecl proj_mode_bow(KKND::Task *task)
   if ( v15 >= 100 )
     v15 = 99;
   if ( kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 902) % 100 < v15 && !unit->destroyed )
-    TASK_send_message(v14, TaskMessage_ReceiveDamage, entity, unit->task);
+    TSK_send_message(v14, TaskMessage_ReceiveDamage, entity, unit->task);
   TASK_yield(v14, Task_Yield_10000000, 0);
   entity_remove(entity);
   --g_num_active_projectiles;
@@ -53478,9 +52262,9 @@ void __cdecl proj_mode_generic(KKND::Task *task)
   proj = (KKND::UnitProjectileType *)entity->ctx;
   parent = (KKND::Unit *)entity->parent->ctx;
   v26 = parent;
-  unit->entity->is_on_collision_grid = 1;
+  unit->entity->is_collidable = 1;
   x = entity->x;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v5 = unit->entity;
   v6 = (v5->y - entity->y) >> 8;
   v7 = (v5->x - x) >> 8;
@@ -53512,15 +52296,15 @@ void __cdecl proj_mode_generic(KKND::Task *task)
     type = v26->type;
     if ( type == UnitType_Mute_GiantScorpion )
     {
-      entity_408800_play_sound(v26->entity, SoundId_161, g_4690A8_sfx_volume, 0);
+      entity_play_sound(v26->entity, SoundId_161, g_4690A8_sfx_volume, 0);
     }
     else if ( type == UnitType_PlasmaTank || type == UnitType_SentinelDroid )
     {
-      entity_408800_play_sound(v26->entity, SoundId_87, g_4690A8_sfx_volume, 0);
+      entity_play_sound(v26->entity, SoundId_87, g_4690A8_sfx_volume, 0);
     }
     else
     {
-      entity_408800_play_sound(v26->entity, SoundId_9, g_4690A8_sfx_volume, 0);
+      entity_play_sound(v26->entity, SoundId_9, g_4690A8_sfx_volume, 0);
     }
     entity->x_speed = v23 + proj->speed * dword_4731A8[dword_47CFC8[v27]];
     entity->y_speed = v15 - proj->speed * dword_4731C8[dword_47CFC8[v27]];
@@ -53534,22 +52318,22 @@ void __cdecl proj_mode_generic(KKND::Task *task)
   {
     if ( v14->type == UnitType_Mute_GiantScorpion )
     {
-      entity_408800_play_sound(entity, SoundId_161, g_4690A8_sfx_volume, 0);
+      entity_play_sound(entity, SoundId_161, g_4690A8_sfx_volume, 0);
     }
     else
     {
       v20 = g_4690A8_sfx_volume;
       v18 = dword_46BB80[kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 945) % 2];
-      entity_408800_play_sound(entity, v18, v20, 0);
+      entity_play_sound(entity, v18, v20, 0);
     }
     entity->mobd_id = MobdId_Explosions;
-    entity_anim_load(entity, proj->mobd_lookup_offset_impact);
+    entity_anim_init(entity, proj->mobd_lookup_offset_impact);
     rend = entity->rend;
     entity->anim_speed = 0x20000000;
     entity->z = 0;
     rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_explosion;
-    sub_4389A0(entity->x, entity->y);
-    entity_40D8B0(entity, proj->radius);
+    SCAR_apply(entity->x, entity->y);
+    entity_apply_aoe_damage(entity, proj->radius);
   }
   TASK_yield(task, Task_Yield_10000000, 0);
   entity_remove(entity);
@@ -53562,11 +52346,39 @@ void __cdecl proj_mode_generic(KKND::Task *task)
 // 47CFC8: using guessed type int dword_47CFC8[255];
 
 //----- (00437DA0) --------------------------------------------------------
+// BOOL HUNK_FixPointers(void *data, void *rllc_section) {
+//     uint32_t num_entries = *(uint32_t*)rllc_section;  // first DWORD = count
+//     uint32_t *entries = (uint32_t*)rllc_section + 1;  // fixup array follows
+// 
+//     for (uint32_t i = 0; i < num_entries; ) {
+//         uint32_t entry = entries[i++];
+//         if (entry & 0x80000000) {
+//             // Mode 3: renderer fixup
+//             uint32_t offset = entry & 0x7FFFFFFF;
+//             int hunk_id = *(int*)((char*)data + offset);
+//             stru2 *cached = BlitterCache_Lookup(hunk_id);
+//             if (!cached) return FALSE;
+//             *(Blitter*)((char*)data + offset) = cached->mode_render;
+//         } else if (entry & 0x40000000) {
+//             // Mode 2: batch pointer fixup
+//             uint32_t offset = entry & 0xBFFFFFFF;
+//             uint32_t count = entries[i++];  // next entry is count
+//             uint32_t *ptrs = (uint32_t*)((char*)data + offset);
+//             for (uint32_t j = 0; j < count; j++)
+//                 ptrs[j] += (uint32_t)data;
+//         } else {
+//             // Mode 1: simple pointer fixup
+//             uint32_t offset = entry;
+//             *(uint32_t*)((char*)data + offset) += (uint32_t)data;
+//         }
+//     }
+//     return TRUE;
+// }
 BOOL __fastcall HUNK_FixPointers(KKND::LevelHunk *data, KKND::LevelHunk *rllc)
 {
   unsigned int v3; // eax
-  KKND::LevelHunk *i; // ebx
-  int name; // ecx
+  KKND::LevelHunkSection **i; // ebx
+  int v5; // ecx
   int *v6; // ebp
   int v7; // edi
   KKND::stru2 *v8; // eax
@@ -53586,16 +52398,16 @@ BOOL __fastcall HUNK_FixPointers(KKND::LevelHunk *data, KKND::LevelHunk *rllc)
   v16 = 0;
   if ( rllc->sections[0] )
   {
-    for ( i = rllc + 1; ; ++i )
+    for ( i = &rllc->sections[1]; ; ++i )
     {
-      name = (int)i->sections[0]->name;
-      if ( (int)i->sections[0] >= 0 )
+      v5 = (int)*i;
+      if ( (int)*i >= 0 )
       {
-        if ( (name & 0x40000000) != 0 )
+        if ( (v5 & HunkFixup_BatchPointer) != 0 )
         {
-          v10 = i[1].sections[0];
+          v10 = i[1];
           ++i;
-          v11 = (int *)((char *)data + (name & 0xBFFFFFFF));
+          v11 = (int *)((char *)data + (v5 & 0xBFFFFFFF));
           ++v3;
           v12 = &v10->name[1];
           do
@@ -53608,13 +52420,13 @@ BOOL __fastcall HUNK_FixPointers(KKND::LevelHunk *data, KKND::LevelHunk *rllc)
         }
         else
         {
-          *(KKND::LevelHunkSection **)((char *)data->sections + name) = (KKND::LevelHunkSection *)(*(char **)((char *)data->sections + name)
-                                                                                                 + (unsigned int)data);
+          *(KKND::LevelHunkSection **)((char *)data->sections + v5) = (KKND::LevelHunkSection *)(*(char **)((char *)data->sections + v5)
+                                                                                               + (unsigned int)data);
         }
       }
       else
       {
-        v6 = (int *)((char *)data + (name & 0x7FFFFFFF));
+        v6 = (int *)((char *)data + (v5 & 0x7FFFFFFF));// #define FIXUP_OFFSET_MASK  0x3FFFFFFF
         v7 = *v6;
         if ( *v6 == v15 )
         {
@@ -53772,7 +52584,7 @@ void __fastcall upgrade_mode_438030(KKND::UpgradeProcess *upg)
             if ( upg->_upgrade_state_field_8 != 1 )
             {
               upg->_upgrade_state_field_8 = 1;
-              entity_anim_load(entity_2, 604);
+              entity_anim_init(entity_2, 604);
             }
           }
           else if ( upg->_upgrade_state_field_8 != 2 )
@@ -53904,7 +52716,7 @@ void __fastcall MessageHandler_RepairBuilding_2(
         unit_destroy(unit, mode_research_building_on_death);
         break;
       case TaskMessage_UnitReady:
-        TASK_send_message(receiver, TaskMessage_UpgradeComplete, *((void **)payload + 76), g_game_update_loop_task);
+        TSK_send_message(receiver, TaskMessage_UpgradeComplete, *((void **)payload + 76), g_game_update_loop_task);
         if ( unit->player_num == g_player_num )
         {
           show_message_unit(nullptr, "Upgrade complete");
@@ -53937,9 +52749,9 @@ void __fastcall MessageHandler_RepairBuilding_2(
                  sub_4381A0,
                  TaskKind_Callback,
                  nullptr);
-          v9->is_on_collision_grid = 1;
+          v9->is_collidable = 1;
           v10 = *(_DWORD *)(*((_DWORD *)payload + 26) + 4);
-          v9->is_on_collision_grid = 1;
+          v9->is_collidable = 1;
           v9->x += v10;
           v11 = *(_DWORD *)(*((_DWORD *)payload + 26) + 8);
           y = v9->y;
@@ -54115,13 +52927,13 @@ int sub_438740()
   v2 = v1;
   if ( !v1 )
     return 0;
-  sub_44E570(v1, (int)aActiveslotD, dword_47C330);
+  fprintf(v1, "ActiveSlot=%d\n", dword_47C330);
   v3 = 0;
   v4 = byte_47C050;
   do
   {
     if ( *v4 )
-      sub_44E570(v2, (int)aSlotDSD, v3);
+      fprintf(v2, "Slot %d = %s %d\n", v3, v4, *((_DWORD *)v4 + 5));
     v4 += 24;
     ++v3;
   }
@@ -54152,13 +52964,13 @@ int sub_438840()
   v2 = v1;
   if ( !v1 )
     return 0;
-  sub_44E570(v1, (int)aActiveslotD, dword_47C330);
+  fprintf(v1, "ActiveSlot=%d\n", dword_47C330);
   v3 = 0;
   v4 = byte_47C050;
   do
   {
     if ( *v4 )
-      sub_44E570(v2, (int)aSlotDSD, v3);
+      fprintf(v2, "Slot %d = %s %d\n", v3, v4, *((_DWORD *)v4 + 5));
     v4 += 24;
     ++v3;
   }
@@ -54169,42 +52981,42 @@ int sub_438840()
 // 47C064: using guessed type int dword_47C064[];
 
 //----- (00438930) --------------------------------------------------------
-BOOL scar_init()
+BOOL SCAR_init()
 {
-  KKND::scar *v0; // eax
+  KKND::Scar *v0; // eax
   int i; // ecx
 
-  v0 = (KKND::scar *)malloc(0x280u);
+  v0 = (KKND::Scar *)malloc(0x280u);
   g_scar_pool = v0;
   if ( !v0 )
     return 0;
-  g_scar_list_free_head = v0;
+  g_scar_free_head = v0;
   for ( i = 0; i < 39; ++i )
   {
     v0[i].next = &v0[i + 1];
     v0 = g_scar_pool;
   }
   g_scar_pool[39].next = nullptr;
-  g_scar_list_head = (KKND::scar *)&g_scar_list_head;
-  g_scar_list_tail = (KKND::scar *)&g_scar_list_head;
+  g_scar_active_head = (KKND::Scar *)&g_scar_active_head;
+  g_scar_active_tail = (KKND::Scar *)&g_scar_active_head;
   return 1;
 }
 
 //----- (004389A0) --------------------------------------------------------
-void __fastcall sub_4389A0(int x, int y)
+void __fastcall SCAR_apply(int x, int y)
 {
   __int16 v4; // ax
   char v5; // bp
   signed int v6; // esi
   signed int v7; // edi
   signed int v8; // ebx
-  KKND::scar *v9; // eax
+  KKND::Scar *v9; // eax
   KKND::Entity *v10; // ecx
-  KKND::scar *v11; // esi
-  KKND::scar *v12; // edx
-  KKND::scar **p_prev; // eax
+  KKND::Scar *v11; // esi
+  KKND::Scar *v12; // edx
+  KKND::Scar **p_prev; // eax
   KKND::Entity *entity; // eax
-  KKND::scar *v15; // edx
+  KKND::Scar *v15; // edx
   int v16; // ecx
   int v17; // edx
 
@@ -54219,13 +53031,13 @@ void __fastcall sub_4389A0(int x, int y)
       v8 = v6;
       if ( (g_terrain[(v7 >> 13) + g_map_num_tiles_x * (v6 >> 13)].flags1 & 0xE0) == 0 )
       {
-        v9 = g_scar_list_head;
-        if ( g_scar_list_head == (KKND::scar *)&g_scar_list_head )
+        v9 = g_scar_active_head;
+        if ( g_scar_active_head == (KKND::Scar *)&g_scar_active_head )
         {
 LABEL_11:
-          v11 = g_scar_list_free_head;
-          if ( g_scar_list_free_head )
-            g_scar_list_free_head = g_scar_list_free_head->next;
+          v11 = g_scar_free_head;
+          if ( g_scar_free_head )
+            g_scar_free_head = g_scar_free_head->next;
           else
             v11 = nullptr;
           if ( v11 )
@@ -54233,28 +53045,28 @@ LABEL_11:
             entity = entity_create(MobdId_Explosions, nullptr, nullptr);
             if ( !entity )
             {
-              v11->next = g_scar_list_free_head;
-              g_scar_list_free_head = v11;
+              v11->next = g_scar_free_head;
+              g_scar_free_head = v11;
               return;
             }
-            v15 = g_scar_list_head;
-            v11->prev = (KKND::scar *)&g_scar_list_head;
+            v15 = g_scar_active_head;
+            v11->prev = (KKND::Scar *)&g_scar_active_head;
             v11->next = v15;
-            g_scar_list_head->prev = v11;
-            g_scar_list_head = v11;
-            entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_terrain_detail;
+            g_scar_active_head->prev = v11;
+            g_scar_active_head = v11;
+            entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_scar;
           }
           else
           {
-            v12 = g_scar_list_tail;
-            p_prev = &g_scar_list_tail->prev;
-            g_scar_list_tail->next->prev = g_scar_list_tail->prev;
+            v12 = g_scar_active_tail;
+            p_prev = &g_scar_active_tail->prev;
+            g_scar_active_tail->next->prev = g_scar_active_tail->prev;
             (*p_prev)->next = v12->next;
-            v12->next = g_scar_list_head;
-            *p_prev = (KKND::scar *)&g_scar_list_head;
+            v12->next = g_scar_active_head;
+            *p_prev = (KKND::Scar *)&g_scar_active_head;
             v11 = v12;
-            g_scar_list_head->prev = v12;
-            g_scar_list_head = v12;
+            g_scar_active_head->prev = v12;
+            g_scar_active_head = v12;
             entity = v12->entity;
           }
           entity->x = v7;
@@ -54262,7 +53074,7 @@ LABEL_11:
           entity->y = v8;
           v11->entity = entity;
           v11->mobd_frame = v16;
-          entity_anim_load(entity, dword_46BBE8[v16]);
+          entity_anim_init(entity, g_scar_frames[v16]);
         }
         else
         {
@@ -54272,20 +53084,19 @@ LABEL_11:
             if ( v10->x == v7 && v10->y == v6 )
               break;
             v9 = v9->next;
-            if ( v9 == (KKND::scar *)&g_scar_list_head )
+            if ( v9 == (KKND::Scar *)&g_scar_active_head )
               goto LABEL_11;
           }
           v17 = v9->mobd_frame + 1;
           v9->mobd_frame = v17;
           if ( v17 >= 8 )
             v9->mobd_frame = 0;
-          entity_anim_load(v10, dword_46BBE8[v9->mobd_frame]);
+          entity_anim_init(v10, g_scar_frames[v9->mobd_frame]);
         }
       }
     }
   }
 }
-// 46BBE8: using guessed type int dword_46BBE8[8];
 // 478AB4: using guessed type int g_map_width;
 // 478FF0: using guessed type int g_map_height;
 // 4793F8: using guessed type int g_map_num_tiles_x;
@@ -54326,7 +53137,7 @@ void __cdecl __noreturn task_bloodsplats(KKND::Task *task)
 
   entity = task->entity;
   v2 = kknd_rand_1("C:\\k\\Scripts\\Schrap.cpp", 155);
-  entity_anim_load(entity, dword_46BC84[v2 % 5]);
+  entity_anim_init(entity, dword_46BC84[v2 % 5]);
   entity->z = 0;
   entity->z_speed_limit = 549;
   v3 = kknd_rand_1("C:\\k\\Scripts\\Schrap.cpp", 158);
@@ -54357,7 +53168,7 @@ void __cdecl sub_438C20(KKND::Task *task)
   entity->x_speed = g_blood_x_speeds[v3] + (unsigned __int8)kknd_rand_1("C:\\k\\Scripts\\Schrap.cpp", 176) - 128;
   v4 = kknd_rand_1("C:\\k\\Scripts\\Schrap.cpp", 177) & 7;
   entity->y_speed = g_blood_y_speeds[v4] + (unsigned __int8)kknd_rand_1("C:\\k\\Scripts\\Schrap.cpp", 177) - 128;
-  entity_anim_load(entity, dword_46BC60[v2]);
+  entity_anim_init(entity, dword_46BC60[v2]);
   entity->z = 0;
   entity->z_speed_limit = 549;
   entity->z_speed = (kknd_rand_1("C:\\k\\Scripts\\Schrap.cpp", 183) & 0x7F) + 352;
@@ -54380,7 +53191,7 @@ void __cdecl sub_438C20(KKND::Task *task)
   entity->z_speed = 0;
   entity->z_acceleration = 0;
   entity->mobd_id = MobdId_Explosions;
-  entity_anim_load(entity, 412);
+  entity_anim_init(entity, 412);
   TASK_yield(task, Task_Yield_10000000, 0);
   if ( g_num_explosions_2 > 0 )
     --g_num_explosions_2;
@@ -54479,8 +53290,8 @@ void __cdecl sub_438F50(KKND::Task *task)
   entity->y = ((v4 - 128) << 8) + y;
   v6 = kknd_rand_1("C:\\k\\Scripts\\Schrap.cpp", 303);
   TASK_yield(task, Task_Sleep, v2 + (v6 & 0x3F));
-  entity_anim_load(entity, dword_46BC98[v3]);
-  sub_4389A0(entity->x, entity->y);
+  entity_anim_init(entity, dword_46BC98[v3]);
+  SCAR_apply(entity->x, entity->y);
   TASK_yield(task, Task_Yield_10000000, 0);
   if ( g_num_explosions_2 > 0 )
     --g_num_explosions_2;
@@ -54500,8 +53311,8 @@ void __cdecl __noreturn task_439050_explosion(KKND::Task *task)
   memset(v2, 0, sizeof(v2));
   if ( !entity->ctx )
     entity->ctx = v2;
-  entity_408800_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
-  entity_anim_load(entity, 144);
+  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_anim_init(entity, 144);
   TASK_yield(task, Task_Yield_10000000, 0);
   if ( g_num_explosions > 0 )
     --g_num_explosions;
@@ -54577,16 +53388,15 @@ KKND::Entity *__thiscall sub_439180(KKND::Entity *parent)
 // 47C350: using guessed type int g_num_explosions_2;
 
 //----- (004391D0) --------------------------------------------------------
-void __fastcall mapd_camera_follow_target(KKND::MapdCamera *camera, struct Entity *target)
+void __fastcall MAPD_camera_follow_target(KKND::MapdCamera *camera, KKND::Entity *target)
 {
-  camera->x = *((_DWORD *)target + 4) - (g_default_draw_ctx[6] << 7);
-  camera->y = *((_DWORD *)target + 5) - (g_default_draw_ctx[7] << 7);
-  camera->z = *((_DWORD *)target + 6);
+  camera->x = target->x - (g_default_draw_ctx->clip_w << 7);
+  camera->y = target->y - (g_default_draw_ctx->clip_h << 7);
+  camera->z = target->z;
 }
-// 465808: using guessed type int *off_465808;
 
 //----- (00439200) --------------------------------------------------------
-void __fastcall render_state_handler_mapd(KKND::MapdRenderNode *mapd, KKND::RenderNode *node)
+void __fastcall MAPD_render_mapd(KKND::MapdRenderNode *mapd, KKND::RenderNode *node)
 {
   node->cmd.image = mapd->scrl;
   node->cmd.z = mapd->z;
@@ -54596,7 +53406,7 @@ void __fastcall render_state_handler_mapd(KKND::MapdRenderNode *mapd, KKND::Rend
 }
 
 //----- (00439230) --------------------------------------------------------
-BOOL LVL_InitMapd()
+BOOL LVL_mapd_init()
 {
   KKND::LevelMapd *mapd; // eax
   int v2; // ecx
@@ -54605,41 +53415,41 @@ BOOL LVL_InitMapd()
   KKND::MapdRenderNode *v5; // ecx
 
   mapd = (KKND::LevelMapd *)LVL_FindSection("MAPD");
-  g_current_lvl_mapd = mapd;
+  g_mapd = mapd;
   if ( mapd )
   {
     v2 = 0;
     g_current_lvl_mapd_num_layers = 0;
-    if ( mapd->layers[0] )
+    if ( mapd->layers )
     {
       do
         g_current_lvl_mapd_num_layers = ++v2;
-      while ( mapd[v2].layers[0] );
+      while ( mapd[v2].layers );
     }
-    g_current_lvl_mapd_verified = 1;
+    g_mapd_active = 1;
     v3 = (KKND::MapdRenderNode *)malloc(0x140u);// 16
     g_mapd_render_node_pool = v3;
     if ( v3 )
     {
       g_mapd_render_node_next_free = v3;
-      v3->prev = (MapdRenderNode *)&g_mapd_render_node_next_free;
+      v3->prev = (KKND::MapdRenderNode *)&g_mapd_render_node_next_free;
       v4 = 15;
       do
       {
         v5 = v3++;
         --v4;
-        v5->next = (MapdRenderNode *)v3;
+        v5->next = v3;
       }
       while ( v4 );
-      v3->next = (MapdRenderNode *)&g_mapd_render_node_next_free;
+      v3->next = (KKND::MapdRenderNode *)&g_mapd_render_node_next_free;
       g_mapd_render_node_tail = (KKND::MapdRenderNode *)&g_mapd_render_node_head;
       g_mapd_render_node_head = (KKND::MapdRenderNode *)&g_mapd_render_node_head;
       g_mapd_camera_target = nullptr;
       g_mapd_camera.z = 0;
       g_mapd_camera.y = 0;
       g_mapd_camera.x = 0;
-      mapd_camera_controller = mapd_camera_follow_target;
-      mapd_render = (int)render_state_handler_mapd;
+      MAPD_camera_controller = (void (__fastcall *)(KKND::MapdCamera *, struct Entity *))MAPD_camera_follow_target;
+      MAPD_render = (void (__fastcall *)(void *, KKND::RenderNode *))MAPD_render_mapd;
       return 1;
     }
     else
@@ -54649,11 +53459,10 @@ BOOL LVL_InitMapd()
   }
   else
   {
-    g_current_lvl_mapd_verified = 0;
+    g_mapd_active = 0;
     return 1;
   }
 }
-// 47C378: using guessed type int mapd_render;
 // 47C37C: using guessed type int g_current_lvl_mapd_num_layers;
 
 //----- (00439300) --------------------------------------------------------
@@ -54663,13 +53472,13 @@ KKND::MapdRenderNode *__fastcall MAPD_Draw(KKND::MenuId mapd_id, int image_id, i
   KKND::MenuId v5; // edi
   KKND::LevelHunk *layers; // eax
   KKND::MapdRenderNode *v7; // esi
-  struct DrawJob *job; // ecx
+  KKND::RenderNode *job; // ecx
   KKND::MapdScrlImage *v9; // eax
 
   if ( mapd_id > g_current_lvl_mapd_num_layers )
     return nullptr;
   v5 = mapd_id;
-  layers = (KKND::LevelHunk *)g_current_lvl_mapd[mapd_id].layers;
+  layers = (KKND::LevelHunk *)g_mapd[mapd_id].layers;
   if ( layers == g_current_lvl )
     return nullptr;
   if ( (KKND::LevelHunkSection *)image_id > layers->sections[0] )
@@ -54677,8 +53486,8 @@ KKND::MapdRenderNode *__fastcall MAPD_Draw(KKND::MenuId mapd_id, int image_id, i
   if ( g_mapd_render_node_next_free == (KKND::MapdRenderNode *)&g_mapd_render_node_next_free )
     return nullptr;
   v7 = g_mapd_render_node_next_free;
-  result = (KKND::MapdRenderNode *)REND_AddNode();
-  v7->job = (struct DrawJob *)result;
+  result = (KKND::MapdRenderNode *)REND_AddNode(g_mapd_render_node_next_free, MAPD_render);
+  v7->job = (KKND::RenderNode *)result;
   if ( result )
   {
     g_mapd_render_node_next_free = v7->next;
@@ -54687,15 +53496,14 @@ KKND::MapdRenderNode *__fastcall MAPD_Draw(KKND::MenuId mapd_id, int image_id, i
     g_mapd_render_node_tail->next = v7;
     g_mapd_render_node_tail = v7;
     job = v7->job;
-    v9 = g_current_lvl_mapd[v5].layers->images[image_id];
+    v9 = g_mapd[v5].layers->images[image_id];
     v7->scrl = v9;
-    *((_DWORD *)job + 6) = v9;
+    job->cmd.image = v9;
     v7->z = z;
     return v7;
   }
   return result;
 }
-// 43B710: using guessed type int sub_43B710(void);
 // 47C37C: using guessed type int g_current_lvl_mapd_num_layers;
 
 //----- (004393C0) --------------------------------------------------------
@@ -54715,17 +53523,17 @@ void __fastcall MAPD_RemoveRenderable(KKND::MapdRenderNode *node)
 //----- (004393F0) --------------------------------------------------------
 void GAME_UpdateCamera()
 {
-  if ( g_current_lvl_mapd_verified && g_mapd_camera_target )
+  if ( g_mapd_active && g_mapd_camera_target )
   {
-    if ( mapd_camera_controller )
-      mapd_camera_controller(&g_mapd_camera, g_mapd_camera_target);
+    if ( MAPD_camera_controller )
+      MAPD_camera_controller(&g_mapd_camera, g_mapd_camera_target);
   }
 }
 
 //----- (00439420) --------------------------------------------------------
 void MAPD_Deinit()
 {
-  if ( g_current_lvl_mapd_verified )
+  if ( g_mapd_active )
   {
     if ( g_mapd_render_node_pool )
       free(g_mapd_render_node_pool);
@@ -54771,7 +53579,7 @@ BOOL SOUND_init()
   dword_47C398 = nullptr;
   g_sounds_head = (KKND::stru7_sound *)&dword_47C398;
   g_sounds_tail = (KKND::stru7_sound *)&dword_47C398;
-  g_sounds_free = nullptr;
+  g_sounds_free_head = nullptr;
   if ( DirectSoundCreate(nullptr, &g_ds, nullptr) )
     return 1;
   if ( g_ds->lpVtbl->SetCooperativeLevel(g_ds, g_hwnd, 1) )
@@ -54797,7 +53605,7 @@ BOOL SOUND_init()
     dword_47C398 = nullptr;
     g_sounds_head = (KKND::stru7_sound *)&dword_47C398;
     g_sounds_tail = (KKND::stru7_sound *)&dword_47C398;
-    g_sounds_free = g_sounds_pool;
+    g_sounds_free_head = g_sounds_pool;
     g_sounds_initialized = 1;
     return 1;
   }
@@ -54935,10 +53743,10 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
       }
       else
       {
-        v11 = g_sounds_free;
-        if ( g_sounds_free )
+        v11 = g_sounds_free_head;
+        if ( g_sounds_free_head )
         {
-          g_sounds_free = *((void **)g_sounds_free + 14);
+          g_sounds_free_head = *((void **)g_sounds_free_head + 14);
           memset(v11, 0, 0x148u);
           if ( !++dword_47C5C4 )
             dword_47C5C4 = 1;
@@ -54967,9 +53775,9 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
             v20 = v11[15];
             if ( v20 )
               *(_DWORD *)(v20 + 56) = v11[14];
-            v21 = g_sounds_free;
-            v11[14] = g_sounds_free;
-            g_sounds_free = v11;
+            v21 = g_sounds_free_head;
+            v11[14] = g_sounds_free_head;
+            g_sounds_free_head = v11;
             dword_477340 = (int)v21;
             v22 = g_coroutine_current;
             if ( g_coroutine_list_head != v22 )
@@ -55003,9 +53811,9 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
               v26 = v11[15];
               if ( v26 )
                 *(_DWORD *)(v26 + 56) = v11[14];
-              v27 = g_sounds_free;
-              v11[14] = g_sounds_free;
-              g_sounds_free = v11;
+              v27 = g_sounds_free_head;
+              v11[14] = g_sounds_free_head;
+              g_sounds_free_head = v11;
               dword_477340 = (int)v27;
               v28 = g_coroutine_current;
               if ( g_coroutine_list_head != v28 )
@@ -55104,10 +53912,10 @@ int __fastcall sub_439AA0(const char *a1, int a2, int a3, int a4, int a5)
   v17 = a1;
   if ( !g_sounds_initialized )
     return 0;
-  v6 = g_sounds_free;
-  if ( !g_sounds_free )
+  v6 = g_sounds_free_head;
+  if ( !g_sounds_free_head )
     return 0;
-  g_sounds_free = g_sounds_free->next;
+  g_sounds_free_head = g_sounds_free_head->next;
   memset(v6, 0, sizeof(KKND::stru7_sound));
   if ( !++dword_47C5C4 )
     dword_47C5C4 = 1;
@@ -55216,7 +54024,7 @@ void __cdecl __noreturn SOUND_thread(KKND::stru7_sound *snd)
   WAVEFORMATEX a2; // [esp+128h] [ebp-50h] BYREF
   WAVEFORMATEX v55; // [esp+13Ch] [ebp-3Ch] BYREF
   DSBCAPS v56; // [esp+150h] [ebp-28h] BYREF
-  DSBUFFERDESC1 var14; // [esp+164h] [ebp-14h] OVERLAPPED BYREF
+  DSBUFFERDESC var14; // [esp+164h] [ebp-14h] OVERLAPPED BYREF
 
   v1 = snd;
   v2 = nullptr;
@@ -55240,8 +54048,8 @@ void __cdecl __noreturn SOUND_thread(KKND::stru7_sound *snd)
     stru7_sound_3C = v1->_stru7_sound_3C;
     if ( stru7_sound_3C )
       *(_DWORD *)(stru7_sound_3C + 56) = v1->next;
-    v1->next = g_sounds_free;
-    g_sounds_free = v1;
+    v1->next = g_sounds_free_head;
+    g_sounds_free_head = v1;
     _endthread();
   }
   v1->_stru7_sound_40 = a3;
@@ -55260,8 +54068,8 @@ void __cdecl __noreturn SOUND_thread(KKND::stru7_sound *snd)
     v43 = v1->_stru7_sound_3C;
     if ( v43 )
       *(_DWORD *)(v43 + 56) = v1->next;
-    v1->next = g_sounds_free;
-    g_sounds_free = v1;
+    v1->next = g_sounds_free_head;
+    g_sounds_free_head = v1;
     _endthread();
   }
   (*p_dsb)->lpVtbl->SetPan(*p_dsb, g_sound_pans[v1->pan]);
@@ -55645,7 +54453,7 @@ void SOUND_ProcessSounds()
               }
               ++v7;
               ++v6;
-              if ( (int)v7 >= (int)&g_sounds_free )
+              if ( (int)v7 >= (int)&g_sounds_free_head )
               {
                 v6 = v20;
                 break;
@@ -55656,7 +54464,7 @@ void SOUND_ProcessSounds()
             *p_volume = v10;
             v9->lpVtbl->SetVolume(v9, g_sound_pans[v10]);
             if ( !v0->_stru7_sound_20 && v0->_stru7_sound_8 )
-              TASK_send_message(
+              TSK_send_message(
                 nullptr,
                 TaskMessage_SoundVolumeTransitionComplete,
                 nullptr,
@@ -55697,7 +54505,7 @@ void SOUND_ProcessSounds()
             if ( !v0->_stru7_sound_2C )
             {
               if ( v0->_stru7_sound_8 )
-                TASK_send_message(
+                TSK_send_message(
                   nullptr,
                   TaskMessage_SoundPanTransitionComplete,
                   nullptr,
@@ -55936,7 +54744,7 @@ void __thiscall sub_43A850(int this)
       *(_DWORD *)(this + 4) = 0;
     }
     if ( *(_DWORD *)(this + 8) )
-      TASK_send_message(nullptr, TaskMessage_SoundCleanupComplete, nullptr, *(KKND::Task **)(this + 8));
+      TSK_send_message(nullptr, TaskMessage_SoundCleanupComplete, nullptr, *(KKND::Task **)(this + 8));
     v5 = *(_DWORD *)(this + 56);
     *(_DWORD *)(this + 8) = 0;
     if ( v5 )
@@ -55944,8 +54752,8 @@ void __thiscall sub_43A850(int this)
     v6 = *(_DWORD *)(this + 60);
     if ( v6 )
       *(_DWORD *)(v6 + 56) = *(_DWORD *)(this + 56);
-    *(_DWORD *)(this + 56) = g_sounds_free;
-    g_sounds_free = (KKND::stru7_sound *)this;
+    *(_DWORD *)(this + 56) = g_sounds_free_head;
+    g_sounds_free_head = (KKND::stru7_sound *)this;
   }
 }
 // 47C5D4: using guessed type int dword_47C5D4;
@@ -58331,13 +57139,13 @@ LABEL_14:
   v3 = 15360;
   v4 = 10240;
 LABEL_21:
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v7 = v3 + *(this + 4);
   *(this + 34) = 1;
   entity->x = v7;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   v8 = v4 + *(this + 5);
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   entity->y = v8;
   return INPUT_set_mouse_pos(v7 >> 8, v8 >> 8);
 }
@@ -58366,7 +57174,7 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
   entity = task->entity;
   v14 = 18000;
   sender = entity;
-  entity_anim_load(entity, 312);
+  entity_anim_init(entity, 312);
   entity->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
   entity->z = 2560;
   dword_47C6F0 = 0;
@@ -58395,13 +57203,13 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
       dword_47C614 = (int)&dword_47C610;
       dword_47C6C8 = 1;
     }
-    MAPD_RemoveRenderable(node[0]);
+    MAPD_RemoveRenderable(dword_47A010[0]);
     TASK_yield(task, Task_Sleep, 3);
     Section = LVL_FindSection("MAPD");
-    palette_40E400((infantr *)(Section[12] + 12));
-    node[0] = MAPD_Draw(MenuId_Credits, 0, -10);
+    PAL_apply((KKND::Palette *)(Section[12] + 12));
+    dword_47A010[0] = MAPD_Draw(MenuId_Credits, 0, -10);
     CPLC_select(12);
-    cplc_406320();
+    CPLC_viewport_update();
     TASK_yield(task, Task_Sleep, 1);
     FADE_4084A0(task);
     if ( dword_47C6BC )
@@ -58418,13 +57226,13 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
       FADE_408500(task);
       sub_443B40(task);
       sub_443980();
-      MAPD_RemoveRenderable(node[0]);
+      MAPD_RemoveRenderable(dword_47A010[0]);
       TASK_yield(task, Task_Sleep, 3);
       v6 = LVL_FindSection("MAPD");
-      palette_40E400((infantr *)(v6[12] + 12));
-      node[0] = MAPD_Draw(MenuId_Credits, 0, -10);
+      PAL_apply((KKND::Palette *)(v6[12] + 12));
+      dword_47A010[0] = MAPD_Draw(MenuId_Credits, 0, -10);
       CPLC_select(12);
-      cplc_406320();
+      CPLC_viewport_update();
       TASK_yield(task, Task_Sleep, 1);
       FADE_4084A0(task);
       if ( dword_47C6BC )
@@ -58433,10 +57241,10 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
     if ( !dword_47C6C4 )
     {
       INPUT_get_mouse_state(&state);
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       cursor_x = state.cursor_x;
       x = g_mapd_camera.x;
-      entity->is_on_collision_grid = 1;
+      entity->is_collidable = 1;
       entity->x = x + cursor_x;
       entity->y = g_mapd_camera.y + state.cursor_y;
       INPUT_get_keyboard_state(&v15);
@@ -58449,7 +57257,7 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
           {
             if ( dword_47C6C0 )
             {
-              TASK_broadcast_message(task, TaskMessage_Infiltrate, nullptr, TaskChannel_MenuCancel);
+              TSK_broadcast_message(task, TaskMessage_Infiltrate, nullptr, TaskChannel_MenuCancel);
             }
             else if ( dword_47C65C )
             {
@@ -58467,12 +57275,12 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
           v10 = (int *)dword_47C610;
           if ( (new_actions_mask & 0x80u) != 0 && (int *)dword_47C610 != &dword_47C610 )
           {
-            TASK_send_message(
+            TSK_send_message(
               nullptr,
               TaskMessage_UnitSelected,
               nullptr,
               *(KKND::Task **)(*(_DWORD *)(dword_47C6D4 + 8) + 108));
-            TASK_send_message(
+            TSK_send_message(
               nullptr,
               TaskMessage_UnitDeselected,
               nullptr,
@@ -58487,16 +57295,16 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
 LABEL_56:
     if ( (TASK_yield(task, Task_Yield, 1) & 0x40000000) != 0 )
     {
-      for ( j = TASK_pop_message(task); j; j = TASK_pop_message(task) )
+      for ( j = TSK_pop_message(task); j; j = TSK_pop_message(task) )
       {
         if ( j->type == TaskMessage_MouseHover )
         {
           if ( (state.new_actions_mask & 0x10) != 0 && j->payload && !g_fade_lock )
-            TASK_send_message(task, TaskMessage_UnitSelected, nullptr, (KKND::Task *)j->payload);
+            TSK_send_message(task, TaskMessage_UnitSelected, nullptr, (KKND::Task *)j->payload);
           if ( (state.released_actions_mask & 0x10) != 0 && j->payload && !g_fade_lock )
-            TASK_send_message(task, TaskMessage_UnitDeselected, nullptr, (KKND::Task *)j->payload);
+            TSK_send_message(task, TaskMessage_UnitDeselected, nullptr, (KKND::Task *)j->payload);
         }
-        task_message_recycle(j);
+        TSK_message_recycle(j);
       }
       entity = sender;
     }
@@ -58714,13 +57522,13 @@ LABEL_8:
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((infantr *)(Section[2] + 12));
-  node[0] = MAPD_Draw(MenuId_NewCampaign, 0, -10);
+  PAL_apply((KKND::Palette *)(Section[2] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_NewCampaign, 0, -10);
   CPLC_select(2);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -58763,7 +57571,7 @@ void __cdecl __noreturn sub_43C310(KKND::Task *task)
   {
     while ( !sub_443380(task, 448, 0) )
       ;
-    TASK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenu);
+    TSK_broadcast_message(task, TaskMessage_RepairBayAssigned, nullptr, TaskChannel_MainMenu);
     sub_432510((KKND::Entity **)task);
     v3 = task->entity;
     parent = v3->parent;
@@ -58858,13 +57666,13 @@ LABEL_8:
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[11] + 12));
-  node[0] = MAPD_Draw(MenuId_PlayMission, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[11] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_PlayMission, 0, -10);
   CPLC_select(11);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -58943,13 +57751,13 @@ LABEL_8:
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[14] + 12));
-  node[0] = MAPD_Draw(MenuId_NewMissions, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[14] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_NewMissions, 0, -10);
   CPLC_select(14);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -59028,13 +57836,13 @@ LABEL_8:
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[15] + 12));
-  node[0] = MAPD_Draw(MenuId_Kaos, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[15] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_Kaos, 0, -10);
   CPLC_select(15);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -59113,13 +57921,13 @@ LABEL_8:
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[1] + 12));
-  node[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[1] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
   CPLC_select(1);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -59198,12 +58006,12 @@ void __cdecl sub_43CD20(KKND::Task *task)
   v2->parent = nullptr;
   task->channel = TaskChannel_CampaignFactionSelect;
   sub_4439F0(v2, 0, 0, 0, 0);
-  entity_anim_load(v2, 1380);
+  entity_anim_init(v2, 1380);
   v3 = 0;
   do
   {
     TASK_yield(task, Task_Wait, 0);
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       switch ( type )
@@ -59229,7 +58037,7 @@ void __cdecl sub_43CD20(KKND::Task *task)
           break;
       }
 LABEL_13:
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
   }
   while ( !v3 );
@@ -59241,7 +58049,7 @@ LABEL_13:
   sub_42E7F0();
   sub_443B40(task);
   g_game_state = 1;
-  task_445310(g_47C6E0_mobd79_task);
+  TASK_terminate(g_47C6E0_mobd79_task);
   g_47C6E0_mobd79_task = nullptr;
 }
 // 47C610: using guessed type int dword_47C610;
@@ -59264,12 +58072,12 @@ void __cdecl sub_43CE30(KKND::Task *task)
   v2->parent = nullptr;
   task->channel = TaskChannel_CampaignFactionSelect;
   sub_4439F0(v2, 0, 0, 0, 0);
-  entity_anim_load(v2, 1380);
+  entity_anim_init(v2, 1380);
   v3 = 0;
   do
   {
     TASK_yield(task, Task_Wait, 0);
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       switch ( type )
@@ -59295,7 +58103,7 @@ void __cdecl sub_43CE30(KKND::Task *task)
           break;
       }
 LABEL_13:
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
   }
   while ( !v3 );
@@ -59307,7 +58115,7 @@ LABEL_13:
   sub_42E7F0();
   sub_443B40(task);
   g_game_state = 1;
-  task_445310(g_47C6E0_mobd79_task);
+  TASK_terminate(g_47C6E0_mobd79_task);
   g_47C6E0_mobd79_task = nullptr;
 }
 // 47C610: using guessed type int dword_47C610;
@@ -59353,13 +58161,13 @@ void __cdecl sub_43CF50(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = (KKND::PaletteEntry **)LVL_FindSection("MAPD");
-  palette_40E400(*Section + 3);
-  node[0] = MAPD_Draw(MenuId_Main, 0, -10);
+  PAL_apply(*Section + 3);
+  dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, -10);
   CPLC_select(0);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -59429,13 +58237,13 @@ void __cdecl sub_43D090(KKND::Task *task)
           dword_47C614 = (int)&dword_47C610;
           dword_47C6C8 = 1;
         }
-        MAPD_RemoveRenderable(node[0]);
+        MAPD_RemoveRenderable(dword_47A010[0]);
         TASK_yield(task, Task_Sleep, 3);
         Section = LVL_FindSection("MAPD");
-        palette_40E400((KKND::PaletteEntry *)(Section[4] + 12));
-        node[0] = MAPD_Draw(MenuId_IpxSetup, 0, -10);
+        PAL_apply((KKND::PaletteEntry *)(Section[4] + 12));
+        dword_47A010[0] = MAPD_Draw(MenuId_IpxSetup, 0, -10);
         CPLC_select(4);
-        cplc_406320();
+        CPLC_viewport_update();
         TASK_yield(task, Task_Sleep, 1);
         FADE_4084A0(task);
         TASK_Terminate(task);
@@ -59509,13 +58317,13 @@ void __cdecl sub_43D271(int a1)
           dword_47C614 = (int)&dword_47C610;
           dword_47C6C8 = 1;
         }
-        MAPD_RemoveRenderable(node[0]);
+        MAPD_RemoveRenderable(dword_47A010[0]);
         TASK_yield((KKND::Task *)a1, Task_Sleep, 3);
         Section = LVL_FindSection("MAPD");
-        palette_40E400((KKND::PaletteEntry *)(Section[5] + 12));
-        node[0] = MAPD_Draw(MenuId_Serial, 0, -10);
+        PAL_apply((KKND::PaletteEntry *)(Section[5] + 12));
+        dword_47A010[0] = MAPD_Draw(MenuId_Serial, 0, -10);
         CPLC_select(5);
-        cplc_406320();
+        CPLC_viewport_update();
         TASK_yield((KKND::Task *)a1, Task_Sleep, 1);
         FADE_4084A0((KKND::Task *)a1);
         TASK_Terminate((KKND::Task *)a1);
@@ -59590,13 +58398,13 @@ void __cdecl sub_43D431(int a1)
           dword_47C614 = (int)&dword_47C610;
           dword_47C6C8 = 1;
         }
-        MAPD_RemoveRenderable(node[0]);
+        MAPD_RemoveRenderable(dword_47A010[0]);
         TASK_yield((KKND::Task *)a1, Task_Sleep, 3);
         Section = LVL_FindSection("MAPD");
-        palette_40E400((KKND::PaletteEntry *)(Section[6] + 12));
-        node[0] = MAPD_Draw(MenuId_Modem, 0, -10);
+        PAL_apply((KKND::PaletteEntry *)(Section[6] + 12));
+        dword_47A010[0] = MAPD_Draw(MenuId_Modem, 0, -10);
         CPLC_select(6);
-        cplc_406320();
+        CPLC_viewport_update();
         TASK_yield((KKND::Task *)a1, Task_Sleep, 1);
         FADE_4084A0((KKND::Task *)a1);
         TASK_Terminate((KKND::Task *)a1);
@@ -59662,13 +58470,13 @@ void __usercall sub_43D5F0(int a1@<eax>, KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = (KKND::PaletteEntry **)LVL_FindSection("MAPD");
-  palette_40E400(*Section + 3);
-  node[0] = MAPD_Draw(MenuId_Main, 0, -10);
+  PAL_apply(*Section + 3);
+  dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, -10);
   CPLC_select(0);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -59721,13 +58529,13 @@ void __cdecl sub_43D740(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[6] + 12));
-  node[0] = MAPD_Draw(MenuId_Modem, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[6] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_Modem, 0, -10);
   CPLC_select(6);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -59780,13 +58588,13 @@ int __cdecl sub_43D890(int a1)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable((KKND::MapdRenderNode *)node);
+  MAPD_RemoveRenderable((KKND::MapdRenderNode *)dword_47A010);
   TASK_yield(a1, 0x80000000, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((infantr *)(Section[6] + 12));
-  node = (int)MAPD_Draw(MenuId_Modem, 0, -10);
+  PAL_apply((KKND::Palette *)(Section[6] + 12));
+  dword_47A010 = (int)MAPD_Draw(MenuId_Modem, 0, -10);
   CPLC_select(6);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(a1, 0x80000000, 1);
   FADE_4084A0(a1);
   return TASK_Terminate(a1);
@@ -59819,7 +58627,7 @@ KKND::Entity *__fastcall sub_43D9E0(char *a1, unsigned __int16 a2)
   dword_47C65C->_ui_string_field_18 = 0;
   dword_47C65C->num_lines = 0;
   sub_443D80(dword_47C65C, a1, 0);
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   pstru8 = dword_47C65C->pstru8;
   v4 = dword_47C65C->_ui_string_field_C + a2 + 1;
   if ( dword_47C65C->_ui_string_field_C + a2 != -1 )
@@ -59834,7 +58642,7 @@ KKND::Entity *__fastcall sub_43D9E0(char *a1, unsigned __int16 a2)
   x = pstru8->rn->cmd.x;
   result = dword_47C664;
   dword_47C664->x = x << 8;
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   dword_47C664->y = 46080;
   return result;
 }
@@ -59860,7 +58668,7 @@ void __cdecl __noreturn sub_43DA80(KKND::Task *task)
   entity = task->entity;
   ctx = (char *)task->ctx;
   dword_47C664 = entity_create(MobdId_FontItalic, nullptr, entity);
-  dword_47C65C = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x15A, 164, 22, 3, 90, 14, 16);
+  dword_47C65C = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x15A, 164, 22, 3, 90, 14, 16);
   if ( !dword_47C65C )
   {
     entity_remove(entity);
@@ -59874,7 +58682,7 @@ void __cdecl __noreturn sub_43DA80(KKND::Task *task)
   v3->parent = nullptr;
   task->channel = TaskChannel_TextInput;
   sub_4439F0(v3, (int)v4, 0, 0, 0);
-  entity_anim_load(v3, 1356);
+  entity_anim_init(v3, 1356);
   v5 = ctx + 8;
   entity->parent = dword_47C664;
   while ( 1 )
@@ -59887,7 +58695,7 @@ void __cdecl __noreturn sub_43DA80(KKND::Task *task)
     do
     {
       TASK_yield(task, Task_Wait, 0);
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
         switch ( type )
@@ -59913,22 +58721,22 @@ void __cdecl __noreturn sub_43DA80(KKND::Task *task)
             break;
         }
 LABEL_16:
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v6 );
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->x = 92672;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->y = 46080;
     dword_47C664->z = 10;
-    entity_anim_load(dword_47C664, 1096);
+    entity_anim_init(dword_47C664, 1096);
     dword_47C6C4 = 1;
     sub_41AC50(v5, 0xBu, (void (__fastcall *)(char *, unsigned int))sub_43D9E0, 1, task);
     v10 = g_47C6E0_mobd79_task->entity;
     v11 = v10->y >> 8;
     v12 = v10->x >> 8;
-    v10->is_on_collision_grid = 1;
+    v10->is_collidable = 1;
     INPUT_set_mouse_pos(v12, v11);
     dword_47C6C4 = 0;
     for ( j = 0; j < 10; ++j )
@@ -59940,9 +58748,9 @@ LABEL_16:
         v5[j] = 95;
     }
     v5[11] = 0;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->x = 92672;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->y = 46080;
     entity_anim_clear(dword_47C664);
   }
@@ -59963,7 +58771,7 @@ KKND::Entity *__fastcall sub_43DCF0(char *a1, unsigned __int16 a2)
   *(_DWORD *)(dword_47C604 + 24) = 0;
   *(_DWORD *)(dword_47C604 + 28) = 0;
   sub_443D80((_DWORD *)dword_47C604, a1, 0);
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   v3 = *(_DWORD **)(dword_47C604 + 8);
   v4 = *(_DWORD *)(dword_47C604 + 12) + a2 + 1;
   if ( *(_DWORD *)(dword_47C604 + 12) + a2 != -1 )
@@ -59978,7 +58786,7 @@ KKND::Entity *__fastcall sub_43DCF0(char *a1, unsigned __int16 a2)
   v5 = *(_DWORD *)(v3[1] + 36);
   result = dword_47C664;
   dword_47C664->x = v5 << 8;
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   dword_47C664->y = 60416;
   return result;
 }
@@ -60013,7 +58821,7 @@ void __cdecl __noreturn sub_43DD90(KKND::Task *task)
   entity = task->entity;
   v18 = ctx;
   v4 = 0;
-  dword_47C604 = (int)ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x140, 220, 22, 3, 90, 14, 16);
+  dword_47C604 = (int)ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x140, 220, 22, 3, 90, 14, 16);
   if ( !dword_47C604 )
   {
     entity_remove(entity);
@@ -60027,7 +58835,7 @@ void __cdecl __noreturn sub_43DD90(KKND::Task *task)
   v5->parent = nullptr;
   task->channel = TaskChannel_TextInput;
   sub_4439F0(v5, v6, 0, 0, 0);
-  entity_anim_load(v5, 1356);
+  entity_anim_init(v5, 1356);
   v7 = ctx + 20;
   taska = (KKND::Task *)v7;
   while ( 1 )
@@ -60039,7 +58847,7 @@ void __cdecl __noreturn sub_43DD90(KKND::Task *task)
     do
     {
       TASK_yield(task, Task_Wait, 0);
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
         switch ( type )
@@ -60065,16 +58873,16 @@ void __cdecl __noreturn sub_43DD90(KKND::Task *task)
             break;
         }
 LABEL_16:
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v4 );
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->x = 86016;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->y = 60416;
     dword_47C664->z = 10;
-    entity_anim_load(dword_47C664, 1096);
+    entity_anim_init(dword_47C664, 1096);
     dword_47C6C4 = 1;
     sub_41AC50(v7, 0xBu, (void (__fastcall *)(char *, unsigned int))sub_43DCF0, 1, task);
     v19 = nullptr;
@@ -60098,12 +58906,12 @@ LABEL_16:
     v15 = g_47C6E0_mobd79_task->entity;
     v16 = v15->y >> 8;
     v17 = v15->x >> 8;
-    v15->is_on_collision_grid = 1;
+    v15->is_collidable = 1;
     INPUT_set_mouse_pos(v17, v16);
     dword_47C6C4 = 0;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->x = 86016;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->y = 60416;
     entity_anim_clear(dword_47C664);
     v7 = (char *)taska;
@@ -60128,7 +58936,7 @@ void __cdecl __noreturn sub_43E010(KKND::Task *task)
 
   ctx = task->ctx;
   entity = task->entity;
-  v3 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x128, 274, 12, 3, 90, 14, 16);
+  v3 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x128, 274, 12, 3, 90, 14, 16);
   if ( !v3 )
   {
     entity_remove(entity);
@@ -60245,7 +59053,7 @@ void __cdecl sub_43E230(KKND::Task *task)
   int v2; // edx
   int v3; // ebp
   FILE *v4; // edi
-  int *i; // esi
+  int i; // esi
   int v6; // ecx
   char *v7; // eax
   int j; // ecx
@@ -60287,8 +59095,8 @@ void __cdecl sub_43E230(KKND::Task *task)
   v4 = fopen(aModemLst, aW);
   if ( v4 )
   {
-    for ( i = (int *)dword_47C628; i != &dword_47C628; i = (int *)*i )
-      sub_44E570(v4, (int)aNameSPhoneSBau, (int)(i + 2));
+    for ( i = dword_47C628; (int *)i != &dword_47C628; i = *(_DWORD *)i )
+      fprintf(v4, "name=%s . phone=%s . baud=%d\n", (const char *)(i + 8), (const char *)(i + 20), *(_DWORD *)(i + 32));
     fclose(v4);
   }
   v6 = dword_47C6C0;
@@ -60312,13 +59120,13 @@ void __cdecl sub_43E230(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(v1, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[6] + 12));
-  node[0] = MAPD_Draw(MenuId_Modem, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[6] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_Modem, 0, -10);
   CPLC_select(6);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(v1, Task_Sleep, 1);
   FADE_4084A0(v1);
   TASK_Terminate(v1);
@@ -60341,7 +59149,7 @@ void __cdecl sub_43E470(KKND::Task *task)
   int v2; // ecx
   int *v3; // ebx
   FILE *v4; // edi
-  int *i; // esi
+  int i; // esi
   int v6; // ecx
   char *v7; // eax
   int j; // ecx
@@ -60391,8 +59199,8 @@ LABEL_4:
   v4 = fopen(aModemLst, aW);
   if ( v4 )
   {
-    for ( i = (int *)dword_47C628; i != &dword_47C628; i = (int *)*i )
-      sub_44E570(v4, (int)aNameSPhoneSBau, (int)(i + 2));
+    for ( i = dword_47C628; (int *)i != &dword_47C628; i = *(_DWORD *)i )
+      fprintf(v4, "name=%s . phone=%s . baud=%d\n", (const char *)(i + 8), (const char *)(i + 20), *(_DWORD *)(i + 32));
     fclose(v4);
   }
   v6 = dword_47C6C0;
@@ -60416,13 +59224,13 @@ LABEL_4:
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[6] + 12));
-  node[0] = MAPD_Draw(MenuId_Modem, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[6] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_Modem, 0, -10);
   CPLC_select(6);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -60477,13 +59285,13 @@ void __cdecl sub_43E670(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = (KKND::PaletteEntry **)LVL_FindSection("MAPD");
-  palette_40E400(*Section + 3);
-  node[0] = MAPD_Draw(MenuId_Main, 0, -10);
+  PAL_apply(*Section + 3);
+  dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, -10);
   CPLC_select(0);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -60562,7 +59370,7 @@ void __cdecl __noreturn sub_43E890(KKND::Task *task)
   v12 = 0;
   v3 = 0;
   dword_47C6CC = 0;
-  entity_anim_load(dword_47C664, 1080);
+  entity_anim_init(dword_47C664, 1080);
   while ( 1 )
   {
     dword_47C664->x = 43008;
@@ -60629,7 +59437,7 @@ LABEL_21:
     }
     v1 = 0;
     TASK_yield(task, Task_Wait, 0);
-    for ( j = TASK_pop_message(task); j; j = TASK_pop_message(task) )
+    for ( j = TSK_pop_message(task); j; j = TSK_pop_message(task) )
     {
       switch ( j->type )
       {
@@ -60658,7 +59466,7 @@ LABEL_21:
         default:
           break;
       }
-      task_message_recycle(j);
+      TSK_message_recycle(j);
     }
     v2 = v12;
     dword_47C6CC = v3 + v12;
@@ -60688,14 +59496,14 @@ void __cdecl __noreturn sub_43EA90(KKND::Task *task)
   v2->parent = nullptr;
   task->channel = TaskChannel_CampaignFactionSelect;
   sub_4439F0(v2, 0, 0, 0, 0);
-  entity_anim_load(v2, 1308);
+  entity_anim_init(v2, 1308);
   while ( 1 )
   {
     v3 = 0;
     do
     {
       TASK_yield(task, Task_Wait, 0);
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
         switch ( type )
@@ -60721,11 +59529,11 @@ void __cdecl __noreturn sub_43EA90(KKND::Task *task)
             break;
         }
 LABEL_14:
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v3 );
-    TASK_send_message(nullptr, TaskMessage_ShowHint, nullptr, dword_47C664->task);
+    TSK_send_message(nullptr, TaskMessage_ShowHint, nullptr, dword_47C664->task);
   }
 }
 // 47C610: using guessed type int dword_47C610;
@@ -60748,14 +59556,14 @@ void __cdecl __noreturn sub_43EB80(KKND::Task *task)
   v2->parent = nullptr;
   task->channel = TaskChannel_CampaignFactionSelect;
   sub_4439F0(v2, 0, 0, 0, 0);
-  entity_anim_load(v2, 1320);
+  entity_anim_init(v2, 1320);
   while ( 1 )
   {
     v3 = 0;
     do
     {
       TASK_yield(task, Task_Wait, 0);
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
         switch ( type )
@@ -60781,11 +59589,11 @@ void __cdecl __noreturn sub_43EB80(KKND::Task *task)
             break;
         }
 LABEL_14:
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v3 );
-    TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, dword_47C664->task);
+    TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, dword_47C664->task);
   }
 }
 // 47C610: using guessed type int dword_47C610;
@@ -60810,14 +59618,14 @@ void __cdecl __noreturn sub_43EC70(KKND::Task *task)
   v3->parent = nullptr;
   v1->channel = TaskChannel_16_Menu;
   sub_4439F0(v3, 0, 0, 0, 0);
-  entity_anim_load(v3, 1332);
+  entity_anim_init(v3, 1332);
   while ( 1 )
   {
     v4 = 0;
     do
     {
       TASK_yield(v1, Task_Wait, 0);
-      for ( i = TASK_pop_message(v1); i; i = TASK_pop_message(v1) )
+      for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
         switch ( type )
@@ -60843,11 +59651,11 @@ void __cdecl __noreturn sub_43EC70(KKND::Task *task)
             break;
         }
 LABEL_14:
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v4 );
-    TASK_send_message(nullptr, TaskMessage_UnitSelected, &task, dword_47C664->task);
+    TSK_send_message(nullptr, TaskMessage_UnitSelected, &task, dword_47C664->task);
   }
 }
 // 47C610: using guessed type int dword_47C610;
@@ -60862,7 +59670,7 @@ void __cdecl __noreturn sub_43ED60(int a1)
   int *v3; // eax
   int v4; // ecx
   FILE *v5; // edi
-  int *i; // esi
+  int i; // esi
 
   v1 = *(_DWORD *)(a1 + 56);
   v2 = entity_create(MobdId_45, nullptr, (KKND::Entity *)v1);
@@ -60898,11 +59706,16 @@ LABEL_8:
     v5 = fopen(aModemLst, aW);
     if ( v5 )
     {
-      for ( i = (int *)dword_47C628; i != &dword_47C628; i = (int *)*i )
-        sub_44E570(v5, (int)aNameSPhoneSBau, (int)(i + 2));
+      for ( i = dword_47C628; (int *)i != &dword_47C628; i = *(_DWORD *)i )
+        fprintf(
+          v5,
+          "name=%s . phone=%s . baud=%d\n",
+          (const char *)(i + 8),
+          (const char *)(i + 20),
+          *(_DWORD *)(i + 32));
       fclose(v5);
     }
-    TASK_send_message(nullptr, TaskMessage_1513_sidebar, nullptr, dword_47C664->task);
+    TSK_send_message(nullptr, TaskMessage_1513_sidebar, nullptr, dword_47C664->task);
   }
 }
 // 47C628: using guessed type int dword_47C628;
@@ -60943,7 +59756,7 @@ void __cdecl sub_43EE90(KKND::Task *task)
     }
     ++v2;
   }
-  v5 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0xA0, 104, 42, 12, 90, 14, 16);
+  v5 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0xA0, 104, 42, 12, 90, 14, 16);
   dword_47C65C = v5;
   if ( !v5 )
   {
@@ -60985,13 +59798,13 @@ void __cdecl sub_43EE90(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[9] + 12));
-  node[0] = MAPD_Draw(MenuId_AddModem, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[9] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_AddModem, 0, -10);
   CPLC_select(9);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -61084,13 +59897,13 @@ void __cdecl sub_43F0E0(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[8] + 12));
-  node[0] = MAPD_Draw(MenuId_JoinGame, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[8] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_JoinGame, 0, -10);
   CPLC_select(8);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -61178,13 +59991,13 @@ void __cdecl sub_43F330(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[7] + 12));
-  node[0] = MAPD_Draw(MenuId_HostGame, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[7] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_HostGame, 0, -10);
   CPLC_select(7);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -61245,13 +60058,13 @@ void __cdecl sub_43F520(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[10] + 12));
-  node[0] = MAPD_Draw(MenuId_ModemPhonebook, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[10] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_ModemPhonebook, 0, -10);
   CPLC_select(10);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -61308,13 +60121,13 @@ void __cdecl sub_43F670(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[1] + 12));
-  node[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[1] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
   CPLC_select(1);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -61349,7 +60162,7 @@ void __cdecl __noreturn sub_43F7C0(KKND::Task *task)
   v2 = entity_create(MobdId_FontItalic, task, nullptr);
   if ( !v2 )
     TASK_Terminate(task);
-  v3 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x45, 219, 27, 10, 90, 14, 16);
+  v3 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x45, 219, 27, 10, 90, 14, 16);
   if ( !v3 )
   {
     entity_remove(v2);
@@ -61357,9 +60170,9 @@ void __cdecl __noreturn sub_43F7C0(KKND::Task *task)
   }
   v4 = sub_4439F0(v2, (int)v3, 0, 1, 0);
   v4[3] |= 1u;
-  entity_anim_load(v2, 1080);
+  entity_anim_init(v2, 1080);
   v2->x = 21248;
-  v2->is_on_collision_grid = 1;
+  v2->is_collidable = 1;
   v2->y = 60160;
   v2->z = 77;
   v2->rend->flags |= 0x40000000u;
@@ -61405,11 +60218,11 @@ void __cdecl __noreturn sub_43F7C0(KKND::Task *task)
     }
     if ( (v13 & 0x40000000) != 0 )
     {
-      for ( i = TASK_pop_message(v1); i; i = TASK_pop_message(v1) )
+      for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         if ( i->type == TaskMessage_SidebarRefreshOptions )
           v14 = 0;
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
   }
@@ -61443,14 +60256,14 @@ void __cdecl __noreturn sub_43F9E0(KKND::Task *task)
   v3->parent = nullptr;
   v1->channel = TaskChannel_16_Menu;
   sub_4439F0(v3, 0, 0, 0, 0);
-  entity_anim_load(v3, 1344);
+  entity_anim_init(v3, 1344);
   while ( 1 )
   {
     v4 = 0;
     do
     {
       TASK_yield(v1, Task_Wait, 0);
-      for ( i = TASK_pop_message(v1); i; i = TASK_pop_message(v1) )
+      for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
         switch ( type )
@@ -61476,11 +60289,11 @@ void __cdecl __noreturn sub_43F9E0(KKND::Task *task)
             break;
         }
 LABEL_14:
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v4 );
-    TASK_send_message(nullptr, TaskMessage_UnitSelected, &task, dword_47C664->task);
+    TSK_send_message(nullptr, TaskMessage_UnitSelected, &task, dword_47C664->task);
   }
 }
 // 47C610: using guessed type int dword_47C610;
@@ -61535,7 +60348,7 @@ void __cdecl __noreturn sub_43FAD0(KKND::Task *task)
     if ( v3 >= 79872 )
     {
       v5 = entity;
-      v6 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0xB7, 136, 20, 12, 90, 14, 16);
+      v6 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0xB7, 136, 20, 12, 90, 14, 16);
       if ( !v6 )
       {
         entity_remove(entity);
@@ -61543,9 +60356,9 @@ void __cdecl __noreturn sub_43FAD0(KKND::Task *task)
       }
       v7 = sub_4439F0(entity, (int)v6, 0, 1, 0);
       v7[3] |= 1u;
-      entity_anim_load(v5, 1080);
+      entity_anim_init(v5, 1080);
       v5->x = 50432;
-      v5->is_on_collision_grid = 1;
+      v5->is_collidable = 1;
       v5->y = 38912;
       v5->z = 77;
       dword_47C5F8 = -1;
@@ -61590,7 +60403,7 @@ void __cdecl __noreturn sub_43FAD0(KKND::Task *task)
           if ( dword_47C660 != dword_47C5F8 )
           {
             dword_47C5F8 = dword_47C660;
-            TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, task->channel);
+            TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, task->channel);
             if ( dword_47C660 )
             {
               if ( dword_47C608 > dword_47C660 - 1 )
@@ -61605,7 +60418,7 @@ void __cdecl __noreturn sub_43FAD0(KKND::Task *task)
         }
         if ( (v9 & 0x40000000) != 0 )
         {
-          for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+          for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
           {
             if ( i->type != TaskMessage_MissionFailed )
             {
@@ -61619,11 +60432,11 @@ void __cdecl __noreturn sub_43FAD0(KKND::Task *task)
                 v17 = 0;
               }
             }
-            task_message_recycle(i);
+            TSK_message_recycle(i);
           }
         }
         v15 = dword_47C608;
-        v5->is_on_collision_grid = 1;
+        v5->is_collidable = 1;
         if ( v15 <= 0 )
           v5->y = 38912;
         else
@@ -61685,13 +60498,13 @@ void __cdecl sub_43FDE0(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[1] + 12));
-  node[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[1] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
   CPLC_select(1);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -61745,8 +60558,8 @@ void __cdecl sub_43FF30(KKND::Task *task)
       v3 = dword_47C660 && sub_42E430(dword_47C608) && dword_46E3F0 == -2;
     while ( !sub_443780(task, 1824, v3, 0) );
     v4 = task->entity;
-    entity_anim_start(v4->parent, 1692, 0);
-    entity_anim_start(v4, 1824, 3);
+    entity_anim_init_directional(v4->parent, 1692, 0);
+    entity_anim_init_directional(v4, 1824, 3);
     dword_468B54 = -1;
     dword_47C5FC = 1280;
     dword_477340 = v5;
@@ -61811,13 +60624,13 @@ void __cdecl sub_43FF30(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[8] + 12));
-  node[0] = MAPD_Draw(MenuId_JoinGame, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[8] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_JoinGame, 0, -10);
   CPLC_select(8);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -61909,13 +60722,13 @@ void __cdecl sub_4402A0(KKND::Task *task)
       dword_47C614 = (int)&dword_47C610;
       dword_47C6C8 = 1;
     }
-    MAPD_RemoveRenderable(node[0]);
+    MAPD_RemoveRenderable(dword_47A010[0]);
     TASK_yield(task, Task_Sleep, 3);
     Section = LVL_FindSection("MAPD");
-    palette_40E400((KKND::PaletteEntry *)(Section[7] + 12));
-    node[0] = MAPD_Draw(MenuId_HostGame, 0, -10);
+    PAL_apply((KKND::PaletteEntry *)(Section[7] + 12));
+    dword_47A010[0] = MAPD_Draw(MenuId_HostGame, 0, -10);
     CPLC_select(7);
-    cplc_406320();
+    CPLC_viewport_update();
     TASK_yield(task, Task_Sleep, 1);
     FADE_4084A0(task);
     TASK_Terminate(task);
@@ -62083,7 +60896,7 @@ KKND::Entity *__fastcall sub_440770(char *a1, unsigned __int16 a2)
   dword_47C65C->_ui_string_field_18 = 0;
   dword_47C65C->num_lines = 0;
   sub_443D80(dword_47C65C, a1, 0);
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   pstru8 = dword_47C65C->pstru8;
   v4 = dword_47C65C->_ui_string_field_C + a2 + 1;
   if ( dword_47C65C->_ui_string_field_C + a2 != -1 )
@@ -62098,7 +60911,7 @@ KKND::Entity *__fastcall sub_440770(char *a1, unsigned __int16 a2)
   x = pstru8->rn->cmd.x;
   result = dword_47C664;
   dword_47C664->x = x << 8;
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   dword_47C664->y = 22528;
   return result;
 }
@@ -62130,7 +60943,7 @@ void __cdecl __noreturn sub_440810(KKND::Task *task)
 
   v1 = task;
   entity = task->entity;
-  dword_47C65C = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x90, 72, 14, 3, 9, 14, 16);
+  dword_47C65C = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x90, 72, 14, 3, 9, 14, 16);
   if ( !dword_47C65C )
   {
     entity_remove(entity);
@@ -62152,7 +60965,7 @@ void __cdecl __noreturn sub_440810(KKND::Task *task)
   dword_47C65C->_ui_string_field_18 = 0;
   dword_47C65C->num_lines = 0;
   sub_443D80(dword_47C65C, dword_468CE0, 0);
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   pstru8 = dword_47C65C->pstru8;
   v4 = dword_47C65C->_ui_string_field_C + 1;
   if ( dword_47C65C->_ui_string_field_C != -1 )
@@ -62165,7 +60978,7 @@ void __cdecl __noreturn sub_440810(KKND::Task *task)
     while ( v4 );
   }
   dword_47C664->x = pstru8->rn->cmd.x << 8;
-  dword_47C664->is_on_collision_grid = 1;
+  dword_47C664->is_collidable = 1;
   dword_47C664->y = 22528;
   entity->parent = dword_47C664;
   v5 = v1->entity;
@@ -62173,9 +60986,9 @@ void __cdecl __noreturn sub_440810(KKND::Task *task)
   v5->parent = nullptr;
   v1->channel = TaskChannel_TextInput;
   sub_4439F0(v5, (int)v6, 0, 0, 0);
-  entity_anim_load(v5, 1368);
+  entity_anim_init(v5, 1368);
   entity->x = 40960;
-  entity->is_on_collision_grid = 1;
+  entity->is_collidable = 1;
   entity->y = 22528;
   while ( 1 )
   {
@@ -62191,7 +61004,7 @@ void __cdecl __noreturn sub_440810(KKND::Task *task)
     do
     {
       TASK_yield(v1, Task_Wait, 0);
-      for ( i = TASK_pop_message(v1); i; i = TASK_pop_message(v1) )
+      for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
         switch ( type )
@@ -62217,22 +61030,22 @@ void __cdecl __noreturn sub_440810(KKND::Task *task)
             break;
         }
 LABEL_29:
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
     while ( !v8 );
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->x = 40960;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->y = 22528;
     dword_47C664->z = 10;
-    entity_anim_load(dword_47C664, 1096);
+    entity_anim_init(dword_47C664, 1096);
     dword_47C6C4 = 1;
     sub_41AC50(dword_468CE0, 8u, (void (__fastcall *)(char *, unsigned int))sub_440770, 1, v1);
     v12 = g_47C6E0_mobd79_task->entity;
     v13 = v12->y >> 8;
     v14 = v12->x >> 8;
-    v12->is_on_collision_grid = 1;
+    v12->is_collidable = 1;
     INPUT_set_mouse_pos(v14, v13);
     v15 = 0;
     dword_47C6C4 = 0;
@@ -62247,9 +61060,9 @@ LABEL_29:
     }
     while ( v15 < 7 );
     LOBYTE(dword_468CE8) = 0;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->x = 40960;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->y = 22528;
     entity_anim_clear(dword_47C664);
     if ( dword_47C6C0 != 15 && g_netz_is_game_host )
@@ -62268,7 +61081,7 @@ LABEL_29:
     dword_47C65C->_ui_string_field_18 = 0;
     dword_47C65C->num_lines = 0;
     sub_443D80(dword_47C65C, dword_468CE0, 0);
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     v19 = dword_47C65C->pstru8;
     v20 = dword_47C65C->_ui_string_field_C + 1;
     if ( dword_47C65C->_ui_string_field_C != -1 )
@@ -62281,7 +61094,7 @@ LABEL_29:
       while ( v20 );
     }
     dword_47C664->x = v19->rn->cmd.x << 8;
-    dword_47C664->is_on_collision_grid = 1;
+    dword_47C664->is_collidable = 1;
     dword_47C664->y = 22528;
     if ( dword_47C6C0 != 15 )
       sub_42E450(dword_47C6C0, 0, 65);
@@ -62317,7 +61130,7 @@ void __cdecl __noreturn sub_440CA0(KKND::Task *task)
     byte_47C654 = 0;
   else
     byte_47C654 = byte_47A781[28 * dword_468B58];
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0xA4, 116, 10, 3, 9, 14, 16);
+  v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0xA4, 116, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62425,7 +61238,7 @@ void __cdecl __noreturn sub_440ED0(KKND::Task *task)
     g_demo_faction = 0;
   else
     g_demo_faction = byte_47A782[28 * dword_468B58];
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x8E, 156, 10, 3, 9, 14, 16);
+  v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x8E, 156, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62491,7 +61304,7 @@ void __cdecl __noreturn sub_441050(KKND::Task *task)
 
   if ( dword_47C6C0 == 15 )
     HIBYTE(dword_47C5FC) = 0;
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x196, 116, 20, 3, 9, 14, 16);
+  v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x196, 116, 20, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62532,7 +61345,7 @@ void __cdecl __noreturn sub_441150(KKND::Task *task)
   char Buffer[20]; // [esp+10h] [ebp-14h] BYREF
 
   v1 = -1;
-  v2 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x196, 116, 20, 3, 9, 14, 16);
+  v2 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x196, 116, 20, 3, 9, 14, 16);
   entity = task->entity;
   v4 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62596,7 +61409,7 @@ void __cdecl __noreturn sub_441260(KKND::Task *task)
 
   if ( dword_47C6C0 == 15 )
     BYTE2(dword_47C5FC) = 0;
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x154, 156, 10, 3, 9, 14, 16);
+  v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x154, 156, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62636,7 +61449,7 @@ void __cdecl __noreturn sub_441340(KKND::Task *task)
   int v6; // [esp+10h] [ebp-4h]
 
   v6 = -1;
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x154, 156, 10, 3, 9, 14, 16);
+  v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x154, 156, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62696,7 +61509,7 @@ void __cdecl __noreturn sub_441470(KKND::Task *task)
 
   if ( dword_47C6C0 == 15 )
     LOBYTE(dword_47C5FC) = 0;
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x1A8, 74, 10, 3, 9, 14, 16);
+  v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x1A8, 74, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62731,7 +61544,7 @@ void __cdecl __noreturn sub_441550(KKND::Task *task)
   int v5; // eax
 
   v1 = -1;
-  v2 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x1A8, 74, 10, 3, 9, 14, 16);
+  v2 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x1A8, 74, 10, 3, 9, 14, 16);
   entity = task->entity;
   v4 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62807,7 +61620,7 @@ void __cdecl __noreturn sub_441680(KKND::Task *task)
 
   if ( dword_47C6C0 == 15 )
     BYTE1(dword_47C5FC) = 5;
-  v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x1F4, 156, 10, 3, 9, 14, 16);
+  v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x1F4, 156, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
   entity->mobd_id = MobdId_45;
@@ -62852,7 +61665,7 @@ void __cdecl __noreturn sub_441780(KKND::Task *task)
 
   if ( dword_47C6C0 == 15 )
   {
-    v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x11C, 252, 10, 3, 9, 14, 16);
+    v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x11C, 252, 10, 3, 9, 14, 16);
     entity = task->entity;
     v3 = entity_create(MobdId_45, nullptr, entity);
     entity->mobd_id = MobdId_45;
@@ -62877,7 +61690,7 @@ void __cdecl __noreturn sub_441780(KKND::Task *task)
         ;
     }
   }
-  v5 = g_current_lvl_mobd[80].layers[0];
+  v5 = g_mobd[80].layers[0];
   *(_DWORD *)Buffer = -1;
   v6 = ui_string_create(nullptr, v5, (char *)0x1F4, 156, 10, 3, 9, 14, 16);
   v7 = task->entity;
@@ -62957,13 +61770,13 @@ void __cdecl sub_441940(KKND::Task *task)
     FADE_408500(task);
     sub_443B40(task);
     sub_443980();
-    MAPD_RemoveRenderable(node[0]);
+    MAPD_RemoveRenderable(dword_47A010[0]);
     TASK_yield(task, Task_Sleep, 3);
     Section = (KKND::PaletteEntry **)LVL_FindSection("MAPD");
-    palette_40E400(*Section + 3);
-    node[0] = MAPD_Draw(MenuId_Main, 0, -10);
+    PAL_apply(*Section + 3);
+    dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, -10);
     CPLC_select(0);
-    cplc_406320();
+    CPLC_viewport_update();
     TASK_yield(task, Task_Sleep, 1);
     FADE_4084A0(task);
     TASK_Terminate(task);
@@ -63012,11 +61825,11 @@ void __cdecl sub_441940(KKND::Task *task)
       dword_47C614 = (int)&dword_47C610;
       dword_47C6C8 = 1;
     }
-    MAPD_RemoveRenderable(node[0]);
+    MAPD_RemoveRenderable(dword_47A010[0]);
     TASK_yield(task, Task_Sleep, 3);
     v15 = LVL_FindSection("MAPD");
-    palette_40E400((KKND::PaletteEntry *)(v15[1] + 12));
-    node[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
+    PAL_apply((KKND::PaletteEntry *)(v15[1] + 12));
+    dword_47A010[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
     v11 = 1;
   }
   else
@@ -63041,15 +61854,15 @@ void __cdecl sub_441940(KKND::Task *task)
       dword_47C614 = (int)&dword_47C610;
       dword_47C6C8 = 1;
     }
-    MAPD_RemoveRenderable(node[0]);
+    MAPD_RemoveRenderable(dword_47A010[0]);
     TASK_yield(task, Task_Sleep, 3);
     v10 = LVL_FindSection("MAPD");
-    palette_40E400((KKND::PaletteEntry *)(v10[4] + 12));
-    node[0] = MAPD_Draw(MenuId_IpxSetup, 0, -10);
+    PAL_apply((KKND::PaletteEntry *)(v10[4] + 12));
+    dword_47A010[0] = MAPD_Draw(MenuId_IpxSetup, 0, -10);
     v11 = 4;
   }
   CPLC_select(v11);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -63131,7 +61944,7 @@ void __cdecl sub_441CE0(int a1)
     g_current_lvl_id = SHIBYTE(dword_47C5FC) + 30;
     g_game_state = 1;
     if ( g_47C6E0_mobd79_task )
-      task_445310(g_47C6E0_mobd79_task);
+      TASK_terminate(g_47C6E0_mobd79_task);
   }
   else
   {
@@ -63153,7 +61966,7 @@ void __cdecl sub_441CE0(int a1)
     g_game_state = 1;
     if ( g_47C6E0_mobd79_task )
     {
-      task_445310(g_47C6E0_mobd79_task);
+      TASK_terminate(g_47C6E0_mobd79_task);
       g_47C6E0_mobd79_task = nullptr;
       return;
     }
@@ -63202,16 +62015,16 @@ void __cdecl __noreturn sub_441F10(KKND::Task *task)
       g_current_lvl_id = SHIBYTE(dword_47C5FC) + 30;
       g_game_state = 1;
       if ( g_47C6E0_mobd79_task )
-        task_445310(g_47C6E0_mobd79_task);
+        TASK_terminate(g_47C6E0_mobd79_task);
       g_47C6E0_mobd79_task = nullptr;
     }
     if ( (v1 & 0x40000000) != 0 )
     {
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         if ( i->type == TaskMessage_MissionFailed )
           TASK_Terminate(task);
-        task_message_recycle(i);
+        TSK_message_recycle(i);
       }
     }
   }
@@ -63242,7 +62055,7 @@ void __cdecl __noreturn sub_441FC0(KKND::Task *task)
 
   if ( dword_47C6C0 == 15 )
   {
-    v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x96, 252, 10, 3, 9, 14, 16);
+    v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x96, 252, 10, 3, 9, 14, 16);
     entity = task->entity;
     v3 = entity_create(MobdId_45, nullptr, entity);
     entity->mobd_id = MobdId_45;
@@ -63354,7 +62167,7 @@ void __cdecl __noreturn sub_4421F0(KKND::Task *task)
 
   if ( dword_47C6C0 == 15 )
   {
-    v1 = ui_string_create(nullptr, g_current_lvl_mobd[80].layers[0], (char *)0x1C8, 252, 10, 3, 9, 14, 16);
+    v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x1C8, 252, 10, 3, 9, 14, 16);
     entity = task->entity;
     v3 = entity_create(MobdId_45, nullptr, entity);
     entity->mobd_id = MobdId_45;
@@ -63435,11 +62248,11 @@ void __cdecl __noreturn sub_4421F0(KKND::Task *task)
       dword_47C614 = (int)&dword_47C610;
       dword_47C6C8 = 1;
     }
-    MAPD_RemoveRenderable(node[0]);
+    MAPD_RemoveRenderable(dword_47A010[0]);
     TASK_yield(task, Task_Sleep, 3);
     Section = LVL_FindSection("MAPD");
-    palette_40E400((infantr *)(Section[1] + 12));
-    node[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
+    PAL_apply((KKND::Palette *)(Section[1] + 12));
+    dword_47A010[0] = MAPD_Draw(MenuId_Multiplayer, 0, -10);
     v14 = 1;
   }
   else
@@ -63450,15 +62263,15 @@ void __cdecl __noreturn sub_4421F0(KKND::Task *task)
     FADE_408500(task);
     sub_443B40(task);
     sub_443980();
-    MAPD_RemoveRenderable(node[0]);
+    MAPD_RemoveRenderable(dword_47A010[0]);
     TASK_yield(task, Task_Sleep, 3);
     v13 = LVL_FindSection("MAPD");
-    palette_40E400((infantr *)(v13[4] + 12));
-    node[0] = MAPD_Draw(MenuId_IpxSetup, 0, -10);
+    PAL_apply((KKND::Palette *)(v13[4] + 12));
+    dword_47A010[0] = MAPD_Draw(MenuId_IpxSetup, 0, -10);
     v14 = 4;
   }
   CPLC_select(v14);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -63535,13 +62348,13 @@ void __cdecl sub_442580(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = (KKND::PaletteEntry **)LVL_FindSection("MAPD");
-  palette_40E400(*Section + 3);
-  node[0] = MAPD_Draw(MenuId_Main, 0, -10);
+  PAL_apply(*Section + 3);
+  dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, -10);
   CPLC_select(0);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -63588,11 +62401,11 @@ void __cdecl sub_4426D0(KKND::Task *task)
     v4 = g_coroutine_current;
     if ( g_coroutine_list_head != v4 && ++dword_47734C == 1 )
       dword_477344 = (int)&v12;
-    sub_40E560();
+    pal_40E560();
     ShowCursor(1);
     v5 = sub_42F8E0((void *)1);
     ShowCursor(0);
-    dword_477340 = sub_40E6B0();
+    dword_477340 = pal_40E6B0();
     v6 = g_coroutine_current;
     if ( g_coroutine_list_head != v6 )
       --dword_47734C;
@@ -63623,13 +62436,13 @@ void __cdecl sub_4426D0(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[7] + 12));
-  node[0] = MAPD_Draw(MenuId_HostGame, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[7] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_HostGame, 0, -10);
   CPLC_select(7);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -63695,12 +62508,12 @@ void __cdecl sub_4428C0(KKND::Task *task)
     v7 = g_coroutine_current;
     if ( g_coroutine_list_head != v7 && ++dword_47734C == 1 )
       dword_477344 = (int)v17;
-    sub_40E560();
+    pal_40E560();
     ShowCursor(1);
     sub_42F9C0(0, nullptr);
     v8 = sub_42F9E0(nullptr);
     ShowCursor(0);
-    dword_477340 = sub_40E6B0();
+    dword_477340 = pal_40E6B0();
     v9 = g_coroutine_current;
     if ( g_coroutine_list_head != v9 )
       --dword_47734C;
@@ -63749,13 +62562,13 @@ void __cdecl sub_4428C0(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[8] + 12));
-  node[0] = MAPD_Draw(MenuId_JoinGame, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[8] + 12));
+  dword_47A010[0] = MAPD_Draw(MenuId_JoinGame, 0, -10);
   CPLC_select(8);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -63817,7 +62630,7 @@ void __cdecl __noreturn sub_442BB0(KKND::Task *task)
   entity = v2;
   task->channel = TaskChannel_14_Menu;
   sub_4439F0(v4, 0, 0, 1, 0);
-  entity_anim_load(v4, 180);
+  entity_anim_init(v4, 180);
   TASK_yield(task, Task_Sleep, 1);
   if ( dword_47C6C0 == 14 )
   {
@@ -63852,20 +62665,20 @@ void __cdecl __noreturn sub_442BB0(KKND::Task *task)
 LABEL_16:
         if ( BYTE2(taska->sleep) == dword_47C6E8 )
         {
-          dword_47C664->is_on_collision_grid = 1;
+          dword_47C664->is_collidable = 1;
           x = v5->x;
-          v5->is_on_collision_grid = 1;
+          v5->is_collidable = 1;
           dword_47C664->x = x;
-          dword_47C664->is_on_collision_grid = 1;
+          dword_47C664->is_collidable = 1;
           dword_47C664->y = v5->y;
         }
-        entity_anim_load(v5, v6);
+        entity_anim_init(v5, v6);
         v9 = 1;
         v10 = 0;
         do
         {
           TASK_yield(task, Task_Wait, 0);
-          v11 = TASK_pop_message(task);
+          v11 = TSK_pop_message(task);
           if ( v11 )
           {
             do
@@ -63895,8 +62708,8 @@ LABEL_16:
                   break;
               }
 LABEL_30:
-              task_message_recycle(v11);
-              v11 = TASK_pop_message(task);
+              TSK_message_recycle(v11);
+              v11 = TSK_pop_message(task);
             }
             while ( v11 );
             v5 = entity;
@@ -63919,8 +62732,8 @@ LABEL_30:
 LABEL_40:
       entity_anim_clear(v5);
       TASK_yield(task, Task_Wait, 0);
-      for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
-        task_message_recycle(i);
+      for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
+        TSK_message_recycle(i);
     }
   }
   v15 = dword_47C6E8;
@@ -63974,13 +62787,13 @@ LABEL_40:
 LABEL_87:
       entity_anim_clear(v16);
       TASK_yield(task, Task_Wait, 0);
-      v27 = TASK_pop_message(task);
+      v27 = TSK_pop_message(task);
       if ( v27 )
       {
         do
         {
-          task_message_recycle(v27);
-          v27 = TASK_pop_message(task);
+          TSK_message_recycle(v27);
+          v27 = TSK_pop_message(task);
         }
         while ( v27 );
         v15 = dword_47C6E8;
@@ -64005,20 +62818,20 @@ LABEL_44:
 LABEL_63:
     if ( BYTE2(taska->sleep) == v15 )
     {
-      dword_47C664->is_on_collision_grid = 1;
+      dword_47C664->is_collidable = 1;
       v21 = v16->x;
-      v16->is_on_collision_grid = 1;
+      v16->is_collidable = 1;
       dword_47C664->x = v21;
-      dword_47C664->is_on_collision_grid = 1;
+      dword_47C664->is_collidable = 1;
       dword_47C664->y = v16->y;
     }
-    entity_anim_load(v16, v18);
+    entity_anim_init(v16, v18);
     v22 = 1;
     v23 = 0;
     do
     {
       TASK_yield(task, Task_Wait, 0);
-      v24 = TASK_pop_message(task);
+      v24 = TSK_pop_message(task);
       if ( v24 )
       {
         do
@@ -64048,8 +62861,8 @@ LABEL_63:
               break;
           }
 LABEL_77:
-          task_message_recycle(v24);
-          v24 = TASK_pop_message(task);
+          TSK_message_recycle(v24);
+          v24 = TSK_pop_message(task);
         }
         while ( v24 );
         v16 = entity;
@@ -64115,13 +62928,13 @@ void __cdecl sub_443000(KKND::Task *task)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = (KKND::PaletteEntry **)LVL_FindSection("MAPD");
-  palette_40E400(*Section + 3);
-  node[0] = MAPD_Draw(MenuId_Main, 0, -10);
+  PAL_apply(*Section + 3);
+  dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, -10);
   CPLC_select(0);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   TASK_Terminate(task);
@@ -64147,7 +62960,7 @@ void __cdecl sub_443140(KKND::Task *task)
   v2 = entity_create(MobdId_FontItalic, nullptr, entity);
   dword_47C664 = v2;
   if ( v2 )
-    entity_anim_load(v2, 1048);
+    entity_anim_init(v2, 1048);
   else
     g_game_state = GameState_PreviousScreen;
   v3 = task->entity;
@@ -64196,7 +63009,7 @@ void __cdecl sub_443140(KKND::Task *task)
   dword_47C6E8 = -1;
   g_is_demo_build = 0;
   g_is_single_player = 1;
-  task_445310(g_47C6E0_mobd79_task);
+  TASK_terminate(g_47C6E0_mobd79_task);
   g_47C6E0_mobd79_task = nullptr;
   sub_443B40(task);
   FADE_408500(task);
@@ -64233,7 +63046,7 @@ void __cdecl __noreturn sub_443290(KKND::Task *task)
     if ( dword_47C6C0 == 14 )
     {
       dword_47C6E8 = 0;
-      TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_14_Menu);
+      TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_14_Menu);
     }
     else
     {
@@ -64241,7 +63054,7 @@ void __cdecl __noreturn sub_443290(KKND::Task *task)
         dword_47C6E8 = (unsigned __int16)g_current_mute_level;
       else
         dword_47C6E8 = (unsigned __int16)g_current_surv_level;
-      TASK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_14_Menu);
+      TSK_broadcast_message(task, TaskMessage_Retreat, nullptr, TaskChannel_14_Menu);
     }
   }
 }
@@ -64287,16 +63100,16 @@ int __fastcall sub_443380(KKND::Task *task, ptrdiff_t a2, int a3)
         break;
       if ( (v4 & 0x20) != 0 )
       {
-        entity_anim_load(parent, 0);
-        entity_anim_start(entity, a2, 3);
+        entity_anim_init(parent, 0);
+        entity_anim_init_directional(entity, a2, 3);
       }
       else
       {
-        entity_anim_load(parent, 12);
-        entity_anim_start(entity, a2, 0);
+        entity_anim_init(parent, 12);
+        entity_anim_init_directional(entity, a2, 0);
       }
     }
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       if ( type > 1511 )
@@ -64344,7 +63157,7 @@ int __fastcall sub_443380(KKND::Task *task, ptrdiff_t a2, int a3)
         v4 |= 8u;
       }
 LABEL_30:
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( (v4 & 0x10) != 0 )
       return 0;
@@ -64352,19 +63165,19 @@ LABEL_30:
       return 2;
     if ( (v4 & 8) != 0 && (v4 & 0x20) == 0 )
     {
-      if ( parent->anim == (KKND::MobdAnimation *)g_current_lvl_mobd[parent->mobd_id].layers[0]->frames[0].points )
-        entity_anim_start(entity, a2, 1);
+      if ( parent->anim == (KKND::MobdAnimation *)g_mobd[parent->mobd_id].layers[0]->frames[0].points )
+        entity_anim_init_directional(entity, a2, 1);
       else
-        entity_anim_start(entity, a2, 2);
+        entity_anim_init_directional(entity, a2, 2);
     }
   }
   while ( (v4 & 2) == 0 || (v4 & 0x20) != 0 );
   parent->collider = &g_null_collision;
-  entity_anim_load(parent, 24);
-  entity_anim_start(entity, a2, 1);
+  entity_anim_init(parent, 24);
+  entity_anim_init_directional(entity, a2, 1);
   TASK_yield(task, Task_Yield_10000000, 0);
-  entity_anim_load(parent, 12);
-  entity_anim_start(entity, a2, 2);
+  entity_anim_init(parent, 12);
+  entity_anim_init_directional(entity, a2, 2);
   TASK_yield(task, Task_Yield_10000000, 0);
   parent->collider = g_unit_collision_handlers;
   return 1;
@@ -64392,20 +63205,20 @@ int __fastcall sub_443570(KKND::Task *task, ptrdiff_t a2, int a3, ptrdiff_t a4)
   {
     if ( a3 )
     {
-      entity_anim_start(parent, 1716, a4);
-      entity_anim_start(entity, a2, 0);
+      entity_anim_init_directional(parent, 1716, a4);
+      entity_anim_init_directional(entity, a2, 0);
     }
     else
     {
-      entity_anim_start(parent, 1692, a4);
-      entity_anim_start(entity, a2, 3);
+      entity_anim_init_directional(parent, 1692, a4);
+      entity_anim_init_directional(entity, a2, 3);
     }
     return 0;
   }
   else
   {
     v9 = 0;
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       if ( type > 1511 )
@@ -64452,7 +63265,7 @@ int __fastcall sub_443570(KKND::Task *task, ptrdiff_t a2, int a3, ptrdiff_t a4)
         v9 |= 8u;
       }
 LABEL_23:
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( a3 )
     {
@@ -64460,19 +63273,19 @@ LABEL_23:
         return 2;
       if ( (v9 & 8) != 0 )
       {
-        if ( parent->anim == (KKND::MobdAnimation *)g_current_lvl_mobd[parent->mobd_id].layers[0][42].frames[0].points )
-          entity_anim_start(entity, a2, 1);
+        if ( parent->anim == (KKND::MobdAnimation *)g_mobd[parent->mobd_id].layers[0][42].frames[0].points )
+          entity_anim_init_directional(entity, a2, 1);
         else
-          entity_anim_start(entity, a2, 2);
+          entity_anim_init_directional(entity, a2, 2);
       }
       if ( (v9 & 2) != 0 )
       {
         parent->collider = &g_null_collision;
-        entity_anim_start(parent, 1704, a4);
-        entity_anim_start(entity, a2, 1);
+        entity_anim_init_directional(parent, 1704, a4);
+        entity_anim_init_directional(entity, a2, 1);
         TASK_yield(task, Task_Yield_10000000, 0);
-        entity_anim_start(parent, 1716, a4);
-        entity_anim_start(entity, a2, 2);
+        entity_anim_init_directional(parent, 1716, a4);
+        entity_anim_init_directional(entity, a2, 2);
         TASK_yield(task, Task_Yield_10000000, 0);
         parent->collider = g_unit_collision_handlers;
         return 2;
@@ -64480,8 +63293,8 @@ LABEL_23:
     }
     else
     {
-      entity_anim_load(parent, 96);
-      entity_anim_start(entity, a2, 3);
+      entity_anim_init(parent, 96);
+      entity_anim_init_directional(entity, a2, 3);
     }
     return 0;
   }
@@ -64506,20 +63319,20 @@ int __fastcall sub_443780(KKND::Task *task, ptrdiff_t a2, int a3, ptrdiff_t a4)
   {
     if ( a3 )
     {
-      entity_anim_start(parent, 1716, a4);
-      entity_anim_start(entity, a2, 0);
+      entity_anim_init_directional(parent, 1716, a4);
+      entity_anim_init_directional(entity, a2, 0);
     }
     else
     {
-      entity_anim_start(parent, 1692, a4);
-      entity_anim_start(entity, a2, 3);
+      entity_anim_init_directional(parent, 1692, a4);
+      entity_anim_init_directional(entity, a2, 3);
     }
     return 0;
   }
   else
   {
     v9 = 0;
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(task) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
       if ( type > 1511 )
@@ -64558,7 +63371,7 @@ int __fastcall sub_443780(KKND::Task *task, ptrdiff_t a2, int a3, ptrdiff_t a4)
         v9 |= 8u;
       }
 LABEL_21:
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( a3 )
     {
@@ -64566,19 +63379,19 @@ LABEL_21:
         return 2;
       if ( (v9 & 8) != 0 )
       {
-        if ( parent->anim == (KKND::MobdAnimation *)g_current_lvl_mobd[parent->mobd_id].layers[0][42].frames[0].points )
-          entity_anim_start(entity, a2, 1);
+        if ( parent->anim == (KKND::MobdAnimation *)g_mobd[parent->mobd_id].layers[0][42].frames[0].points )
+          entity_anim_init_directional(entity, a2, 1);
         else
-          entity_anim_start(entity, a2, 2);
+          entity_anim_init_directional(entity, a2, 2);
       }
       if ( (v9 & 2) != 0 )
       {
         parent->collider = &g_null_collision;
-        entity_anim_start(parent, 1704, a4);
-        entity_anim_start(entity, a2, 1);
+        entity_anim_init_directional(parent, 1704, a4);
+        entity_anim_init_directional(entity, a2, 1);
         TASK_yield(task, Task_Yield_10000000, 0);
-        entity_anim_start(parent, 1716, a4);
-        entity_anim_start(entity, a2, 2);
+        entity_anim_init_directional(parent, 1716, a4);
+        entity_anim_init_directional(entity, a2, 2);
         TASK_yield(task, Task_Yield_10000000, 0);
         parent->collider = g_unit_collision_handlers;
         return 2;
@@ -64586,8 +63399,8 @@ LABEL_21:
     }
     else
     {
-      entity_anim_load(parent, 96);
-      entity_anim_start(entity, a2, 3);
+      entity_anim_init(parent, 96);
+      entity_anim_init_directional(entity, a2, 3);
     }
     return 0;
   }
@@ -64767,7 +63580,7 @@ void __thiscall sub_443B40(KKND::Task *this)
       }
       entity_remove(v3);
       if ( task != this && task )
-        task_445310(task);
+        TASK_terminate(task);
       v8 = (int **)v1[1];
       *(_DWORD *)(*v1 + 4) = v8;
       *(_DWORD *)v1[1] = *v1;
@@ -64843,13 +63656,13 @@ void __fastcall sub_443C40(KKND::Task *task, KKND::MenuId a1)
     dword_47C614 = (int)&dword_47C610;
     dword_47C6C8 = 1;
   }
-  MAPD_RemoveRenderable(node[0]);
+  MAPD_RemoveRenderable(dword_47A010[0]);
   TASK_yield(task, Task_Sleep, 3);
   Section = LVL_FindSection("MAPD");
-  palette_40E400((KKND::PaletteEntry *)(Section[a1] + 12));
-  node[0] = MAPD_Draw(a1, 0, -10);
+  PAL_apply((KKND::PaletteEntry *)(Section[a1] + 12));
+  dword_47A010[0] = MAPD_Draw(a1, 0, -10);
   CPLC_select(a1);
-  cplc_406320();
+  CPLC_viewport_update();
   TASK_yield(task, Task_Sleep, 1);
   FADE_4084A0(task);
   if ( dword_47C6BC || a1 != MenuId_Credits )
@@ -65051,23 +63864,23 @@ int sub_443F20()
 // 47C6EC: using guessed type int dword_47C6EC;
 
 //----- (00444080) --------------------------------------------------------
-void __fastcall sub_444080(void *this)
+void __fastcall MAPD_animated_overlay_init(KKND::MenuId id)
 {
   int v1; // eax
   char *v2; // eax
   int i; // ecx
   KKND::Entity *v4; // eax
 
-  switch ( (unsigned int)this )
+  switch ( id )
   {
-    case 1u:
+    case MenuId_Multiplayer:
       dword_47C6BC = 0;
       break;
-    case 4u:
+    case MenuId_IpxSetup:
       dword_47C6BC = 1;
       break;
-    case 7u:
-    case 8u:
+    case MenuId_HostGame:
+    case MenuId_JoinGame:
       v1 = -(dword_468B68 != 0);
       LOBYTE(v1) = v1 & 0xFD;
       dword_47C6BC = v1 + 4;
@@ -65075,7 +63888,7 @@ void __fastcall sub_444080(void *this)
     default:
       break;
   }
-  dword_47C6C0 = (int)this;
+  dword_47C6C0 = id;
   if ( !g_47C6E0_mobd79_task )
   {
     dword_47C6D4 = 0;
@@ -65187,7 +64000,11 @@ void __fastcall unit_oil_tanker_init(KKND::Unit *unit)
       v6 = BOXD_adjust_unit_position_x(unit, unit->tile_position);
     else
       v6 = v5->size != UnitSize_Regular ? 7424 : 4096;
-    v7 = BOXD_40DE80(unit, v6 + (unit->entity->x & 0xFFFFE000), v4 + (unit->entity->y & 0xFFFFE000), UnitPosition_Slot0);
+    v7 = BOXD_place_unit_world_coords(
+           unit,
+           v6 + (unit->entity->x & 0xFFFFE000),
+           v4 + (unit->entity->y & 0xFFFFE000),
+           UnitPosition_Slot0);
     if ( v7 == UnitTilePosition_Invalid )
     {
       unit_mode_destroy(unit);
@@ -65222,7 +64039,7 @@ void __fastcall unit_oil_tanker_init(KKND::Unit *unit)
       unit->mode = unit_mode_4444D0;
     }
   }
-  else if ( BOXD_413860(unit) )
+  else if ( BOXD_find_nearby_clear_tile(unit) )
   {
     v19 = unit->stats;
     if ( v19->is_infantry )
@@ -65252,8 +64069,8 @@ void __fastcall unit_oil_tanker_init(KKND::Unit *unit)
   }
   else
   {
-    TASK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
-    TASK_broadcast_message(nullptr, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+    TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+    TSK_broadcast_message(nullptr, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
     unit->task->channel = TaskChannel_None;
     v18 = unit->entity;
     unit->unit_id = 0;
@@ -65288,7 +64105,7 @@ void __fastcall unit_mode_4444F0(KKND::Unit *unit)
   {
     state[7] = 0;
     state[8] = 0;
-    TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Drillrig);
+    TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Drillrig);
     v3 = sub_444BE0(unit);
     state[3] = v3;
     if ( v3 )
@@ -65311,7 +64128,10 @@ void __fastcall unit_mode_4444F0(KKND::Unit *unit)
   }
   else
   {
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_idle,
+      g_angle_to_orientation[unit->orientation]);
     TASK_yield(unit->task, Task_Sleep, 20);
   }
 }
@@ -65329,7 +64149,7 @@ void __fastcall unit_mode_444590(KKND::Unit *unit)
   {
     state->array_20_size = 0;
     state->array_20[0] = nullptr;
-    TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_PowerPlant);
+    TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_PowerPlant);
     v3 = sub_444BE0(unit);
     state->powerstation = v3;
     if ( v3 )
@@ -65352,7 +64172,10 @@ void __fastcall unit_mode_444590(KKND::Unit *unit)
   }
   else
   {
-    entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+    entity_anim_init_directional(
+      unit->entity,
+      unit->stats->mobd_lookup_offset_idle,
+      g_angle_to_orientation[unit->orientation]);
     TASK_yield(unit->task, Task_Sleep, 20);
   }
 }
@@ -65365,7 +64188,10 @@ void __fastcall unit_mode_444630(KKND::Unit *unit)
   p_orientation = &unit->orientation;
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   if ( !entity_anim_advance_rotation((ptrdiff_t *)p_orientation, MobdOrientation_SW, unit->stats->turning_speed) )
     unit->mode = unit_mode_tanker_4446B0_load_oil;
   TASK_yield(unit->task, Task_Sleep, 1);
@@ -65466,7 +64292,7 @@ void __fastcall unit_mode_4447C0(KKND::Unit *unit)
     v5 = unit->state;
     v5[7] = 0;
     v5[8] = 0;
-    TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_PowerPlant);
+    TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_PowerPlant);
     v6 = sub_444BE0(unit);
     v5[2] = v6;
     if ( v6 )
@@ -65485,7 +64311,7 @@ void __fastcall unit_mode_4447C0(KKND::Unit *unit)
   state->_18_entity_id = powerstation_entity_id;
   if ( powerstation )
   {
-    unit_mobd_anchor_unknown = powerstation->mobd_anchors._unit_mobd_anchor_unknown;
+    unit_mobd_anchor_unknown = powerstation->mobd_anchors.dock_point;
     x = unit_mobd_anchor_unknown->x;
     y = unit_mobd_anchor_unknown->y;
     if ( !x && !y )
@@ -65493,7 +64319,7 @@ void __fastcall unit_mode_4447C0(KKND::Unit *unit)
       x = -8192;
       y = 0x2000;
     }
-    powerstation->entity->is_on_collision_grid = 1;
+    powerstation->entity->is_collidable = 1;
     unit->order_target_x = x + state->_4_entity->entity->x;
     v12 = state->_4_entity->entity->y;
     unit->order = UnitOrder_TankerDock;
@@ -65544,7 +64370,7 @@ void __fastcall unit_mode_4448C0(KKND::Unit *unit)
     v6 = unit->state;
     v6[7] = 0;
     v6[8] = 0;
-    TASK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Drillrig);
+    TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Drillrig);
     v7 = sub_444BE0(unit);
     v6[3] = v7;
     if ( v7 )
@@ -65563,7 +64389,7 @@ void __fastcall unit_mode_4448C0(KKND::Unit *unit)
   state->_18_entity_id = drillrig_entity_id;
   if ( v8 )
   {
-    unit_mobd_anchor_unknown = v8->mobd_anchors._unit_mobd_anchor_unknown;
+    unit_mobd_anchor_unknown = v8->mobd_anchors.dock_point;
     x = unit_mobd_anchor_unknown->x;
     y = unit_mobd_anchor_unknown->y;
     if ( !x && !y )
@@ -65592,7 +64418,10 @@ void __fastcall unit_mode_4449D0(KKND::Unit *unit)
   p_orientation = &unit->orientation;
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   if ( !entity_anim_advance_rotation((ptrdiff_t *)p_orientation, MobdOrientation_SW, unit->stats->turning_speed) )
     unit->mode = unit_mode_444A40;
   TASK_yield(unit->task, Task_Sleep, 1);
@@ -65758,7 +64587,7 @@ KKND::Unit *__thiscall sub_444CC0(KKND::Unit *this)
   state = this->state;
   state[7] = 0;
   state[8] = 0;
-  TASK_broadcast_message(this->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_PowerPlant);
+  TSK_broadcast_message(this->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_PowerPlant);
   result = sub_444BE0(this);
   state[2] = result;
   if ( result )
@@ -65783,7 +64612,7 @@ KKND::Unit *__thiscall sub_444D10(KKND::Unit *this)
   state = this->state;
   state[7] = 0;
   state[8] = 0;
-  TASK_broadcast_message(this->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Drillrig);
+  TSK_broadcast_message(this->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Drillrig);
   result = sub_444BE0(this);
   state[3] = result;
   if ( result )
@@ -65991,7 +64820,7 @@ LABEL_63:
         }
         break;
       case TaskMessage_RepairBayAssigned:
-        sub_41A470(unit, (KKND::Unit *)payload);
+        unit_41A470(unit, (KKND::Unit *)payload);
         break;
       default:
         return;
@@ -66009,7 +64838,7 @@ BOOL __fastcall LVL_InitTasks(int default_coroutine_stack_size)
   v1 = default_coroutine_stack_size;
   if ( !default_coroutine_stack_size )
     v1 = 2048;
-  result = task_message_pool_init();
+  result = TSK_message_pool_init();
   if ( result )
   {
     result = (BOOL)malloc(0x21340u);
@@ -66103,7 +64932,7 @@ KKND::Task *__fastcall TASK_CreateCallback(KKND::TaskChannel chan, KKND::TaskFn 
 }
 
 //----- (00445310) --------------------------------------------------------
-void __fastcall task_445310(KKND::Task *task)
+void __fastcall TASK_terminate(KKND::Task *task)
 {
   KKND::TaskLocal *locals; // eax
   KKND::TaskLocal *next; // esi
@@ -66119,7 +64948,7 @@ void __fastcall task_445310(KKND::Task *task)
     }
     while ( next );
   }
-  task_discard_queue(task);
+  TSK_discard_queue(task);
   task->prev->next = task->next;
   task->next->prev = task->prev;
   task->next = g_task_terminated_head;
@@ -66266,7 +65095,7 @@ void TASK_ExecuteScheduledTasks()
         }
         while ( v3 );
       }
-      task_discard_queue(next);
+      TSK_discard_queue(next);
       next->prev->next = next->next;
       next->next->prev = next->prev;
       next->next = g_task_terminated_head;
@@ -66348,7 +65177,7 @@ void sub_4455A0()
             }
             while ( next );
           }
-          task_discard_queue(v2);
+          TSK_discard_queue(v2);
           v2->prev->next = v2->next;
           v2->next->prev = v2->prev;
           v2->next = g_task_terminated_head;
@@ -66362,7 +65191,7 @@ void sub_4455A0()
       free(g_tasks);
       g_tasks = nullptr;
       TASK_coroutine_cleanup();
-      TASK_message_pool_cleanup();
+      TSK_message_pool_cleanup();
     }
   }
 }
@@ -66399,12 +65228,12 @@ int sub_445690()
       for ( i = 0; i < 6136; i += 8 )
         *(_DWORD *)((char *)dword_47C774 + i) = (char *)dword_47C774 + i + 8;
       *((_DWORD *)dword_47C774 + 1534) = 0;
-      dword_47C778 = (int)dword_47C774;
+      dword_47C778 = (KKND::stru8 *)dword_47C774;
       for ( j = 0; j < 480; j += 32 )
         *(_DWORD *)((char *)dword_47C77C + j) = (char *)dword_47C77C + j + 32;
       *((_DWORD *)dword_47C77C + 120) = 0;
-      dword_47C784 = 0;
-      dword_47C780 = (int)dword_47C77C;
+      dword_47C784 = nullptr;
+      dword_47C780 = (KKND::UiString *)dword_47C77C;
       return 1;
     }
     else
@@ -66422,9 +65251,6 @@ int sub_445690()
 }
 // 47C76C: using guessed type int dword_47C76C;
 // 47C770: using guessed type int dword_47C770;
-// 47C778: using guessed type int dword_47C778;
-// 47C780: using guessed type int dword_47C780;
-// 47C784: using guessed type int dword_47C784;
 
 //----- (00445770) --------------------------------------------------------
 void __fastcall sub_445770(_DWORD *a1, unsigned __int8 *a2, int a3)
@@ -66703,8 +65529,9 @@ int __thiscall sub_445AE0(_DWORD *this)
 }
 
 //----- (00445B30) --------------------------------------------------------
-void __fastcall sub_445B30(KKND::stru8 **p_next)
+void __fastcall sub_445B30()
 {
+  KKND::stru8 **p_next; // ecx
   KKND::UiString *i; // edx
   KKND::stru8 *j; // eax
   KKND::UiString *prev; // eax
@@ -66736,6 +65563,7 @@ void __fastcall sub_445B30(KKND::stru8 **p_next)
     dword_47C770 = 0;
   }
 }
+// 445B7A: variable 'p_next' is possibly undefined
 // 47C76C: using guessed type int dword_47C76C;
 // 47C770: using guessed type int dword_47C770;
 
@@ -66903,8 +65731,8 @@ void __fastcall sidebar_mode_infantry_open(KKND::SidebarButton *button)
   {
     if ( g_is_sidebar_open[i] )
     {
-      TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
     }
   }
   if ( prev != g_factory_production_heads )
@@ -66921,10 +65749,10 @@ void __fastcall sidebar_mode_infantry_open(KKND::SidebarButton *button)
           prev->icon_entity = v4;
           v4->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
           y = v4->y;
-          v4->is_on_collision_grid = 1;
+          v4->is_collidable = 1;
           v4->y = y - 1024;
           v4->z = 3;
-          entity_anim_load(v4, dword_4701BC[2 * prev->factory_header_color_idx]);
+          entity_anim_init(v4, dword_4701BC[2 * prev->factory_header_color_idx]);
         }
       }
       for ( j = prev->production_list_tail;
@@ -67004,8 +65832,8 @@ void __fastcall sidebar_mode_vehicles_open(KKND::SidebarButton *button)
   {
     if ( g_is_sidebar_open[i] )
     {
-      TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
     }
   }
   if ( next != &g_factory_production_heads[ProductionType_Vehicles] )
@@ -67022,10 +65850,10 @@ void __fastcall sidebar_mode_vehicles_open(KKND::SidebarButton *button)
           next->icon_entity = v4;
           v4->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
           y = v4->y;
-          v4->is_on_collision_grid = 1;
+          v4->is_collidable = 1;
           v4->y = y - 1024;
           v4->z = 3;
-          entity_anim_load(v4, dword_4701BC[2 * next->factory_header_color_idx]);
+          entity_anim_init(v4, dword_4701BC[2 * next->factory_header_color_idx]);
         }
       }
       for ( j = next->production_list_tail;
@@ -67088,8 +65916,8 @@ void __fastcall sidebar_mode_aircraft_open(KKND::SidebarButton *button)
   {
     if ( g_is_sidebar_open[i] )
     {
-      TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
     }
   }
   if ( prev != &g_factory_production_heads[ProductionType_Aircraft] )
@@ -67126,12 +65954,12 @@ void __fastcall sidebar_mode_airstrike_open(KKND::SidebarButton *button)
 {
   KKND::SidebarButton **v1; // esi
 
-  TASK_send_message(nullptr, TaskMessage_AirstrikeSetTargetingMode, nullptr, g_game_update_loop_task);
+  TSK_send_message(nullptr, TaskMessage_AirstrikeSetTargetingMode, nullptr, g_game_update_loop_task);
   v1 = &g_help_button;
   do
   {
     if ( v1 != &g_airstrike_button )            // BUG - only send it to help button
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, (*v1)->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, (*v1)->task);
     ++v1;
   }
   while ( (int)v1 < (int)&g_sidebar_button_minimap );// BUG
@@ -67140,7 +65968,7 @@ void __fastcall sidebar_mode_airstrike_open(KKND::SidebarButton *button)
 //----- (004461E0) --------------------------------------------------------
 void __fastcall sidebar_mode_airstrike_close(KKND::SidebarButton *button)
 {
-  TASK_send_message(nullptr, TaskMessage_AirstrikeClearTargetingMode, nullptr, g_game_update_loop_task);
+  TSK_send_message(nullptr, TaskMessage_AirstrikeClearTargetingMode, nullptr, g_game_update_loop_task);
 }
 
 //----- (00446200) --------------------------------------------------------
@@ -67156,8 +65984,8 @@ void __fastcall sidebar_mode_buildings_open(KKND::SidebarButton *button)
   {
     if ( g_is_sidebar_open[i] )
     {
-      TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
     }
   }
   if ( prev != &g_factory_production_heads[ProductionType_Buildings] )
@@ -67208,7 +66036,7 @@ LABEL_4:
       g_47C788_planner.footprint_width = footprint_width;
       g_47C788_planner.footprint_height = footprint_height;
       g_47C788_planner.cost = g_unit_stats[v6].cost;
-      TASK_send_message(nullptr, TaskMessage_BuildingPlacementModeBegin, &g_47C788_planner, g_game_update_loop_task);
+      TSK_send_message(nullptr, TaskMessage_BuildingPlacementModeBegin, &g_47C788_planner, g_game_update_loop_task);
     }
   }
   else
@@ -67244,8 +66072,8 @@ void __fastcall sidebar_mode_towers_open(KKND::SidebarButton *a1)
   {
     if ( g_is_sidebar_open[i] )
     {
-      TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_production_buttons[i]->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_production_buttons[i]->task);
     }
   }
   if ( prev != &g_factory_production_heads[ProductionType_Towers] )
@@ -67300,9 +66128,9 @@ KKND::SidebarFactoryProduction *__fastcall unit_enable_production(
     g_sidebar_close_handlers[sidebar](nullptr);
     v17 = 1;
   }
-  v3 = g_prod_free_list;
-  if ( g_prod_free_list )
-    g_prod_free_list = g_prod_free_list->next;
+  v3 = g_prod_free_head;
+  if ( g_prod_free_head )
+    g_prod_free_head = g_prod_free_head->next;
   else
     v3 = nullptr;
   if ( !v3 )
@@ -67444,15 +66272,15 @@ LABEL_4:
       g_sidebar_close_handlers[prod_type](nullptr);
       v12 = 1;
     }
-    v8 = g_prod_options_free_list;
-    if ( g_prod_options_free_list )
-      g_prod_options_free_list = g_prod_options_free_list->next;
+    v8 = g_prod_options_free_head;
+    if ( g_prod_options_free_head )
+      g_prod_options_free_head = g_prod_options_free_head->next;
     else
       v8 = nullptr;
     if ( v8 )
     {
       if ( *p_production_list_head == (KKND::SidebarFactoryProductionOption *)p_production_list_head )
-        TASK_send_message(
+        TSK_send_message(
           nullptr,
           TaskMessage_1514_sidebar,
           nullptr,
@@ -67524,12 +66352,12 @@ LABEL_6:
     }
     production_list_head->next->prev = production_list_head->prev;
     production_list_head->prev->next = production_list_head->next;
-    production_list_head->next = g_prod_options_free_list;
-    g_prod_options_free_list = production_list_head;
+    production_list_head->next = g_prod_options_free_head;
+    g_prod_options_free_head = production_list_head;
     if ( *p_production_list_head == (KKND::SidebarFactoryProductionOption *)p_production_list_head )
     {
       g_is_sidebar_open[prod->type] = 0;
-      TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_production_buttons[prod->type]->task);
+      TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_production_buttons[prod->type]->task);
     }
     else if ( v3 )
     {
@@ -67562,8 +66390,8 @@ void __fastcall sub_4467E0(KKND::SidebarFactoryProduction *prod, KKND::UnitType 
       prev = i->prev;
       i->next->prev = prev;
       i->prev->next = i->next;
-      i->next = g_prod_options_free_list;
-      g_prod_options_free_list = i;
+      i->next = g_prod_options_free_head;
+      g_prod_options_free_head = i;
       i = prev;
     }
   }
@@ -67622,21 +66450,21 @@ LABEL_12:
       factory_cancel_production(&production_list_head->state.remaining_cost, 0);
       production_list_head->next->prev = production_list_head->prev;
       production_list_head->prev->next = production_list_head->next;
-      production_list_head->next = g_prod_options_free_list;
-      g_prod_options_free_list = production_list_head;
+      production_list_head->next = g_prod_options_free_head;
+      g_prod_options_free_head = production_list_head;
       production_list_head = *p_production_list_head;
     }
     while ( *p_production_list_head != (KKND::SidebarFactoryProductionOption *)p_production_list_head );
   }
   prod->next->prev = prod->prev;
   prod->prev->next = prod->next;
-  prod->next = g_prod_free_list;
-  g_prod_free_list = prod;
+  prod->next = g_prod_free_head;
+  g_prod_free_head = prod;
   v7 = prod->type;
   if ( g_factory_production_heads[v7].next == &g_factory_production_heads[v7] )
   {
     g_is_sidebar_open[v7] = 0;
-    TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_production_buttons[prod->type]->task);
+    TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_production_buttons[prod->type]->task);
   }
   else if ( v8 )
   {
@@ -67649,7 +66477,7 @@ LABEL_12:
 //----- (004469D0) --------------------------------------------------------
 void __fastcall sidebar_mode_options_open(KKND::SidebarButton *button)
 {
-  TASK_send_message(nullptr, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
+  TSK_send_message(nullptr, TaskMessage_ToggleIngameMenu, nullptr, g_task_47C028);
 }
 
 //----- (004469F0) --------------------------------------------------------
@@ -67685,7 +66513,7 @@ BOOL GAME_sidebar_init()
   g_prod_options_pool = v0;
   if ( !v0 )
     return 0;
-  g_prod_options_free_list = v0;
+  g_prod_options_free_head = v0;
   for ( i = 0; i < 255; ++i )
   {
     v0[i].next = &v0[i + 1];
@@ -67698,7 +66526,7 @@ BOOL GAME_sidebar_init()
   g_prod_pool = v2;
   if ( !v2 )
     return 0;
-  g_prod_free_list = v2;
+  g_prod_free_head = v2;
   for ( j = 0; j < 31; ++j )
   {
     v2[j].next = &v2[j + 1];
@@ -67820,10 +66648,10 @@ LABEL_16:
   if ( v23 )
   {
     v23->rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_ui;
-    entity_anim_load(dword_47C96C, 72);
-    dword_47C96C->is_on_collision_grid = 1;
+    entity_anim_init(dword_47C96C, 72);
+    dword_47C96C->is_collidable = 1;
     dword_47C96C->x = (g_screen_width - 32) << 8;
-    dword_47C96C->is_on_collision_grid = 1;
+    dword_47C96C->is_collidable = 1;
     dword_47C96C->y = 0x10000;
     dword_47C96C->z = 0;
   }
@@ -67841,10 +66669,10 @@ void __fastcall sidebar_mode_cash_open(KKND::SidebarButton *button)
 
   v2 = ui_string_445C00("        0", 12);
   v3 = ui_string_445C80("        0", 12);
-  button->entity->is_on_collision_grid = 1;
+  button->entity->is_collidable = 1;
   g_sidebar_cash_string = ui_string_create(
                             nullptr,
-                            g_current_lvl_mobd[MobdId_Font_27].layers[MobdId_Mute_AlchemyHall],
+                            g_mobd[MobdId_Font_27].layers[MobdId_Mute_AlchemyHall],
                             (char *)((button->entity->x >> 8) - (8 * v3 + 24)),
                             button->entity->y >> 8,
                             v3 + 2,
@@ -67871,17 +66699,17 @@ void __fastcall sidebar_mode_help_open(KKND::SidebarButton *button)
   do
   {
     if ( v1 != &g_help_button )                 // BUG - send this message to aircraft button
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, (*v1)->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, (*v1)->task);
     ++v1;
   }
   while ( (int)v1 < (int)&g_sidebar_button_minimap );// BUG
-  TASK_send_message(nullptr, TaskMessage_ShowHint, nullptr, g_game_update_loop_task);
+  TSK_send_message(nullptr, TaskMessage_ShowHint, nullptr, g_game_update_loop_task);
 }
 
 //----- (00446E50) --------------------------------------------------------
 void __fastcall sidebar_mode_help_close(KKND::SidebarButton *button)
 {
-  TASK_send_message(nullptr, TaskMessage_HideHint, nullptr, g_game_update_loop_task);
+  TSK_send_message(nullptr, TaskMessage_HideHint, nullptr, g_game_update_loop_task);
 }
 
 //----- (00446E90) --------------------------------------------------------
@@ -67902,10 +66730,10 @@ void __cdecl __noreturn sub_446ED0(KKND::Task *a1)
   TASK_yield(a1, Task_Sleep, 2);
   v1 = g_production_buttons;
   do
-    TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, (*v1++)->task);
+    TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, (*v1++)->task);
   while ( (int)v1 < (int)&dword_47CA2C );
-  TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_sidebar_button_minimap->task);
-  TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_help_button[1]->task);
+  TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_sidebar_button_minimap->task);
+  TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_help_button[1]->task);
   while ( 1 )
   {
     if ( g_sidebar_cash_string )
@@ -67948,12 +66776,12 @@ KKND::Entity *enable_minimap()
   KKND::Entity *result; // eax
 
   if ( GAME_IsLoading() )
-    return (KKND::Entity *)TASK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_sidebar_button_minimap->task);
-  result = &g_current_lvl_mobd[g_sidebar_button_minimap->entity->mobd_id].layers[0][49].frames[0].sound_id != (KKND::SoundId *)g_sidebar_button_minimap->entity->anim
+    return (KKND::Entity *)TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_sidebar_button_minimap->task);
+  result = &g_mobd[g_sidebar_button_minimap->entity->mobd_id].layers[0][49].frames[0].sound_id != (KKND::SoundId *)g_sidebar_button_minimap->entity->anim
          ? g_sidebar_button_minimap->entity
          : nullptr;
   if ( !result )
-    return (KKND::Entity *)TASK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_sidebar_button_minimap->task);
+    return (KKND::Entity *)TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_sidebar_button_minimap->task);
   return result;
 }
 
@@ -67961,7 +66789,7 @@ KKND::Entity *enable_minimap()
 BOOL minimap_disable()
 {
   minimap_close();
-  return TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_sidebar_button_minimap->task);
+  return TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_sidebar_button_minimap->task);
 }
 
 //----- (00447070) --------------------------------------------------------
@@ -68002,7 +66830,7 @@ LABEL_11:
   if ( !v1 )
     v2 = UnitType_Surv_Bomber;
   production_enable_unit(g_sidebar_aircraft_prod, v2, 2236);
-  return TASK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_production_buttons[4]->task);
+  return TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_production_buttons[4]->task);
 }
 // 47C658: using guessed type char g_demo_faction;
 // 47CA2C: using guessed type int dword_47CA2C;
@@ -68040,8 +66868,8 @@ LABEL_10:
     SOUND_play(SoundId_66, 0, (int)g_4690A8_sfx_volume, 16, 0);
   if ( dword_47CA2C )
   {
-    TASK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_airstrike_button->task);
-    TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_47C970_sidebar_task);
+    TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_airstrike_button->task);
+    TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_47C970_sidebar_task);
   }
   ++g_num_player_units;
 }
@@ -68058,14 +66886,14 @@ int sub_4471E0()
   for ( i = 0; i < 8; i += 4 )
   {
     if ( i != -4 )
-      TASK_send_message(
+      TSK_send_message(
         nullptr,
         TaskMessage_UnitDeselected,
         nullptr,
         (*(KKND::SidebarButton **)((char *)&g_help_button + i))->task);// BUG
   }
-  TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_47C970_sidebar_task);
-  TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_airstrike_button->task);
+  TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_47C970_sidebar_task);
+  TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, g_airstrike_button->task);
   result = g_num_player_units;
   if ( g_num_player_units > 0 )
     return --g_num_player_units;
@@ -68088,9 +66916,9 @@ int sub_447250()
 LABEL_10:
       dword_47CA2C = 0;
       sidebar_disable_production(g_sidebar_aircraft_prod, (KKND::UnitType)(UnitType_Surv_Bomber - (v1 != 0)));
-      TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_production_buttons[4]->task);
-      TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_airstrike_button->task);
-      return TASK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_47C970_sidebar_task);
+      TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_production_buttons[4]->task);
+      TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_airstrike_button->task);
+      return TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_47C970_sidebar_task);
     }
     if ( g_is_single_player )
     {
@@ -68116,7 +66944,7 @@ LABEL_10:
 //----- (00447310) --------------------------------------------------------
 KKND::Entity *sub_447310()
 {
-  return &g_current_lvl_mobd[g_sidebar_button_minimap->entity->mobd_id].layers[0][49].frames[0].sound_id != (KKND::SoundId *)g_sidebar_button_minimap->entity->anim
+  return &g_mobd[g_sidebar_button_minimap->entity->mobd_id].layers[0][49].frames[0].sound_id != (KKND::SoundId *)g_sidebar_button_minimap->entity->anim
        ? g_sidebar_button_minimap->entity
        : nullptr;
 }
@@ -68134,7 +66962,7 @@ BOOL __fastcall sidebar_toggle_help_airstrike(int button_id)
   do
   {
     if ( v2 != button_id )                      // BUG - it's always -1 and code clumps airstrike and help for no reason
-      result = TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, *(KKND::Task **)&(*v3)[8]);
+      result = TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, *(KKND::Task **)&(*v3)[8]);
     ++v3;
     ++v2;
   }
@@ -68167,7 +66995,10 @@ LABEL_15:
   }
   unit = unit_create(task);
   unit->task->message_handler = MessageHandler_Tower;
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
+  entity_anim_init_directional(
+    unit->entity,
+    unit->stats->mobd_lookup_offset_idle,
+    g_angle_to_orientation[unit->orientation]);
   id = (KKND::MobdPoint *)unit->entity->anim_current_frame->points[0].id;
   if ( id )
   {
@@ -68192,8 +67023,8 @@ LABEL_15:
     goto LABEL_15;
   }
   if ( unit->player_num == g_player_num )
-    TASK_send_message(unit->task, TaskMessage_AdvanceConstructionStage, unit, g_game_update_loop_task);
-  entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, 0);
+    TSK_send_message(unit->task, TaskMessage_AdvanceConstructionStage, unit, g_game_update_loop_task);
+  entity_anim_init_directional(unit->entity, unit->stats->mobd_lookup_offset_attack, 0);
   unit->mode = unit_mode_tower_4474E0_on_advance_construction;
   ((void (__thiscall *)(KKND::Unit *))unit->mode)(unit);
 }
@@ -68230,8 +67061,8 @@ void __fastcall unit_mode_tower_on_death(KKND::Unit *unit)
   task = unit->task;
   unit->destroyed = 1;
   unit->unit_id = 0;
-  TASK_send_message(task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
-  TASK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
+  TSK_send_message(task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
+  TSK_broadcast_message(unit->task, TaskMessage_UnitDeselected, unit, TaskChannel_UnitLifecycle);
   unit->task->channel = TaskChannel_None;
   v5 = unit->task;
   unit->mode = unit_mode_tower_finalize;
@@ -68289,7 +67120,7 @@ void __fastcall MessageHandler_Tower(
           {
             unit->order_target = (KKND::Unit *)payload;
             unit->order_target_id = *((_DWORD *)payload + 76);
-            TASK_send_message(unit->task, TaskMessage_AttackOrder, nullptr, turret->task);
+            TSK_send_message(unit->task, TaskMessage_AttackOrder, nullptr, turret->task);
           }
         }
         break;
@@ -68317,20 +67148,20 @@ void __fastcall MessageHandler_Tower(
         {
           if ( payload == (void *)1 )
           {
-            entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, 1);
+            entity_anim_init_directional(unit->entity, unit->stats->mobd_lookup_offset_attack, 1);
           }
           else if ( payload == (void *)BuildingConstructionStage_2 )
           {
-            entity_anim_start(unit->entity, unit->stats->mobd_lookup_offset_attack, 2);
+            entity_anim_init_directional(unit->entity, unit->stats->mobd_lookup_offset_attack, 2);
           }
           else if ( payload == (void *)BuildingConstructionStage_Complete )
           {
-            entity_anim_start(
+            entity_anim_init_directional(
               unit->entity,
               unit->stats->mobd_lookup_offset_idle,
               g_angle_to_orientation[unit->orientation]);
             tower_turret_init(unit);
-            TASK_broadcast_message(unit->task, TaskMessage_TowerReady, nullptr, TaskChannel_unused_tanker_broadcast);
+            TSK_broadcast_message(unit->task, TaskMessage_TowerReady, nullptr, TaskChannel_unused_tanker_broadcast);
             unit->mode = unit_mode_tower_4474D0_on_completed;
           }
         }
@@ -68384,7 +67215,7 @@ void __fastcall unit_tower_on_attack_order(KKND::Unit *unit, void *a2)
             g_diplomacy.is_ally[unit->player_num][*(_DWORD *)(*((_DWORD *)a2 + 1) + 20)] = 0;
           }
         }
-        TASK_send_message(unit->task, TaskMessage_AttackOrder, nullptr, unit->turret->task);
+        TSK_send_message(unit->task, TaskMessage_AttackOrder, nullptr, unit->turret->task);
       }
     }
   }
@@ -68577,8 +67408,8 @@ BOOL __fastcall sub_4479F0(KKND::Turret *this)
       v8 = v18;
     }
   }
-  v20 = g_aircraft_list_head;
-  if ( g_aircraft_list_head == (KKND::Aircraft *)&g_aircraft_list_head )
+  v20 = g_aircraft_head;
+  if ( g_aircraft_head == (KKND::Aircraft *)&g_aircraft_head )
     return 0;
   while ( 1 )
   {
@@ -68603,7 +67434,7 @@ BOOL __fastcall sub_4479F0(KKND::Turret *this)
       }
     }
     v20 = v20->next;
-    if ( v20 == (KKND::Aircraft *)&g_aircraft_list_head )
+    if ( v20 == (KKND::Aircraft *)&g_aircraft_head )
       return 0;
   }
   this->target = v20->unit;
@@ -68623,7 +67454,10 @@ void __fastcall turret_mode_447C40(KKND::Turret *turret)
   current_mobd_frame = turret->current_mobd_frame;
   attachment = turret->attachment;
   turret->target_unit_id = 0;
-  entity_anim_start(turret->entity, attachment->mobd_lookup_offset_idle, g_angle_to_orientation[current_mobd_frame]);
+  entity_anim_init_directional(
+    turret->entity,
+    attachment->mobd_lookup_offset_idle,
+    g_angle_to_orientation[current_mobd_frame]);
   if ( sub_4479F0(turret) )
   {
     task = turret->task;
@@ -68657,7 +67491,7 @@ void __fastcall turret_mode_attack_target(KKND::Turret *turret)
   turret->mode = turret_mode_attack_target;
   v5 = vec2_orientation(target->entity->x - entity->x, target->entity->y - entity->y);
   entity_anim_advance_rotation(&turret->current_mobd_frame, v5, turret->attachment->rotation_speed);
-  entity_anim_start(
+  entity_anim_init_directional(
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[turret->current_mobd_frame]);
@@ -68675,9 +67509,9 @@ void __fastcall turret_mode_attack_target(KKND::Turret *turret)
     attachment = turret->attachment;
     v10 = g_angle_to_orientation[turret->current_mobd_frame];
     if ( turret->owner->type == UnitType_Mute_RotaryCannon )
-      entity_anim_start(turret->entity, attachment->mobd_lookup_offset_attack, v10);
+      entity_anim_init_directional(turret->entity, attachment->mobd_lookup_offset_attack, v10);
     else
-      entity_anim_start(turret->entity, attachment->mobd_lookup_offset_idle, v10);
+      entity_anim_init_directional(turret->entity, attachment->mobd_lookup_offset_idle, v10);
     turret->mode = turret_mode_447E20;
   }
   else
@@ -68696,9 +67530,9 @@ void __fastcall turret_mode_447DD0(KKND::Turret *turret)
   attachment = turret->attachment;
   v3 = g_angle_to_orientation[turret->current_mobd_frame];
   if ( turret->owner->type == UnitType_Mute_RotaryCannon )
-    entity_anim_start(turret->entity, attachment->mobd_lookup_offset_attack, v3);
+    entity_anim_init_directional(turret->entity, attachment->mobd_lookup_offset_attack, v3);
   else
-    entity_anim_start(turret->entity, attachment->mobd_lookup_offset_idle, v3);
+    entity_anim_init_directional(turret->entity, attachment->mobd_lookup_offset_idle, v3);
   turret->mode = turret_mode_447E20;
 }
 
@@ -68734,12 +67568,12 @@ void __fastcall turret_mode_447E20(KKND::Turret *turret)
       owner = turret->owner;
       turret->current_mobd_frame = v6;
       if ( owner->type == UnitType_Mute_RotaryCannon )
-        entity_anim_switch_direction(
+        entity_anim_change_direction(
           turret->entity,
           turret->attachment->mobd_lookup_offset_attack,
           g_angle_to_orientation[v6]);
       else
-        entity_anim_switch_direction(
+        entity_anim_change_direction(
           turret->entity,
           turret->attachment->mobd_lookup_offset_idle,
           g_angle_to_orientation[v6]);
@@ -68747,7 +67581,7 @@ void __fastcall turret_mode_447E20(KKND::Turret *turret)
       {
         type = turret->owner->type;
         if ( type != UnitType_Surv_MissileBattery && type != UnitType_Mute_RotaryCannon )
-          entity_anim_start(
+          entity_anim_init_directional(
             turret->entity,
             turret->attachment->mobd_lookup_offset_attack,
             g_angle_to_orientation[turret->current_mobd_frame]);
@@ -68775,7 +67609,10 @@ unsigned int __thiscall sub_447F50(int *this)
 
   v2 = *(_DWORD *)(*(this + 2) + 16);
   if ( v2 != 56 && v2 != 57 )
-    entity_anim_start((KKND::Entity *)*(this + 1), *(_DWORD *)(*(this + 10) + 28), g_angle_to_orientation[*(this + 5)]);
+    entity_anim_init_directional(
+      (KKND::Entity *)*(this + 1),
+      *(_DWORD *)(*(this + 10) + 28),
+      g_angle_to_orientation[*(this + 5)]);
   *(this + 4) = (int)turret_mode_447FA0;
   v3 = *this;
   result = *(_DWORD *)(v3 + 36) & 0xEFFFFFFF;
@@ -68811,7 +67648,7 @@ void __fastcall turret_mode_447FA0(KKND::Turret *a1)
     mobd_lookup_offset_travel = projectile_type->mobd_lookup_offset_travel;
     v5 = v3;
     if ( mobd_lookup_offset_travel != -1 )
-      entity_anim_start(v3, mobd_lookup_offset_travel, g_angle_to_orientation[a1->current_mobd_frame]);
+      entity_anim_init_directional(v3, mobd_lookup_offset_travel, g_angle_to_orientation[a1->current_mobd_frame]);
     task = v5->task;
     z = a1->entity->z;
     v5->ctx = projectile_type;
@@ -68826,7 +67663,7 @@ void __fastcall turret_mode_447FA0(KKND::Turret *a1)
     v5->building_damage = LOWORD(projectile_type->damage_building)
                         + ((projectile_type->damage_building * g_veterancy_damage_mod[a1->owner->veterancy]) >> 8);
     v5->parent = a1->entity->parent;
-    TASK_send_message(a1->owner->task, TaskMessage_Attacked, a1->owner, a1->target->task);
+    TSK_send_message(a1->owner->task, TaskMessage_Attacked, a1->owner, a1->target->task);
   }
   attachment = a1->attachment;
   v9 = a1->volley_remaining - 1;
@@ -68901,15 +67738,18 @@ void __fastcall turret_mode_448160(KKND::Turret *turret)
     owner = turret->owner;
     turret->current_mobd_frame = v4;
     if ( owner->type != UnitType_Mute_RotaryCannon )
-      entity_anim_start(turret->entity, turret->attachment->mobd_lookup_offset_idle, g_angle_to_orientation[v4]);
+      entity_anim_init_directional(
+        turret->entity,
+        turret->attachment->mobd_lookup_offset_idle,
+        g_angle_to_orientation[v4]);
     if ( !turret->reload_timer )
     {
       attachment = turret->attachment;
       v7 = g_angle_to_orientation[turret->current_mobd_frame];
       if ( turret->owner->type == UnitType_Mute_RotaryCannon )
-        entity_anim_start(turret->entity, attachment->mobd_lookup_offset_attack, v7);
+        entity_anim_init_directional(turret->entity, attachment->mobd_lookup_offset_attack, v7);
       else
-        entity_anim_start(turret->entity, attachment->mobd_lookup_offset_idle, v7);
+        entity_anim_init_directional(turret->entity, attachment->mobd_lookup_offset_idle, v7);
       turret->mode = turret_mode_447E20;
     }
   }
@@ -68925,7 +67765,10 @@ void __fastcall turret_mode_448230(KKND::Turret *turret)
   KKND::Unit *target; // eax
   BOOL v3; // eax
 
-  entity_anim_start(turret->entity, turret->attachment->mobd_lookup_offset_attack, g_angle_to_orientation[128]);
+  entity_anim_init_directional(
+    turret->entity,
+    turret->attachment->mobd_lookup_offset_attack,
+    g_angle_to_orientation[128]);
   TASK_yield(turret->task, Task_Yield_10000000, 0);
   target = turret->target;
   if ( target )
@@ -68946,7 +67789,10 @@ void __fastcall turret_mode_448290(KKND::Turret *a1)
   p_current_mobd_frame = &a1->current_mobd_frame;
   if ( !entity_anim_advance_rotation(&a1->current_mobd_frame, MobdOrientation_SW, a1->attachment->rotation_speed) )
     a1->mode = turret_mode_448230;
-  entity_anim_start(a1->entity, a1->attachment->mobd_lookup_offset_idle, g_angle_to_orientation[*p_current_mobd_frame]);
+  entity_anim_init_directional(
+    a1->entity,
+    a1->attachment->mobd_lookup_offset_idle,
+    g_angle_to_orientation[*p_current_mobd_frame]);
 }
 
 //----- (004482D0) --------------------------------------------------------
@@ -68954,7 +67800,7 @@ void __fastcall turret_mode_4482D0_missile_battery(KKND::Turret *turret)
 {
   KKND::Task *task; // eax
 
-  entity_anim_start(
+  entity_anim_init_directional(
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[turret->current_mobd_frame]);
@@ -68984,34 +67830,34 @@ void __fastcall MessageHandler_TowerTurret(
 }
 
 //----- (00448360) --------------------------------------------------------
-KKND::MapdRenderNode *__fastcall sub_448360(int a1, _DWORD *a2)
+KKND::MapdRenderNode *__fastcall MAPD_render_shroud(void *_, KKND::RenderNode *n)
 {
   KKND::MapdRenderNode *result; // eax
 
-  result = node[0];
-  if ( node[0] )
+  result = dword_47A010[0];
+  if ( dword_47A010[0] )
   {
-    a2[9] = node[0]->job->cmd.x;
-    result = (KKND::MapdRenderNode *)node[0]->job->cmd.y;
-    a2[10] = result;
+    n->cmd.x = dword_47A010[0]->job->cmd.x;
+    result = (KKND::MapdRenderNode *)dword_47A010[0]->job->cmd.y;
+    n->cmd.y = (int)result;
   }
-  a2[11] = 0xFFFFF;
+  n->cmd.z = 0xFFFFF;
   return result;
 }
 
 //----- (00448390) --------------------------------------------------------
-KKND::MapdRenderNode *__fastcall sub_448390(int a1, _DWORD *a2)
+KKND::MapdRenderNode *__fastcall MAPD_448390(int a1, KKND::RenderNode *n)
 {
   KKND::MapdRenderNode *result; // eax
 
-  result = node[0];
-  if ( node[0] )
+  result = dword_47A010[0];
+  if ( dword_47A010[0] )
   {
-    a2[9] = node[0]->job->cmd.x - 2 * g_fog_of_war_scrl->tile_x_size;
-    result = (KKND::MapdRenderNode *)(node[0]->job->cmd.y - 2 * g_fog_of_war_scrl->tile_y_size);
-    a2[10] = result;
+    n->cmd.x = dword_47A010[0]->job->cmd.x - 2 * g_shroud->tile_x_size;
+    result = (KKND::MapdRenderNode *)(dword_47A010[0]->job->cmd.y - 2 * g_shroud->tile_y_size);
+    n->cmd.y = (int)result;
   }
-  a2[11] = 0x10000000;
+  n->cmd.z = 0x10000000;
   return result;
 }
 
@@ -69283,7 +68129,7 @@ BOOL __fastcall sub_4488F0(KKND::Unit *a, KKND::Unit *b, int a3)
 //----- (00448980) --------------------------------------------------------
 void __fastcall sub_448980(KKND::Turret *turret)
 {
-  entity_anim_start(
+  entity_anim_init_directional(
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[turret->current_mobd_frame]);
@@ -69336,7 +68182,7 @@ LABEL_9:
            *(_DWORD *)(*(_DWORD *)(v7 + 92) + 16) - *(_DWORD *)(v8 + 16),
            *(_DWORD *)(*(_DWORD *)(v7 + 92) + 20) - *(_DWORD *)(v8 + 20));
     entity_anim_advance_rotation((ptrdiff_t *)(this + 20), v9, *(_DWORD *)(*(_DWORD *)(this + 40) + 8));
-    entity_anim_start(
+    entity_anim_init_directional(
       *(KKND::Entity **)(this + 4),
       *(_DWORD *)(*(_DWORD *)(this + 40) + 24),
       g_angle_to_orientation[*(_DWORD *)(this + 20)]);
@@ -69345,7 +68191,7 @@ LABEL_9:
       vec2_orientation(
         *(_DWORD *)(*(_DWORD *)(*(_DWORD *)(this + 12) + 92) + 16) - *(_DWORD *)(*(_DWORD *)(this + 4) + 16),
         *(_DWORD *)(*(_DWORD *)(*(_DWORD *)(this + 12) + 92) + 20) - *(_DWORD *)(*(_DWORD *)(this + 4) + 20));
-      entity_anim_start(
+      entity_anim_init_directional(
         *(KKND::Entity **)(this + 4),
         *(_DWORD *)(*(_DWORD *)(this + 40) + 28),
         g_angle_to_orientation[*(_DWORD *)(this + 20)]);
@@ -69361,7 +68207,7 @@ LABEL_9:
   {
     v12 = *(_DWORD *)(this + 40);
     *(_DWORD *)(this + 20) = v13;
-    entity_anim_switch_direction(*(KKND::Entity **)(this + 4), *(_DWORD *)(v12 + 24), g_angle_to_orientation[v11]);
+    entity_anim_change_direction(*(KKND::Entity **)(this + 4), *(_DWORD *)(v12 + 24), g_angle_to_orientation[v11]);
   }
 }
 
@@ -69379,7 +68225,7 @@ void __thiscall sub_448B40(int this)
          *(_DWORD *)(*(_DWORD *)(v2 + 92) + 16) - *(_DWORD *)(v3 + 16),
          *(_DWORD *)(*(_DWORD *)(v2 + 92) + 20) - *(_DWORD *)(v3 + 20));
   entity_anim_advance_rotation((ptrdiff_t *)(this + 20), v4, *(_DWORD *)(*(_DWORD *)(this + 40) + 8));
-  entity_anim_start(
+  entity_anim_init_directional(
     *(KKND::Entity **)(this + 4),
     *(_DWORD *)(*(_DWORD *)(this + 40) + 24),
     g_angle_to_orientation[*(_DWORD *)(this + 20)]);
@@ -69388,7 +68234,7 @@ void __thiscall sub_448B40(int this)
     vec2_orientation(
       *(_DWORD *)(*(_DWORD *)(*(_DWORD *)(this + 12) + 92) + 16) - *(_DWORD *)(*(_DWORD *)(this + 4) + 16),
       *(_DWORD *)(*(_DWORD *)(*(_DWORD *)(this + 12) + 92) + 20) - *(_DWORD *)(*(_DWORD *)(this + 4) + 20));
-    entity_anim_start(
+    entity_anim_init_directional(
       *(KKND::Entity **)(this + 4),
       *(_DWORD *)(*(_DWORD *)(this + 40) + 28),
       g_angle_to_orientation[*(_DWORD *)(this + 20)]);
@@ -69402,7 +68248,7 @@ void __thiscall sub_448BF0(int this)
   vec2_orientation(
     *(_DWORD *)(*(_DWORD *)(*(_DWORD *)(this + 12) + 92) + 16) - *(_DWORD *)(*(_DWORD *)(this + 4) + 16),
     *(_DWORD *)(*(_DWORD *)(*(_DWORD *)(this + 12) + 92) + 20) - *(_DWORD *)(*(_DWORD *)(this + 4) + 20));
-  entity_anim_start(
+  entity_anim_init_directional(
     *(KKND::Entity **)(this + 4),
     *(_DWORD *)(*(_DWORD *)(this + 40) + 28),
     g_angle_to_orientation[*(_DWORD *)(this + 20)]);
@@ -69435,7 +68281,7 @@ void __thiscall sub_448C40(int this)
            *(_DWORD *)(*(_DWORD *)(*(_DWORD *)(this + 12) + 92) + 20) - *(_DWORD *)(*(_DWORD *)(this + 4) + 20));
     v3 = *(KKND::Entity **)(this + 4);
     *(_DWORD *)(this + 20) = v2;
-    entity_anim_switch_direction(v3, *(_DWORD *)(*(_DWORD *)(this + 40) + 28), g_angle_to_orientation[v2]);
+    entity_anim_change_direction(v3, *(_DWORD *)(*(_DWORD *)(this + 40) + 28), g_angle_to_orientation[v2]);
     v4 = *(_DWORD *)(*(_DWORD *)(this + 40) + 32);
     if ( v4 && g_num_active_projectiles < 200 && !*(_DWORD *)(this + 24) )
     {
@@ -69449,7 +68295,7 @@ void __thiscall sub_448C40(int this)
       v6 = *(_DWORD *)(v4 + 8);
       v7 = v5;
       if ( v6 != -1 )
-        entity_anim_start(v5, v6, g_angle_to_orientation[*(_DWORD *)(this + 20)]);
+        entity_anim_init_directional(v5, v6, g_angle_to_orientation[*(_DWORD *)(this + 20)]);
       task = v7->task;
       v9 = *(_DWORD *)(*(_DWORD *)(this + 4) + 24);
       v7->ctx = (void *)v4;
@@ -69464,7 +68310,7 @@ void __thiscall sub_448C40(int this)
       v7->building_damage = *(_WORD *)(v4 + 28)
                           + ((*(_DWORD *)(v4 + 28) * g_veterancy_damage_mod[*(_DWORD *)(*(_DWORD *)(this + 8) + 152)]) >> 8);
       v7->parent = *(KKND::Entity **)(*(_DWORD *)(this + 4) + 8);
-      TASK_send_message(
+      TSK_send_message(
         *(KKND::Task **)(*(_DWORD *)(this + 8) + 12),
         TaskMessage_Attacked,
         *(void **)(this + 8),
@@ -69498,7 +68344,7 @@ void __thiscall sub_448C40(int this)
   }
   else
   {
-    entity_anim_start(
+    entity_anim_init_directional(
       *(KKND::Entity **)(this + 4),
       *(_DWORD *)(*(_DWORD *)(this + 40) + 24),
       g_angle_to_orientation[*(_DWORD *)(this + 20)]);
@@ -69761,7 +68607,7 @@ void __cdecl sub_448F30(KKND::Task *sender)
       do
       {
         if ( v18[2]->message_handler )
-          TASK_send_message(ctx[5], TaskMessage_MoveOrder, ctx + 10, v18[2]);
+          TSK_send_message(ctx[5], TaskMessage_MoveOrder, ctx + 10, v18[2]);
         v18 = (KKND::Task **)*v18;
       }
       while ( v18 != ctx );
@@ -69778,7 +68624,7 @@ void __cdecl sub_448F30(KKND::Task *sender)
       do
       {
         if ( *(KKND::TaskLocal **)((char *)&v20->locals[5].prev + 3) )
-          TASK_send_message(ctx[5], TaskMessage_AttackOrder, ctx + 8, (KKND::Task *)v20->locals);
+          TSK_send_message(ctx[5], TaskMessage_AttackOrder, ctx + 8, (KKND::Task *)v20->locals);
         v20 = v20->next;
       }
       while ( v20 != (KKND::Task *)ctx );
@@ -69788,7 +68634,7 @@ void __cdecl sub_448F30(KKND::Task *sender)
       v21 = sub_44CA30(*(void **)v2->payload);
       if ( !v21 )
         goto LABEL_95;
-      TASK_send_message(sender, TaskMessage_UnitReady, *(void **)&v2->payload[4], v21->task);
+      TSK_send_message(sender, TaskMessage_UnitReady, *(void **)&v2->payload[4], v21->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_BuildingPlaced:
@@ -69806,21 +68652,21 @@ void __cdecl sub_448F30(KKND::Task *sender)
       return;
     case GameEvent_MobileBaseDeployed:
       v22 = sub_44CA30(*(void **)&v2->payload[4]);
-      TASK_send_message(sender, TaskMessage_BuildingPlacementModeBegin, nullptr, v22->task);
+      TSK_send_message(sender, TaskMessage_BuildingPlacementModeBegin, nullptr, v22->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_BuildingConstructionProgressed:
       v23 = sub_44CA30(*(void **)v2->payload);
       if ( !v23 )
         goto LABEL_95;
-      TASK_send_message(sender, TaskMessage_AdvanceConstructionStage, *(void **)&v2->payload[4], v23->task);
+      TSK_send_message(sender, TaskMessage_AdvanceConstructionStage, *(void **)&v2->payload[4], v23->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_UpgradeCompleted:
       v24 = sub_44CA30(*(void **)v2->payload);
       if ( !v24 )
         goto LABEL_95;
-      TASK_send_message(sender, TaskMessage_UpgradeComplete, nullptr, v24->task);
+      TSK_send_message(sender, TaskMessage_UpgradeComplete, nullptr, v24->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_RepairBayHealTick:
@@ -69878,31 +68724,31 @@ void __cdecl sub_448F30(KKND::Task *sender)
     case GameEvent_TankerAssignedToDrillrig:
       v33 = sub_44CA30(*(void **)&v2->payload[4]);
       v34 = sub_44CA30(*(void **)v2->payload);
-      TASK_send_message(sender, TaskMessage_TankerAssignedNewDrillrig, v33, v34->task);
+      TSK_send_message(sender, TaskMessage_TankerAssignedNewDrillrig, v33, v34->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_TankerAssignedToPowerPlant:
       v35 = sub_44CA30(*(void **)&v2->payload[4]);
       v36 = sub_44CA30(*(void **)v2->payload);
-      TASK_send_message(sender, TaskMessage_TankerAssignedNewPowerPlant, v35, v36->task);
+      TSK_send_message(sender, TaskMessage_TankerAssignedNewPowerPlant, v35, v36->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_RepairBayAssigned:
       v41 = sub_44CA30(*(void **)&v2->payload[4]);
       v42 = sub_44CA30(*(void **)v2->payload);
-      TASK_send_message(sender, TaskMessage_RepairBayAssigned, v41, v42->task);
+      TSK_send_message(sender, TaskMessage_RepairBayAssigned, v41, v42->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_TechnicianAssigned:
       v39 = sub_44CA30(*(void **)&v2->payload[4]);
       v40 = sub_44CA30(*(void **)v2->payload);
-      TASK_send_message(sender, TaskMessage_TechnicianAssigned, v39, v40->task);
+      TSK_send_message(sender, TaskMessage_TechnicianAssigned, v39, v40->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_InfiltratorAssigned:
       v37 = sub_44CA30(*(void **)&v2->payload[4]);
       v38 = sub_44CA30(*(void **)v2->payload);
-      TASK_send_message(sender, TaskMessage_Infiltrate, v37, v38->task);
+      TSK_send_message(sender, TaskMessage_Infiltrate, v37, v38->task);
       v2->type = GameEvent_None;
       return;
     case GameEvent_AirstrikeCalled:
@@ -69924,7 +68770,7 @@ void __cdecl sub_448F30(KKND::Task *sender)
     case GameEvent_BuildingSold:
       v44 = sub_44CA30(*(void **)v2->payload);
       if ( v44 )
-        TASK_send_message(sender, TaskMessage_Destroy, nullptr, v44->task);
+        TSK_send_message(sender, TaskMessage_Destroy, nullptr, v44->task);
       goto LABEL_95;
     case GameEvent_SwearAllegiance:
       v31 = g_player_num;
@@ -70034,7 +68880,7 @@ void sub_449800()
   do
   {
     if ( *v0 )
-      task_445310(*v0);
+      TASK_terminate(*v0);
     ++v0;
   }
   while ( (int)v0 < (int)&dword_47CB0C );
@@ -70761,13 +69607,13 @@ void __cdecl __noreturn sub_44A500(KKND::Task *task)
   {
     v1 = task;
     TASK_yield(task, Task_Yield, 1);
-    for ( i = TASK_pop_message(task); i; i = TASK_pop_message(v1) )
+    for ( i = TSK_pop_message(task); i; i = TSK_pop_message(v1) )
     {
       if ( i->type == TaskMessage_UnitSelected )
       {
-        p_cmd = &node[0]->job->cmd;
+        p_cmd = &dword_47A010[0]->job->cmd;
         INPUT_get_mouse_state(&state);
-        g_minimap_entity->is_on_collision_grid = 1;
+        g_minimap_entity->is_collidable = 1;
         v4 = 16 * (state.cursor_x - g_minimap_entity->x) - (g_screen_width << 7);
         v5 = 16 * (state.cursor_y - g_minimap_entity->y) - (g_screen_height << 7);
         if ( v4 >= 0 )
@@ -70792,7 +69638,7 @@ void __cdecl __noreturn sub_44A500(KKND::Task *task)
         v1 = task;
         g_mapd_camera.y = v5;
       }
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     dword_47CB68 = g_mapd_camera.x >> 12;
     dword_47CB6C = g_mapd_camera.y >> 12;
@@ -70827,9 +69673,9 @@ KKND::Entity *__fastcall sub_44A6B0(int a1, int a2)
 {
   KKND::Entity *result; // eax
 
-  g_minimap_entity->is_on_collision_grid = 1;
+  g_minimap_entity->is_collidable = 1;
   g_minimap_entity->x = (a1 - g_minimap_width - 4) << 8;
-  g_minimap_entity->is_on_collision_grid = 1;
+  g_minimap_entity->is_collidable = 1;
   result = g_minimap_entity;
   g_minimap_entity->y = a2 << 8;
   return result;
@@ -70849,11 +69695,11 @@ KKND::Entity *__thiscall sub_44A700(KKND::Task *this)
     result = g_minimap_entity;
     if ( g_minimap_entity )
     {
-      TASK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, v3->task);
-      TASK_send_message(nullptr, TaskMessage_MouseHover, nullptr, v3->task);
+      TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, v3->task);
+      TSK_send_message(nullptr, TaskMessage_MouseHover, nullptr, v3->task);
       TASK_yield(this, Task_Sleep, 1);
-      TASK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, v3->task);
-      return (KKND::Entity *)TASK_send_message(nullptr, TaskMessage_MouseHover, nullptr, v3->task);
+      TSK_send_message(nullptr, TaskMessage_UnitDeselected, nullptr, v3->task);
+      return (KKND::Entity *)TSK_send_message(nullptr, TaskMessage_MouseHover, nullptr, v3->task);
     }
   }
   return result;
@@ -70986,43 +69832,43 @@ BOOL minimap_init()
     g_fog_of_war = (KKND::MapdRenderNode *)result;
     if ( result )
     {
-      *(_DWORD *)(*(_DWORD *)(result + 8) + 16) = sub_448390;
-      g_fog_of_war_scrl_2 = (KKND::MapdScrlImage *)g_fog_of_war->job->cmd.image;
+      *(_DWORD *)(*(_DWORD *)(result + 8) + 16) = MAPD_448390;
+      g_shroud_backup = (KKND::MapdScrlImage *)g_fog_of_war->job->cmd.image;
       g_fog_of_war_num_tiles_x = g_map_num_tiles_x + 4;
       g_fog_of_war_num_tiles_y = g_map_num_tiles_y + 4;
       result = (BOOL)malloc(4 * (g_map_num_tiles_x + 4) * (g_map_num_tiles_y + 4) + 20);
-      g_fog_of_war_scrl = (KKND::MapdScrlImage *)result;
+      g_shroud = (KKND::MapdScrlImage *)result;
       if ( result )
       {
-        *(_DWORD *)result = g_fog_of_war_scrl_2->renderer;
-        g_fog_of_war_scrl->tile_x_size = g_fog_of_war_scrl_2->tile_x_size;
-        g_fog_of_war_scrl->tile_y_size = g_fog_of_war_scrl_2->tile_y_size;
-        g_fog_of_war_scrl->num_x_tiles = g_fog_of_war_num_tiles_x;
-        g_fog_of_war_scrl->num_y_tiles = g_fog_of_war_num_tiles_y;
-        g_fog_of_war_tile0 = (KKND::MapdScrlImageTile *)g_fog_of_war_scrl->tiles;
+        *(_DWORD *)result = g_shroud_backup->renderer;
+        g_shroud->tile_x_size = g_shroud_backup->tile_x_size;
+        g_shroud->tile_y_size = g_shroud_backup->tile_y_size;
+        g_shroud->num_x_tiles = g_fog_of_war_num_tiles_x;
+        g_shroud->num_y_tiles = g_fog_of_war_num_tiles_y;
+        g_fog_of_war_tile0 = (KKND::MapdScrlImageTile *)g_shroud->tiles;
         dword_47CFC0 = 0;
-        g_fog_of_war_tile1 = g_fog_of_war_scrl_2->tiles[1];
-        g_fog_of_war_tile2 = g_fog_of_war_scrl_2->tiles[2];
-        g_fog_of_war_tile3 = g_fog_of_war_scrl_2->tiles[3];
-        g_fog_of_war_tile4 = g_fog_of_war_scrl_2->tiles[4];
-        g_fog_of_war_tile5 = g_fog_of_war_scrl_2->tiles[5];
-        g_fog_of_war_tile6 = g_fog_of_war_scrl_2->tiles[6];
-        g_fog_of_war_tile7 = g_fog_of_war_scrl_2->tiles[7];
-        g_fog_of_war_tile8 = g_fog_of_war_scrl_2->tiles[8];
-        g_fog_of_war_tile9 = g_fog_of_war_scrl_2->tiles[9];
-        g_fog_of_war_tile10 = g_fog_of_war_scrl_2->tiles[10];
-        g_fog_of_war_tile11 = g_fog_of_war_scrl_2->tiles[11];
-        g_fog_of_war_tile12 = g_fog_of_war_scrl_2->tiles[12];
-        g_fog_of_war_tile13 = g_fog_of_war_scrl_2->tiles[13];
-        g_fog_of_war_tile14 = g_fog_of_war_scrl_2->tiles[14];
+        g_fog_of_war_tile1 = g_shroud_backup->tiles[1];
+        g_fog_of_war_tile2 = g_shroud_backup->tiles[2];
+        g_fog_of_war_tile3 = g_shroud_backup->tiles[3];
+        g_fog_of_war_tile4 = g_shroud_backup->tiles[4];
+        g_fog_of_war_tile5 = g_shroud_backup->tiles[5];
+        g_fog_of_war_tile6 = g_shroud_backup->tiles[6];
+        g_fog_of_war_tile7 = g_shroud_backup->tiles[7];
+        g_fog_of_war_tile8 = g_shroud_backup->tiles[8];
+        g_fog_of_war_tile9 = g_shroud_backup->tiles[9];
+        g_fog_of_war_tile10 = g_shroud_backup->tiles[10];
+        g_fog_of_war_tile11 = g_shroud_backup->tiles[11];
+        g_fog_of_war_tile12 = g_shroud_backup->tiles[12];
+        g_fog_of_war_tile13 = g_shroud_backup->tiles[13];
+        g_fog_of_war_tile14 = g_shroud_backup->tiles[14];
         v2 = 0;
-        for ( g_fog_of_war_tile15 = g_fog_of_war_scrl_2->tiles[15];
+        for ( g_fog_of_war_tile15 = g_shroud_backup->tiles[15];
               v2 < g_fog_of_war_num_tiles_x * g_fog_of_war_num_tiles_y;
               ++v2 )
         {
           *(&g_fog_of_war_tile0->flags + v2) = (int)g_fog_of_war_tile1;
         }
-        g_fog_of_war->job->cmd.image = g_fog_of_war_scrl;
+        g_fog_of_war->job->cmd.image = g_shroud;
         LOBYTE(dword_47CB4C) = g_fog_of_war_tile1->pixels[0];
         g_minimap_width = 2 * g_map_num_tiles_x;
         v3 = 2 * g_map_num_tiles_x * 2 * g_map_num_tiles_y;
@@ -71322,7 +70168,7 @@ int sub_44AE30()
           result = j->player_num;
           if ( result == g_player_num )
           {
-            j->entity->is_on_collision_grid = 1;
+            j->entity->is_collidable = 1;
             entity = j->entity;
             v10 = 2 * (entity->x >> 13);
             result = 2 * (entity->y >> 13);
@@ -71359,7 +70205,7 @@ int sub_44AE30()
           result = k->player_num;
           if ( result )
           {
-            k->entity->is_on_collision_grid = 1;
+            k->entity->is_collidable = 1;
             v14 = k->entity;
             v15 = 2 * (v14->x >> 13);
             result = 2 * (v14->y >> 13);
@@ -71556,7 +70402,7 @@ int __fastcall unit_reveal_fog_of_war(KKND::Unit *unit)
   result = unit->player_num;
   if ( result == g_player_num )
   {
-    unit->entity->is_on_collision_grid = 1;
+    unit->entity->is_collidable = 1;
     entity = unit->entity;
     view_range = unit->stats->view_range;
     v4 = 2 * (entity->x >> 13);
@@ -72172,7 +71018,7 @@ void sub_44BC00()
   free(dword_47CB8C);
   free(g_minimap_unrevealed_pixels);
   free(g_minimap_revealed_pixels);
-  free(g_fog_of_war_scrl);
+  free(g_shroud);
 }
 
 //----- (0044BC80) --------------------------------------------------------
@@ -72193,9 +71039,9 @@ int __fastcall sub_44BC80(int a1, int a2, int a3, int a4)
   int v17; // [esp+1Ch] [ebp+8h]
 
   v5 = a1 - 2;
-  image = node[0]->job->cmd.image;
+  image = dword_47A010[0]->job->cmd.image;
   v7 = a2 + 2;
-  v8 = node[1]->job->cmd.image;
+  v8 = dword_47A010[1]->job->cmd.image;
   result = a3 - 2;
   v15 = v8;
   v10 = a3 - 2 < 0;
@@ -72235,49 +71081,45 @@ int __fastcall sub_44BC80(int a1, int a2, int a3, int a4)
 }
 
 //----- (0044BD50) --------------------------------------------------------
-int sub_44BD50()
+void MAPD_enable_tile_blending()
 {
-  int v0; // ebx
-  _DWORD *image; // ecx
-  _DWORD *v2; // ebp
-  int result; // eax
-  int v4; // eax
-  _DWORD **v5; // esi
-  _DWORD **v6; // edi
-  int v7; // edx
+  int y; // ebx
+  KKND::MapdScrlImage *image1; // ecx
+  KKND::MapdScrlImage *image2; // ebp
+  int num_x_tiles; // eax
+  KKND::MapdScrlImageTile **v4; // esi
+  KKND::MapdScrlImageTile **v5; // edi
+  int v6; // edx
 
-  v0 = 0;
-  image = node[0]->job->cmd.image;
-  v2 = node[1]->job->cmd.image;
-  result = image[4];
-  if ( result > 0 )
+  y = 0;
+  image1 = (KKND::MapdScrlImage *)dword_47A010[0]->job->cmd.image;
+  image2 = (KKND::MapdScrlImage *)dword_47A010[1]->job->cmd.image;
+  if ( image1->num_y_tiles > 0 )
   {
     do
     {
-      v4 = image[3];
-      v5 = (_DWORD **)&image[v4 * v0 + 5];
-      v6 = (_DWORD **)&v2[v2[3] * v0 + 5];
-      v7 = 0;
-      if ( v4 > 0 )
+      num_x_tiles = image1->num_x_tiles;
+      v4 = &image1->tiles[num_x_tiles * y];
+      v5 = &image2->tiles[image2->num_x_tiles * y];
+      v6 = 0;
+      if ( num_x_tiles > 0 )
       {
         do
         {
+          if ( *v4 )
+            (*v4)->flags |= 2u;
           if ( *v5 )
-            **v5 |= 2u;
-          if ( *v6 )
-            **v6 |= 2u;
+            (*v5)->flags |= 2u;
+          ++v4;
           ++v5;
           ++v6;
-          ++v7;
         }
-        while ( v7 < image[3] );
+        while ( v6 < image1->num_x_tiles );
       }
-      result = image[4];
-      ++v0;
+      ++y;
     }
-    while ( v0 < result );
+    while ( y < image1->num_y_tiles );
   }
-  return result;
 }
 
 //----- (0044BDC0) --------------------------------------------------------
@@ -72319,11 +71161,11 @@ void __cdecl __noreturn task_explosion_1(KKND::Task *task)
   memset(v3, 0, sizeof(v3));
   if ( !entity->ctx )
     entity->ctx = v3;
-  entity_408800_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
   rend = entity->rend;
   entity->z = 0;
   rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_explosion;
-  entity_anim_load(entity, 144);
+  entity_anim_init(entity, 144);
   TASK_yield(task, Task_Yield_10000000, 0);
   explosion_finished();
   entity_remove(task->entity);
@@ -72338,7 +71180,7 @@ void __fastcall turret_mode_init(KKND::Turret *turret)
   KKND::Unit *owner; // edx
 
   p_current_mobd_frame = &turret->current_mobd_frame;
-  entity_anim_start(
+  entity_anim_init_directional(
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[turret->current_mobd_frame]);
@@ -72346,7 +71188,7 @@ void __fastcall turret_mode_init(KKND::Turret *turret)
   owner = turret->owner;
   turret->mode = turret_mode_idle;
   entity_anim_advance_rotation(p_current_mobd_frame, owner->orientation, attachment->rotation_speed);
-  entity_anim_switch_direction(
+  entity_anim_change_direction(
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[*p_current_mobd_frame]);
@@ -72363,7 +71205,7 @@ void __fastcall turret_mode_idle(KKND::Turret *turret)
     &turret->current_mobd_frame,
     turret->owner->orientation,
     turret->attachment->rotation_speed);
-  entity_anim_switch_direction(
+  entity_anim_change_direction(
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[*p_current_mobd_frame]);
@@ -72567,7 +71409,7 @@ int GAME_InitUnits()
   g_escort_pool = v2;
   if ( !v2 )
     return 0;
-  g_escort_free_list_head = v2;
+  g_escort_free_head = v2;
   for ( j = 0; j < 499; ++j )
   {
     v2[j].next = &v2[j + 1];
@@ -72579,7 +71421,7 @@ int GAME_InitUnits()
   g_escort_initialized = 1;
   g_show_message_ex = TASK_CreateFiber(TaskChannel_None, task_show_message_ex, 0);
   g_show_message = TASK_CreateFiber(TaskChannel_None, task_show_message, 0);
-  entity_render = render_state_handler_default;
+  entity_render = render_state_handler_entity_isometric;
   stat = (KKND::UnitStats *__shifted(KKND::UnitStats,0x44))&g_unit_stats[0].attachment;
   do
   {
@@ -72634,7 +71476,7 @@ LABEL_18:
             result = sub_411040();
             if ( result )
             {
-              result = scar_init();
+              result = SCAR_init();
               if ( result )
               {
                 if ( !GAME_construction_init() )
@@ -72665,7 +71507,7 @@ LABEL_18:
 // 47DCD0: using guessed type int g_num_towers;
 
 //----- (0044C430) --------------------------------------------------------
-void __fastcall render_state_handler_default(KKND::Entity *entity, KKND::RenderNode *node)
+void __fastcall render_state_handler_entity_isometric(KKND::Entity *entity, KKND::RenderNode *node)
 {
   KKND::MobdAnimFrame *anim_current_frame; // eax
 
@@ -72730,10 +71572,10 @@ int sub_44C4B0()
             turret->projectile_spawn_anchor = v8;
           else
             turret->projectile_spawn_anchor = (KKND::MobdPoint *)g_47DCD8_mobd_anchors;
-          i->turret->entity->is_on_collision_grid = 1;
-          i->entity->is_on_collision_grid = 1;
+          i->turret->entity->is_collidable = 1;
+          i->entity->is_collidable = 1;
           i->turret->entity->x = i->entity->x + p_mobd_anchors->turret->x;
-          i->turret->entity->is_on_collision_grid = 1;
+          i->turret->entity->is_collidable = 1;
           i->turret->entity->y = i->entity->y + p_mobd_anchors->turret->y;
         }
       }
@@ -72885,7 +71727,7 @@ LABEL_18:
   memset32(&v1->mobd_anchors, (int)&g_47DCD8_mobd_anchors, 6u);
   entity->rend->cmd.palette = g_tint_palettes_per_player[g_palette_idx_per_player[v1->player_num]];
   entity->rend->flags |= 0x10000000u;
-  TASK_broadcast_message(task, TaskMessage_UnitCreated, v1, TaskChannel_UnitLifecycle);
+  TSK_broadcast_message(task, TaskMessage_UnitCreated, v1, TaskChannel_UnitLifecycle);
   v12 = g_unit_list_head;
   v1->prev = (KKND::Unit *)&g_unit_list_head;
   v1->next = v12;
@@ -72937,7 +71779,7 @@ KKND::Entity *__fastcall entity_create_by_unit_type(KKND::UnitType type, int x, 
   if ( result )
   {
     result->x = x;
-    result->is_on_collision_grid = 1;
+    result->is_collidable = 1;
     result->y = y;
     result->cplc_meta = nullptr;
     result->ctx = (void *)(type | (player_num << 16));
@@ -73079,15 +71921,15 @@ KKND::Unit *__fastcall sub_44CA70(KKND::Unit *unit, KKND::UnitType type, int pla
 BOOL __fastcall show_message_unit(KKND::Unit *unit, const char *text)
 {
   if ( unit )
-    return TASK_send_message(unit->task, TaskMessage_UnitDeselected, (void *)text, g_show_message_ex);
+    return TSK_send_message(unit->task, TaskMessage_UnitDeselected, (void *)text, g_show_message_ex);
   else
-    return TASK_send_message(nullptr, TaskMessage_UnitDeselected, (void *)text, g_show_message_ex);
+    return TSK_send_message(nullptr, TaskMessage_UnitDeselected, (void *)text, g_show_message_ex);
 }
 
 //----- (0044CB40) --------------------------------------------------------
 BOOL __fastcall show_message(const char *text)
 {
-  return TASK_send_message(nullptr, TaskMessage_UnitDeselected, (void *)text, g_show_message);
+  return TSK_send_message(nullptr, TaskMessage_UnitDeselected, (void *)text, g_show_message);
 }
 
 //----- (0044CB60) --------------------------------------------------------
@@ -73168,7 +72010,7 @@ void __cdecl __noreturn show_message_ex(KKND::Task *task)
     if ( !v1 )
       TASK_yield(task, Task_Wait, 0);
     v1 = 0;
-    for ( i = (_DWORD *)TASK_pop_message(task); i; i = (_DWORD *)TASK_pop_message(task) )
+    for ( i = (_DWORD *)TSK_pop_message(task); i; i = (_DWORD *)TSK_pop_message(task) )
     {
       if ( i[2] == 1512 )
       {
@@ -73179,7 +72021,7 @@ void __cdecl __noreturn show_message_ex(KKND::Task *task)
         else
           v12 = nullptr;
       }
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( v2 )
     {
@@ -73208,7 +72050,7 @@ void __cdecl __noreturn show_message_ex(KKND::Task *task)
       v10 = ui_string_445C80(v2, 128);
       v11 = ui_string_create(
               0,
-              g_current_lvl_mobd[27].layers[0],
+              g_mobd[27].layers[0],
               (char *)(v7 - ((8 * (v10 + 2)) >> 1)),
               v8 - 32,
               v10 + 2,
@@ -73302,7 +72144,7 @@ void __cdecl __noreturn show_message(KKND::Task *task)
     if ( !v1 )
       TASK_yield(task, Task_Wait, 0);
     v1 = 0;
-    for ( i = (_DWORD *)TASK_pop_message(task); i; i = (_DWORD *)TASK_pop_message(task) )
+    for ( i = (_DWORD *)TSK_pop_message(task); i; i = (_DWORD *)TSK_pop_message(task) )
     {
       if ( i[2] == 1512 )
       {
@@ -73313,7 +72155,7 @@ void __cdecl __noreturn show_message(KKND::Task *task)
         else
           v12 = nullptr;
       }
-      task_message_recycle(i);
+      TSK_message_recycle(i);
     }
     if ( v2 )
     {
@@ -73342,7 +72184,7 @@ void __cdecl __noreturn show_message(KKND::Task *task)
       v10 = ui_string_445C80(v2, 128);
       v11 = ui_string_create(
               0,
-              g_current_lvl_mobd[27].layers[0],
+              g_mobd[27].layers[0],
               (char *)(v7 - ((8 * (v10 + 2)) >> 1)),
               v8 - 32,
               v10 + 2,
@@ -73413,7 +72255,7 @@ int __fastcall sub_44D000(KKND::Unit *unit)
     }
     else
     {
-      v9 = BOX_classify_tile_for_pathing(unit, v7, v8, &v6[dword_478BE8[v5]]) == Boxd_Clear;
+      v9 = BOXD_classify_tile_for_pathing(unit, v7, v8, &v6[dword_478BE8[v5]]) == Boxd_Clear;
       v28[v5] = v9;
       if ( !v9 )
         v24 = 1;
@@ -73517,7 +72359,7 @@ int __fastcall sub_44D250(_DWORD *a1, _DWORD *a2, int a3, KKND::Unit *unit, int 
       && v10 >= 0
       && v10 < g_map_num_tiles_y
       && (v7 & 1) == 0
-      && BOX_classify_tile_for_pathing(unit, v9, v10, &v8[dword_478BE8[v7]]) == Boxd_Clear )
+      && BOXD_classify_tile_for_pathing(unit, v9, v10, &v8[dword_478BE8[v7]]) == Boxd_Clear )
     {
       break;
     }
@@ -73547,10 +72389,10 @@ LABEL_12:
 // 4793F8: using guessed type int g_map_num_tiles_x;
 
 //----- (0044D340) --------------------------------------------------------
-int __fastcall sub_44D340(_DWORD *a1, _DWORD *a2, int a3, KKND::Unit *unit, int *a5)
+BOOL __fastcall sub_44D340(_DWORD *a1, _DWORD *a2, int a3, KKND::Unit *unit, KKND::Direction *a5)
 {
   unsigned __int32 v6; // eax
-  int v7; // ebx
+  KKND::Direction v7; // ebx
   int v8; // edi
   KKND::TerrainTile *v9; // ebp
   int v10; // edx
@@ -73593,7 +72435,7 @@ LABEL_23:
       return 0;
     a1 = v20;
   }
-  v12 = BOX_classify_tile_for_pathing(unit, v10, v11, &v9[dword_478BE8[v7]]) - 1;
+  v12 = BOXD_classify_tile_for_pathing(unit, v10, v11, &v9[dword_478BE8[v7]]) - 1;
   if ( v12 )
   {
     v13 = v12 - 1;
@@ -73619,7 +72461,7 @@ LABEL_21:
     v15 = a3;
     if ( v7 || a3 )
     {
-      if ( v7 == 4 && a3 == 1 )
+      if ( v7 == Direction_S && a3 == 1 )
         return 0;
       goto LABEL_32;
     }
@@ -73628,11 +72470,11 @@ LABEL_21:
   {
     v15 = a3;
 LABEL_32:
-    if ( v14 || (v7 || v15 != 1) && (v7 != 4 || v15) )
+    if ( v14 || (v7 || v15 != 1) && (v7 != Direction_S || v15) )
     {
       v17 = dword_465728[v7] + *a2;
-      if ( (v17 != g_map_num_tiles_y - 1 || (v7 != 2 || v15) && (v7 != 6 || v15 != 1))
-        && (v17 || (v7 != 2 || v15 != 1) && (v7 != 6 || v15)) )
+      if ( (v17 != g_map_num_tiles_y - 1 || (v7 != Direction_E || v15) && (v7 != Direction_W || v15 != 1))
+        && (v17 || (v7 != Direction_E || v15 != 1) && (v7 != Direction_W || v15)) )
       {
         *a5 = v7;
         *v20 += dword_465708[v7];
@@ -73740,21 +72582,6 @@ size_t __cdecl sub_44DB80(void *Buffer, size_t ElementSize, size_t ElementCount,
   return v4;
 }
 
-//----- (0044E570) --------------------------------------------------------
-int __cdecl sub_44E570(FILE *Stream, int a2, int a3)
-{
-  int v3; // edi
-  int v4; // ebx
-
-  _lock_file(Stream);
-  v3 = sub_452610((int)Stream);
-  v4 = _output(Stream, a2, (int)&a3);
-  _ftbuf(v3, Stream);
-  _unlock_file(Stream);
-  return v4;
-}
-// 4526D0: using guessed type _DWORD __cdecl _ftbuf(_DWORD, _DWORD);
-
 //----- (0044E840) --------------------------------------------------------
 int sub_44E840()
 {
@@ -73762,49 +72589,6 @@ int sub_44E840()
 }
 // 452A80: using guessed type _DWORD __cdecl _ftime(_DWORD);
 // 47DD48: using guessed type int dword_47DD48;
-
-//----- (00452610) --------------------------------------------------------
-int __cdecl sub_452610(int a1)
-{
-  int v1; // edi
-  void *v2; // eax
-  int v3; // edi
-
-  if ( !_isatty(*(_DWORD *)(a1 + 16)) )
-    return 0;
-  if ( (FILE *)a1 == &File )
-  {
-    v1 = 0;
-  }
-  else
-  {
-    if ( (_UNKNOWN *)a1 != &unk_4755F0 )
-      return 0;
-    v1 = 1;
-  }
-  ++dword_47DDD8;
-  if ( (*(_DWORD *)(a1 + 12) & 0x10C) != 0 )
-    return 0;
-  if ( dword_47DDD0[v1] || (v2 = malloc(0x1000u), (dword_47DDD0[v1] = (int)v2) != 0) )
-  {
-    v3 = dword_47DDD0[v1];
-    *(_DWORD *)(a1 + 24) = 4096;
-    *(_DWORD *)(a1 + 8) = v3;
-    *(_DWORD *)a1 = v3;
-    *(_DWORD *)(a1 + 4) = 4096;
-  }
-  else
-  {
-    *(_DWORD *)(a1 + 8) = a1 + 20;
-    *(_DWORD *)a1 = a1 + 20;
-    *(_DWORD *)(a1 + 24) = 2;
-    *(_DWORD *)(a1 + 4) = 2;
-  }
-  *(_DWORD *)(a1 + 12) |= 0x1102u;
-  return 1;
-}
-// 47DDD0: using guessed type int dword_47DDD0[];
-// 47DDD8: using guessed type int dword_47DDD8;
 
 //----- (004528F0) --------------------------------------------------------
 DWORD __cdecl sub_4528F0(void **Block)
@@ -99225,5 +98009,5 @@ int __cdecl sub_4620C0(int C)
 }
 // 475838: using guessed type _UNKNOWN *off_475838;
 
-// nfuncs=1398 queued=1117 decompiled=1117 lumina nreq=0 worse=0 better=0
-// ALL OK, 1117 function(s) have been successfully decompiled
+// nfuncs=1398 queued=1115 decompiled=1115 lumina nreq=0 worse=0 better=0
+// ALL OK, 1115 function(s) have been successfully decompiled

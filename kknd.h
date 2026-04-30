@@ -34,7 +34,7 @@ struct _EXCEPTION_RECORD;
 struct _iobuf;
 struct KKND::TaskLocal;
 struct KKND::Task;
-struct KKND::BoxdCollisionBox;
+struct KKND::BoxdAabb;
 struct KKND::BoxdCollisionShape;
 struct KKND::CplcSpawnParams;
 struct KKND::CplcEntity;
@@ -45,7 +45,7 @@ struct KKND::MobdAnimFrame;
 struct KKND::Entity;
 struct KKND::MobdAnimation;
 struct KKND::BoxdCollisionHandler;
-struct KKND::BoxdCollisionState;
+struct ___remove__KKND::BoxdCollisionState;
 struct KKND::RenderViewport;
 struct KKND::Unit;
 struct KKND::RenderNode;
@@ -72,8 +72,8 @@ struct KKND::AiDrillrigNode;
 struct KKND::AiTankerNode;
 struct KKND::AiPowerPlantNode;
 struct KKND::AiEnemyNode;
-struct KKND::Ai_stru160_Node;
-struct KKND::Ai_stru26C_Node;
+struct KKND::AiSquadNode;
+struct KKND::AiBuildOrderNode;
 struct KKND::AiMobileDerrickNode;
 struct _DDCAPS_DX5;
 struct _DDCAPS_DX3;
@@ -1367,11 +1367,11 @@ struct KKND::Entity
   int y_drag;
   int z_drag;
   KKND::MobdAnimation *anim;
-  KKND::MobdAnimFrame **anim_cursor;
+  KKND::MobdAnimation *anim_cursor;
   KKND::MobdAnimFrame *anim_current_frame;
   KKND::BoxdCollisionShape *shape;
   KKND::BoxdCollisionHandler *collider;
-  int anim_speed;
+  int anim_speed;                       ///< ticks
   int anim_timer;                       ///< remaining ticks on the anim
   KKND::RenderNode *rend;
   KKND::Task *task;
@@ -1381,7 +1381,7 @@ struct KKND::Entity
   void *ctx;
   void *_80_attacker_unit_or__stru29__sprite__initial_hitpoints;
   int _80_unit_id;
-  BOOL is_on_collision_grid;
+  BOOL is_collidable;
   __int16 infantry_damage;
   __int16 vehicle_damage;
   __int16 building_damage;
@@ -1614,18 +1614,18 @@ struct KKND::MobdAnimFrame
 /* 170 */
 struct KKND::BoxdCollisionShape
 {
-  KKND::BoxdCollisionBox *box;
+  KKND::BoxdAabb *box;
 };
 
 /* 205 */
 enum __dec KKND::BoxCollisionAxis : unsigned __int32
 {
-  BoxCollisionDirection_NegativeX = 0,
-  BoxCollisionDirection_PositiveX = 1,
-  BoxCollisionDirection_NegativeY = 2,
-  BoxCollisionDirection_PositiveY = 3,
-  BoxCollisionDirection_NegativeZ = 4,
-  BoxCollisionDirection_PositiveZ = 5,
+  BoxCollisionAxis_NegX = 0,
+  BoxCollisionAxis_PosX = 1,
+  BoxCollisionAxis_NegY = 2,
+  BoxCollisionAxis_PosY = 3,
+  BoxCollisionAxis_NegZ = 4,
+  BoxCollisionAxis_PosZ = 5,
 };
 
 /* 204 */
@@ -1633,23 +1633,23 @@ struct KKND::BoxdCollisionHandler
 {
   int collides_with_categories;         ///< The collision only proceeds if there is any bit in common between the mover's collides_with_categories (outgoing) and the target shape's category (incoming).
   int category;
-  bool (*mover_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, KKND::BoxdCollisionState *, KKND::BoxdCollisionState *); ///< 
-                                                                                                                                          ///< Two handlers enable asymmetric collision pairs where one side is authoritative:
-                                                                                                                                          ///< 
-                                                                                                                                          ///< Obstacle-driven (terrain/buildings): Mover has primary=NULL at its root shape. Each obstacle sub-shape defines its own geometry response in secondary. A unit walking into a ramp gets ramp behavior; walking into a wall gets solid push-out — all without the mover knowing what it hit.
-                                                                                                                                          ///< 
-                                                                                                                                          ///< Mover-driven (cursor/projectile): The mover has primary set. It doesn't matter what the obstacle's secondary says — the mover overrides. The cursor fires a hover event regardless of what kind of entity it's over.
-                                                                                                                                          ///< 
-                                                                                                                                          ///< Hypothetical dual-response (never used): If both were set, the mover's primary would always win. The obstacle never gets a say. You could imagine a scenario where a special unit type overrides terrain collision (e.g., a flying unit with a custom primary that ignores slopes) — the architecture supports it, but no entry uses both slots simultaneously.
-                                                                                                                                          ///< 
-                                                                                                                                          ///< The system was clearly designed for a third case — mover-specific override of terrain response. Imagine:
-                                                                                                                                          ///< 
-                                                                                                                                          ///< - A hovercraft that slides over ramps instead of climbing (override primary to skip Y clamping)
-                                                                                                                                          ///< - An ethereal unit that passes through walls but still triggers hover events
-                                                                                                                                          ///< - Different weight classes that get pushed differently by the same obstacle
-                                                                                                                                          ///< 
-                                                                                                                                          ///< None of these shipped, so every game entity uses index 0 (root) with primary=NULL, deferring entirely to the obstacle's secondary. The cursor is the sole example of a mover-driven response. The two-slot design is architectural foresight that simplified to a one-sided dispatch in practice.
-  bool (*obstacle_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, KKND::BoxdCollisionState *, KKND::BoxdCollisionState *);
+  BOOL (__fastcall *mover_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, ___remove__KKND::BoxdCollisionState *, ___remove__KKND::BoxdCollisionState *); ///< 
+                                                                                                                                                                           ///< Two handlers enable asymmetric collision pairs where one side is authoritative:
+                                                                                                                                                                           ///< 
+                                                                                                                                                                           ///< Obstacle-driven (terrain/buildings): Mover has primary=NULL at its root shape. Each obstacle sub-shape defines its own geometry response in secondary. A unit walking into a ramp gets ramp behavior; walking into a wall gets solid push-out — all without the mover knowing what it hit.
+                                                                                                                                                                           ///< 
+                                                                                                                                                                           ///< Mover-driven (cursor/projectile): The mover has primary set. It doesn't matter what the obstacle's secondary says — the mover overrides. The cursor fires a hover event regardless of what kind of entity it's over.
+                                                                                                                                                                           ///< 
+                                                                                                                                                                           ///< Hypothetical dual-response (never used): If both were set, the mover's primary would always win. The obstacle never gets a say. You could imagine a scenario where a special unit type overrides terrain collision (e.g., a flying unit with a custom primary that ignores slopes) — the architecture supports it, but no entry uses both slots simultaneously.
+                                                                                                                                                                           ///< 
+                                                                                                                                                                           ///< The system was clearly designed for a third case — mover-specific override of terrain response. Imagine:
+                                                                                                                                                                           ///< 
+                                                                                                                                                                           ///< - A hovercraft that slides over ramps instead of climbing (override primary to skip Y clamping)
+                                                                                                                                                                           ///< - An ethereal unit that passes through walls but still triggers hover events
+                                                                                                                                                                           ///< - Different weight classes that get pushed differently by the same obstacle
+                                                                                                                                                                           ///< 
+                                                                                                                                                                           ///< None of these shipped, so every game entity uses index 0 (root) with primary=NULL, deferring entirely to the obstacle's secondary. The cursor is the sole example of a mover-driven response. The two-slot design is architectural foresight that simplified to a one-sided dispatch in practice.
+  BOOL (__fastcall *obstacle_response)(KKND::Entity *, KKND::Entity *, KKND::BoxCollisionAxis, ___remove__KKND::BoxdCollisionState *, ___remove__KKND::BoxdCollisionState *);
 };
 
 /* 282 */
@@ -1846,39 +1846,40 @@ struct KKND::MobdSprtImage
 /* 206 */
 enum __dec KKND::BoxdCollisionType : unsigned __int32
 {
-  BoxdCollisionType_0 = 0,
-  BoxdCollisionType_1 = 1,
-  BoxdCollisionType_2 = 2,
-  BoxdCollisionType_3 = 3,
-  BoxdCollisionType_4 = 4,
-  BoxdCollisionType_5 = 5,
-  BoxdCollisionType_6 = 6,
-  BoxdCollisionType_7 = 7,
+  BoxdCollisionType_Unit = 0,
+  BoxdCollisionType_Solid = 1,
+  BoxdCollisionType_Floor = 2,
+  BoxdCollisionType_RampLtr = 3,
+  BoxdCollisionType_RampRtl = 4,
+  BoxdCollisionType_SlopeLeft = 5,
+  BoxdCollisionType_SlopeRight = 6,
+  BoxdCollisionType_FloorAlt = 7,
   BoxdCollisionType_Skip = -3,
   BoxdCollisionType_OffGrid = -2,
   BoxdCollisionType_Always = -1,
 };
 
 /* 169 */
-struct KKND::BoxdCollisionBox
+struct KKND::BoxdAabb
 {
   KKND::BoxdCollisionType type;
-  int x;
-  int y;
-  int _boxd_collision_box_field_c;
-  int z;
-  int w;
+  int min_x;
+  int min_y;
+  int min_z;
+  int max_x;
+  int max_y;
 };
 
 /* 207 */
-struct KKND::BoxdCollisionState
+/// It's BoxdAabb
+struct ___remove__KKND::BoxdCollisionState
 {
-  int x1;
-  int y1;
-  int z1;
-  int x2;
-  int y2;
-  int z2;
+  KKND::BoxdCollisionType type;
+  int min_x;
+  int min_y;
+  int min_z;
+  int max_x;
+  int max_y;
 };
 
 /* 208 */
@@ -1915,44 +1916,43 @@ struct KKND::LevelHunkSection
 /* 168 */
 struct KKND::LevelHunk
 {
-  KKND::LevelHunkSection *sections[1];
+  KKND::LevelHunkSection *sections[];
 };
 
 /* 171 */
-/// Per-tile linked list of overlapping sprites
-struct KKND::BoxdCollisionBucket
+struct BoxdSpatialHashEntry
 {
   KKND::BoxdCollisionShape *shape;
   KKND::Entity *entity;
-  KKND::BoxdCollisionBucket *next;
+  BoxdSpatialHashEntry *next;
 };
 
 /* 172 */
-struct KKND::BoxdTile
+struct ___remove__KKND::BoxdTile
 {
   int type;
-  int x;
-  int y;
-  int _boxd_tile_field_c;
+  int x1;
+  int y1;
   int z;
-  int w;
+  int x2;
+  int y2;
 };
 
 /* 173 */
-struct KKND::LevelBoxdSurface
+struct BoxdGrid
 {
   int max_collision_buckets;
   int world_to_tile_x;
   int world_to_tile_y;
   int num_tiles_x;
   int num_tiles_y;
-  KKND::BoxdTile *tiles[1];
+  KKND::BoxdAabb *tiles[1];
 };
 
 /* 174 */
 struct KKND::LevelBoxd
 {
-  KKND::LevelBoxdSurface *layers[1];
+  BoxdGrid *grid[1];
 };
 
 /* 180 */
@@ -2007,7 +2007,7 @@ struct KKND::PaletteEntry
 };
 
 /* 201 */
-struct infantr
+struct KKND::Palette
 {
   KKND::PaletteEntry entries[256];
 };
@@ -2018,7 +2018,7 @@ struct KKND::LevelMapdSurface
   int num_images;
   KKND::MapdScrlImage *images[1];
   int num_palette_entries;
-  infantr palette;
+  KKND::Palette palette;
 };
 
 /* 188 */
@@ -2351,8 +2351,8 @@ struct KKND::UnitMobdAnchors
   KKND::MobdPoint *rally;
   KKND::MobdPoint *render;
   KKND::MobdPoint *grid;
-  KKND::MobdPoint *_unit_mobd_anchor_unused;
-  KKND::MobdPoint *_unit_mobd_anchor_unknown;
+  KKND::MobdPoint *_unit_mobd_anchors_10_unused;
+  KKND::MobdPoint *dock_point;
 };
 
 /* 237 */
@@ -2392,7 +2392,7 @@ enum __dec KKND::UnitTilePosition : unsigned __int32
   UnitPosition_Slot3 = 3,
   UnitPosition_Slot4 = 4,
   UnitTilePosition_Invalid = 5,
-  UnitTilePosition_40 = 64,
+  UnitTilePosition_BuildingPlacement = 64,
 };
 
 /* 241 */
@@ -2879,6 +2879,7 @@ enum __dec KKND::BoxdPathingClassification : unsigned __int32
   Boxd_PartiallyOccupied = 1,           ///< Partially occupied — entities present but slots in flux (room to squeeze)
   Boxd_Clear = 2,                       ///< Free/clear tile — walkable, nobody there (the unit itself is not counted as obstacle)
   Boxd_FullyOccupied = 3,               ///< Fully occupied — all entity slots stably filled / building
+  Boxd_MovementSucceeded = 4,           ///< Function is really a dual-purpose "try-move-or-classify" — returns classification only when move fails, returns 4 when move succeeds. This makes it a tagged union of success(4) vs failure-reason(0-3)
 };
 
 /* 251 */
@@ -2970,7 +2971,7 @@ struct KKND::CursorState
   KKND::CursorUnitSelection *selection_tail;
   KKND::Task *_cursor_state_task_8;
   KKND::CursorUnitSelection *selection_pool;
-  KKND::CursorUnitSelection *selection_free_pool;
+  KKND::CursorUnitSelection *selection_free_head;
   KKND::Task *cursor_task;
   KKND::Task *hovered_ui_task;
   KKND::Task *hovered_unit_task;
@@ -3337,10 +3338,10 @@ struct KKND::DrillrigState
 };
 
 /* 291 */
-struct KKND::scar
+struct KKND::Scar
 {
-  KKND::scar *next;
-  KKND::scar *prev;
+  KKND::Scar *next;
+  KKND::Scar *prev;
   ptrdiff_t mobd_frame;
   KKND::Entity *entity;
 };
@@ -3549,18 +3550,18 @@ struct KKND::AiController
   int _ai_controller_110;
   KKND::AiEnemyNode *enemy_pool;
   KKND::AiEnemyNode *enemy_free;
-  KKND::Ai_stru160_Node *_ai_controller_11C_head;
-  KKND::Ai_stru160_Node *_ai_controller_11C_tail;
+  KKND::AiSquadNode *_ai_controller_11C_head;
+  KKND::AiSquadNode *_ai_controller_11C_tail;
   char _ai_controller_124[60];
-  KKND::Ai_stru160_Node *_ai_controller_160_pool;
-  KKND::Ai_stru160_Node *_ai_controller_160_free;
+  KKND::AiSquadNode *_ai_controller_160_pool;
+  KKND::AiSquadNode *_ai_controller_160_free;
   int _ai_controller_168_head;
   int _ai_controller_168_tail;
   char _ai_controller_170[60];
   int _ai_controller_1AC;
   int _ai_controller_1B0;
-  KKND::Ai_stru160_Node *_ai_controller_1B4_head;
-  KKND::Ai_stru160_Node *_ai_controller_1B4_tail;
+  KKND::AiSquadNode *_ai_controller_1B4_head;
+  KKND::AiSquadNode *_ai_controller_1B4_tail;
   char _ai_controller_1BC[60];
   int _ai_controller_1F8;
   int _ai_controller_1FC;
@@ -3569,31 +3570,31 @@ struct KKND::AiController
   char _ai_controller_208[60];
   int _ai_controller_244;
   int _ai_controller_248;
-  KKND::Ai_stru160_Node *_ai_controller_24C;
+  KKND::AiSquadNode *_ai_controller_24C;
   int base_area_min_x;
   int base_area_min_y;
   int base_area_max_x;
   int base_area_max_y;
-  KKND::Ai_stru26C_Node *_ai_controller_26C_head;
-  KKND::Ai_stru26C_Node *_ai_controller_26C_tail;
+  KKND::AiBuildOrderNode *_ai_controller_26C_head;
+  KKND::AiBuildOrderNode *_ai_controller_26C_tail;
   int _ai_controller_268;
-  KKND::Ai_stru26C_Node *_ai_controller_26C_pool;
-  KKND::Ai_stru26C_Node *_ai_controller_26C_free;
-  KKND::Ai_stru26C_Node *_ai_controller_274;
-  int _ai_controller_278_x;
-  int _ai_controller_27C_y;
-  int _ai_controller_280[2][4];
+  KKND::AiBuildOrderNode *_ai_controller_26C_pool;
+  KKND::AiBuildOrderNode *_ai_controller_26C_free;
+  KKND::AiBuildOrderNode *_ai_controller_274;
+  int rally_x;
+  int rally_y;
+  int patrol_waypoints[2][4];
   int player_num;
   KKND::Race player_race;
   int *cash;
-  int _ai_controller_2AC;
-  int _ai_controller_2B0;
-  int _ai_controller_2B4;
-  int _ai_controller_2B8;
-  int _ai_controller_2BC_ai_importance;
-  int _ai_controller_2C0_threat_in_area;
-  int _ai_controller_2C4_2C8_idx;
-  int _ai_controller_2C8[5];
+  int attacker_count;
+  int max_attackers;
+  int squad_threshold;
+  int attack_confidence;
+  int base_threat;
+  int max_squad_threat;
+  int best_patrol_waypoint_idx;
+  int patrol_threat[5];
   KKND::UnitType last_unit_produced;
   KKND::UnitType last_unit_produced_factory;
   BOOL tanker_production_in_progress;
@@ -3621,7 +3622,7 @@ struct KKND::AiController
 /* 306 */
 struct KKND::AiController_struC
 {
-  KKND::Ai_stru160_Node *_ai_controller_strucC_0;
+  KKND::AiSquadNode *_ai_controller_strucC_0;
   int _ai_controller_strucC_4;
   int _ai_controller_strucC_8;
   KKND::AiAttackerNode *_ai_controller_strucC_C;
@@ -3706,7 +3707,7 @@ struct KKND::Ai_stru10_Node
   KKND::Ai_stru10_Node *next;
   KKND::Ai_stru10_Node *prev;
   KKND::Unit *unit;
-  KKND::Ai_stru160_Node *_ai_stru10_node_C;
+  KKND::AiSquadNode *_ai_stru10_node_C;
 };
 
 /* 308 */
@@ -3723,7 +3724,7 @@ struct KKND::AiAttackerNode
 {
   KKND::AiAttackerNode *next;
   KKND::AiAttackerNode *prev;
-  KKND::Ai_stru160_Node *_ai_attacker_node_8;
+  KKND::AiSquadNode *_ai_attacker_node_8;
   KKND::Unit *unit;
 };
 
@@ -3751,7 +3752,7 @@ struct KKND::AiDrillrigNode
   int _ai_drillrig_node_18;
   int _ai_drillrig_node_1C;
   KKND::Unit *unit;
-  KKND::Ai_stru160_Node *_ai_drillrig_node_24;
+  KKND::AiSquadNode *_ai_drillrig_node_24;
   KKND::AiPowerPlantNode *_ai_drillrig_node_28;
   int _ai_drillrig_node_2C;
   int _ai_drillrig_node_30;
@@ -3784,15 +3785,15 @@ struct KKND::AiEnemyNode
 };
 
 /* 316 */
-struct KKND::Ai_stru160_Node
+struct KKND::AiSquadNode
 {
-  KKND::Ai_stru160_Node *next;
-  KKND::Ai_stru160_Node *prev;
-  KKND::Ai_stru160_Node *_ai_stru160_node_8;
-  KKND::AiAttackerNode *_ai_stru160_node_C;
-  void *_ai_stru160_node_10;
-  int _ai_stru160_node_14;
-  int _ai_stru160_node_18;
+  KKND::AiSquadNode *next;
+  KKND::AiSquadNode *prev;
+  KKND::AiSquadNode *merge_target_squad;
+  KKND::AiAttackerNode *attacker_list_head;
+  KKND::AiAttackerNode *attacker_list_tail;
+  int _ai_stru160_node_14_unused;
+  int _ai_stru160_node_18_unused;
   int _ai_stru160_node_1C;
   KKND::AiAttackerNode *_ai_stru160_node_20;
   KKND::AiEnemyNode *_ai_stru160_node_24;
@@ -3806,10 +3807,10 @@ struct KKND::Ai_stru160_Node
 };
 
 /* 317 */
-struct KKND::Ai_stru26C_Node
+struct KKND::AiBuildOrderNode
 {
-  KKND::Ai_stru26C_Node *next;
-  KKND::Ai_stru26C_Node *prev;
+  KKND::AiBuildOrderNode *next;
+  KKND::AiBuildOrderNode *prev;
   int _ai_stru26C_node_8;
 };
 
@@ -4435,5 +4436,13 @@ struct _DSBUFFERDESC1
   DWORD dwBufferBytes;
   DWORD dwReserved;
   LPWAVEFORMATEX lpwfxFormat;
+};
+
+/* 348 */
+enum KKND::HunkFixupType : unsigned __int32
+{
+  HunkFixup_SimplePointer = 0x0,
+  HunkFixup_BatchPointer = 0x40000000,
+  HunkFixup_Renderer = 0x80000000,
 };
 

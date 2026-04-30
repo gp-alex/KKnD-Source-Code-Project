@@ -4,68 +4,13 @@
 
 ### Functions
 
-| Current Name | Proposed Name | Reason |
-|---|---|---|
-| `BOXD_40DA90` | `BOXD_update_tile_on_move` | Called during movement tick to update tile occupancy when entity moves between tiles |
-| `BOXD_40DE80` | `BOXD_place_unit_world_coords` | Wrapper that converts world coords to tile coords before calling BOXD_place_unit (XL-aware) |
-| `BOXD_40DF50` | `BOXD_update_friendly_flags` | Updates flags2 friendly bits for unit's tile(s), XL-aware |
-| `BOXD_40E000` | `BOXD_classify_area_for_pathing` | Like BOX_classify_tile_for_pathing but handles XL 2×2 area and tracks nav_obstacle |
-| `BOXD_40E1B0` | `BOXD_place_unit_xl` | XL placement across 2×2 grid, returns pathing classification on failure |
-| `BOXD_40ED00` | `BOXD_classify_tile_simple` | Simpler version of BOX_classify_tile_for_pathing, used during scanning (returns 0/1/2/3 not the enum) |
-| `BOXD_40EDF0` | `BOXD_is_tile_passable_ignoring` | Checks if tile blocked, ignoring two specific units (self + target) |
-| `BOXD_40EE10` | `BOXD_find_building_at_tile` | Returns building-type unit at tile, checks CantPlaceBuilding linkage |
-| `BOXD_40EE70` | `BOXD_is_tile_free_for_building` | Returns true if tile empty and no CantPlaceBuilding flag |
-| `BOXD_40F230` | `BOXD_set_friendly_flag` | Sets or clears friendly flag in flags2 for given unit's slot |
-| `BOXD_413860` | `BOXD_find_nearby_clear_tile` | Emergency placement: diamond-scan for clear tile with LOS |
-| `BOXD_413A90` | `BOXD_find_nearby_clear_tile_spiral` | Fallback spiral search for any passable tile |
-| `BOXD_41C130` | `BOXD_line_of_sight_check` | Size-dispatching LOS check (regular/small → 41C190, XL → 41C250) |
-| `BOX_classify_tile_for_pathing` | `BOXD_classify_tile_for_pathing` | Consistent prefix (currently missing 'D') |
-| `sub_41BA30` | `BOXD_raycast_x_major` | X-major Bresenham raycast leg |
-| `sub_41BC60` | `BOXD_raycast_y_major` | Y-major Bresenham raycast leg |
-| `sub_41BE90` | `BOXD_raycast_classify_step` | Per-step classifier during raycast walk |
-| `sub_41C060` | `BOXD_raycast_finalize` | Raycast result assembly |
-| `BOXD_41C190` | `BOXD_los_check_regular` | LOS for regular/small units |
-| `BOXD_41C250` | `BOXD_los_check_xl` | LOS for XL units |
-| `BOXD_41C660` | `BOXD_los_bresenham_x_major` | LOS X-major walk |
-| `BOXD_41C890` | `BOXD_los_bresenham_y_major` | LOS Y-major walk |
-
-### Structures
-
-| Current Name | Proposed Name | Reason |
-|---|---|---|
-| `LevelBoxdSurface` | `BoxdGridLayer` | It's a spatial grid layer, not a "surface" |
-| `BoxdCollisionBucket` | `BoxdSpatialHashEntry` | More accurate — it's a spatial hash bucket entry |
-| `BoxdTile` | **DELETE** | Not a real struct — IDA artifact. Replace with `BoxdCollisionBox**` (NULL-terminated pointer array per cell) |
-
-### Struct Fields
-
-| Location | Current | Proposed | Reason |
-|---|---|---|---|
-| `BoxdCollisionBox._boxd_collision_box_field_c` | `_field_c` | `h` or `depth` | Likely the Z/depth extent (3D AABB has 6 values: x,y,z for min + w,h,d for extents). Currently only x,y are used as 2D but the field exists |
-| `BoxdTile._boxd_tile_field_c` | `_field_c` | Same as above — probably depth/Z | |
-| `Entity.is_on_collision_grid` | OK | Consider `is_collidable` | More semantic — flag means entity participates in collision detection |
+Still some functions to check - re-check everything, follow references deep - some suggestions were off
 
 ### Enums
 
-| Current Name | Proposed Name | Reason |
-|---|---|---|
-| `BoxdCollisionType_0` through `_7` | See table below | Should be named by terrain shape |
-| `BoxCollisionAxis` | Acceptable | But values named `BoxCollisionDirection_*` — inconsistent with enum name |
+`BOXD_40ED00` returns 0/1/2/3 matching the enum values but typed as `int`. Likely same enum, just the decompiler didn't tag it.
 
-**Proposed BoxdCollisionType names:**
 
-| Value | Current | Proposed |
-|---|---|---|
-| 0 | BoxdCollisionType_0 | `BoxdCollisionType_UnitRoot` |
-| 1 | BoxdCollisionType_1 | `BoxdCollisionType_Solid` |
-| 2 | BoxdCollisionType_2 | `BoxdCollisionType_Floor` |
-| 3 | BoxdCollisionType_3 | `BoxdCollisionType_RampLTR` |
-| 4 | BoxdCollisionType_4 | `BoxdCollisionType_RampRTL` |
-| 5 | BoxdCollisionType_5 | `BoxdCollisionType_SlopeLeft` |
-| 6 | BoxdCollisionType_6 | `BoxdCollisionType_SlopeRight` |
-| 7 | BoxdCollisionType_7 | `BoxdCollisionType_FloorAlt` |
-
----
 
 ## Concerns & Decompilation Issues
 
@@ -95,34 +40,6 @@ struct BoxdCollisionState {
 
 OR the naming is just confusing and the 6 fields represent min/max of 3 axes but accessed in non-obvious order. Need to verify against how they're computed in `BOXD_collide_entity`.
 
-### 2. BoxdTile struct is a decompilation error
-
-`BoxdTile` as defined by IDA is **entirely wrong**. The actual data at `tiles[cell_index]` is a **NULL-terminated array of `BoxdCollisionBox*` pointers** (one per terrain collision shape overlapping that cell).
-
-In `LVL_InitBoxdTerrain` (kknd.c:17880–17953):
-```c
-v10 = *tiles;                          // first BoxdCollisionBox* in array
-type = (int *)(*tiles)->type;          // dereferences .type AS A POINTER → BoxdCollisionBox
-v20 = (_DWORD *)v25->type;            // same: reads through it as BoxdCollisionBox*
-// v20[0]=type, v20[1]=x_min, v20[2]=y_min, v20[4]=x_max, v20[5]=y_max
-...
-type = (int *)v10->x;                  // .x is next pointer in the array (offset 4 = next slot)
-v10 = (BoxdTile *)((char *)v10 + 4);  // advance by 4 bytes = next pointer
-```
-
-**Reality:** Each `tiles[i]` is a `BoxdCollisionBox**` — pointer to array of BoxdCollisionBox pointers. The IDA-generated `BoxdTile` struct should be deleted and replaced with `BoxdCollisionBox**`.
-
-The terrain shapes use **absolute world coordinates** (not entity-relative). Overlap test: `shape->x < tile_world + 0x2000 && shape->z > tile_world` confirms min/max semantics.
-
-**Action:** Delete `BoxdTile` struct, change `LevelBoxdSurface.tiles` type to `BoxdCollisionBox **tiles[1]`, rename `g_tiles` to `g_terrain_shapes`.
-
-### 3. Dual grid ~~confusion~~ (RESOLVED)
-
-~~Two grids exist with similar names at different resolutions.~~
-
-**RESOLVED:** In practice, `world_to_tile_x` is always 13, so both grids have identical dimensions. The difference is purely conceptual:
-- `g_tiles[]` (static): pre-authored terrain collision shapes (loaded from BOXD section, used only during terrain init to mark passability flags). **NOTE:** `g_tiles` is referenced but never dereferenced in `BOXD_collide_entity` — dead/vestigial code from an older design where terrain shapes were checked at runtime.
-- `g_terrain[]` (runtime): unit occupancy tracking. Used by pathfinding and placement.
 
 ### 4. BOXD_40ED00 returns int, not BoxdPathingClassification
 
@@ -132,13 +49,6 @@ The terrain shapes use **absolute world coordinates** (not entity-relative). Ove
 
 The enum only defines 0-7 + special values (-3,-2,-1). But the handler table has 20 entries (indices 0-19). The enum needs extending to cover all terrain shape types actually used in MOBD/BOXD data.
 
-### 6. `entity->collider` is array-accessed but typed as pointer
-
-Code does `entity->collider[type].mover_response` — treating `collider` as an array base. The pointer always points to `g_unit_collision_handlers` (or `g_null_collision`). This is correct C but confusing — the struct type should document that it's used as array base.
-
-### 7. UnitTilePosition_40 magic value
-
-`UnitTilePosition_40 = 64` — used specifically during building placement to signal "mark as CantPlaceBuilding but don't set VehicleOrBuilding." Should be renamed to `UnitTilePosition_BuildingPlacement` or similar.
 
 ---
 
@@ -150,10 +60,6 @@ Create two enums:
 - `BoxdTerrainShapeType` — for the level file shapes (0-15+)
 - `BoxdEntityCollisionMode` — for the special values (Skip, OffGrid, Always)
 
-### 2. Rename BoxCollisionAxis enum values
-
-Current: `BoxCollisionDirection_NegativeX` etc.
-Either rename enum to `BoxCollisionDirection` or rename values to `BoxCollisionAxis_NegX`.
 
 ### 3. Document the task flags set by collision responses
 
