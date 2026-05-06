@@ -13,29 +13,12 @@
 
 #define __thiscall __cdecl // Test compile in C mode
 
-void aircraft_list_free();
-void __fastcall unit_401530_bomber(KKND::Unit *unit, int a2);
-void __fastcall unit_mode_bomber_4016B0(KKND::Unit *unit);
-void __fastcall UNIT_mode_bomber_approach_target(KKND::Unit *unit);
-void buildings_tracker_cleanup();
-void BOXD_cleanup();
-int __fastcall UISTR_scroll_up(KKND::UiStr *str, int row, int x);
-KKND::Glyph *__fastcall UISTR_set_row_y(KKND::UiStr *str, int row, int y);
-char __fastcall UISTR_set_text_multiline(KKND::UiStr *str, const char *text, int x, int y);
 BOOL __fastcall CPLC_select(int id);
-void CPLC_restore_from_backup();
 KKND::CplcEntity *CPLC_viewport_update();
-void cplc_cleanup();
-void GAME_oil_patches_cleanup();
-void palette_408460();
 void FADE_Reset();
 unsigned int __thiscall FADE_4084A0(KKND::Task *this);
 void __fastcall FADE_408500(KKND::Task *task);
 void __fastcall FADE_Start(KKND::RenderViewport *ctx, int start, int end, int length);
-void __fastcall entity_play_sound(KKND::Entity *entity, KKND::SoundId sound_id, int volume, int unused);
-void FADE_Update();
-void AI_cleanup();
-void __fastcall FILE_close(KKND::File *file);
 BOOL sub_40CAE0();
 BOOL __fastcall MOVIE_load(const char *filename, int x, int y, int z);
 BOOL MOVIE_do_frame();
@@ -43,156 +26,111 @@ void MOVIE_cleanup();
 BOOL MOVIE_is_null();
 int __fastcall MOVIE_load_mission_briefing(const char *filename, KKND::RenderViewport *viewport_main, KKND::RenderViewport *viewport_screen, KKND::UiStr *str, int main_width, int main_height, int z);
 void TIME_tick();
-BOOL __fastcall entity_is_in_radius(KKND::Entity *a, KKND::Entity *b, int radius);
-void __fastcall entity_apply_aoe_damage(KKND::Entity *entity, int radius);
+BOOL REND_routines_init();
 const char *__cdecl sub_40E3E0();
 void __fastcall PAL_apply(KKND::PaletteEntry *pal);
-int sub_40E530();
-void sub_40EA20();
-void BOXD_terrain_cleanup();
-int __fastcall kknd_rand_1(const char *file, int line);
-void sidebar_cleanup();
-void stru2_4104E0();
-void healthbar_sprites_cleanup();
+void __fastcall sub_40E430(unsigned int brightness);
+void sub_40E530();
 KKND::RenderViewport *__fastcall REND_viewport_create(int flags, int x, int y, int w, int h);
 KKND::RenderViewport *__thiscall REND_viewport_free(KKND::RenderViewport *viewport);
-int __fastcall REND_get_width(KKND::RenderCommand *cmd);
-int REND_mode_scrl_setup();
 int INPUT_ProcessKeyboard();
 BOOL __fastcall INPUT_get_keyboard_state(KKND::KeyboardState *state);
 KKND::LevelHunk *__fastcall LVL_LoadLevel(const char *filename);
 BOOL __fastcall LVL_RunLevel(KKND::LevelHunk *lvl);
 void LVL_cleanup();
 void __fastcall KKND_free(void *p);
-void LVL_SysCleanup();
 void *__fastcall LVL_FindSection(const char *name);
 BOOL __fastcall LVL_SubstHunk(KKND::LevelHunk *dst, KKND::LevelHunk *src, const char *name);
-BOOL GAME_IsLoading();
-int sub_41CAD0();
-KKND::LevelId GAME_GetSaveLoadLevelId();
-BOOL GAME_save();
-void GAME_save_failed();
-void sub_4224B0();
-BOOL GAME_splash();
-void __fastcall GAME_PrepareSuperLvl(KKND::MenuId mapd_id);
+BOOL GAME_is_load_initiated();
 BOOL __fastcall MOVIE_Play(int type);
-void GAME_mission_load();
-BOOL GAME_post_campaign_mission();
-int KKND_Main();
 BOOL __fastcall TSK_send_message(KKND::Task *sender, KKND::TaskMessageType message, void *payload, KKND::Task *receiver);
 BOOL __fastcall TSK_broadcast_message(KKND::Task *task, KKND::TaskMessageType message, void *payload, KKND::TaskChannel channel);
-void GAME_infer_player_side_from_level();
-void __cdecl __noreturn task_424CE0(KKND::Task *task);
+KKND::TaskMessage *__fastcall TSK_pop_message(KKND::Task *task);
+void __fastcall TSK_message_recycle(KKND::TaskMessage *msg);
+int __thiscall sub_423C60(void *this);
+void __cdecl sub_425400(KKND::Task *task);
 void sub_425660();
 KKND::Entity *__fastcall entity_create(KKND::MobdId mobd_id, KKND::Task *task, KKND::Entity *parent);
 KKND::Entity *__fastcall entity_create_ex(KKND::MobdId mobd_id, KKND::Entity *parent, KKND::TaskFn task_entry, KKND::TaskKind task_kind, KKND::MobdPoint *parent_anchor);
 void __fastcall entity_remove(KKND::Entity *entity);
-void GAME_AdvanceEntityPositions();
 void __fastcall entity_anim_init(KKND::Entity *entity, ptrdiff_t offset);
-void __fastcall entity_anim_init_directional(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t direction);
-void __fastcall entity_anim_change_direction(KKND::Entity *entity, ptrdiff_t offset, ptrdiff_t idx);
-void __fastcall entity_anim_clear(KKND::Entity *entity);
-void GAME_AdvanceEntityAnimations();
-void MOBD_Deinit();
-void sub_428080();
-BOOL __fastcall INPUT_set_mouse_pos(__int16 x, __int16 y);
-int INPUT_ProcessMouse();
-void sub_4287A0();
-char __fastcall sub_42D260(_DWORD *a1, char *a2, int a3);
-KKND::GameEvent *sub_42D500();
-int sub_42D540();
-__int16 __cdecl vec2_orientation(int x, int y);
-int __cdecl MATH_vec2_length(int x, int y);
-void *__thiscall sub_42E400(void *this);
-BOOL __fastcall sub_42E430(int player);
-// UINT __usercall sub_42E450@<eax>(UINT@<eax>, char dl0@<dl>, char cl0@<cl>);
-// UINT __usercall sub_42E690@<eax>(UINT@<eax>, char@<cl>);
-void __fastcall NETZ_42E820(KKND::netz_stru2 *a1);
-int sub_42F620(void);
-// UINT __usercall NETZ_42F650@<eax>(UINT@<eax>);
-KKND::NetzError __fastcall NETZ_init(KKND::NetzProtocol protocol, int (__fastcall *a2)(_DWORD), void (__fastcall *a3)(KKND::netz_stru2 *));
+BOOL __fastcall INPUT_get_mouse_state(KKND::MouseState *state);
+int sub_42E7B0();
+void NETZ_game_start();
 KKND::NetzError __fastcall NETZ_switch_host_or_join(BOOL is_host);
-void NETZ_disconnect2();
-int __fastcall NETZ_poll(unsigned int, void *);
-KKND::NetzError __fastcall NETZ_create_player(int player);
-KKND::NetzError __fastcall NETZ_send(int player, char a2, const void *a3, unsigned int a4, int a5);
-int __fastcall NETZ_enable_joining(int _);
-int NETZ_session_close();
-KKND::NetzError __fastcall NETZ_4300C0(BOOL is_host);
-HRESULT DP_session_close();
-int __fastcall DP_player_slot_release(int);
-void __cdecl proj_mode_grenade(KKND::Task *task);
-void __cdecl __noreturn task_rocket_proj_explosion(KKND::Task *task);
-void __cdecl proj_mode_rocket(KKND::Task *task);
-void __cdecl __noreturn task_flamethrower_proj(KKND::Task *task);
-void __cdecl __noreturn task_giant_beetle_proj(KKND::Task *task);
-void __cdecl proj_mode_giant_beetle(KKND::Task *task);
-void __cdecl proj_mode_mech(KKND::Task *task);
-void __cdecl proj_mode_437690(KKND::Task *task);
-void __cdecl proj_mode_bow(KKND::Task *task);
-void __cdecl proj_mode_generic(KKND::Task *task);
-void SCAR_cleanup();
-void __fastcall SCAR_apply(int x, int y);
+int NETZ_disable_joining();
+UINT __fastcall sub_431980(KKND::PaletteEntry *a1);
+void __cdecl __noreturn sub_431E60(KKND::Task *sender);
+void __cdecl sub_431F10(KKND::Task *task); // idb
+KKND::Entity *__thiscall sub_4321A0(KKND::Task *this);
+BOOL __thiscall sub_4325B0(KKND::Task *task);
+KKND::Entity *__fastcall sub_433640(KKND::Task *task, KKND::TaskChannel channel, int x, int y, int z);
+void __cdecl sub_433AF0(KKND::Task *task);
+void __cdecl sub_433DB0(KKND::Task *task); // idb
+BOOL __fastcall sub_434500(KKND::Task *task, ptrdiff_t, ptrdiff_t, int);
+void __fastcall REND_set_clip_impl(int clip_x, int clip_y, int clip_z, int clip_w);
+UINT __fastcall REND_clear_impl(BOOL front);
+int sub_434890();
+void __fastcall sub_4349A0(char *, int, int);
+int __fastcall sub_4349D0(_BYTE *, int, int);
+int __fastcall sub_434A00(_BYTE *, int, __int16, unsigned __int16, __int16);
+BOOL __fastcall sub_434A90(int, int, int, int, int, int);
+int __fastcall sub_434AD0(_BYTE *, int, __int16, int, __int16);
+int __fastcall sub_434B70(int, int, int, int, int, int);
+int __fastcall sub_434BD0(unsigned __int8 *, int, __int16, __int16, unsigned __int16, __int16);
+int __fastcall sub_434C60(_BYTE *, int, __int16, __int16, int, __int16);
+void __fastcall sub_434D00(char *, int, int, int, int);
+void __fastcall sub_434EA0(_BYTE *, int, int, unsigned int, int);
+char __fastcall sub_4351A0(int, int, int, int, int);
+int __fastcall sub_435320(int, int, int, int, int);
 KKND::MapdRenderNode *__fastcall MAPD_Draw(KKND::MenuId mapd_id, int image_id, int z);
 void __fastcall MAPD_RemoveRenderable(KKND::MapdRenderNode *node);
 void GAME_UpdateCamera();
-void MAPD_Deinit();
-int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, unsigned int a6);
-void SOUND_cleanup_inlined();
-void SOUND_ProcessSounds();
-void SOUND_cleanup();
-void __fastcall sub_43A800(int);
-void __fastcall SOUND_43A850(KKND::stru7_sound *a1);
+int __fastcall sub_439AA0(const char *, int, int, int, KKND::Task *);
+char __thiscall sub_43A2B0(void *this);
 int sub_43B6B0();
 BOOL REND_DoFrame();
 void sub_43B910();
-int __fastcall sub_43BA40(KKND::Task *, ptrdiff_t, int (*)(void), ptrdiff_t);
-KKND::Task *sub_43BA90();
-void sub_43BAA0();
+BOOL __thiscall sub_43BAB0(_DWORD *this);
+void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task);
+void __cdecl sub_43CC00(KKND::Task *task);
 void __cdecl __noreturn sub_43F7C0(KKND::Task *task); // weak
-void __cdecl __noreturn sub_43FAD0(KKND::Task *task); // weak
-void __cdecl sub_43FF30(KKND::Task *task);
-void __cdecl sub_441940(KKND::Task *task);
-int __thiscall sub_441EF0(int *this);
-void __cdecl __noreturn sub_441F10(KKND::Task *task); // weak
+void __cdecl sub_4404D0(KKND::Task *task);
+void __cdecl __noreturn sub_440810(KKND::Task *task);
+void __cdecl __noreturn sub_440CA0(KKND::Task *task);
+void __cdecl __noreturn sub_440ED0(KKND::Task *task);
+void __cdecl __noreturn sub_441050(KKND::Task *task); // idb
+void __cdecl __noreturn sub_441150(KKND::Task *task);
+void __cdecl __noreturn sub_441260(KKND::Task *task); // idb
+void __cdecl __noreturn sub_441340(KKND::Task *task);
+void __cdecl __noreturn sub_441470(KKND::Task *task); // idb
+void __cdecl __noreturn sub_441550(KKND::Task *task);
+void __cdecl __noreturn sub_441680(KKND::Task *task); // idb
+void __cdecl __noreturn sub_441780(KKND::Task *task);
+void __cdecl sub_441CE0(int a1);
+void __cdecl __noreturn sub_441FC0(KKND::Task *task);
 void __cdecl __noreturn sub_4421F0(KKND::Task *task); // idb
+void __cdecl sub_443140(KKND::Task *task);
+int __fastcall sub_443380(KKND::Task *task, ptrdiff_t, int);
 int __fastcall sub_443780(KKND::Task *task, ptrdiff_t, int, ptrdiff_t);
 int sub_443980();
-int *__fastcall sub_4439F0(_DWORD *, int, int, int, int);
+int *__fastcall sub_4439F0(_DWORD *a1, int a2, int a3, int a4, int a5);
 void __thiscall sub_443B40(KKND::Task *this);
-int __fastcall find_newline(const char *text);
 KKND::Glyph *__fastcall UISTR_append_text(KKND::UiStr *str, const char *text, int a3);
-char sub_443F10();
+int sub_443F20();
 KKND::Task *__fastcall TSK_CreateAsync(KKND::TaskChannel chan, KKND::TaskFn fn, size_t stack_size);
 void __fastcall TASK_terminate(KKND::Task *task);
 unsigned int __cdecl TSK_yield(KKND::Task *a1, KKND::TaskYieldFlags yield_flags, int a3);
 void __fastcall TSK_terminate(KKND::Task *task);
-void TASK_ExecuteScheduledTasks();
-void sub_4455A0();
 KKND::UiStr *__fastcall ui_string_create(KKND::RenderViewport *viewport, KKND::LevelMobdSurface *font, char *a3, int a4, int cols, int rows, int a7, int a8, int a9);
 void __fastcall ui_string_free(KKND::UiStr *str);
 int __fastcall UISTR_clear(KKND::UiStr *str);
-void __fastcall UISTR_cleanup();
-int __fastcall measure_width(const char *text, int a2);
-void PROD_cleanup();
 void __fastcall mode_null(void *_);
 void __fastcall render_state_handler_ui(KKND::Entity *entity, KKND::RenderNode *node);
-void __fastcall render_state_handler_explosion(KKND::Entity *entity, KKND::RenderNode *node);
-void __fastcall render_state_handler_aircraft(KKND::Entity *entity, KKND::RenderNode *node);
-void __fastcall render_state_handler_scar(KKND::Entity *entity, KKND::RenderNode *node);
-void sub_449800();
-void __cdecl sub_449820(KKND::Task *task);
-BOOL __fastcall sub_449E00(_DWORD *, unsigned int, int);
-char __fastcall sub_44A160(char, const void *, unsigned int);
-UINT __fastcall sub_44A220(char, const void *, unsigned int);
-void minimap_cleanup();
-void PAL_tint_cleanup();
-int sub_44C4B0();
-void sub_44C5C0();
-BOOL __fastcall show_message(const char *text);
-ptrdiff_t __fastcall entity_anim_advance_rotation(ptrdiff_t *src_orientation, KKND::MobdOrientation dst_orientation, ptrdiff_t step);
+char sub_449FF0();
+UINT __fastcall sub_44A2A0(char, void *edx0, unsigned int);
+KKND::Entity *__thiscall sub_44A700(KKND::Task *this);
 // void *__cdecl malloc(size_t Size);
-// void __cdecl free(void *Block);
 // int sprintf(char *const Buffer, const char *const Format, ...);
 // void __cdecl srand(unsigned int Seed);
 // int __cdecl rand();
@@ -201,8 +139,29 @@ ptrdiff_t __fastcall entity_anim_advance_rotation(ptrdiff_t *src_orientation, KK
 //-------------------------------------------------------------------------
 // Data declarations
 
-int g_veterancy_damage_mod[3] = { 0, 51, 102 };
-int g_veterancy_accuracy_bonus[4] = { 0, 10, 20, 0 };
+KKND::BoxdCollisionHandler g_unit_collision_handlers[20] =
+{
+  { 1, 2, NULL, NULL },
+  { 0, 1, NULL, &BOXD_collide_solid },
+  { 0, 1, NULL, &BOXD_collide_floor },
+  { 0, 1, NULL, &BOXD_collide_ramp_ltr },
+  { 0, 1, NULL, &BOXD_collide_ramp_rtl },
+  { 0, 1, NULL, &BOXD_collide_slope_left },
+  { 0, 1, NULL, &BOXD_collide_slope_right },
+  { 0, 1, NULL, &BOXD_collide_floor },
+  { 0, 1, NULL, &BOXD_collide_solid },
+  { 0, 1, NULL, &BOXD_collide_solid },
+  { 0, 1, NULL, &BOXD_collide_solid },
+  { 0, 1, NULL, &BOXD_collide_solid },
+  { 0, 1, NULL, &BOXD_collide_solid },
+  { 0, 1, NULL, &BOXD_collide_corner_right },
+  { 0, 1, NULL, &BOXD_collide_corner_left },
+  { 0, 1, NULL, &BOXD_collide_solid },
+  { 0, 0, NULL, NULL },
+  { 5, 0, NULL, NULL },
+  { 2, 0, &BOXD_collide_cursor, NULL },
+  { 0, 4, NULL, &BOXD_collide_solid }
+};
 KKND::RenderViewport *g_rend_default_viewport = &g_default_viewport;
 KKND::BoxdCollisionHandler g_ui_collision_handlers[7] =
 {
@@ -1237,233 +1196,138 @@ KKND::LevelDesc g_lvl_desc[68] =
     { 0, 0, 0u, 0u }
   }
 };
-KKND::LevelId g_last_loaded_level_id = LevelId_Invalid;
-char byte_468A58 = 'E'; // weak
+char *off_46773C[39] =
+{
+  "mb_m01.wav",
+  &off_46C520,
+  "mb_m02.wav",
+  &off_46C548,
+  "mb_m03.wav",
+  &off_46C578,
+  "mb_m04.wav",
+  &off_46C598,
+  "mb_m05.wav",
+  &off_46C5C0,
+  "mb_m06.wav",
+  &off_46C5F8,
+  "mb_m07.wav",
+  &off_46C630,
+  "mb_m08.wav",
+  &off_46C658,
+  "mb_m09.wav",
+  &off_46C688,
+  "mb_m10.wav",
+  &off_46C6B0,
+  "mb_s01.wav",
+  &off_46C6D0,
+  "mb_s02.wav",
+  &off_46C6F0,
+  "mb_s03.wav",
+  &off_46C738,
+  "mb_s04.wav",
+  &off_46C778,
+  "mb_s05.wav",
+  &off_46C7B8,
+  "mb_s06.wav",
+  &off_46C7F0,
+  "mb_s07.wav",
+  &off_46C828,
+  "mb_s08.wav",
+  &off_46C860,
+  "mb_s09.wav",
+  &off_46C888,
+  "mb_s10.wav"
+}; // weak
 int dword_468B50 = 1; // weak
-int dword_468B54 = -1; // idb
 int dword_468B58 = -1; // weak
 BOOL g_is_single_player = 1;
-int dword_468B60 = 1; // weak
-KKND::NetzProtocol g_netz_protocol = NetzProtocol_Invalid;
-const char off_468CD8[] = { '0', '\x8D', 'F', '\0' };
-const char off_468CDC[] = { '$', '\x8D', 'F', '\0' };
-int g_4690A8_sfx_volume = 16;
-int dword_4690AC = 16; // weak
-KKND::SoundId dword_46BB80[2] = { SoundId_9, SoundId_10 }; // weak
-ptrdiff_t g_scar_frames[8] = { 1976, 1988, 2000, 2012, 2024, 2036, 2048, 2060 };
-const char *off_46C398[3] = { "EASY  ", "NORMAL", "HARD  " };
-int dword_46E3F0 = -2; // weak
-int g_difficulty_mult = 1;
-_UNKNOWN dword_46E404; // weak
+const CHAR aPlayer[] = "PLAYER";
+int dword_46E3F8 = 2; // weak
 int g_player_num = 1;
 int dword_47050C = -1; // weak
-char aWaitingForServ[26] = "waiting for server packet"; // weak
-char aWaitingForPlay[26] = "waiting for player packet"; // weak
-signed int g_sin_tbl[32] =
-{
-  0,
-  50,
-  98,
-  142,
-  181,
-  213,
-  237,
-  251,
-  256,
-  251,
-  237,
-  213,
-  181,
-  142,
-  98,
-  50,
-  0,
-  -50,
-  -98,
-  -142,
-  -181,
-  -213,
-  -237,
-  -251,
-  -256,
-  -251,
-  -237,
-  -213,
-  -181,
-  -142,
-  -98,
-  -50
-};
-UINT g_last_result = 0u;
-int dword_477344 = 0; // weak
-int dword_47734C = 0; // weak
-KKND::BuildingsTracker *g_buildings_tracker_pool = NULL;
-KKND::CplcEntity *g_current_lvl_cplc_layer_y_sorted_bottom;
-KKND::LevelCplcSurface *g_current_lvl_cplc_layer;
-KKND::CplcEntity *g_current_lvl_cplc_layer_x_sorted_right;
-KKND::LevelCplcSurface *g_current_lvl_cplc_backup;
-int g_cplc_spawn_x; // weak
-KKND::CplcEntity *g_current_lvl_cplc_layer_x_sorted_base;
-int g_cplc_spawn_y; // weak
-KKND::CplcEntity *g_current_lvl_cplc_layer_y_sorted_base;
-KKND::CplcEntityInViewport *g_cplc_viewport_active_head;
-KKND::CplcEntity *g_cplc_camera;
-KKND::CplcEntityInViewport *g_cplc_viewport_pool;
-KKND::CplcEntity *g_current_lvl_cplc_layer_y_sorted_top;
-KKND::CplcEntityInViewport *g_cplc_viewport_active_head2;
-size_t g_current_lvl_cplc_layer_size;
-KKND::CplcEntity *g_current_lvl_cplc_layer_x_sorted_left;
-KKND::OilPatch *g_oil_patch_pool;
-KKND::Task *g_ai_players_tasks[7];
-_UNKNOWN unk_4778EC; // weak
+UINT g_last_async_result = 0u;
+void *g_stack_frame = NULL;
+int g_coroutine_nesting_depth = 0; // weak
+BOOL g_fade_lock;
 WAVEFORMATEX stru_477980;
-int (__thiscall *dword_4785C8)(_DWORD); // weak
+int dword_4785B8; // weak
+int dword_4785BC; // weak
+KKND::PaletteEntry *g_pal_4785C0;
+void (__fastcall *REND_clear)(BOOL front);
+int dword_4785CC; // weak
+int (__stdcall *REND_fmv_interlaced)(_DWORD, _DWORD, _DWORD); // weak
 KKND::PaletteEntry *g_pal_4785DC;
+int (__fastcall *REND_blit_tile_transparent)(_DWORD, _DWORD, _DWORD); // weak
+int (__fastcall *REND_blit)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
+KKND::PaletteEntry stru_4785F0; // idb
+void (__fastcall *REND_set_clip)(_DWORD, _DWORD, _DWORD, _DWORD);
+int (__fastcall *REND_blit_rle_override_palette_mirrored)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
+int (__fastcall *REND_blit_mirrored)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
+int (__stdcall *REND_fmv)(_DWORD, _DWORD, _DWORD); // weak
+int (__fastcall *REND_blit_rle)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
+BOOL g_478A0C_unused;
+int (__fastcall *REND_blit_tile)(_DWORD, _DWORD, _DWORD); // weak
+int dword_478A14; // weak
+COLORREF dword_478A18[25];
+int (__fastcall *REND_blit_rle_override_palette)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
+int g_display_height; // weak
 _DWORD g_rend_screen_height; // idb
 _DWORD g_rend_screen_width; // idb
-KKND::TerrainTile *g_terrain;
-int g_map_width; // weak
-int g_map_height; // weak
-int g_map_num_tiles_x; // weak
+int (__fastcall *REND_blit_rle_mirrored)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD); // weak
+BOOL g_478A94_unused;
+int dword_478A98; // weak
+int g_display_width; // weak
 int g_rand_seed; // weak
-_UNKNOWN dword_479534; // weak
-int g_opportunity_timer; // weak
-KKND::MobdImageData *g_healthbar_by_veterancy_wide[3][28];
-KKND::MobdImageData *g_healthbar_by_veterancy_short[3][12];
-struct tagRECT g_window_rect; // idb
 KKND::BoxdCollisionHandler g_null_collision;
-BOOL g_tasks_initialized;
-int dword_479DBC; // weak
-int g_ui_string_initialized; // weak
-int dword_479DC4; // weak
-KKND::LevelHunkSection *g_current_lvl_sections;
-BOOL g_cplc_initialized;
-BOOL g_mobd_initialized;
-BOOL g_timer_initialized;
-int dword_479DD8; // weak
-KKND::LevelHunk *g_current_lvl;
-BOOL g_fade_initialized;
-BOOL g_window_initialized;
-BOOL g_boxd_collisions_initialized;
-int dword_479DEC; // weak
-BOOL g_mapd_initialized;
 char g_app_root[20]; // idb
-KKND::LevelHunk *g_level;
 KKND::MapdRenderNode *dword_47A010[3];
-int dword_47A01C; // weak
 char g_game_path[256];
-KKND::LevelHunk *g_splash_lvl;
 KKND::LevelHunk *g_supspr_lvl;
 KKND::MissionOutcome g_mission_outcome;
+int dword_47A184; // weak
 BOOL g_play_campaign_outro;
+int dword_47A198; // weak
+int dword_47A19C; // weak
+int dword_47A1A0; // weak
+int dword_47A1A4; // weak
+int dword_47A1A8; // weak
+int dword_47A1AC; // weak
+int dword_47A1B0; // weak
 KKND::GameLoop g_game_loop;
 KKND::LevelId g_current_lvl_id;
-__int16 g_current_mute_level; // weak
-__int16 g_current_surv_level; // weak
-int dword_47A3DC; // weak
 KKND::LevelMobd *g_mobd;
 KKND::Entity g_default_entity;
-void *dword_47A4F4; // idb
-void *dword_47A52C; // idb
-KKND::BuildingConstruction *g_construction_pool;
-int dword_47A738; // weak
-char byte_47A740; // idb
-char byte_47A741[37]; // weak
-int g_netz_is_game_finished; // weak
-KKND::netz_stru2 *dword_47A77C;
-char a3[]; // weak
-char byte_47A781[]; // weak
-char byte_47A782[]; // weak
-char byte_47A783[13]; // weak
-int player[]; // weak
-int dword_47A794[]; // weak
-int dword_47A798[36]; // weak
-int dword_47A828; // weak
-BOOL g_netz_is_game_started;
-int g_netz_is_game_started_2_unused; // weak
-BOOL g_netz_is_game_host;
-void (__fastcall *dword_47A838)(KKND::netz_stru2 *);
-int dword_47A83C; // weak
-int dword_47A840; // weak
-DPID g_dp_pid;
-IDirectPlay2A *g_dp;
-int dword_47A968[78]; // weak
+BOOL g_netz_enable_lockstep_mode;
+KKND::NetzPlayer g_netz_players[6];
 KKND::Task *g_task_47C028; // idb
 int dword_47C030; // weak
-int g_num_active_projectiles; // weak
-int g_num_active_explosions; // weak
-KKND::Scar *g_scar_active_head;
-KKND::Scar *g_scar_active_tail;
-KKND::Scar *g_scar_pool;
-KKND::Scar *g_scar_free_head;
 KKND::MapdCamera g_mapd_camera;
-KKND::stru7_sound *dword_47C398;
-KKND::stru7_sound *g_sounds_head;
-LPDIRECTSOUND g_ds; // idb
-KKND::stru7_sound *g_sounds_free_head;
-KKND::stru7_sound *g_sounds_pool;
-int dword_47C5C0; // weak
-void *dword_47C5C8; // idb
-BOOL g_sounds_initialized;
-int dword_47C5D4; // weak
-int dword_47C5F8; // weak
 int dword_47C5FC; // weak
-_UNKNOWN byte_47C600; // weak
-void *dword_47C608; // idb
 int dword_47C610; // weak
 int dword_47C614; // weak
 void *dword_47C620; // idb
 int dword_47C624; // weak
-int dword_47C660; // weak
+char g_demo_faction; // weak
+KKND::UiStr *dword_47C65C;
 KKND::Entity *dword_47C664; // idb
+int dword_47C6B8; // weak
 int dword_47C6BC; // weak
 int dword_47C6C0; // weak
 int dword_47C6C4; // weak
 int dword_47C6C8; // weak
 int dword_47C6D4; // weak
 BOOL g_is_demo_build;
+BOOL g_level_loading_lock;
 KKND::Task *g_47C6E0_mobd79_task;
-int dword_47C6F4; // weak
-_UNKNOWN dword_47C6F8; // weak
+int dword_47C6E4; // weak
+int dword_47C6E8; // weak
+int dword_47C6EC; // weak
+int dword_47C6F0; // weak
 KKND::Coroutine *volatile g_coroutine_current;
 KKND::Coroutine *g_coroutine_list_head;
 __int16 g_netz_synchronized_lockstep_mode; // weak
-KKND::SidebarFactoryProduction *g_prod_pool;
-KKND::Entity *g_47C96C; // idb
-KKND::SidebarFactoryProductionOption *g_prod_options_pool;
-KKND::UiStr *g_sidebar_cash_string;
-char byte_47CA80[96]; // weak
-KKND::GameEvent g_47CAE0;
-KKND::Task *g_47CAF0[7];
-int dword_47CB0C; // weak
-int dword_47CB10; // weak
 int dword_47CB14; // weak
-int dword_47CB18; // weak
-int dword_47CB1C; // weak
-int dword_47CB20; // weak
-KKND::MapdScrlImage *g_shroud;
-KKND::Entity *g_minimap_entity; // idb
-void *g_minimap_revealed_pixels;
-void *g_minimap_unrevealed_pixels;
-void *dword_47CB8C; // idb
-KKND::MapdRenderNode *g_fog_of_war; // idb
-int g_orientation_to_sin[255]; // weak
-int g_angle_to_orientation[256];
-KKND::Unit *g_unit_list_head;
-KKND::Unit *g_unit_pool;
-KKND::Unit *g_unit_free_head;
-KKND::UnitEscortNode *g_escort_pool;
-unsigned __int8 *g_tint_palettes_per_player[7];
-KKND::Unit *dword_47DCA4;
-int g_palette_idx_per_player[7];
-int g_num_player_units; // weak
-int g_num_ai_units; // weak
-BOOL g_escort_initialized;
-BOOL g_os_quit_signal_received;
-// extern void (__stdcall *Sleep)(DWORD dwMilliseconds);
-// extern MMRESULT (__stdcall *timeEndPeriod)(UINT uPeriod);
-// extern MMRESULT (__stdcall *timeBeginPeriod)(UINT uPeriod);
-// extern DWORD (__stdcall *timeGetTime)();
+// extern DWORD (__stdcall *GetTickCount)();
 
 
 //----- (00401000) --------------------------------------------------------
@@ -1718,7 +1582,7 @@ void __fastcall unit_mode_401480(KKND::Unit *unit)
   if ( entity->z <= 0 )
   {
     entity->z = 255;
-    entity_play_sound(entity, SoundId_9, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_9, g_sfx_vol, 0);
     entity->mobd_id = MobdId_Explosions;
     entity_anim_init(entity, 0);
     entity->anim_speed = 0x20000000;
@@ -1807,7 +1671,7 @@ LABEL_6:
 }
 
 //----- (00401660) --------------------------------------------------------
-void __fastcall UNIT_mode_bomber_on_death(KKND::Unit *unit)
+void __fastcall unit_mode_bomber_on_death(KKND::Unit *unit)
 {
   unit_401530_bomber(unit, 1);
 }
@@ -2170,7 +2034,7 @@ void __fastcall nuke_mode_401D30(KKND::Nuke *nuke)
   if ( proj->mobd_lookup_offset_impact != -1 )
   {
     entity->z = 255;
-    entity_play_sound(entity, SoundId_10, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_10, g_sfx_vol, 0);
     entity->mobd_id = MobdId_Explosions;
     entity_anim_init(entity, proj->mobd_lookup_offset_impact);
     entity->anim_speed = 0x20000000;
@@ -2200,7 +2064,7 @@ void __fastcall nuke_mode_init(KKND::Nuke *nuke)
   entity->z_speed = 512;
   entity->z_speed_limit = 512;
   entity->z_acceleration = -34;
-  entity_play_sound(entity, SoundId_163, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_163, g_sfx_vol, 0);
   nuke->mode = nuke_mode_401DC0;
 }
 
@@ -2275,19 +2139,19 @@ void __fastcall MSG_beast_enclosure(
           switch ( (unsigned int)payload )
           {
             case UnitType_Mute_DireWolf:
-              SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_sfx_vol, 16, 0);
               break;
             case UnitType_Mute_GiantScorpion:
-              SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_sfx_vol, 16, 0);
               break;
             case UnitType_Mute_WarMastadont:
-              SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_sfx_vol, 16, 0);
               break;
             case UnitType_Mute_GiantBeetle:
-              SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_sfx_vol, 16, 0);
               break;
             case UnitType_Mute_MissileCrab:
-              SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_sfx_vol, 16, 0);
               break;
             default:
               return;
@@ -2530,7 +2394,7 @@ void __fastcall UNIT_mode_beast_enclosure_complete(KKND::Unit *unit)
   if ( turret )
     turret->entity->rn->flags &= ~RenderNode_Skip;
   if ( g_player_num == unit->player_num && !unit->entity->cplc_spawn_params )
-    SOUND_play(SoundId_96, 0, g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_96, 0, g_sfx_vol, 16, 0);
   unit->task->message_handler = MSG_beast_enclosure;
   unit->task->channel = TaskChannel_BeastEnclosure;
   if ( unit->entity->cplc_spawn_params )
@@ -2614,7 +2478,7 @@ void __fastcall MSG_blacksmith(KKND::Task *receiver, KKND::Task *sender, KKND::T
         {
           if ( g_player_num == unit->player_num )
           {
-            SOUND_play(SoundId_Mute_UnitReady, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_Mute_UnitReady, 0, g_sfx_vol, 16, 0);
             show_message_unit(nullptr, "Unit Ready");
           }
         }
@@ -2740,7 +2604,7 @@ void __fastcall UNIT_mode_blacksmith_complete(KKND::Unit *unit)
   if ( turret )
     turret->entity->rn->flags &= ~RenderNode_Skip;
   if ( g_player_num == unit->player_num && !unit->entity->cplc_spawn_params )
-    SOUND_play(SoundId_96, 0, g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_96, 0, g_sfx_vol, 16, 0);
   unit->task->channel = TaskChannel_Blacksmith;
   if ( unit->entity->cplc_spawn_params )
     unit->mode = UNIT_mode_building_snap_to_grid_cplc;
@@ -3009,18 +2873,18 @@ void __fastcall unit_on_sabotage(KKND::Unit *unit, KKND::Unit *saboteur, KKND::U
       {
         show_message_unit(unit, "Building Sabotaged");
         if ( saboteur->type == UnitType_Surv_Saboteur )
-          SOUND_play(SoundId_40, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_40, 0, g_sfx_vol, 16, 0);
         else
-          SOUND_play(SoundId_105, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_105, 0, g_sfx_vol, 16, 0);
       }
     }
     else if ( player_num == g_player_num )
     {
       show_message_unit(unit, "Building Sabotaged");
       if ( saboteur->type == UnitType_Surv_Saboteur )
-        SOUND_play(SoundId_26, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_26, 0, g_sfx_vol, 16, 0);
       else
-        SOUND_play(SoundId_93, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_93, 0, g_sfx_vol, 16, 0);
     }
     v9 = state->garrison_strength;
     if ( v9 )
@@ -3138,9 +3002,9 @@ void __fastcall MessageHandler_BuildingDefault(
           {
             unit->cplc_spawn_param = 2000;
             if ( is_player_evolved() )
-              SOUND_play(SoundId_129, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_129, 0, g_sfx_vol, 16, 0);
             else
-              SOUND_play(SoundId_20, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_20, 0, g_sfx_vol, 16, 0);
           }
           break;
         case TaskMessage_ReceiveDamage:
@@ -3188,9 +3052,9 @@ void __fastcall MessageHandler_BuildingDefault(
             if ( entity_create_by_unit_type((KKND::UnitType)payload, v8, v9, player_num) )
             {
               if ( is_player_evolved() )
-                SOUND_play(SoundId_Mute_UnitReady, 0, g_4690A8_sfx_volume, 16, 0);
+                SOUND_play(SoundId_Mute_UnitReady, 0, g_sfx_vol, 16, 0);
               else
-                SOUND_play(SoundId_Surv_UnitReady, 0, g_4690A8_sfx_volume, 16, 0);
+                SOUND_play(SoundId_Surv_UnitReady, 0, g_sfx_vol, 16, 0);
               show_message_unit(nullptr, "Unit Ready");
             }
             else
@@ -3226,7 +3090,7 @@ void __cdecl __noreturn task_explosion_4(KKND::Task *task)
 
   entity = task->entity;
   entity->collider = &g_null_collision;
-  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_3, g_sfx_vol, 0);
   entity->is_collidable = 1;
   v2 = kknd_rand_1("C:\\k\\Scripts\\Building.cpp", 372);
   x = entity->x;
@@ -3250,7 +3114,7 @@ void __cdecl __noreturn task_explosion_3(KKND::Task *task)
   entity = task->entity;
   entity->collider = &g_null_collision;
   TSK_yield(task, Task_Sleep, 130);
-  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_3, g_sfx_vol, 0);
   entity_anim_init(entity, 0);
   v2 = entity->y + 2048;
   entity->is_collidable = 1;
@@ -3358,7 +3222,7 @@ void __fastcall UNIT_mode_building_placement_validate(KKND::Unit *unit)
 {
   if ( unit_425820(unit, 76800) )
   {
-    SOUND_play(SoundId_MobileBasePlanting, 0, g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_MobileBasePlanting, 0, g_sfx_vol, 16, 0);
     unit_4258C0(unit, g_player_num);
     buildings_tracker_increment(unit->type);
     unit_410BE0_healthbar(unit);
@@ -3431,9 +3295,9 @@ void __fastcall UINT_mode_building_cleanup(KKND::Unit *unit)
   if ( unit->player_num == g_player_num )
   {
     if ( is_player_evolved() )
-      SOUND_play(SoundId_101, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_101, 0, g_sfx_vol, 16, 0);
     else
-      SOUND_play(SoundId_23, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_23, 0, g_sfx_vol, 16, 0);
   }
   BOXD_building_release_area(unit);
   entity_remove(unit->entity);
@@ -3694,32 +3558,32 @@ void buildings_tracker_cleanup()
 }
 
 //----- (00403B70) --------------------------------------------------------
-int __fastcall sub_403B70(CHAR a1)
+int __fastcall OS_is_drive_cdrom(char drive_letter)
 {
   KKND::Coroutine *v1; // et1
-  UINT DriveTypeA; // ecx
+  UINT drive_type; // ecx
   KKND::Coroutine *v3; // et1
   int result; // eax
-  CHAR RootPathName[4]; // [esp+0h] [ebp-4h] BYREF
+  CHAR path[4]; // [esp+0h] [ebp-4h] BYREF
 
-  strcpy(RootPathName, "#:\\");
-  RootPathName[0] = a1;
-  g_last_result = dword_464068;
+  strcpy(path, "#:\\");
+  path[0] = drive_letter;
+  g_last_async_result = dword_464068;
   v1 = g_coroutine_current;
-  if ( g_coroutine_list_head != v1 && ++dword_47734C == 1 )
-    dword_477344 = (int)RootPathName;
-  DriveTypeA = GetDriveTypeA(RootPathName);
-  g_last_result = DriveTypeA;
+  if ( g_coroutine_list_head != v1 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = path;
+  drive_type = GetDriveTypeA(path);
+  g_last_async_result = drive_type;
   v3 = g_coroutine_current;
   if ( g_coroutine_list_head != v3 )
-    --dword_47734C;
-  switch ( DriveTypeA )
+    --g_coroutine_nesting_depth;
+  switch ( drive_type )
   {
-    case 0u:
-    case 1u:
+    case DRIVE_UNKNOWN:
+    case DRIVE_NO_ROOT_DIR:
       result = -1;
       break;
-    case 5u:
+    case DRIVE_CDROM:
       result = 1;
       break;
     default:
@@ -3729,9 +3593,7 @@ int __fastcall sub_403B70(CHAR a1)
   return result;
 }
 // 464068: using guessed type int dword_464068;
-// 477340: using guessed type int dword_477340;
-// 477344: using guessed type int dword_477344;
-// 47734C: using guessed type int dword_47734C;
+// 47734C: using guessed type int g_coroutine_nesting_depth;
 
 //----- (00403C20) --------------------------------------------------------
 int get_clanhall_max_level()
@@ -3871,7 +3733,7 @@ void __fastcall MSG_clanhall(KKND::Task *receiver, KKND::Task *sender, KKND::Tas
           if ( unit->player_num == g_player_num )
           {
             show_message_unit(nullptr, "Unit Ready");
-            SOUND_play(SoundId_Mute_UnitReady, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_Mute_UnitReady, 0, g_sfx_vol, 16, 0);
           }
         }
         else
@@ -4018,7 +3880,7 @@ void __fastcall UNIT_mode_clanhall_complete(KKND::Unit *unit)
   if ( turret )
     turret->entity->rn->flags &= ~RenderNode_Skip;
   if ( g_player_num == unit->player_num && !unit->entity->cplc_spawn_params )
-    SOUND_play(SoundId_96, 0, g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_96, 0, g_sfx_vol, 16, 0);
   if ( unit->entity->cplc_spawn_params )
     unit->mode = UNIT_mode_building_snap_to_grid_cplc;
   else
@@ -4027,7 +3889,7 @@ void __fastcall UNIT_mode_clanhall_complete(KKND::Unit *unit)
 }
 
 //----- (00404320) --------------------------------------------------------
-void __fastcall unit_mode_clanhall_downgrade_production(KKND::Unit *unit)
+void __fastcall UNIT_mode_clanhall_downgrade_production(KKND::Unit *unit)
 {
   KKND::Unit *v1; // edi
   int player_num; // edx
@@ -4070,7 +3932,7 @@ LABEL_17:
       case 4:
         if ( (g_lvl_desc[v5].disabled_units_mask & 0x1000) == 0 )
           sidebar_disable_production(g_sidebar_tower_prod, UnitType_Mute_RotaryCannon);
-        sub_447250();
+        aircraft_revoke_production();
         goto LABEL_17;
     }
     v7 = *(&g_buildings_tracker_free_head + upgrade_level--);// BUG -- g_clanhall_levels.num_buildings_by_level[upgrade_level-1]
@@ -4088,7 +3950,7 @@ LABEL_22:
       dword_47B3D8 = 1;
     }
     sub_446860(g_sidebar_tower_prod);
-    sub_447250();
+    aircraft_revoke_production();
     sub_446860(g_sidebar_aircraft_prod);
     g_sidebar_aircraft_prod = nullptr;
     g_sidebar_tower_prod = nullptr;
@@ -5221,7 +5083,7 @@ int __fastcall unit_show_hint(KKND::Unit *unit)
   result = unit->player_num;
   if ( result )
   {
-    sprintf(byte_4773D0, "%s's %s", (const char *)&unk_47A767 + 28 * result, unit->stats->name);
+    sprintf(byte_4773D0, "%s's %s", g_netz_players[result].name, unit->stats->name);
     return show_message_unit(unit, byte_4773D0);
   }
   return result;
@@ -7364,7 +7226,7 @@ LABEL_16:
         goto LABEL_23;
       }
     }
-    else if ( !byte_47A766[28 * unit->player_num] )
+    else if ( g_netz_players[unit->player_num].faction == NetzFaction_Surv )
     {
       unit->entity->is_collidable = 1;
       goto LABEL_16;
@@ -7495,7 +7357,7 @@ void __fastcall unit_mode_tech_bunker_407950(KKND::Unit *unit)
     if ( u )
     {
       unit->multi_purpose_field_1 = u->player_num;
-      entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
+      entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_sfx_vol, 0);
       unit->mode = unit_mode_tech_bunker_407870;
     }
   }
@@ -7533,7 +7395,7 @@ void __fastcall unit_mode_tech_bunker_4079F0_surv18(KKND::Unit *unit)
     {
       unit->cplc_spawn_param = 10;
       unit->multi_purpose_field_1 = any_in_radius->player_num;
-      entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
+      entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_sfx_vol, 0);
       unit->mode = unit_mode_tech_bunker_407870;
     }
   }
@@ -7605,7 +7467,7 @@ void __cdecl UNIT_Handler_TechBunker(KKND::Task *task)
 //----- (00407C20) --------------------------------------------------------
 void __fastcall unit_mode_tech_bunker_407C20(KKND::Unit *unit)
 {
-  SOUND_play(SoundId_23, 0, g_4690A8_sfx_volume, 16, 0);
+  SOUND_play(SoundId_23, 0, g_sfx_vol, 16, 0);
   BOXD_building_release_area(unit);
   entity_remove(unit->entity);
   TSK_terminate(unit->task);
@@ -7796,9 +7658,9 @@ void __fastcall MessageHandler_Drillrig(
         {
           unit->cplc_spawn_param = 1500;
           if ( is_player_evolved() )
-            SOUND_play(SoundId_128, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_128, 0, g_sfx_vol, 16, 0);
           else
-            SOUND_play(SoundId_56, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_56, 0, g_sfx_vol, 16, 0);
         }
         break;
       case TaskMessage_ReceiveDamage:
@@ -8131,7 +7993,7 @@ void sub_408550()
     v11 = 0;
     qmemcpy(g_477490, g_pal_4778A4, sizeof(g_477490));
     v12 = g_477490;
-    v13 = byte_47A781;
+    v13 = MEMORY[0x47A781];
     v14 = &g_palette_idx_per_player[1];
     do
     {
@@ -8260,8 +8122,8 @@ LABEL_22:
   }
   if ( v11 < 2 )
     v11 = 2;
-  if ( v11 > g_4690A8_sfx_volume )
-    v11 = g_4690A8_sfx_volume;
+  if ( v11 > g_sfx_vol )
+    v11 = g_sfx_vol;
   if ( unused || v11 )
     SOUND_play(sound_id, 0, v11, v10, unused);
 }
@@ -13281,7 +13143,7 @@ BOOL REND_routines_init()
   g_478A0C_unused = 1;
   REND_set_clip = REND_set_clip_impl;
   REND_set_clip_impl(0, 0, g_rend_screen_width, g_rend_screen_height);
-  dword_4785C8 = (int (__thiscall *)(_DWORD))sub_434790;
+  REND_clear = (void (__fastcall *)(BOOL))REND_clear_impl;
   REND_fmv = (int (__stdcall *)(_DWORD, _DWORD, _DWORD))sub_434D00;
   REND_blit = (int (__fastcall *)(_DWORD, _DWORD, _DWORD, _DWORD, _DWORD))sub_4351A0;
   REND_fmv_interlaced = (int (__stdcall *)(_DWORD, _DWORD, _DWORD))sub_434EA0;
@@ -13300,7 +13162,6 @@ BOOL REND_routines_init()
 }
 // 4785B8: using guessed type int dword_4785B8;
 // 4785BC: using guessed type int dword_4785BC;
-// 4785C8: using guessed type int (__thiscall *dword_4785C8)(_DWORD);
 // 4785CC: using guessed type int dword_4785CC;
 // 4785D8: using guessed type int (__stdcall *REND_fmv_interlaced)(_DWORD, _DWORD, _DWORD);
 // 4785E0: using guessed type int (__fastcall *REND_blit_tile_transparent)(_DWORD, _DWORD, _DWORD);
@@ -13423,19 +13284,17 @@ void __fastcall sub_40E430(unsigned int brightness)
   }
   else
   {
-    dword_4785C8(0);
+    REND_clear(0);
   }
 }
-// 4785C8: using guessed type int (__thiscall *dword_4785C8)(_DWORD);
 // 478A14: using guessed type int dword_478A14;
 
 //----- (0040E530) --------------------------------------------------------
-int sub_40E530()
+void sub_40E530()
 {
   REND_set_clip(0, 0, g_rend_screen_width, g_rend_screen_height);
-  return dword_4785C8(0);
+  REND_clear(0);
 }
-// 4785C8: using guessed type int (__thiscall *dword_4785C8)(_DWORD);
 
 //----- (0040E550) --------------------------------------------------------
 KKND::PaletteEntry *palette_40E550()
@@ -16646,12 +16505,11 @@ BOOL REND_direct_draw_init()
   BOOL v3; // eax
   BOOL v4; // eax
   BOOL v5; // eax
-  BOOL v6; // eax
   HWND ActiveWindow; // eax
-  int v9; // [esp+68h] [ebp-280h] BYREF
+  int v8; // [esp+68h] [ebp-280h] BYREF
   LPDIRECTDRAW lpDD; // [esp+6Ch] [ebp-27Ch] BYREF
-  DDCAPS_DX3 v11; // [esp+70h] [ebp-278h] BYREF
-  DDCAPS_DX3 v12; // [esp+1ACh] [ebp-13Ch] BYREF
+  DDCAPS_DX3 v10; // [esp+70h] [ebp-278h] BYREF
+  DDCAPS_DX3 v11; // [esp+1ACh] [ebp-13Ch] BYREF
 
   if ( !g_ddraw_initialized && !g_pdd )
   {
@@ -16662,12 +16520,12 @@ BOOL REND_direct_draw_init()
       g_pdd = lpDD;
       if ( lpDD )
       {
+        v10.dwSize = 316;
+        memset(&v10.dwCaps, 0, 0x138u);
         v11.dwSize = 316;
         memset(&v11.dwCaps, 0, 0x138u);
-        v12.dwSize = 316;
-        memset(&v12.dwCaps, 0, 0x138u);
-        lpDD->lpVtbl->GetCaps(lpDD, (LPDDCAPS)&v11, (LPDDCAPS)&v12);
-        if ( (v11.dwCaps & 0x80000000) != 0 || (v12.dwCaps & 0x80000000) != 0 )
+        lpDD->lpVtbl->GetCaps(lpDD, (LPDDCAPS)&v10, (LPDDCAPS)&v11);
+        if ( (v10.dwCaps & 0x80000000) != 0 || (v11.dwCaps & 0x80000000) != 0 )
         {
           if ( dword_4798AC == 1 )
           {
@@ -16687,41 +16545,41 @@ BOOL REND_direct_draw_init()
               g_479818.ddsCaps.dwCaps = 536;
               g_479818.dwBackBufferCount = 2;
               dword_4798C4 = 1;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v9, nullptr) )
+              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v8, nullptr) )
               {
                 v0 = 0;
               }
               else
               {
-                g_pdds = (IDirectDrawSurface *)v9;
-                v0 = v9 != 0;
+                g_pdds = (IDirectDrawSurface *)v8;
+                v0 = v8 != 0;
               }
               if ( v0 )
                 goto LABEL_50;
               g_479818.ddsCaps.dwCaps = 536;
               g_479818.dwBackBufferCount = 1;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v9, nullptr) )
+              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v8, nullptr) )
               {
                 v1 = 0;
               }
               else
               {
-                g_pdds = (IDirectDrawSurface *)v9;
-                v1 = v9 != 0;
+                g_pdds = (IDirectDrawSurface *)v8;
+                v1 = v8 != 0;
               }
               if ( v1 )
                 goto LABEL_50;
               dword_4798C4 = 0;
               g_479818.dwFlags = 1;
               g_479818.ddsCaps.dwCaps = 512;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v9, nullptr) )
+              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v8, nullptr) )
               {
                 v2 = 0;
               }
               else
               {
-                g_pdds = (IDirectDrawSurface *)v9;
-                v2 = v9 != 0;
+                g_pdds = (IDirectDrawSurface *)v8;
+                v2 = v8 != 0;
               }
               if ( v2 )
               {
@@ -16729,19 +16587,19 @@ BOOL REND_direct_draw_init()
                 g_479818.dwWidth = g_window_width;
                 g_479818.dwFlags = 7;
                 g_479818.ddsCaps.dwCaps = 2112;
-                if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v9, nullptr) )
+                if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v8, nullptr) )
                 {
                   v3 = 0;
                 }
                 else
                 {
-                  g_pdds2 = (IDirectDrawSurface *)v9;
-                  v3 = v9 != 0;
+                  g_pdds2 = (IDirectDrawSurface *)v8;
+                  v3 = v8 != 0;
                 }
                 if ( v3 )
                 {
 LABEL_50:
-                  if ( g_pdds2 || (v9 = 4, !g_pdds->lpVtbl->GetAttachedSurface(g_pdds, (LPDDSCAPS)&v9, &g_pdds2)) )
+                  if ( g_pdds2 || (v8 = 4, !g_pdds->lpVtbl->GetAttachedSurface(g_pdds, (LPDDSCAPS)&v8, &g_pdds2)) )
                   {
 LABEL_38:
                     if ( (dword_4798AC != 1
@@ -16753,9 +16611,9 @@ LABEL_38:
                       && !g_pdds->lpVtbl->GetSurfaceDesc(g_pdds, &g_479818) )
                     {
                       qmemcpy(&unk_4797E8, &g_479818.ddpfPixelFormat, 0x20u);
-                      v6 = ShowWindow(g_hwnd, g_cmd_show);
+                      ShowWindow(g_hwnd, g_cmd_show);
                       g_ddraw_initialized = 0;
-                      sub_434790(v6, 1);
+                      REND_clear_impl(1);
                       return 1;
                     }
                   }
@@ -16785,14 +16643,14 @@ LABEL_38:
               g_479818.dwSize = 108;
               g_479818.dwFlags = 1;
               g_479818.ddsCaps.dwCaps = 512;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v9, nullptr) )
+              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v8, nullptr) )
               {
                 v4 = 0;
               }
               else
               {
-                g_pdds = (IDirectDrawSurface *)v9;
-                v4 = v9 != 0;
+                g_pdds = (IDirectDrawSurface *)v8;
+                v4 = v8 != 0;
               }
               if ( v4 )
               {
@@ -16800,14 +16658,14 @@ LABEL_38:
                 g_479818.dwWidth = g_window_width;
                 g_479818.dwFlags = 7;
                 g_479818.ddsCaps.dwCaps = 16448;
-                if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v9, nullptr) )
+                if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_479818, (LPDIRECTDRAWSURFACE *)&v8, nullptr) )
                 {
                   v5 = 0;
                 }
                 else
                 {
-                  g_pdds2 = (IDirectDrawSurface *)v9;
-                  v5 = v9 != 0;
+                  g_pdds2 = (IDirectDrawSurface *)v8;
+                  v5 = v8 != 0;
                 }
                 if ( v5 )
                   goto LABEL_38;
@@ -22285,9 +22143,9 @@ LABEL_27:
         if ( unit->player_num == g_player_num )
         {
           if ( unit->type == UnitType_Surv_Technician )
-            SOUND_play(SoundId_28, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_28, 0, g_sfx_vol, 16, 0);
           else
-            SOUND_play(SoundId_108, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_108, 0, g_sfx_vol, 16, 0);
         }
         if ( Async )
           Async->ctx = unit->order_target;
@@ -22768,7 +22626,7 @@ void __fastcall UNIT_mode_death_anim(KKND::Unit *unit)
   unit->mode = UNIT_mode_infantry_cleanup;
   if ( stats->is_infantry )
   {
-    v10 = g_4690A8_sfx_volume;
+    v10 = g_sfx_vol;
     if ( unit->veterancy )
     {
       v5 = kknd_rand_1("C:\\k\\Scripts\\Infantry.cpp", 4183);
@@ -22795,7 +22653,7 @@ LABEL_11:
   }
   if ( unit->type == UnitType_Mute_DireWolf )
   {
-    v11 = g_4690A8_sfx_volume;
+    v11 = g_sfx_vol;
     v8 = kknd_rand_1("C:\\k\\Scripts\\Infantry.cpp", 4196);
     entity_play_sound(unit->entity, dword_465988[v8 % 5], v11, 0);
     unit->entity->mobd_id = MobdId_Mute_DirewWolf;
@@ -23197,8 +23055,8 @@ void __fastcall unit_419F00(KKND::Unit *unit, int a2)
             sprintf(
               byte_479B00,
               "%s's allegiance with %s is broken",
-              (const char *)&unk_47A767 + 28 * v7,
-              (const char *)&unk_47A767 + 28 * unit->player_num);
+              g_netz_players[v7].name,
+              g_netz_players[unit->player_num].name);
             show_message_unit(nullptr, byte_479B00);
           }
         }
@@ -25551,11 +25409,10 @@ BOOL GAME_IsLoading()
 }
 
 //----- (0041CAD0) --------------------------------------------------------
-int sub_41CAD0()
+BOOL GAME_is_save_initiated()
 {
   return g_is_game_saving;
 }
-// 479FC0: using guessed type int dword_479FC0;
 
 //----- (0041CAE0) --------------------------------------------------------
 BOOL __fastcall sub_41CAE0(const char *filename, KKND::LevelId level_id)
@@ -26682,7 +26539,7 @@ LABEL_5:
   unit->locked_target = v4;
   creature_id = data->creature_id;
   if ( creature_id && creature_id <= g_script_handlers_num )
-    result = *(_DWORD *)&dword_465084[4 * creature_id];// BUG -1 indexing
+    result = *(_DWORD *)&aWb[4 * creature_id];  // BUG -1 indexing
   else
     result = 0;
   if ( result )
@@ -26692,7 +26549,7 @@ LABEL_5:
     {
       message_handler_id = data->message_handler_id;
       if ( message_handler_id && message_handler_id <= g_script_handlers_num )
-        v8 = *(_DWORD *)&dword_465084[4 * message_handler_id];
+        v8 = *(_DWORD *)&aWb[4 * message_handler_id];
       else
         v8 = 0;
       *(_DWORD *)(result + 52) = v8;
@@ -26731,7 +26588,7 @@ LABEL_5:
         *(_DWORD *)(result + 40) = unit->stats->attachment;
         turret_creature_id = data->turret_creature_id;
         if ( turret_creature_id && turret_creature_id <= g_script_handlers_num )
-          result = *(_DWORD *)&dword_465084[4 * turret_creature_id];
+          result = *(_DWORD *)&aWb[4 * turret_creature_id];
         else
           result = 0;
         if ( result )
@@ -26741,7 +26598,7 @@ LABEL_5:
           {
             turret_message_handler_id = data->turret_message_handler_id;
             if ( turret_message_handler_id && turret_message_handler_id <= g_script_handlers_num )
-              v13 = *(_DWORD *)&dword_465084[4 * turret_message_handler_id];
+              v13 = *(_DWORD *)&aWb[4 * turret_message_handler_id];
             else
               v13 = 0;
             *(_DWORD *)(result + 52) = v13;
@@ -26789,7 +26646,7 @@ LABEL_42:
         v10->target = v16;
         turret_mode = data->turret_mode;
         if ( turret_mode && turret_mode <= g_script_handlers_num )
-          result = *(_DWORD *)&dword_465084[4 * turret_mode];
+          result = *(_DWORD *)&aWb[4 * turret_mode];
         else
           result = 0;
         v10->mode = (KKND::TurretMode)result;
@@ -26809,7 +26666,7 @@ LABEL_42:
       }
       unit_mode = data->unit_mode;
       if ( unit_mode && unit_mode <= g_script_handlers_num )
-        v19 = *(void (__fastcall **)(KKND::Unit *))&dword_465084[4 * unit_mode];
+        v19 = *(void (__fastcall **)(KKND::Unit *))&aWb[4 * unit_mode];
       else
         v19 = nullptr;
       unit->mode = v19;
@@ -26817,37 +26674,37 @@ LABEL_42:
         return 0;
       unit_mode_idle = data->unit_mode_idle;
       if ( unit_mode_idle && unit_mode_idle <= g_script_handlers_num )
-        v21 = *(void (__fastcall **)(KKND::Unit *))&dword_465084[4 * unit_mode_idle];
+        v21 = *(void (__fastcall **)(KKND::Unit *))&aWb[4 * unit_mode_idle];
       else
         v21 = nullptr;
       unit->mode_idle = v21;
       unit_mode_arrive = data->unit_mode_arrive;
       if ( unit_mode_arrive && unit_mode_arrive <= g_script_handlers_num )
-        v23 = *(void (__fastcall **)(KKND::Unit *))&dword_465084[4 * unit_mode_arrive];
+        v23 = *(void (__fastcall **)(KKND::Unit *))&aWb[4 * unit_mode_arrive];
       else
         v23 = nullptr;
       unit->mode_arrive = v23;
       unit_mode_attacked = data->unit_mode_attacked;
       if ( unit_mode_attacked && unit_mode_attacked <= g_script_handlers_num )
-        v25 = *(void (__fastcall **)(KKND::Unit *))&dword_465084[4 * unit_mode_attacked];
+        v25 = *(void (__fastcall **)(KKND::Unit *))&aWb[4 * unit_mode_attacked];
       else
         v25 = nullptr;
       unit->mode_attacked = v25;
       unit_mode_return = data->unit_mode_return;
       if ( unit_mode_return && unit_mode_return <= g_script_handlers_num )
-        v27 = *(void (__fastcall **)(KKND::Unit *))&dword_465084[4 * unit_mode_return];
+        v27 = *(void (__fastcall **)(KKND::Unit *))&aWb[4 * unit_mode_return];
       else
         v27 = nullptr;
       unit->mode_return = v27;
       unit_mode_turn_return = data->unit_mode_turn_return;
       if ( unit_mode_turn_return && unit_mode_turn_return <= g_script_handlers_num )
-        v29 = *(void (__fastcall **)(KKND::Unit *))&dword_465084[4 * unit_mode_turn_return];
+        v29 = *(void (__fastcall **)(KKND::Unit *))&aWb[4 * unit_mode_turn_return];
       else
         v29 = nullptr;
       unit->mode_turn_return = v29;
       unit_message_handler_id = data->unit_message_handler_id;
       if ( unit_message_handler_id && unit_message_handler_id <= g_script_handlers_num )
-        v31 = *(void (__fastcall **)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *))&dword_465084[4 * unit_message_handler_id];
+        v31 = *(void (__fastcall **)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *))&aWb[4 * unit_message_handler_id];
       else
         v31 = nullptr;
       unit->message_handler = v31;
@@ -27222,7 +27079,7 @@ LABEL_152:
         goto LABEL_189;
       z_index = data[1].turret.z_index;
       if ( z_index && z_index <= g_script_handlers_num )
-        v68 = *(void (__cdecl __noreturn **)(KKND::Task *))&dword_465084[4 * z_index];
+        v68 = *(void (__cdecl __noreturn **)(KKND::Task *))&aWb[4 * z_index];
       else
         v68 = nullptr;
       if ( v68 )
@@ -27232,7 +27089,7 @@ LABEL_152:
         {
           x_speed = data[1].turret.x_speed;
           if ( x_speed && x_speed <= g_script_handlers_num )
-            v72 = *(void (__fastcall **)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *))&dword_465084[4 * x_speed];
+            v72 = *(void (__fastcall **)(KKND::Task *, KKND::Task *, KKND::TaskMessageType, void *))&aWb[4 * x_speed];
           else
             v72 = nullptr;
           Callback->message_handler = v72;
@@ -27258,7 +27115,7 @@ LABEL_152:
         *(_DWORD *)(result + 28) = v69;
         task_flags24 = data[1].task_flags24;
         if ( task_flags24 && task_flags24 <= g_script_handlers_num )
-          v75 = *(void **)&dword_465084[4 * task_flags24];
+          v75 = *(void **)&aWb[4 * task_flags24];
         else
           v75 = nullptr;
         *v73 = v75;
@@ -27496,7 +27353,7 @@ BOOL __fastcall GAME_load_production(int *data)
   KKND::SidebarFactoryProductionOption *p_production_list_head; // ebp
   int v9; // edx
   int v10; // eax
-  int factory_or_factory_type; // ecx
+  KKND::Unit *factory_or_factory_type; // ecx
   KKND::SidebarFactoryProduction *v12; // ecx
   KKND::SidebarFactoryProduction *v13; // eax
   KKND::SidebarFactoryProduction *v14; // edx
@@ -27580,7 +27437,7 @@ LABEL_11:
     v4->factory_header_color_idx = data[2];
     v9 = v7;
     v10 = v4->factory_header_color_idx + 16 * v7;
-    factory_or_factory_type = (int)v4->factory_or_factory_type;
+    factory_or_factory_type = v4->factory_or_factory_type;
     v4->production_list_tail = (KKND::SidebarFactoryProductionOption *)&v4->production_list_head;
     v4->production_list_head = (KKND::SidebarFactoryProductionOption *)&v4->production_list_head;
     v4->_sidebar_factory_production_field_20 = -1;
@@ -28582,7 +28439,7 @@ BOOL __fastcall GAME_load_ai_players(const KKND::AiPlayersSaveStruct *data)
     ai_players_save_struct_0 = v5->_ai_players_save_struct_0;
     data_148 = p_ai_players_save_struct_11C;
     if ( v5->_ai_players_save_struct_0 && ai_players_save_struct_0 <= g_script_handlers_num )
-      v8 = *(void (__cdecl __noreturn **)(KKND::Task *))&dword_465084[4 * ai_players_save_struct_0];// BUG -1 indexing
+      v8 = *(void (__cdecl __noreturn **)(KKND::Task *))&aWb[4 * ai_players_save_struct_0];// BUG -1 indexing
     else
       v8 = nullptr;
     if ( !v8 )
@@ -29802,7 +29659,7 @@ BOOL __fastcall GAME_pack_meta(void *data)
     while ( (int)v7 < (int)&g_sidebar_buildings_prod );
     *(_DWORD *)(v5 + 280) = dword_47A370;
     *(_DWORD *)(v5 + 284) = dword_47A2F8;
-    *(_DWORD *)(v5 + 288) = dword_47CA2C;
+    *(_DWORD *)(v5 + 288) = g_aircraft_unlocked;
     v10 = g_script_handlers[0];
     v11 = 0;
     if ( g_script_handlers[0] != (void *)-1 )
@@ -29999,10 +29856,10 @@ LABEL_13:
     v6 += 4;
   }
   while ( (int)v5 < (int)&g_sidebar_buildings_prod );
-  dword_47CA2C = *((_DWORD *)data + 72);
+  g_aircraft_unlocked = *((_DWORD *)data + 72);
   v8 = *((_DWORD *)data + 86);
   if ( v8 && v8 <= g_script_handlers_num )
-    v9 = *(void (__cdecl __noreturn **)(KKND::Task *))&dword_465084[4 * v8];
+    v9 = *(void (__cdecl __noreturn **)(KKND::Task *))&aWb[4 * v8];
   else
     v9 = nullptr;
   if ( v9 )
@@ -30012,7 +29869,7 @@ LABEL_13:
     {
       v11 = *((_DWORD *)data + 87);
       if ( v11 && v11 <= g_script_handlers_num )
-        v12 = *(_DWORD *)&dword_465084[4 * v11];// BUG -1 indexing
+        v12 = *(_DWORD *)&aWb[4 * v11];         // BUG -1 indexing
       else
         v12 = 0;
       *(_DWORD *)(result + 52) = v12;
@@ -30037,19 +29894,19 @@ LABEL_13:
       *(_DWORD *)(result + 16) = g_47C970_sidebar_task;
       v14 = *((_DWORD *)data + 73);
       if ( v14 && v14 <= g_script_handlers_num )
-        result = *(_DWORD *)&dword_465084[4 * v14];
+        result = *(_DWORD *)&aWb[4 * v14];
       else
         result = 0;
-      v13->mode = (void (__fastcall *)(SidebarPayload *))result;
+      v13->mode = (void (__fastcall *)(KKND::SidebarPayload *))result;
       if ( result )
       {
         v13->_sidebar_payload_4 = *((_DWORD *)data + 74);
-        result = (BOOL)GAME_load_entity((int)(data + 300));
+        result = (BOOL)GAME_load_entity((const KKND::EntitySaveStruct *)(data + 300));
         v13->_sidebar_payload_8 = (KKND::Entity *)result;
         if ( result )
         {
           task = v13->task;
-          v13->airstrike_button_entity = g_help_button[1]->entity;
+          v13->airstrike_button_entity = g_airstrike_button->entity;
           task->ctx = v13;
           v13->task->entity = v13->_sidebar_payload_8;
           v13->_sidebar_payload_8->task = v13->task;
@@ -30067,7 +29924,7 @@ LABEL_13:
           if ( v13->_sidebar_payload_4 <= 1 )
             v13->_sidebar_payload_8->rn->flags |= 0x40000000u;
           if ( v13->_sidebar_payload_4 > 0 )
-            TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_help_button[1]->task);
+            TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_airstrike_button->task);
           v13->_sidebar_payload_8->rn->cmd.palette_override = g_tint_palettes_per_player[g_palette_idx_per_player[g_player_num]];
           v13->_sidebar_payload_8->rn->flags |= 0x10000000u;
           entity_anim_init_directional(v13->_sidebar_payload_8, 2276, 0);
@@ -30090,11 +29947,10 @@ LABEL_13:
 // 47DCD0: using guessed type int g_num_towers;
 
 //----- (004211D0) --------------------------------------------------------
-// write access to const memory has been detected, the output may be wrong!
 BOOL GAME_save()
 {
   size_t *v0; // ebp
-  int *v2; // ebx
+  void *v2; // ebx
   KKND::Unit *i; // esi
   int v4; // eax
   KKND::UnitType type; // ecx
@@ -30113,7 +29969,7 @@ BOOL GAME_save()
   KKND::Unit *v18; // ebp
   char *v19; // ebx
   _DWORD *v20; // edi
-  int *Block; // [esp+10h] [ebp-48h]
+  void *Block; // [esp+10h] [ebp-48h]
   BOOL v22; // [esp+14h] [ebp-44h]
   char *v23; // [esp+18h] [ebp-40h]
   void *v24; // [esp+1Ch] [ebp-3Ch]
@@ -30144,7 +30000,7 @@ BOOL GAME_save()
   v28 = v0;
   if ( !v0 )
   {
-    *(_DWORD *)off_46725C = "Couldn't allocate temporary buffer";
+    g_last_error = "Couldn't allocate temporary buffer";
     return 0;
   }
   Buffer[1] = g_mapd_camera.y;
@@ -30153,7 +30009,7 @@ BOOL GAME_save()
   Block = v2;
   if ( !v2 )
   {
-    *(_DWORD *)off_46725C = "Could not save oil information";
+    g_last_error = "Could not save oil information";
     goto LABEL_40;
   }
   for ( i = g_unit_list_head; i != (KKND::Unit *)&g_unit_list_head; i = i->next )
@@ -30213,7 +30069,7 @@ BOOL GAME_save()
   v23 = v6;
   if ( !v6 )
   {
-    *(_DWORD *)off_46725C = "Could not allocate buffer for units";
+    g_last_error = "Could not allocate buffer for units";
     free(v2);
     goto LABEL_40;
   }
@@ -30231,7 +30087,7 @@ BOOL GAME_save()
           free(v7);
           free(Block);
           g_is_game_saving = 0;
-          *(_DWORD *)off_46725C = "Could not save unit information";
+          g_last_error = "Could not save unit information";
           return 0;
         }
         v9 += *v10;
@@ -30246,7 +30102,7 @@ BOOL GAME_save()
   v24 = v11;
   if ( !v11 )
   {
-    *(_DWORD *)off_46725C = "Could not save cpu player information";
+    g_last_error = "Could not save cpu player information";
 LABEL_33:
     free(v7);
     free(v2);
@@ -30256,7 +30112,7 @@ LABEL_33:
   v25 = v12;
   if ( !v12 )
   {
-    *(_DWORD *)off_46725C = "Could not save production information";
+    g_last_error = "Could not save production information";
     free(v11);
     goto LABEL_33;
   }
@@ -30271,7 +30127,7 @@ LABEL_33:
     }
     else
     {
-      *(_DWORD *)off_46725C = "Could not save miscellaneous information";
+      g_last_error = "Could not save miscellaneous information";
       free(v13);
       free(v12);
       free(v11);
@@ -30281,7 +30137,7 @@ LABEL_33:
   }
   else
   {
-    *(_DWORD *)off_46725C = "Could not save map information";
+    g_last_error = "Could not save map information";
     free(v12);
     free(v11);
     free(v7);
@@ -30298,12 +30154,12 @@ LABEL_80:
   }
   v22 = 0;
   SetFileAttributesA(g_current_savegame_filename, 0x80u);
-  v14 = fopen(g_current_savegame_filename, dword_465084);
+  v14 = fopen(g_current_savegame_filename, "wb");
   v15 = v14;
   if ( !v14 )
   {
     g_is_game_saving = 0;
-    *(_DWORD *)off_46725C = "couldn't open save-game file";
+    g_last_error = "couldn't open save-game file";
     return 0;
   }
   if ( !kknd_fwrite(&g_player_num, 1u, 4u, v14)
@@ -30344,7 +30200,7 @@ LABEL_80:
 LABEL_78:
     fclose(v15);
     if ( !v22 )
-      *(_DWORD *)off_46725C = "couldn't write to save-game file";
+      g_last_error = "couldn't write to save-game file";
     goto LABEL_80;
   }
   v18 = g_unit_list_head;
@@ -30409,17 +30265,6 @@ LABEL_68:
   g_is_game_saving = 0;
   return 0;
 }
-// 421218: write access to const memory at 46725C has been detected
-// 421252: write access to const memory at 46725C has been detected
-// 421325: write access to const memory at 46725C has been detected
-// 421399: write access to const memory at 46725C has been detected
-// 4213B9: write access to const memory at 46725C has been detected
-// 4213F6: write access to const memory at 46725C has been detected
-// 42143B: write access to const memory at 46725C has been detected
-// 4214C3: write access to const memory at 46725C has been detected
-// 421810: write access to const memory at 46725C has been detected
-// 421859: write access to const memory at 46725C has been detected
-// 479FC0: using guessed type int dword_479FC0;
 
 //----- (004218B0) --------------------------------------------------------
 BOOL GAME_load()
@@ -30809,7 +30654,7 @@ LABEL_11:
           {
             if ( g_player_num == unit->player_num )
             {
-              SOUND_play(SoundId_Surv_UnitReady, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Surv_UnitReady, 0, g_sfx_vol, 16, 0);
               show_message_unit(nullptr, "Unit Ready");
             }
           }
@@ -30974,7 +30819,7 @@ void __fastcall UNIT_mode_machine_shop_complete(KKND::Unit *unit)
   unit->mode_arrive = nullptr;
   UNIT_mode_machine_shop_on_complete(unit);
   if ( g_player_num == unit->player_num && !unit->entity->cplc_spawn_params && !is_player_evolved() )
-    SOUND_play(SoundId_32, 0, g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_32, 0, g_sfx_vol, 16, 0);
   turret = unit->turret;
   if ( turret )
     turret->entity->rn->flags &= ~RenderNode_Skip;
@@ -31094,7 +30939,7 @@ BOOL GAME_splash()
   int v8; // [esp+0h] [ebp-80h] BYREF
   char Buffer[120]; // [esp+8h] [ebp-78h] BYREF
 
-  dword_468B60 = 1;
+  g_468B60_unused = 1;
   GAME_read_config();
   sub_4240E0("kknd.sve");
   GAME_parse_cmd_line();
@@ -31129,7 +30974,7 @@ BOOL GAME_splash()
       printf("%s", Buffer);
     exit(0);
   }
-  dword_468B60 = 0;
+  g_468B60_unused = 0;
   v4 = sub_40E3E0();
   sprintf(Buffer, "%s\\LEVELS\\%s\\wait.lvl", g_game_path, v4);
   g_splash_lvl = LVL_LoadLevel(Buffer);
@@ -31321,7 +31166,7 @@ BOOL __fastcall MOVIE_Play(int type)
   if ( !type )
   {
     sub_43B6B0();
-    dword_4785C8(1);
+    REND_clear(1);
     sprintf(Buffer, "%s\\FMV\\mh_fmv.vbc", g_app_root);
     if ( MOVIE_load(Buffer, 0, 0, 100) && !MOVIE_is_null() )
     {
@@ -31393,7 +31238,7 @@ LABEL_42:
     goto LABEL_43;
   }
   if ( (int)g_current_lvl_id >= (int)LevelId_Surv_16 && (int)g_current_lvl_id <= (int)LevelId_Mute_25
-    || GAME_IsLoading() )
+    || GAME_is_load_initiated() )
   {
     goto LABEL_44;
   }
@@ -31479,7 +31324,6 @@ LABEL_30:
   }
   return result;
 }
-// 4785C8: using guessed type int (__thiscall *dword_4785C8)(_DWORD);
 
 //----- (00422F60) --------------------------------------------------------
 void GAME_mission_load()
@@ -31578,10 +31422,10 @@ void GAME_mission_load()
   }
   sub_427CA0();
   REND_mode_scrl_setup();
-  if ( dword_4690AC )
+  if ( g_music_vol )
   {
     sprintf(Buffer, "%s\\LEVELS\\%s", g_app_root, g_lvl_desc[g_current_lvl_id].wav_filename);
-    dword_47A01C = sub_439AA0(Buffer, 1, dword_4690AC, 16, 0);
+    dword_47A01C = sub_439AA0(Buffer, 1, g_music_vol, 16, nullptr);
   }
   g_rend_default_viewport->flags &= ~0x40000000u;
   dword_47A010[0] = MAPD_Draw(MenuId_Main, 0, 0);
@@ -31592,7 +31436,7 @@ void GAME_mission_load()
   g_rend_default_viewport->clip_y = 0;
   g_rend_default_viewport->clip_h = g_rend_screen_height;
   g_default_entity.collider = g_ui_collision_handlers;
-  if ( GAME_IsLoading() )
+  if ( GAME_is_load_initiated() )
   {
     g_last_loaded_level_id = LevelId_Invalid;
     cplc_init_subset();
@@ -31605,7 +31449,7 @@ void GAME_mission_load()
         printf("%s", "LoadGameState() failed\n");
       exit(0);
     }
-    g_game_loop = 0u;
+    g_game_loop = GameLoop_Continue;
   }
   else
   {
@@ -31613,9 +31457,7 @@ void GAME_mission_load()
   }
 }
 // 4660A8: using guessed type char *off_4660A8[5];
-// 4690AC: using guessed type int dword_4690AC;
-// 478A88: using guessed type int g_screen_height;
-// 478A8C: using guessed type int g_screen_width;
+// 4690AC: using guessed type int g_music_vol;
 // 47A008: using guessed type char g_game_path_drive_letter;
 // 47A01C: using guessed type int dword_47A01C;
 // 47A2E4: using guessed type int dword_47A2E4;
@@ -31640,7 +31482,7 @@ BOOL GAME_post_campaign_mission()
     }
     ++v0;
   }
-  while ( (int)v0 < (int)&dword_47A01C );
+  while ( (int)v0 < (int)&dword_47A01C );       // BUG
   mode_null(v1);
   sub_428080();
   sub_44C5C0();
@@ -31666,7 +31508,7 @@ BOOL GAME_post_campaign_mission()
     g_supspr_lvl = nullptr;
     g_last_loaded_level_id = LevelId_Invalid;
   }
-  if ( !g_is_single_player && !g_netz_is_game_finished )
+  if ( !g_is_single_player && !MEMORY[0x47A778] )
   {
     v2 = NETZ_session_close();
     NETZ_42F650(v2);
@@ -31674,7 +31516,7 @@ BOOL GAME_post_campaign_mission()
   }
   if ( g_game_loop != GameLoop_NextMission )
     return g_game_loop == GameLoop_EndMission;
-  if ( GAME_IsLoading() )
+  if ( GAME_is_load_initiated() )
   {
     g_last_loaded_level_id = LevelId_Invalid;
     g_current_lvl_id = GAME_GetSaveLoadLevelId();
@@ -31695,7 +31537,6 @@ BOOL GAME_post_campaign_mission()
 }
 // 423342: variable 'v1' is possibly undefined
 // 47A01C: using guessed type int dword_47A01C;
-// 47A18C: using guessed type int dword_47A18C;
 // 47A778: using guessed type int g_netz_is_game_finished;
 
 //----- (00423460) --------------------------------------------------------
@@ -31711,12 +31552,12 @@ int KKND_Main()
   if ( MOVIE_Play(0) )
   {
 LABEL_5:
-    dword_4785C8(1);
+    REND_clear(1);
     v1 = MenuId_Main;
     g_netz_is_game_started = 0;
     if ( !g_is_single_player )
     {
-      if ( g_netz_is_game_finished )
+      if ( MEMORY[0x47A778] )
       {
         if ( g_netz_is_game_host )
         {
@@ -31760,13 +31601,13 @@ LABEL_5:
       }
       ++v2;
     }
-    while ( (int)v2 < (int)&dword_47A01C );
+    while ( (int)v2 < (int)&dword_47A01C );     // BUG
     LVL_cleanup();
     g_mission_outcome = MissionOutcome_NotStarted;
     KKND_free(g_level);
     KKND_free(g_supspr_lvl);
     g_supspr_lvl = nullptr;
-    if ( GAME_IsLoading() )
+    if ( GAME_is_load_initiated() )
     {
       g_last_loaded_level_id = LevelId_Invalid;
       g_current_lvl_id = GAME_GetSaveLoadLevelId();
@@ -31776,8 +31617,8 @@ LABEL_5:
     {
       while ( 1 )
       {
-        dword_4785C8(1);
-        if ( !GAME_IsLoading() )
+        REND_clear(1);
+        if ( !GAME_is_load_initiated() )
         {
           if ( (int)g_current_lvl_id < (int)LevelId_Surv_16 || (int)g_current_lvl_id > (int)LevelId_Mute_25 )
           {
@@ -31812,13 +31653,13 @@ LABEL_5:
               }
               ++v3;
             }
-            while ( (int)v3 < (int)&dword_47A01C );
+            while ( (int)v3 < (int)&dword_47A01C );// BUG
             LVL_cleanup();
             g_mission_outcome = MissionOutcome_NotStarted;
             KKND_free(g_level);
             KKND_free(g_supspr_lvl);
             g_supspr_lvl = nullptr;
-            if ( GAME_IsLoading() )
+            if ( GAME_is_load_initiated() )
             {
               g_last_loaded_level_id = LevelId_Invalid;
               g_current_lvl_id = GAME_GetSaveLoadLevelId();
@@ -31833,7 +31674,7 @@ LABEL_5:
         do
         {
           if ( !g_is_single_player )
-            g_netz_synchronized_lockstep_mode = dword_47A738 != 0;
+            g_netz_synchronized_lockstep_mode = g_netz_enable_lockstep_mode;
           GAME_AdvanceEntityAnimations();
           GAME_AdvanceEntityPositions();
           INPUT_ProcessKeyboard();
@@ -31846,12 +31687,12 @@ LABEL_5:
           GAME_UpdateCamera();
           REND_DoFrame();
           TIME_tick();
-          if ( sub_41CAD0() )
+          if ( GAME_is_save_initiated() )
           {
-            sub_43A800(0);
+            SOUND_43A800_set_volume(0);
             if ( !GAME_save() )
               GAME_save_failed();
-            sub_43A800(dword_4690AC);
+            SOUND_43A800_set_volume(g_music_vol);
           }
         }
         while ( !g_os_quit_signal_received && g_game_loop == GameLoop_Continue );
@@ -31866,7 +31707,7 @@ LABEL_5:
       }
     }
     NETZ_disconnect2();
-    dword_468B60 = 1;
+    g_468B60_unused = 1;
     KKND_free(g_splash_lvl);
     SOUND_cleanup_inlined();
     LVL_SysCleanup();
@@ -31875,18 +31716,16 @@ LABEL_5:
   }
   else
   {
-    dword_468B60 = 1;
+    g_468B60_unused = 1;
     KKND_free(g_splash_lvl);
     SOUND_cleanup_inlined();
     LVL_SysCleanup();
     return 1;
   }
 }
-// 468B60: using guessed type int dword_468B60;
-// 4690AC: using guessed type int dword_4690AC;
-// 4785C8: using guessed type int (__thiscall *dword_4785C8)(_DWORD);
+// 468B60: using guessed type int g_468B60_unused;
+// 4690AC: using guessed type int g_music_vol;
 // 47A01C: using guessed type int dword_47A01C;
-// 47A738: using guessed type int dword_47A738;
 // 47A778: using guessed type int g_netz_is_game_finished;
 // 47C764: using guessed type __int16 g_netz_synchronized_lockstep_mode;
 // 47CB0C: using guessed type int dword_47CB0C;
@@ -32114,7 +31953,7 @@ void __cdecl sub_423A70(KKND::Task *task)
   dword_47A19C = 0;
   v3 = 0;
   sprintf(Buffer, "%s\\LEVELS\\%s", g_app_root, (&off_46773C[20 * dword_47A1AC])[2 * dword_47A1A8]);
-  dword_47A198 = sub_439AA0(Buffer, 0, 16, 16, 0);
+  dword_47A198 = sub_439AA0(Buffer, 0, 16, 16, nullptr);
   while ( 1 )
   {
     TSK_yield(task, Task_Sleep, 1);
@@ -32140,7 +31979,7 @@ void __cdecl sub_423A70(KKND::Task *task)
   task->entity->task = nullptr;
   entity_remove(task->entity);
   FADE_408500(task);
-  g_game_loop = 3u;
+  g_game_loop = GameLoop_PreviousScreen;
 }
 // 46773C: using guessed type char *off_46773C[39];
 // 47A198: using guessed type int dword_47A198;
@@ -33135,7 +32974,7 @@ LABEL_10:
       v7 = 7;
       do
       {
-        SOUND_play(SoundId_166, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_166, 0, g_sfx_vol, 16, 0);
         TSK_yield(v1, Task_Sleep, 8);
         --v7;
       }
@@ -33147,7 +32986,7 @@ LABEL_10:
       entity->y = v8;
       entity->z = 999;
       TSK_yield(v1, Task_Yield_10000000, 0);
-      SOUND_play(SoundId_166, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_166, 0, g_sfx_vol, 16, 0);
       TSK_yield(v1, Task_Sleep, 200);
       FADE_408500(v1);
       if ( g_is_single_player )
@@ -33183,7 +33022,7 @@ LABEL_10:
       {
         g_mission_outcome = MissionOutcome_Victory;
         sub_42F620();
-        g_netz_is_game_finished = 1;
+        MEMORY[0x47A778] = 1;
       }
       while ( 1 )
         TSK_yield(v1, Task_Sleep, 5000);
@@ -33897,13 +33736,13 @@ void __fastcall unit_mode_scout_init(KKND::Unit *unit)
       {
         g_scout = unit;
         entity_create_ex(MobdId_Cursors, unit->entity, task_draw_x_mark, TaskKind_Coroutine, nullptr);
-        SOUND_play(SoundId_128|SoundId_64, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_128|SoundId_64, 0, g_sfx_vol, 16, 0);
       }
       else if ( g_current_lvl_id == LevelId_Mute_04_RaidTheFort && !g_scout )
       {
         g_scout = unit;
         entity_create_ex(MobdId_Cursors, unit->entity, task_draw_x_mark, TaskKind_Coroutine, nullptr);
-        SOUND_play(SoundId_MobileBasePlanting, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_MobileBasePlanting, 0, g_sfx_vol, 16, 0);
       }
     }
   }
@@ -34567,7 +34406,7 @@ LABEL_85:
     }
     g_level_loading_lock = 0;
     v55 = 1;
-    v74 = byte_47A782;
+    v74 = MEMORY[0x47A782];
     v71 = &v78;
     do
     {
@@ -35960,7 +35799,7 @@ void __fastcall unit_mobile_base_plant(KKND::Unit *unit)
   unit->type = v7;
   anchor->x = -11776;
   unit->mobd_anchors.grid->y = -1280;
-  entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_4690A8_sfx_volume, 0);
+  entity_play_sound(unit->entity, SoundId_MobileBasePlanting, g_sfx_vol, 0);
   if ( BOXD_building_claim_area(unit) )
   {
     TSK_send_message(unit->task, TaskMessage_UnitDeselected, nullptr, g_game_update_loop_task);
@@ -36571,15 +36410,15 @@ BOOL __fastcall INPUT_set_mouse_pos(__int16 x, __int16 y)
   v4 = (unsigned __int16)v8;
   Point.x = LOWORD(Point.y);
   Point.y = (unsigned __int16)v8;
-  g_last_result = g_input_mouse_window_losing_focus_reset_to_defaults;
+  g_last_async_result = g_input_mouse_window_losing_focus_reset_to_defaults;
   v5 = g_coroutine_current;
-  if ( g_coroutine_list_head != v5 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v7;
+  if ( g_coroutine_list_head != v5 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)&v7;
   ClientToScreen(g_hwnd, &Point);
-  g_last_result = SetCursorPos(Point.x, Point.y);
+  g_last_async_result = SetCursorPos(Point.x, Point.y);
   v6 = g_coroutine_current;
   if ( g_coroutine_list_head != v6 )
-    --dword_47734C;
+    --g_coroutine_nesting_depth;
   g_input_last_mouse_state.cursor_x = y_low << 8;
   g_input_last_mouse_state.cursor_y = v4 << 8;
   return 1;
@@ -37427,7 +37266,7 @@ LABEL_110:
         }
         if ( v23 )
         {
-          SOUND_play(SoundId_129|SoundId_64, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_129|SoundId_64, 0, g_sfx_vol, 16, 0);
           *(_WORD *)g_game_event_queue.evt.payload = cursor.planner->type;
           v25 = v10->x;
           v10->is_collidable = 1;
@@ -37621,31 +37460,31 @@ int __fastcall cursor_select_control_group(void *cursor, int group)
       switch ( *((_DWORD *)cursor + 18) )
       {
         case 0x1B:
-          SOUND_play(SoundId_Mute_DireWolf_Recall, 0, (int)g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_DireWolf_Recall, 0, (int)g_sfx_vol, 16, 0);
           break;
         case 0x21:
-          SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, (int)g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, (int)g_sfx_vol, 16, 0);
           break;
         case 0x23:
-          SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, (int)g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, (int)g_sfx_vol, 16, 0);
           break;
         case 0x25:
-          SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, (int)g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, (int)g_sfx_vol, 16, 0);
           break;
         case 0x27:
-          SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, (int)g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, (int)g_sfx_vol, 16, 0);
           break;
         case 0x4A:
         case 0x4C:
         case 0x4D:
         case 0x4E:
-          v16 = *(&g_futuristic_units_recall + kknd_rand_2(g_4690A8_sfx_volume, 16) % 2);
+          v16 = *(&g_futuristic_units_recall + kknd_rand_2(g_sfx_vol, 16) % 2);
           goto LABEL_44;
         default:
           if ( is_player_evolved() )
-            v16 = dword_468998[kknd_rand_2(g_4690A8_sfx_volume, 16) % 4];
+            v16 = dword_468998[kknd_rand_2(g_sfx_vol, 16) % 4];
           else
-            v16 = dword_468988[kknd_rand_2(g_4690A8_sfx_volume, 16) % 4];
+            v16 = dword_468988[kknd_rand_2(g_sfx_vol, 16) % 4];
 LABEL_44:
           SOUND_play(v16, 0, v25, v26, 0);
           break;
@@ -37884,26 +37723,26 @@ KKND::UnitType __fastcall cursor_429D40(KKND::CursorState *a1, KKND::Unit *a2)
   switch ( type )
   {
     case UnitType_Surv_Scout:
-      SOUND_play(SoundId_128|SoundId_64, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_128|SoundId_64, 0, g_sfx_vol, 16, 0);
       break;
     case UnitType_Mute_DireWolf:
-      SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_sfx_vol, 16, 0);
       a1->unit_type_to_voice_response = a2->type;
       break;
     case UnitType_Mute_GiantScorpion:
-      SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_sfx_vol, 16, 0);
       a1->unit_type_to_voice_response = a2->type;
       break;
     case UnitType_Mute_WarMastadont:
-      SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_sfx_vol, 16, 0);
       a1->unit_type_to_voice_response = a2->type;
       break;
     case UnitType_Mute_GiantBeetle:
-      SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_sfx_vol, 16, 0);
       a1->unit_type_to_voice_response = a2->type;
       break;
     case UnitType_Mute_MissileCrab:
-      SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_sfx_vol, 16, 0);
       a1->unit_type_to_voice_response = a2->type;
       break;
     default:
@@ -37917,7 +37756,7 @@ KKND::UnitType __fastcall cursor_429D40(KKND::CursorState *a1, KKND::Unit *a2)
           veterancy = a2->veterancy;
           if ( v8 )
           {
-            v13 = g_4690A8_sfx_volume;
+            v13 = g_sfx_vol;
             if ( veterancy )
               v10 = dword_468A18[kknd_rand_2() % 2];
             else
@@ -37925,7 +37764,7 @@ KKND::UnitType __fastcall cursor_429D40(KKND::CursorState *a1, KKND::Unit *a2)
           }
           else
           {
-            v13 = g_4690A8_sfx_volume;
+            v13 = g_sfx_vol;
             if ( veterancy )
               v10 = dword_468A20[kknd_rand_2() % 2];
             else
@@ -37936,7 +37775,7 @@ KKND::UnitType __fastcall cursor_429D40(KKND::CursorState *a1, KKND::Unit *a2)
       }
       else
       {
-        v12 = g_4690A8_sfx_volume;
+        v12 = g_sfx_vol;
         v7 = kknd_rand_2();
         SOUND_play((KKND::SoundId)*(&g_futuristic_units_recall + (int)abs32(v7) % 2), 0, v12, 16, 0);
         a1->unit_type_to_voice_response = a2->type;
@@ -38194,9 +38033,9 @@ LABEL_234:
       if ( selection_executing_representative )
       {
         if ( selection_executing_representative->type == UnitType_Surv_Saboteur )
-          SOUND_play(SoundId_45, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_45, 0, g_sfx_vol, 16, 0);
         else
-          SOUND_play(SoundId_124, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_124, 0, g_sfx_vol, 16, 0);
         g_game_event_queue.evt.type = GameEvent_InfiltratorAssigned;
         *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
         *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
@@ -38296,35 +38135,35 @@ LABEL_175:
               {
                 if ( v33 == 20 )
                 {
-                  SOUND_play(SoundId_128|SoundId_64, 0, g_4690A8_sfx_volume, 16, 0);
+                  SOUND_play(SoundId_128|SoundId_64, 0, g_sfx_vol, 16, 0);
                   return;
                 }
                 if ( v32->veterancy )
                 {
                   if ( is_player_evolved() )
-                    SOUND_play(SoundId_153, 0, g_4690A8_sfx_volume, 16, 0);
+                    SOUND_play(SoundId_153, 0, g_sfx_vol, 16, 0);
                   else
-                    SOUND_play(SoundId_73, 0, g_4690A8_sfx_volume, 16, 0);
+                    SOUND_play(SoundId_73, 0, g_sfx_vol, 16, 0);
                   return;
                 }
                 if ( !is_player_evolved() )
                 {
                   if ( !(kknd_rand_2() % 2) )
                   {
-                    SOUND_play(SoundId_48, 0, g_4690A8_sfx_volume, 16, 0);
+                    SOUND_play(SoundId_48, 0, g_sfx_vol, 16, 0);
                     return;
                   }
 LABEL_95:
-                  SOUND_play(SoundId_59, 0, g_4690A8_sfx_volume, 16, 0);
+                  SOUND_play(SoundId_59, 0, g_sfx_vol, 16, 0);
                   return;
                 }
                 if ( kknd_rand_2() % 2 )
                 {
-                  SOUND_play(SoundId_92, 0, g_4690A8_sfx_volume, 16, 0);
+                  SOUND_play(SoundId_92, 0, g_sfx_vol, 16, 0);
                   return;
                 }
 LABEL_116:
-                SOUND_play(SoundId_119, 0, g_4690A8_sfx_volume, 16, 0);
+                SOUND_play(SoundId_119, 0, g_sfx_vol, 16, 0);
                 return;
               }
               goto LABEL_114;
@@ -38342,7 +38181,7 @@ LABEL_116:
       if ( (int)v35 >= (int)UnitType_Gort && (int)v35 <= (int)UnitType_Mech )
       {
 LABEL_104:
-        v78 = g_4690A8_sfx_volume;
+        v78 = g_sfx_vol;
         v36 = kknd_rand_2();
         SOUND_play((KKND::SoundId)dword_4689B0[v36 % 3], 0, v78, 16, 0);
         return;
@@ -38362,23 +38201,23 @@ LABEL_104:
                 goto LABEL_116;
               }
 LABEL_114:
-              SOUND_play(SoundId_164, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_164, 0, g_sfx_vol, 16, 0);
               return;
             }
 LABEL_112:
-            SOUND_play(SoundId_173, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_173, 0, g_sfx_vol, 16, 0);
             return;
           }
 LABEL_110:
-          SOUND_play(SoundId_159, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_159, 0, g_sfx_vol, 16, 0);
           return;
         }
 LABEL_108:
-        SOUND_play(SoundId_169, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_169, 0, g_sfx_vol, 16, 0);
         return;
       }
     }
-    SOUND_play(SoundId_171, 0, g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_171, 0, g_sfx_vol, 16, 0);
     return;
   }
   v37 = cursor->selection_executing_archetype;
@@ -38396,9 +38235,9 @@ LABEL_108:
     if ( !v39 )
       return;
     if ( v39->type == UnitType_Surv_Technician )
-      SOUND_play(SoundId_45, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_45, 0, g_sfx_vol, 16, 0);
     else
-      SOUND_play(SoundId_124, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_124, 0, g_sfx_vol, 16, 0);
     g_game_event_queue.evt.type = GameEvent_TechnicianAssigned;
     *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
     *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
@@ -38766,30 +38605,30 @@ LABEL_27:
     switch ( cursor->selection_executing_representative->type )
     {
       case UnitType_Mute_DireWolf:
-        SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_sfx_vol, 16, 0);
         break;
       case UnitType_Mute_GiantScorpion:
-        SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_sfx_vol, 16, 0);
         break;
       case UnitType_Mute_WarMastadont:
-        SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_sfx_vol, 16, 0);
         break;
       case UnitType_Mute_GiantBeetle:
-        SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_sfx_vol, 16, 0);
         break;
       case UnitType_Mute_MissileCrab:
-        SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_sfx_vol, 16, 0);
         break;
       default:
         if ( is_player_evolved() )
         {
-          v14 = g_4690A8_sfx_volume;
+          v14 = g_sfx_vol;
           v11 = kknd_rand_2();
           SOUND_play(dword_468998[v11 % 4], 0, v14, 16, 0);
         }
         else
         {
-          v13 = g_4690A8_sfx_volume;
+          v13 = g_sfx_vol;
           v10 = kknd_rand_2();
           SOUND_play(dword_468988[v10 % 4], 0, v13, 16, 0);
         }
@@ -38864,35 +38703,35 @@ void __thiscall sub_42B230(KKND::CursorState *cursor)
             (int)unit_type_to_voice_response >= (int)UnitType_Gort)
         && (int)unit_type_to_voice_response <= (int)UnitType_Mech )
       {
-        v21 = g_4690A8_sfx_volume;
+        v21 = g_sfx_vol;
         v9 = dword_4689C0[kknd_rand_2() % 22];
         SOUND_play(v9, 0, v21, 16, 0);
         goto LABEL_53;
       }
       if ( type == 20 )
       {
-        SOUND_play(SoundId_128|SoundId_64, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_128|SoundId_64, 0, g_sfx_vol, 16, 0);
         goto LABEL_53;
       }
       if ( type == 39 || unit_type_to_voice_response == UnitType_Mute_MissileCrab )
       {
-        SOUND_play(SoundId_171, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_171, 0, g_sfx_vol, 16, 0);
       }
       else if ( type == 37 || unit_type_to_voice_response == UnitType_Mute_GiantBeetle )
       {
-        SOUND_play(SoundId_169, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_169, 0, g_sfx_vol, 16, 0);
       }
       else if ( type == 35 || unit_type_to_voice_response == UnitType_Mute_WarMastadont )
       {
-        SOUND_play(SoundId_159, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_159, 0, g_sfx_vol, 16, 0);
       }
       else if ( type == 33 || unit_type_to_voice_response == UnitType_Mute_GiantScorpion )
       {
-        SOUND_play(SoundId_173, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_173, 0, g_sfx_vol, 16, 0);
       }
       else if ( type == 27 || unit_type_to_voice_response == UnitType_Mute_DireWolf )
       {
-        SOUND_play(SoundId_164, 0, g_4690A8_sfx_volume, 16, 0);
+        SOUND_play(SoundId_164, 0, g_sfx_vol, 16, 0);
       }
       else
       {
@@ -38911,7 +38750,7 @@ void __thiscall sub_42B230(KKND::CursorState *cursor)
           {
             if ( v11 )
             {
-              v22 = g_4690A8_sfx_volume;
+              v22 = g_sfx_vol;
               if ( v11->veterancy )
               {
                 v12 = kknd_rand_2();
@@ -38925,7 +38764,7 @@ void __thiscall sub_42B230(KKND::CursorState *cursor)
             }
             else
             {
-              v23 = g_4690A8_sfx_volume;
+              v23 = g_sfx_vol;
               v14 = dword_468A28[kknd_rand_2() % 3];
               SOUND_play(v14, 0, v23, 16, 0);
             }
@@ -38933,7 +38772,7 @@ void __thiscall sub_42B230(KKND::CursorState *cursor)
           }
           if ( !v11 || v11->veterancy == Veterancy_Rookie )
           {
-            v24 = g_4690A8_sfx_volume;
+            v24 = g_sfx_vol;
             v15 = dword_468A38[kknd_rand_2() % 3];
             SOUND_play(v15, 0, v24, 16, 0);
             goto LABEL_53;
@@ -38943,12 +38782,12 @@ void __thiscall sub_42B230(KKND::CursorState *cursor)
         if ( selection_executing_representative->veterancy )
         {
 LABEL_46:
-          v25 = g_4690A8_sfx_volume;
+          v25 = g_sfx_vol;
           v16 = kknd_rand_2();
           SOUND_play((KKND::SoundId)dword_468A50[(int)abs32(v16) % 2], 0, v25, 16, 0);
           goto LABEL_53;
         }
-        v26 = g_4690A8_sfx_volume;
+        v26 = g_sfx_vol;
         v17 = kknd_rand_2();
         SOUND_play((KKND::SoundId)dword_468A38[(int)abs32(v17) % 2], 0, v26, 16, 0);
       }
@@ -39083,72 +38922,69 @@ void __fastcall game_process_events(KKND::CursorState *cursor, BOOL process_ui_e
   __int16 v20; // dx
   char held_actions_mask; // al
   int rmb_scrolling_initial_x; // ecx
-  fixed v23; // edx
-  KKND::RenderCommand *v24; // ebx
-  int v25; // edx
-  int v26; // eax
-  signed __int32 v27; // eax
-  KKND::Entity *cursor_entity; // edx
-  int v29; // esi
-  int v30; // edi
-  KKND::RenderCommand *v31; // ebx
-  int v32; // esi
-  GameEventNode *v33; // ecx
-  GameEventNode *v34; // edx
-  char v35; // bl
+  KKND::RenderCommand *v23; // ebx
+  int v24; // edx
+  int v25; // eax
+  signed __int32 v26; // eax
+  int v27; // esi
+  int v28; // edi
+  KKND::RenderCommand *v29; // ebx
+  int v30; // esi
+  GameEventNode *v31; // ecx
+  GameEventNode *v32; // edx
+  char v33; // bl
   GameEventNode *k; // eax
   KKND::CursorState *m; // esi
   KKND::Entity *cursor_hitbox_tester; // eax
-  int v39; // ecx
-  int v40; // eax
+  int v37; // ecx
+  int v38; // eax
   KKND::TerrainTileFlags1 flags1; // al
   KKND::Task *cursor_task; // ecx
-  KKND::TaskMessage *n; // ebx
+  KKND::TaskMessage *msg; // ebx
   KKND::TaskMessageType type; // eax
-  void *v45; // ecx
-  unsigned int v46; // eax
-  GameEventNode *v47; // ecx
-  GameEventNode *v48; // edx
-  char v49; // al
-  GameEventNode *v50; // eax
-  GameEventNode **v51; // ecx
-  KKND::BuildingConstruction *v52; // esi
-  _DWORD *v53; // ecx
+  void *v43; // ecx
+  unsigned int v44; // eax
+  GameEventNode *v45; // ecx
+  GameEventNode *v46; // edx
+  char v47; // al
+  GameEventNode *v48; // eax
+  GameEventNode **v49; // ecx
+  KKND::BuildingConstruction *v50; // esi
+  _DWORD *v51; // ecx
   int cost; // eax
-  int v55; // eax
-  KKND::BuildingConstruction *v56; // ecx
+  int v53; // eax
+  KKND::BuildingConstruction *v54; // ecx
   KKND::BuildingPlannerPayload *payload; // eax
-  KKND::BuildingConstruction *v58; // esi
+  KKND::BuildingConstruction *v56; // esi
   KKND::Unit *unit; // edi
   KKND::CursorState *selection_head; // eax
-  signed __int8 v61; // cl
-  KKND::CursorState *v62; // edx
-  KKND::Unit *link; // eax
-  KKND::UnitType v64; // ecx
-  KKND::UnitType v65; // ecx
+  signed __int8 v59; // cl
+  KKND::CursorState *v60; // edx
+  KKND::Unit *ctx; // eax
+  KKND::UnitType v62; // ecx
+  KKND::UnitType v63; // ecx
   KKND::UnitType unit_type_to_voice_response; // edi
-  KKND::UnitType v67; // ecx
-  KKND::UnitType v68; // eax
-  _DWORD *v69; // eax
-  char v70; // al
-  GameEventNode *v71; // eax
-  GameEventNode **v72; // ecx
-  char v73; // al
-  GameEventNode *v74; // eax
-  GameEventNode **v75; // ecx
-  char v76; // al
-  GameEventNode *v77; // eax
-  GameEventNode **v78; // ecx
-  char v79; // al
-  GameEventNode *v80; // eax
-  GameEventNode **v81; // ecx
-  char v82; // al
-  GameEventNode *ii; // eax
-  GameEventNode *v84; // eax
-  int v85; // ecx
-  int v86; // edx
-  KKND::GameEvent *v87; // eax
-  int v88; // edx
+  KKND::UnitType v65; // ecx
+  KKND::UnitType v66; // eax
+  _DWORD *v67; // eax
+  char v68; // al
+  GameEventNode *v69; // eax
+  GameEventNode **v70; // ecx
+  char v71; // al
+  GameEventNode *v72; // eax
+  GameEventNode **v73; // ecx
+  char v74; // al
+  GameEventNode *v75; // eax
+  GameEventNode **v76; // ecx
+  char v77; // al
+  GameEventNode *v78; // eax
+  GameEventNode **v79; // ecx
+  char v80; // al
+  GameEventNode *n; // eax
+  GameEventNode *v82; // eax
+  int v83; // ecx
+  int v84; // edx
+  KKND::GameEvent *v85; // eax
   KKND::RenderCommand *cmd; // [esp+10h] [ebp-Ch]
 
   cmd = &dword_47A010[0]->job->cmd;
@@ -39332,81 +39168,75 @@ LABEL_27:
     if ( v20 )
     {
 LABEL_81:
-      v24 = cmd;
+      v23 = cmd;
       cursor->cursor_hitbox_tester->is_collidable = 1;
       cursor->cursor_hitbox_tester->x = g_mapd_camera.x + g_game_mouse_state.cursor_x;
       cursor->cursor_hitbox_tester->is_collidable = 1;
       cursor->cursor_hitbox_tester->y = g_mapd_camera.y + g_game_mouse_state.cursor_y;
       cursor->cursor_entity->is_collidable = 1;
       cursor->cursor_entity->x = g_game_mouse_state.cursor_x;
-      cursor_entity = cursor->cursor_entity;
-      cursor_entity->is_collidable = 1;
+      cursor->cursor_entity->is_collidable = 1;
       cursor->cursor_entity->y = g_game_mouse_state.cursor_y;
       goto LABEL_82;
     }
-    v29 = g_mapd_camera.x - g_camera_shake_x;
-    v30 = g_mapd_camera.y - g_camera_shake_y;
-    if ( (rmb_scrolling_initial_x < 256 || (held_actions_mask & 4) != 0) && v29 > 0 )
+    v27 = g_mapd_camera.x - g_camera_shake_x;
+    v28 = g_mapd_camera.y - g_camera_shake_y;
+    if ( (rmb_scrolling_initial_x < 256 || (held_actions_mask & 4) != 0) && v27 > 0 )
     {
-      g_mapd_camera.x = v29 - ((held_actions_mask & 4) != 0 ? 3840 : 1024);
+      g_mapd_camera.x = v27 - ((held_actions_mask & 4) != 0 ? 3840 : 1024);
       if ( g_mapd_camera.x < 0 )
         g_mapd_camera.x = 0;
     }
-    else
+    else if ( rmb_scrolling_initial_x >= (g_rend_screen_width << 8) - 256 || (held_actions_mask & 8) != 0 )
     {
-      v88 = (g_rend_screen_width << 8) - 256;
-      if ( rmb_scrolling_initial_x >= v88 || (held_actions_mask & 8) != 0 )
+      v29 = cmd;
+      if ( v27 >= (32 - g_rend_screen_width + REND_get_width(cmd)) << 8
+        || (g_mapd_camera.x = v27 + ((g_game_keyboard_state.held_actions_mask & 8) != 0 ? 3840 : 1024),
+            g_mapd_camera.x < (32 - g_rend_screen_width + REND_get_width(cmd)) << 8) )
       {
-        v31 = cmd;
-        if ( v29 >= (32 - g_rend_screen_width + REND_get_width(cmd, v88)) << 8
-          || (g_mapd_camera.x = v29 + ((g_game_keyboard_state.held_actions_mask & 8) != 0 ? 3840 : 1024),
-              g_mapd_camera.x < (32 - g_rend_screen_width + REND_get_width(cmd, g_mapd_camera.x)) << 8) )
-        {
-          held_actions_mask = g_game_keyboard_state.held_actions_mask;
-        }
-        else
-        {
-          g_mapd_camera.x = (32 - g_rend_screen_width + REND_get_width(cmd, g_rend_screen_width)) << 8;
-          held_actions_mask = g_game_keyboard_state.held_actions_mask;
-        }
-LABEL_71:
-        if ( ((int)g_game_mouse_state.cursor_y < 256 || (held_actions_mask & 1) != 0) && v30 > 0 )
-        {
-          g_mapd_camera.y = v30 - ((held_actions_mask & 1) != 0 ? 3840 : 1024);
-          if ( g_mapd_camera.y < 0 )
-            g_mapd_camera.y = 0;
-        }
-        else if ( ((int)g_game_mouse_state.cursor_y >= (g_rend_screen_height << 8) - 256 || (held_actions_mask & 2) != 0)
-               && v30 < (REND_get_height(v31) - g_rend_screen_height) << 8 )
-        {
-          g_mapd_camera.y = v30 + ((g_game_keyboard_state.held_actions_mask & 2) != 0 ? 3840 : 1024);
-          if ( g_mapd_camera.y >= (REND_get_height(v31) - g_rend_screen_height) << 8 )
-            g_mapd_camera.y = (REND_get_height(v31) - g_rend_screen_height) << 8;
-        }
-        goto LABEL_81;
+        held_actions_mask = g_game_keyboard_state.held_actions_mask;
       }
+      else
+      {
+        g_mapd_camera.x = (32 - g_rend_screen_width + REND_get_width(cmd)) << 8;
+        held_actions_mask = g_game_keyboard_state.held_actions_mask;
+      }
+LABEL_71:
+      if ( ((int)g_game_mouse_state.cursor_y < 256 || (held_actions_mask & 1) != 0) && v28 > 0 )
+      {
+        g_mapd_camera.y = v28 - ((held_actions_mask & 1) != 0 ? 3840 : 1024);
+        if ( g_mapd_camera.y < 0 )
+          g_mapd_camera.y = 0;
+      }
+      else if ( ((int)g_game_mouse_state.cursor_y >= (g_rend_screen_height << 8) - 256 || (held_actions_mask & 2) != 0)
+             && v28 < (REND_get_height(v29) - g_rend_screen_height) << 8 )
+      {
+        g_mapd_camera.y = v28 + ((g_game_keyboard_state.held_actions_mask & 2) != 0 ? 3840 : 1024);
+        if ( g_mapd_camera.y >= (REND_get_height(v29) - g_rend_screen_height) << 8 )
+          g_mapd_camera.y = (REND_get_height(v29) - g_rend_screen_height) << 8;
+      }
+      goto LABEL_81;
     }
-    v31 = cmd;
+    v29 = cmd;
     goto LABEL_71;
   }
-  v23 = 2 * g_game_mouse_state.cursor_dx - g_camera_shake_x;
-  g_mapd_camera.x += v23;
+  g_mapd_camera.x += 2 * g_game_mouse_state.cursor_dx - g_camera_shake_x;
   if ( g_mapd_camera.x >= 0 )
   {
-    v24 = cmd;
-    if ( g_mapd_camera.x >= (32 - g_rend_screen_width + REND_get_width(cmd, v23)) << 8 )
-      g_mapd_camera.x = (32 - g_rend_screen_width + REND_get_width(cmd, g_rend_screen_width)) << 8;
+    v23 = cmd;
+    if ( g_mapd_camera.x >= (32 - g_rend_screen_width + REND_get_width(cmd)) << 8 )
+      g_mapd_camera.x = (32 - g_rend_screen_width + REND_get_width(cmd)) << 8;
   }
   else
   {
-    v24 = cmd;
+    v23 = cmd;
     g_mapd_camera.x = 0;
   }
   g_mapd_camera.y += 2 * g_game_mouse_state.cursor_dy - g_camera_shake_y;
   if ( g_mapd_camera.y >= 0 )
   {
-    if ( g_mapd_camera.y >= (REND_get_height(v24) - g_rend_screen_height) << 8 )
-      g_mapd_camera.y = (REND_get_height(v24) - g_rend_screen_height) << 8;
+    if ( g_mapd_camera.y >= (REND_get_height(v23) - g_rend_screen_height) << 8 )
+      g_mapd_camera.y = (REND_get_height(v23) - g_rend_screen_height) << 8;
   }
   else
   {
@@ -39420,42 +39250,42 @@ LABEL_71:
   cursor->cursor_entity->x = cursor->rmb_scrolling_initial_x;
   cursor->cursor_entity->is_collidable = BuildingConstructionStage_1;
   cursor->cursor_entity->y = cursor->rmb_scrolling_initial_y;
-  v25 = g_game_mouse_state.cursor_x - (g_rend_screen_width << 7) + cursor->rmb_scrolling_dx;
-  v26 = v25;
-  cursor->rmb_scrolling_dx = v25;
-  if ( v25 < 0 )
-    v26 = -v25;
-  if ( v26 > cursor->rmb_scrolling_max_dx )
-    cursor->rmb_scrolling_max_dx = v26;
-  v27 = g_game_mouse_state.cursor_y - (g_rend_screen_height << 7) + cursor->rmb_scrolling_dy;
-  cursor->rmb_scrolling_dy = v27;
-  if ( v27 < 0 )
-    v27 = -v27;
-  if ( v27 > cursor->rmb_scrolling_max_dy )
-    cursor->rmb_scrolling_max_dy = v27;
-  INPUT_set_mouse_pos((unsigned int)g_rend_screen_width >> 1, (unsigned int)g_rend_screen_height >> 1);
+  v24 = g_game_mouse_state.cursor_x - (g_rend_screen_width << 7) + cursor->rmb_scrolling_dx;
+  v25 = v24;
+  cursor->rmb_scrolling_dx = v24;
+  if ( v24 < 0 )
+    v25 = -v24;
+  if ( v25 > cursor->rmb_scrolling_max_dx )
+    cursor->rmb_scrolling_max_dx = v25;
+  v26 = g_game_mouse_state.cursor_y - (g_rend_screen_height << 7) + cursor->rmb_scrolling_dy;
+  cursor->rmb_scrolling_dy = v26;
+  if ( v26 < 0 )
+    v26 = -v26;
+  if ( v26 > cursor->rmb_scrolling_max_dy )
+    cursor->rmb_scrolling_max_dy = v26;
+  INPUT_set_mouse_pos(g_rend_screen_width >> 1, g_rend_screen_height >> 1);
 LABEL_82:
   if ( (g_camera_shake_vel_x || g_camera_shake_vel_y) && !g_netz_synchronized_lockstep_mode && g_camera_shake_vel_x )
   {
-    v32 = g_camera_shake_vel_x + g_mapd_camera.x;
+    v30 = g_camera_shake_vel_x + g_mapd_camera.x;
     if ( g_camera_shake_vel_x + g_mapd_camera.x >= 0 )
     {
-      if ( v32 <= (32 - g_rend_screen_width + REND_get_width(v24, cursor_entity)) << 8 )
+      if ( v30 <= (32 - g_rend_screen_width + REND_get_width(v23)) << 8 )
       {
         g_camera_shake_x = g_camera_shake_vel_x;
       }
       else
       {
-        v32 = (32 - g_rend_screen_width + REND_get_width(v24, 32 - g_rend_screen_width)) << 8;
-        g_camera_shake_x = v32 - g_mapd_camera.x;
+        v30 = (32 - g_rend_screen_width + REND_get_width(v23)) << 8;
+        g_camera_shake_x = v30 - g_mapd_camera.x;
       }
     }
     else
     {
-      v32 = 0;
+      v30 = 0;
       g_camera_shake_x = -g_mapd_camera.x;
     }
-    g_mapd_camera.x = v32;
+    g_mapd_camera.x = v30;
   }
   if ( (g_game_mouse_state.released_actions_mask & 0x20) != 0
     && !g_netz_synchronized_lockstep_mode
@@ -39463,27 +39293,27 @@ LABEL_82:
     && cursor->rmb_scrolling_max_dx < 4096
     && cursor->rmb_scrolling_max_dy < 4096 )
   {
-    v33 = g_game_event_queue.next;
+    v31 = g_game_event_queue.next;
     g_game_event_queue.evt.type = GameEvent_SelectionCleared;
-    v34 = g_game_event_free_head;
+    v32 = g_game_event_free_head;
     if ( g_game_event_free_head )
     {
       g_game_event_free_head = g_game_event_free_head->next;
-      *(_DWORD *)&v34->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-      *(_DWORD *)&v34->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-      *(_DWORD *)&v34->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
-      v35 = g_game_event_queue.evt.payload[11];
-      v34->next = nullptr;
-      v34->evt.payload[11] = v35;
+      *(_DWORD *)&v32->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
+      *(_DWORD *)&v32->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
+      *(_DWORD *)&v32->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+      v33 = g_game_event_queue.evt.payload[11];
+      v32->next = nullptr;
+      v32->evt.payload[11] = v33;
       if ( g_game_event_queue.next )
       {
-        for ( k = v33->next; k; k = k->next )
-          v33 = k;
-        v33->next = v34;
+        for ( k = v31->next; k; k = k->next )
+          v31 = k;
+        v31->next = v32;
       }
       else
       {
-        g_game_event_queue.next = v34;
+        g_game_event_queue.next = v32;
       }
     }
     cursor->are_own_units_selected = 0;
@@ -39503,96 +39333,99 @@ LABEL_82:
   }
   cursor->cursor_hitbox_tester->is_collidable = BuildingConstructionStage_1;
   cursor_hitbox_tester = cursor->cursor_hitbox_tester;
-  v39 = cursor_hitbox_tester->x >> 13;
-  v40 = cursor_hitbox_tester->y >> 13;
-  if ( v39 >= 0 )
+  v37 = cursor_hitbox_tester->x >> 13;
+  v38 = cursor_hitbox_tester->y >> 13;
+  if ( v37 >= 0 )
   {
-    if ( v39 >= g_map_num_tiles_x )
-      v39 = g_map_num_tiles_x - 1;
+    if ( v37 >= g_map_num_tiles_x )
+      v37 = g_map_num_tiles_x - 1;
   }
   else
   {
-    v39 = 0;
+    v37 = 0;
   }
-  if ( v40 >= 0 )
+  if ( v38 >= 0 )
   {
-    if ( v40 >= g_map_num_tiles_y )
-      v40 = g_map_num_tiles_y - 1;
+    if ( v38 >= g_map_num_tiles_y )
+      v38 = g_map_num_tiles_y - 1;
   }
   else
   {
-    v40 = 0;
+    v38 = 0;
   }
-  flags1 = g_terrain[v39 + g_map_num_tiles_x * v40].flags1;
+  flags1 = g_terrain[v37 + g_map_num_tiles_x * v38].flags1;
   cursor_task = cursor->cursor_task;
   cursor->is_cursor_over_impassable_terrain = flags1 & 0x60;
-  for ( n = TSK_pop_message(cursor_task); n; n = TSK_pop_message(cursor->cursor_task) )
+  for ( msg = TSK_pop_message(cursor_task); msg; msg = TSK_pop_message(cursor->cursor_task) )
   {
-    type = n->type;
+    type = msg->type;
     if ( (int)type > (int)TaskMessage_RepairTick )
     {
       switch ( type )
       {
         case TaskMessage_UnitDeselected:
-          v58 = g_construction_active_list_head;
-          unit = (KKND::Unit *)n->task->ctx;
+          v56 = g_construction_active_list_head;
+          unit = (KKND::Unit *)msg->task->ctx;
           dword_468980 = -1;
           if ( g_construction_active_list_head != (KKND::BuildingConstruction *)&g_construction_active_list_head )
           {
-            while ( v58->unit_id != unit->unit_id )
+            while ( v56->unit_id != unit->unit_id )
             {
-              v58 = v58->next;
-              if ( v58 == (KKND::BuildingConstruction *)&g_construction_active_list_head )
+              v56 = v56->next;
+              if ( v56 == (KKND::BuildingConstruction *)&g_construction_active_list_head )
                 goto LABEL_162;
             }
-            factory_cancel_production(&v58->remaining_cost, 0);
-            v58->next->prev = v58->prev;
-            v58->prev->next = v58->next;
-            v58->next = g_construction_free_pool;
-            g_construction_free_pool = v58;
+            factory_cancel_production(&v56->remaining_cost, 0);
+            v56->next->prev = v56->prev;
+            v56->prev->next = v56->next;
+            v56->next = g_construction_free_pool;
+            g_construction_free_pool = v56;
           }
 LABEL_162:
           selection_head = (KKND::CursorState *)cursor->selection_head;
           if ( (KKND::CursorState *)cursor->selection_head != cursor )
           {
-            while ( selection_head->_cursor_state_task_8 != n->task )
+            while ( selection_head->_cursor_state_task_8 != msg->task )
             {
               selection_head = (KKND::CursorState *)selection_head->selection_head;
               if ( selection_head == cursor )
                 goto LABEL_169;
             }
-            v61 = unit->control_groups[g_player_num];
-            if ( v61 )
-              --g_num_units_in_group[v61];
+            v59 = unit->control_groups[g_player_num];
+            if ( v59 )
+              --g_num_units_in_group[v59];
             selection_head->selection_head->prev = selection_head->selection_tail;
             selection_head->selection_tail->next = selection_head->selection_head;
             selection_head->selection_head = cursor->selection_free_head;
             cursor->selection_free_head = (KKND::CursorUnitSelection *)selection_head;
           }
 LABEL_169:
-          v62 = (KKND::CursorState *)cursor->selection_head;
-          for ( cursor->unit_type_to_voice_response = 0; v62 != cursor; v62 = (KKND::CursorState *)v62->selection_head )
+          v60 = (KKND::CursorState *)cursor->selection_head;
+          for ( cursor->unit_type_to_voice_response = UnitType_Surv_Rifleman;
+                v60 != cursor;
+                v60 = (KKND::CursorState *)v60->selection_head )
           {
-            link = (KKND::Unit *)v62->_cursor_state_task_8->ctx;
-            if ( link->player_num == g_player_num )
+            ctx = (KKND::Unit *)v60->_cursor_state_task_8->ctx;
+            if ( ctx->player_num == g_player_num )
             {
-              v64 = link->type;
-              if ( (int)v64 <= 39 || (int)v64 >= 74 )
+              v62 = ctx->type;
+              if ( (int)v62 <= (int)UnitType_Mute_MissileCrab || (int)v62 >= (int)UnitType_Gort )
               {
-                cursor->selection_executing_representative = link;
-                v65 = link->type;
-                if ( ((int)v65 < 21 || (int)v65 > 25) && ((int)v65 < 12 || (int)v65 > 13) )
+                cursor->selection_executing_representative = ctx;
+                v63 = ctx->type;
+                if ( ((int)v63 < (int)UnitType_Surv_MobileDerrick || (int)v63 > (int)UnitType_TankerConvoy)
+                  && ((int)v63 < (int)UnitType_Surv_Technician || (int)v63 > (int)UnitType_Mute_Makanik) )
                 {
                   unit_type_to_voice_response = cursor->unit_type_to_voice_response;
                   cursor->are_movable_units_selected = 1;
                   cursor->are_attacker_units_selected = 1;
-                  v67 = link->type;
-                  if ( (int)v67 > (int)unit_type_to_voice_response && v67 != 29 )
-                    cursor->unit_type_to_voice_response = v67;
+                  v65 = ctx->type;
+                  if ( (int)v65 > (int)unit_type_to_voice_response && v65 != UnitType_Mute_BikeAndSidecar )
+                    cursor->unit_type_to_voice_response = v65;
                 }
               }
-              v68 = link->type;
-              if ( (int)v68 >= 52 && (int)v68 <= 57 )
+              v66 = ctx->type;
+              if ( (int)v66 >= (int)UnitType_Surv_GuardTower && (int)v66 <= (int)UnitType_Mute_RotaryCannon )
                 cursor->are_attacker_units_selected = 1;
             }
           }
@@ -39624,167 +39457,167 @@ LABEL_169:
         case TaskMessage_BuildingPlacementModeBegin:
           if ( process_ui_events )
           {
-            payload = (KKND::BuildingPlannerPayload *)n->payload;
+            payload = (KKND::BuildingPlannerPayload *)msg->payload;
             cursor->is_placing_building = BuildingConstructionStage_1;
             cursor->planner = payload;
           }
           break;
         case TaskMessage_AdvanceConstructionStage:
-          v52 = g_construction_free_pool;
-          v53 = n->payload;
+          v50 = g_construction_free_pool;
+          v51 = msg->payload;
           if ( g_construction_free_pool )
             g_construction_free_pool = g_construction_free_pool->next;
           else
-            v52 = nullptr;
-          if ( v52 )
+            v50 = nullptr;
+          if ( v50 )
           {
-            v52->unit_id = v53[76];
-            v52->player_num = v53[5];
-            v52->stage = 0;
-            cost = g_unit_stats[v53[4]].cost;
-            v52->remaining_cost = cost;
-            v52->cost = cost;
-            v55 = (cost << 8) / (60 * *(_DWORD *)(v53[6] + 96));
-            v52->cost_per_tick = v55;
-            sub_427D60(v55, 0, 0, -1);
-            v56 = g_construction_active_list_head;
-            v52->prev = (KKND::BuildingConstruction *)&g_construction_active_list_head;
-            v52->next = v56;
-            g_construction_active_list_head->prev = v52;
-            g_construction_active_list_head = v52;
+            v50->unit_id = v51[76];
+            v50->player_num = v51[5];
+            v50->stage = 0;
+            cost = g_unit_stats[v51[4]].cost;
+            v50->remaining_cost = cost;
+            v50->cost = cost;
+            v53 = (cost << 8) / (60 * *(_DWORD *)(v51[6] + 96));
+            v50->cost_per_tick = v53;
+            sub_427D60(&g_cash.cash[v50->player_num], &v50->remaining_cost, v53, nullptr, nullptr, -1);
+            v54 = g_construction_active_list_head;
+            v50->prev = (KKND::BuildingConstruction *)&g_construction_active_list_head;
+            v50->next = v54;
+            g_construction_active_list_head->prev = v50;
+            g_construction_active_list_head = v50;
           }
           break;
         case TaskMessage_PauseGame:
-          v47 = g_game_event_queue.next;
+          v45 = g_game_event_queue.next;
           g_game_event_queue.evt.type = GameEvent_GamePaused;
-          v48 = g_game_event_free_head;
+          v46 = g_game_event_free_head;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
-            v73 = g_game_event_queue.evt.payload[11];
-            v48->next = nullptr;
-            v48->evt.payload[11] = v73;
+            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
+            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
+            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            v71 = g_game_event_queue.evt.payload[11];
+            v46->next = nullptr;
+            v46->evt.payload[11] = v71;
             if ( !g_game_event_queue.next )
               goto LABEL_210;
-            v74 = v47->next;
-            if ( !v47->next )
+            v72 = v45->next;
+            if ( !v45->next )
               goto LABEL_209;
             do
             {
-              v75 = &v74->next;
-              v74 = v74->next;
+              v73 = &v72->next;
+              v72 = v72->next;
             }
-            while ( v74 );
-            *v75 = v48;
+            while ( v72 );
+            *v73 = v46;
           }
           break;
         case TaskMessage_ResumeGame:
-          v47 = g_game_event_queue.next;
+          v45 = g_game_event_queue.next;
           g_game_event_queue.evt.type = GameEvent_GameResumed;
-          v48 = g_game_event_free_head;
+          v46 = g_game_event_free_head;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
-            v79 = g_game_event_queue.evt.payload[11];
-            v48->next = nullptr;
-            v48->evt.payload[11] = v79;
+            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
+            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
+            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            v77 = g_game_event_queue.evt.payload[11];
+            v46->next = nullptr;
+            v46->evt.payload[11] = v77;
             if ( !g_game_event_queue.next )
               goto LABEL_210;
-            v80 = v47->next;
-            if ( !v47->next )
+            v78 = v45->next;
+            if ( !v45->next )
               goto LABEL_209;
             do
             {
-              v81 = &v80->next;
-              v80 = v80->next;
+              v79 = &v78->next;
+              v78 = v78->next;
             }
-            while ( v80 );
-            *v81 = v48;
+            while ( v78 );
+            *v79 = v46;
           }
           break;
         case TaskMessage_PauseGame|0x2:
-          v47 = g_game_event_queue.next;
-          *(_DWORD *)g_game_event_queue.evt.payload = *(_DWORD *)n->payload;
+          v45 = g_game_event_queue.next;
+          *(_DWORD *)g_game_event_queue.evt.payload = *(_DWORD *)msg->payload;
           g_game_event_queue.evt.type = GameEvent_18;
-          v48 = g_game_event_free_head;
+          v46 = g_game_event_free_head;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
-            v82 = g_game_event_queue.evt.payload[11];
-            v48->next = nullptr;
-            v48->evt.payload[11] = v82;
+            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
+            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
+            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            v80 = g_game_event_queue.evt.payload[11];
+            v46->next = nullptr;
+            v46->evt.payload[11] = v80;
             if ( !g_game_event_queue.next )
               goto LABEL_210;
-            for ( ii = v47->next; ii; ii = ii->next )
-              v47 = ii;
+            for ( n = v45->next; n; n = n->next )
+              v45 = n;
             goto LABEL_209;
           }
           break;
         case TaskMessage_UnitReady:
-          v69 = n->payload;
-          *(_DWORD *)g_game_event_queue.evt.payload = *(_DWORD *)(v69[2] + 304);
-          v47 = g_game_event_queue.next;
-          *(_DWORD *)&g_game_event_queue.evt.payload[4] = v69[3];
+          v67 = msg->payload;
+          *(_DWORD *)g_game_event_queue.evt.payload = *(_DWORD *)(v67[2] + 304);
+          v45 = g_game_event_queue.next;
+          *(_DWORD *)&g_game_event_queue.evt.payload[4] = v67[3];
           g_game_event_queue.evt.type = GameEvent_UnitProduced;
-          v48 = g_game_event_free_head;
+          v46 = g_game_event_free_head;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
-            v70 = g_game_event_queue.evt.payload[11];
-            v48->next = nullptr;
-            v48->evt.payload[11] = v70;
+            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
+            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
+            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            v68 = g_game_event_queue.evt.payload[11];
+            v46->next = nullptr;
+            v46->evt.payload[11] = v68;
             if ( !g_game_event_queue.next )
               goto LABEL_210;
-            v71 = v47->next;
-            if ( !v47->next )
+            v69 = v45->next;
+            if ( !v45->next )
               goto LABEL_209;
             do
             {
-              v72 = &v71->next;
-              v71 = v71->next;
+              v70 = &v69->next;
+              v69 = v69->next;
             }
-            while ( v71 );
-            *v72 = v48;
+            while ( v69 );
+            *v70 = v46;
           }
           break;
         case TaskMessage_UpgradeComplete:
           g_game_event_queue.evt.type = GameEvent_UpgradeCompleted;
-          v48 = g_game_event_free_head;
-          *(_DWORD *)g_game_event_queue.evt.payload = n->payload;
-          v47 = g_game_event_queue.next;
+          v46 = g_game_event_free_head;
+          *(_DWORD *)g_game_event_queue.evt.payload = msg->payload;
+          v45 = g_game_event_queue.next;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
-            v76 = g_game_event_queue.evt.payload[11];
-            v48->next = nullptr;
-            v48->evt.payload[11] = v76;
+            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
+            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
+            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            v74 = g_game_event_queue.evt.payload[11];
+            v46->next = nullptr;
+            v46->evt.payload[11] = v74;
             if ( !g_game_event_queue.next )
               goto LABEL_210;
-            v77 = v47->next;
-            if ( !v47->next )
+            v75 = v45->next;
+            if ( !v45->next )
               goto LABEL_209;
             do
             {
-              v78 = &v77->next;
-              v77 = v77->next;
+              v76 = &v75->next;
+              v75 = v75->next;
             }
-            while ( v77 );
-            *v78 = v48;
+            while ( v75 );
+            *v76 = v46;
           }
           break;
         default:
@@ -39794,62 +39627,62 @@ LABEL_169:
     else if ( type == TaskMessage_RepairTick )
     {
       g_game_event_queue.evt.type = GameEvent_RepairBayHealTick;
-      *(_DWORD *)g_game_event_queue.evt.payload = *((_DWORD *)n->payload + 76);
-      v47 = g_game_event_queue.next;
-      *(_WORD *)&g_game_event_queue.evt.payload[4] = g_cash.cash[*((_DWORD *)n->payload + 5)] != 0 ? 4 : 0;
-      v48 = g_game_event_free_head;
+      *(_DWORD *)g_game_event_queue.evt.payload = *((_DWORD *)msg->payload + 76);
+      v45 = g_game_event_queue.next;
+      *(_WORD *)&g_game_event_queue.evt.payload[4] = g_cash.cash[*((_DWORD *)msg->payload + 5)] != 0 ? 4 : 0;
+      v46 = g_game_event_free_head;
       if ( g_game_event_free_head )
       {
         g_game_event_free_head = g_game_event_free_head->next;
-        *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-        *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-        *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
-        v49 = g_game_event_queue.evt.payload[11];
-        v48->next = nullptr;
-        v48->evt.payload[11] = v49;
+        *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
+        *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
+        *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+        v47 = g_game_event_queue.evt.payload[11];
+        v46->next = nullptr;
+        v46->evt.payload[11] = v47;
         if ( g_game_event_queue.next )
         {
-          v50 = v47->next;
-          if ( v47->next )
+          v48 = v45->next;
+          if ( v45->next )
           {
             do
             {
-              v51 = &v50->next;
-              v50 = v50->next;
+              v49 = &v48->next;
+              v48 = v48->next;
             }
-            while ( v50 );
-            *v51 = v48;
+            while ( v48 );
+            *v49 = v46;
           }
           else
           {
 LABEL_209:
-            v47->next = v48;
+            v45->next = v46;
           }
         }
         else
         {
 LABEL_210:
-          g_game_event_queue.next = v48;
+          g_game_event_queue.next = v46;
         }
       }
     }
     else if ( type == TaskMessage_MouseHover && process_ui_events && !dword_47C6C4 )
     {
-      v45 = n->payload;
-      v46 = *((_DWORD *)v45 + 3);
-      if ( v46 == 60138 || v46 >= 0xCA000000 && v46 < 0xCA000014 )
+      v43 = msg->payload;
+      v44 = *((_DWORD *)v43 + 3);
+      if ( v44 == 0xEAEA || v44 >= 0xCA000000 && v44 < 0xCA000014 )
       {
-        cursor->hovered_unit_task = (KKND::Task *)v45;
+        cursor->hovered_unit_task = (KKND::Task *)v43;
       }
-      else if ( v46 == 0xBABA || v46 == 0xBBBB || v46 == 0xDA000002 || v46 == 0xDA000003 || v46 == 0xDA000001 )
+      else if ( v44 == 0xBABA || v44 == 0xBBBB || v44 == 0xDA000002 || v44 == 0xDA000003 || v44 == 0xDA000001 )
       {
-        cursor->hovered_unit_task = (KKND::Task *)v45;
-        cursor->hovered_ui_task = (KKND::Task *)v45;
+        cursor->hovered_unit_task = (KKND::Task *)v43;
+        cursor->hovered_ui_task = (KKND::Task *)v43;
       }
     }
-    TSK_message_recycle(n);
+    TSK_message_recycle(msg);
   }
-  v84 = g_game_event_queue.next;
+  v82 = g_game_event_queue.next;
   if ( g_game_event_queue.next )
   {
     *(_DWORD *)&g_47CAE0.type = *(_DWORD *)&g_game_event_queue.next->evt.type;
@@ -39857,21 +39690,21 @@ LABEL_210:
     *(_DWORD *)&g_47CAE0.payload[7] = *(_DWORD *)&g_game_event_queue.next->evt.payload[7];
     g_47CAE0.payload[11] = g_game_event_queue.next->evt.payload[11];
     g_game_event_queue.next = g_game_event_queue.next->next;
-    v84->next = g_game_event_free_head;
-    g_game_event_free_head = v84;
+    v82->next = g_game_event_free_head;
+    g_game_event_free_head = v82;
     if ( dword_47CB0C )
     {
-      v85 = g_47A660_num_items;
+      v83 = g_47A660_num_items;
       if ( g_47A660_num_items >= 10 )
-        v85 = 0;
-      v86 = *(_DWORD *)&g_47CAE0.type;
-      g_47A660[v85]._is_free = 1;
-      v87 = &g_47A660[v85];
-      g_47A660_num_items = v85 + 1;
-      *(_DWORD *)&v87->type = v86;
-      *(_DWORD *)&v87->payload[3] = *(_DWORD *)&g_47CAE0.payload[3];
-      *(_DWORD *)&v87->payload[7] = *(_DWORD *)&g_47CAE0.payload[7];
-      v87->payload[11] = g_47CAE0.payload[11];
+        v83 = 0;
+      v84 = *(_DWORD *)&g_47CAE0.type;
+      g_47A660[v83]._is_free = 1;
+      v85 = &g_47A660[v83];
+      g_47A660_num_items = v83 + 1;
+      *(_DWORD *)&v85->type = v84;
+      *(_DWORD *)&v85->payload[3] = *(_DWORD *)&g_47CAE0.payload[3];
+      *(_DWORD *)&v85->payload[7] = *(_DWORD *)&g_47CAE0.payload[7];
+      v85->payload[11] = g_47CAE0.payload[11];
     }
   }
   else
@@ -39879,20 +39712,13 @@ LABEL_210:
     g_47CAE0.type = GameEvent_None;
   }
 }
-// 42BE51: variable 'cursor_entity' is possibly undefined
-// 4125D0: using guessed type int __fastcall sub_4125D0(_DWORD, _DWORD);
-// 4125F0: using guessed type int __thiscall sub_4125F0(_DWORD);
-// 427D60: using guessed type _DWORD __stdcall sub_427D60(_DWORD, _DWORD, _DWORD, _DWORD);
 // 468980: using guessed type int dword_468980;
-// 470508: using guessed type int g_player_num;
 // 477898: using guessed type int g_camera_shake_x;
 // 47789C: using guessed type int g_camera_shake_y;
-// 478A88: using guessed type int g_screen_height;
-// 478A8C: using guessed type int g_screen_width;
 // 478AAC: using guessed type int g_map_num_tiles_y;
 // 4793F8: using guessed type int g_map_num_tiles_x;
 // 47A6F0: using guessed type int g_rmb_hold_frame_count;
-// 47A72C: using guessed type int dword_47A72C;
+// 47A72C: using guessed type int g_47A660_num_items;
 // 47C6C4: using guessed type int dword_47C6C4;
 // 47C764: using guessed type __int16 g_netz_synchronized_lockstep_mode;
 // 47CB0C: using guessed type int dword_47CB0C;
@@ -40264,36 +40090,36 @@ void __fastcall cursor_42C9E0(KKND::CursorState *cursor, int x, int y)
         case UnitType_TankerConvoy:
           break;
         case UnitType_Mute_DireWolf:
-          SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_sfx_vol, 16, 0);
           break;
         case UnitType_Mute_GiantScorpion:
-          SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_GiantScorpion_Recall, 0, g_sfx_vol, 16, 0);
           break;
         case UnitType_Mute_WarMastadont:
-          SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_WarMastadont_Recall, 0, g_sfx_vol, 16, 0);
           break;
         case UnitType_Mute_GiantBeetle:
-          SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_GiantBeetle_Recall, 0, g_sfx_vol, 16, 0);
           break;
         case UnitType_Mute_MissileCrab:
-          SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_MissileCrab_Recall, 0, g_sfx_vol, 16, 0);
           break;
         case UnitType_Gort:
         case UnitType_PlasmaTank:
         case UnitType_SentinelDroid:
         case UnitType_Mech:
-          v33 = g_4690A8_sfx_volume;
+          v33 = g_sfx_vol;
           v24 = g_futuristic_units_recall[kknd_rand_2() % 2];
           goto LABEL_57;
         default:
           if ( is_player_evolved() )
           {
-            v33 = g_4690A8_sfx_volume;
+            v33 = g_sfx_vol;
             v24 = dword_468998[kknd_rand_2() % 4];
           }
           else
           {
-            v33 = g_4690A8_sfx_volume;
+            v33 = g_sfx_vol;
             v24 = dword_468988[kknd_rand_2() % 4];
           }
 LABEL_57:
@@ -41550,7 +41376,7 @@ BOOL __fastcall sub_42E170(int a1, const char *a2)
   g_netz_is_game_started = 0;
   dword_47A828 = 0;
   dword_468B50 = 0;
-  v2 = dword_47A798;
+  v2 = MEMORY[0x47A798];
   do
   {
     *((_BYTE *)v2 - 24) = 0;
@@ -41562,7 +41388,7 @@ BOOL __fastcall sub_42E170(int a1, const char *a2)
   srand(v3);
   v4 = 0;
   v5 = rand() % 6;
-  while ( a3[28 * v5] )
+  while ( MEMORY[0x47A780][28 * v5] )
   {
     if ( ++v5 == 6 )
       v5 = 0;
@@ -41575,7 +41401,7 @@ BOOL __fastcall sub_42E170(int a1, const char *a2)
   dword_468B58 = v5;
   memset(v23, 0, sizeof(v23));
   v6 = 0;
-  v7 = byte_47A781;
+  v7 = MEMORY[0x47A781];
   do
   {
     if ( *(v7 - 1) && v6 != v5 )
@@ -41600,34 +41426,34 @@ BOOL __fastcall sub_42E170(int a1, const char *a2)
 LABEL_20:
   v11 = v25;
   v12 = 28 * dword_468B58;
-  byte_47A781[v12] = v10;
-  a3[v12] = 2;
-  byte_47A782[v12] = 0;
+  MEMORY[0x47A781][v12] = v10;
+  MEMORY[0x47A780][v12] = 2;
+  MEMORY[0x47A782][v12] = 0;
   v13 = strlen(v11) + 1;
-  v25 = (char *)&byte_47A783 + v12;
-  qmemcpy((char *)&byte_47A783 + v12, v11, v13);
+  v25 = (char *)&MEMORY[0x47A783] + v12;
+  qmemcpy((char *)&MEMORY[0x47A783] + v12, v11, v13);
   v14 = dword_468B50;
-  dword_47A798[v12 / 4] = 1;
+  MEMORY[0x47A798][v12 / 4] = 1;
   dword_468B50 = v14 + 1;
-  g_last_result = v13;
+  g_last_async_result = v13;
   v15 = g_coroutine_current;
-  if ( g_coroutine_list_head != v15 && ++dword_47734C == 1 )
-    dword_477344 = (int)v22;
+  if ( g_coroutine_list_head != v15 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)v22;
   v16 = NETZ_set_protocol(v24);
-  g_last_result = v16;
+  g_last_async_result = v16;
   v17 = g_coroutine_current;
   if ( g_coroutine_list_head != v17 )
-    --dword_47734C;
+    --g_coroutine_nesting_depth;
   if ( v16 )
     return 0;
   v19 = g_coroutine_current;
-  if ( g_coroutine_list_head != v19 && ++dword_47734C == 1 )
-    dword_477344 = (int)v22;
+  if ( g_coroutine_list_head != v19 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)v22;
   v20 = NETZ_host_or_join(0);
-  g_last_result = v20;
+  g_last_async_result = v20;
   v21 = g_coroutine_current;
   if ( g_coroutine_list_head != v21 )
-    --dword_47734C;
+    --g_coroutine_nesting_depth;
   return v20 == 0;
 }
 // 42F8C0: using guessed type int __thiscall sub_42F8C0(_DWORD);
@@ -41649,15 +41475,15 @@ int __usercall sub_42E390@<eax>(int a1@<eax>)
   KKND::Coroutine *v3; // et1
   _UNKNOWN *retaddr; // [esp+0h] [ebp+0h] BYREF
 
-  g_last_result = a1;
+  g_last_async_result = a1;
   v1 = g_coroutine_current;
-  if ( g_coroutine_list_head != v1 && ++dword_47734C == 1 )
-    dword_477344 = (int)&retaddr;
+  if ( g_coroutine_list_head != v1 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)&retaddr;
   NETZ_disconnect();
-  g_last_result = v2;
+  g_last_async_result = v2;
   v3 = g_coroutine_current;
   if ( g_coroutine_list_head != v3 )
-    --dword_47734C;
+    --g_coroutine_nesting_depth;
   return 1;
 }
 // 42E3C6: variable 'v2' is possibly undefined
@@ -41749,10 +41575,10 @@ UINT __usercall sub_42E450@<eax>(UINT a1@<eax>, char dl0@<dl>, char cl0@<cl>)
 
   v25 = dl0;
   a2 = cl0;
-  g_last_result = a1;
+  g_last_async_result = a1;
   v3 = g_coroutine_current;
-  if ( g_coroutine_list_head != v3 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v20;
+  if ( g_coroutine_list_head != v3 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)&v20;
   Time = (char *)timeGetTime();
   memset(a3, 0, sizeof(a3));
   v24 = 10000;
@@ -41761,7 +41587,7 @@ UINT __usercall sub_42E450@<eax>(UINT a1@<eax>, char dl0@<dl>, char cl0@<cl>)
     v4 = dword_468B50;
     v5 = (char *)&a3[5] + 1;
     a3[0] = dword_468B50;
-    v6 = dword_47A798;
+    v6 = MEMORY[0x47A798];
     do
     {
       if ( *((_BYTE *)v6 - 24) && *v6 )
@@ -41787,7 +41613,7 @@ UINT __usercall sub_42E450@<eax>(UINT a1@<eax>, char dl0@<dl>, char cl0@<cl>)
     }
     while ( (int)v6 < (int)&dword_47A840 );
     v10 = 0;
-    v11 = player;
+    v11 = MEMORY[0x47A790];
     do
     {
       if ( *((_BYTE *)v11 - 16) && v10 != dword_468B58 )
@@ -41821,10 +41647,10 @@ UINT __usercall sub_42E450@<eax>(UINT a1@<eax>, char dl0@<dl>, char cl0@<cl>)
     v22 = 15 * dword_468B58;
     *((_BYTE *)&a3[2] + 15 * dword_468B58) = 1;
     Time = (char *)&a3[2] + 15 * v13 + 1;
-    strcpy(Time, &byte_47A783[v14]);
+    strcpy(Time, &MEMORY[0x47A783][v14]);
     v15 = v22;
-    v16 = byte_47A781[v14];
-    LOBYTE(v14) = byte_47A782[v14];
+    v16 = MEMORY[0x47A781][v14];
+    LOBYTE(v14) = MEMORY[0x47A782][v14];
     *((_BYTE *)&a3[5] + v22 + 1) = v16;
     v17 = dword_468B54;
     *((_BYTE *)&a3[5] + v15 + 2) = v14;
@@ -41846,11 +41672,11 @@ UINT __usercall sub_42E450@<eax>(UINT a1@<eax>, char dl0@<dl>, char cl0@<cl>)
       while ( dword_47CB10 > 0 );
     }
   }
-  g_last_result = v4;
+  g_last_async_result = v4;
   v18 = g_coroutine_current;
   if ( g_coroutine_list_head != v18 )
-    --dword_47734C;
-  return g_last_result;
+    --g_coroutine_nesting_depth;
+  return g_last_async_result;
 }
 // 468B50: using guessed type int dword_468B50;
 // 468B58: using guessed type int dword_468B58;
@@ -41862,11 +41688,11 @@ UINT __usercall sub_42E450@<eax>(UINT a1@<eax>, char dl0@<dl>, char cl0@<cl>)
 // 47CB10: using guessed type int dword_47CB10;
 
 //----- (0042E690) --------------------------------------------------------
-UINT __usercall sub_42E690@<eax>(UINT a1@<eax>, char a2@<cl>)
+UINT __usercall sub_42E690@<eax>(UINT a1@<eax>, char cl0@<cl>)
 {
   KKND::Coroutine *v2; // et1
   char *v3; // ebx
-  UINT v4; // eax
+  KKND::NetzError v4; // eax
   int *v5; // edx
   char *v6; // edi
   char *v7; // esi
@@ -41876,26 +41702,26 @@ UINT __usercall sub_42E690@<eax>(UINT a1@<eax>, char a2@<cl>)
   int v11; // ecx
   KKND::Coroutine *v12; // et1
   int v14; // [esp+0h] [ebp-78h] BYREF
-  _DWORD v15[26]; // [esp+Ch] [ebp-6Ch] BYREF
-  char v16; // [esp+77h] [ebp-1h]
+  _DWORD a3[26]; // [esp+Ch] [ebp-6Ch] BYREF
+  char a2; // [esp+77h] [ebp-1h]
 
-  v16 = a2;
-  g_last_result = a1;
+  a2 = cl0;
+  g_last_async_result = a1;
   v2 = g_coroutine_current;
-  if ( g_coroutine_list_head != v2 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v14;
-  v3 = (char *)&v15[5] + 1;
-  memset(v15, 0, 0x64u);
+  if ( g_coroutine_list_head != v2 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = &v14;
+  v3 = (char *)&a3[5] + 1;
+  memset(a3, 0, 0x64u);
   v4 = dword_468B50;
-  v5 = dword_47A798;
-  v15[0] = dword_468B50;
+  v5 = MEMORY[0x47A798];
+  a3[0] = dword_468B50;
   do
   {
     LOBYTE(v4) = *((_BYTE *)v5 - 24);
     if ( (_BYTE)v4 && *v5 )
     {
       v4 = strlen((const char *)v5 - 21) + 1;
-      v15[25] = v3 - 12;
+      a3[25] = v3 - 12;
       *(v3 - 13) = 1;
       qmemcpy(v3 - 12, (char *)v5 - 21, 4 * (v4 >> 2));
       v7 = (char *)&v5[(v4 >> 2) - 5] - 1;
@@ -41915,7 +41741,7 @@ UINT __usercall sub_42E690@<eax>(UINT a1@<eax>, char a2@<cl>)
   }
   while ( (int)v5 < (int)&dword_47A840 );
   v9 = 0;
-  v10 = dword_47A798;
+  v10 = MEMORY[0x47A798];
   do
   {
     if ( *((_BYTE *)v10 - 24) == 1 )
@@ -41923,27 +41749,26 @@ UINT __usercall sub_42E690@<eax>(UINT a1@<eax>, char a2@<cl>)
       if ( *v10 )
       {
         v4 = *(v10 - 1);
-        if ( !v4 )
+        if ( v4 == NetzError_Ok )
         {
           v11 = *(v10 - 2);
-          v15[1] = v9;
-          v4 = NETZ_send(v11, v16, v15, 0x64u, 1);
+          a3[1] = v9;
+          v4 = NETZ_send(v11, a2, a3, 0x64u, 1);
         }
       }
     }
     v10 += 7;
     ++v9;
   }
-  while ( (int)v10 < (int)&dword_47A840 );
-  g_last_result = v4;
+  while ( (int)v10 < (int)&dword_47A840 );      // BUG
+  g_last_async_result = v4;
   v12 = g_coroutine_current;
   if ( g_coroutine_list_head != v12 )
-    --dword_47734C;
-  return g_last_result;
+    --g_coroutine_nesting_depth;
+  return g_last_async_result;
 }
 // 468B50: using guessed type int dword_468B50;
-// 477344: using guessed type int dword_477344;
-// 47734C: using guessed type int dword_47734C;
+// 47734C: using guessed type int g_coroutine_nesting_depth;
 // 47A798: using guessed type int dword_47A798[36];
 // 47A840: using guessed type int dword_47A840;
 
@@ -41958,7 +41783,7 @@ int sub_42E7B0()
   {
     if ( dword_468B50 != 1 )
     {
-      v1 = dword_47A798;
+      v1 = MEMORY[0x47A798];
       while ( *((_BYTE *)v1 - 24) != 1 || *v1 )
       {
         v1 += 7;
@@ -42065,7 +41890,7 @@ void __fastcall NETZ_42E820(KKND::netz_stru2 *a1)
   char *v76; // [esp+1Ch] [ebp-40h]
   _DWORD v77[15]; // [esp+20h] [ebp-3Ch] BYREF
 
-  dword_47A77C = a1;
+  MEMORY[0x47A77C] = a1;
   switch ( a1->_netz_stru2_C )
   {
     case 1:
@@ -42075,7 +41900,7 @@ void __fastcall NETZ_42E820(KKND::netz_stru2 *a1)
       {
         case 0x1F:
           v2 = 0;
-          v3 = dword_47A798;
+          v3 = MEMORY[0x47A798];
           a3 = 6;
           do
           {
@@ -42085,7 +41910,7 @@ void __fastcall NETZ_42E820(KKND::netz_stru2 *a1)
           }
           while ( (int)v3 < (int)&dword_47A840 );
           v4 = 0;
-          v5 = player;
+          v5 = MEMORY[0x47A790];
           while ( *((_BYTE *)v5 - 16) != 1 || *v5 != a1->dp_player_slot )
           {
             v5 += 7;
@@ -42108,11 +41933,11 @@ LABEL_14:
             if ( v6 != -1 )
             {
               ++dword_468B50;
-              strcpy(&byte_47A783[28 * v6], netz_stru2_34);
-              byte_47A781[28 * v6] = byte_47A781[28 * dword_468B58];
+              strcpy(&MEMORY[0x47A783][28 * v6], netz_stru2_34);
+              MEMORY[0x47A781][28 * v6] = MEMORY[0x47A781][28 * dword_468B58];
               memset(v77, 0, sizeof(v77));
               v8 = 0;
-              v9 = byte_47A781;
+              v9 = MEMORY[0x47A781];
               do
               {
                 if ( *(v9 - 1) && v8 != v6 )
@@ -42136,16 +41961,16 @@ LABEL_14:
               v12 = a3;
               a3 = 6;
               v13 = 28 * v12;
-              byte_47A781[v13] = v11;
-              byte_47A782[v13] = 1;
-              v14 = dword_47A794;
+              MEMORY[0x47A781][v13] = v11;
+              MEMORY[0x47A782][v13] = 1;
+              v14 = MEMORY[0x47A794];
               do
               {
                 *v14 = 0;
                 v14 += 7;
               }
               while ( (int)v14 < (int)&dword_47A83C );
-              v15 = &dword_47A798[7 * v12];
+              v15 = &MEMORY[0x47A798][7 * v12];
               *v15 = 1;
               sub_42E690((UINT)v14, 57);
               sub_443F10();
@@ -42155,12 +41980,12 @@ LABEL_14:
           else if ( g_netz_is_game_host )
           {
             NETZ_send(a1->dp_player_slot, 76, nullptr, 0, 1);
-            DP_player_slot_release(dword_47A77C->dp_player_slot);
+            DP_player_slot_release(MEMORY[0x47A77C]->dp_player_slot);
             if ( a3 != -1 )
             {
               v16 = 7 * a3;
-              player[v16] = -1;
-              ::a3[v16 * 4] = 0;
+              MEMORY[0x47A790][v16] = -1;
+              MEMORY[0x47A780][v16 * 4] = 0;
             }
           }
           return;
@@ -42190,11 +42015,11 @@ LABEL_14:
           }
           return;
         case 0x34:
-          v38 = player;
+          v38 = MEMORY[0x47A790];
           a1->dp_player_slot = a1->dp_player_slot;
-          v39 = dword_47A77C;
+          v39 = MEMORY[0x47A77C];
           v40 = 0;
-          while ( *((_BYTE *)v38 - 16) != 1 || *v38 != dword_47A77C->dp_player_slot )
+          while ( *((_BYTE *)v38 - 16) != 1 || *v38 != MEMORY[0x47A77C]->dp_player_slot )
           {
             v38 += 7;
             ++v40;
@@ -42207,9 +42032,9 @@ LABEL_14:
           v41 = v40;
 LABEL_90:
           a3 = v41;
-          if ( v41 != -1 && !dword_47A794[7 * v41] )
+          if ( v41 != -1 && !MEMORY[0x47A794][7 * v41] )
           {
-            dword_47A794[7 * v41] = 1;
+            MEMORY[0x47A794][7 * v41] = 1;
             v42 = v39->_netz_stru2_34;
             if ( *(_BYTE *)v42 )
             {
@@ -42228,7 +42053,7 @@ LABEL_90:
           return;
         case 0x37:
           v26 = 0;
-          v27 = player;
+          v27 = MEMORY[0x47A790];
           while ( *((_BYTE *)v27 - 16) != 1 || *v27 != a1->dp_player_slot )
           {
             v27 += 7;
@@ -42243,7 +42068,7 @@ LABEL_90:
 LABEL_69:
           if ( v28 != -1 )
           {
-            v29 = &dword_47A798[7 * v28];
+            v29 = &MEMORY[0x47A798][7 * v28];
             if ( !*v29 )
               goto LABEL_122;
           }
@@ -42264,16 +42089,16 @@ LABEL_40:
             v18 = (int)&v75[3 * v17] + 3 * v17;
             if ( *(_BYTE *)(v18 + 8) )
             {
-              ::a3[28 * v17] = 3;
-              v76 = &byte_47A783[28 * v17];
+              MEMORY[0x47A780][28 * v17] = 3;
+              v76 = &MEMORY[0x47A783][28 * v17];
               strcpy(v76, (const char *)(v18 + 9));
-              byte_47A781[28 * v17] = *(_BYTE *)(v18 + 21);
-              byte_47A782[28 * v17] = *(_BYTE *)(v18 + 22);
+              MEMORY[0x47A781][28 * v17] = *(_BYTE *)(v18 + 21);
+              MEMORY[0x47A782][28 * v17] = *(_BYTE *)(v18 + 22);
               ++v74;
             }
             else
             {
-              ::a3[28 * v17] = 0;
+              MEMORY[0x47A780][28 * v17] = 0;
             }
             a3 = ++v17;
           }
@@ -42289,8 +42114,8 @@ LABEL_40:
             return;
           v55 = 0;
           a1->dp_player_slot = a1->dp_player_slot;
-          v56 = player;
-          while ( *((_BYTE *)v56 - 16) != 1 || *v56 != dword_47A77C->dp_player_slot )
+          v56 = MEMORY[0x47A790];
+          while ( *((_BYTE *)v56 - 16) != 1 || *v56 != MEMORY[0x47A77C]->dp_player_slot )
           {
             v56 += 7;
             ++v55;
@@ -42304,7 +42129,7 @@ LABEL_40:
 LABEL_120:
           if ( v57 != -1 )
           {
-            v29 = &dword_47A794[7 * v57];
+            v29 = &MEMORY[0x47A794][7 * v57];
             if ( !*v29 )
             {
 LABEL_122:
@@ -42318,9 +42143,9 @@ LABEL_123:
           g_netz_is_game_started_2_unused = 1;
           return;
         case 0x3D:
-          dword_47A738 = 0;
+          g_netz_enable_lockstep_mode = 0;
           dword_47CB18 = 1;
-          g_netz_is_game_finished = 1;
+          MEMORY[0x47A778] = 1;
           g_netz_synchronized_lockstep_mode = 0;
           dword_47CB1C = 0;
           g_mission_outcome = MissionOutcome_Victory;
@@ -42331,9 +42156,9 @@ LABEL_123:
           if ( dword_468B50 <= 2 )
           {
             g_netz_synchronized_lockstep_mode = 0;
-            g_netz_is_game_finished = 1;
+            MEMORY[0x47A778] = 1;
             dword_47CB18 = 1;
-            dword_47A738 = 0;
+            g_netz_enable_lockstep_mode = 0;
             dword_47CB1C = 0;
             dword_47CB14 = -1;
             g_mission_outcome = MissionOutcome_Victory;
@@ -42342,9 +42167,9 @@ LABEL_123:
           }
           v58 = 0;
           a1->dp_player_slot = a1->dp_player_slot;
-          v59 = dword_47A77C;
-          v60 = player;
-          while ( *((_BYTE *)v60 - 16) != 1 || *v60 != dword_47A77C->dp_player_slot )
+          v59 = MEMORY[0x47A77C];
+          v60 = MEMORY[0x47A790];
+          while ( *((_BYTE *)v60 - 16) != 1 || *v60 != MEMORY[0x47A77C]->dp_player_slot )
           {
             v60 += 7;
             ++v58;
@@ -42358,12 +42183,12 @@ LABEL_123:
           if ( v58 != -1 )
           {
             v61 = 7 * v58;
-            player[v61] = -1;
-            ::a3[v61 * 4] = 0;
+            MEMORY[0x47A790][v61] = -1;
+            MEMORY[0x47A780][v61 * 4] = 0;
             DP_player_slot_release(v59->dp_player_slot);
             --dword_468B50;
             --dword_47CB14;
-            v62 = player;
+            v62 = MEMORY[0x47A790];
             do
             {
               if ( *((_BYTE *)v62 - 16) == 1 )
@@ -42378,10 +42203,10 @@ LABEL_123:
           return;
         case 0x3F:
           v63 = a1->_netz_stru2_34;
-          if ( ::a3[28 * *v63] )
+          if ( MEMORY[0x47A780][28 * *v63] )
           {
             v64 = dword_468B50;
-            ::a3[28 * *v63] = 0;
+            MEMORY[0x47A780][28 * *v63] = 0;
             dword_468B50 = v64 - 1;
           }
           return;
@@ -42398,10 +42223,10 @@ LABEL_123:
             v37 = (int)&v75[3 * v36] + 3 * v36;
             if ( *(_BYTE *)(v37 + 8) )
             {
-              v76 = &byte_47A783[28 * v36];
+              v76 = &MEMORY[0x47A783][28 * v36];
               strcpy(v76, (const char *)(v37 + 9));
-              byte_47A781[28 * v36] = *(_BYTE *)(v37 + 21);
-              byte_47A782[28 * v36] = *(_BYTE *)(v37 + 22);
+              MEMORY[0x47A781][28 * v36] = *(_BYTE *)(v37 + 21);
+              MEMORY[0x47A782][28 * v36] = *(_BYTE *)(v37 + 22);
             }
             a3 = ++v36;
           }
@@ -42417,32 +42242,32 @@ LABEL_123:
           v76 = (char *)v32;
           if ( *(_BYTE *)(v32 + 8) && v31 < 7 )
           {
-            strcpy(&byte_47A783[28 * v31], (const char *)(v32 + 9));
+            strcpy(&MEMORY[0x47A783][28 * v31], (const char *)(v32 + 9));
             v33 = v76;
-            byte_47A781[28 * v31] = v76[21];
-            byte_47A782[28 * v31] = v33[22];
+            MEMORY[0x47A781][28 * v31] = v76[21];
+            MEMORY[0x47A782][28 * v31] = v33[22];
           }
           else
           {
-            ::a3[28 * v31] = 0;
+            MEMORY[0x47A780][28 * v31] = 0;
             DP_player_slot_release(a1->dp_player_slot);
             v31 = a3;
           }
-          v34 = dword_47A798[7 * v31];
-          v35 = &dword_47A798[7 * v31];
+          v34 = MEMORY[0x47A798][7 * v31];
+          v35 = &MEMORY[0x47A798][7 * v31];
           *v35 = 1;
           sub_42E450((UINT)v35, 0, 65);
-          dword_47A798[7 * a3] = v34;
+          MEMORY[0x47A798][7 * a3] = v34;
           return;
         case 0x43:
           if ( dword_468B54 >= 0 )
             TSK_broadcast_message(nullptr, TaskMessage_Infiltrate, nullptr, TaskChannel_MenuCancel);
           return;
         case 0x44:
-          v20 = player;
+          v20 = MEMORY[0x47A790];
           a1->dp_player_slot = a1->dp_player_slot;
           v21 = 0;
-          while ( *((_BYTE *)v20 - 16) != 1 || *v20 != dword_47A77C->dp_player_slot )
+          while ( *((_BYTE *)v20 - 16) != 1 || *v20 != MEMORY[0x47A77C]->dp_player_slot )
           {
             v20 += 7;
             ++v21;
@@ -42456,11 +42281,11 @@ LABEL_123:
           if ( v21 != -1 )
           {
             NETZ_send(v21, 56, nullptr, 0, 1);
-            v22 = dword_47A77C;
+            v22 = MEMORY[0x47A77C];
             --dword_47C6F4;
             v23 = 7 * a3;
-            player[v23] = -1;
-            ::a3[v23 * 4] = 0;
+            MEMORY[0x47A790][v23] = -1;
+            MEMORY[0x47A780][v23 * 4] = 0;
             --dword_468B50;
             v24 = DP_player_slot_release(v22->dp_player_slot);
             sub_42E450(v24, 0, 57);
@@ -42473,7 +42298,7 @@ LABEL_123:
 LABEL_100:
           v52 = 0;
           v53 = 0;
-          v54 = dword_47A798;
+          v54 = MEMORY[0x47A798];
           break;
         case 0x46:
           goto LABEL_62;
@@ -42489,14 +42314,14 @@ LABEL_62:
           NETZ_42F650(v25);
           return;
         case 0x49:
-          memset(&byte_47A740, 0, 0x38u);
+          memset(byte_47A740, 0, 0x38u);
           v19 = strlen((const char *)a1->_netz_stru2_34) + 1;
-          qmemcpy(&byte_47A740, a1->_netz_stru2_34, v19 + 1);
-          if ( byte_47A741[v19 - 1] == byte_468A58 )
+          qmemcpy(byte_47A740, a1->_netz_stru2_34, v19 + 1);
+          if ( byte_47A740[v19] == byte_468A58 )
           {
             if ( g_netz_is_game_host )
-              sub_44A160(73, &byte_47A740, v19 + 1);
-            show_message(&byte_47A740);
+              sub_44A160(73, byte_47A740, v19 + 1);
+            show_message(byte_47A740);
           }
           return;
         case 0x4A:
@@ -42513,7 +42338,7 @@ LABEL_62:
       {
         v54 += 7;
         ++v53;
-        if ( (int)v54 >= (int)&dword_47A840 )
+        if ( (int)v54 >= (int)&dword_47A840 )   // BUG
           goto LABEL_108;
       }
       v52 = 1;
@@ -42526,7 +42351,7 @@ LABEL_108:
           v51 = 0;
         goto LABEL_100;
       }
-      byte_47A781[28 * v50] = v51;
+      MEMORY[0x47A781][28 * v50] = v51;
       sub_42E450((UINT)v54, 0, 65);
       return;
     case 3:
@@ -42550,12 +42375,12 @@ LABEL_108:
       if ( !g_netz_is_game_host || g_netz_is_game_started )
       {
         NETZ_send(a1->dp_player_slot, 76, nullptr, 0, 1);
-        DP_player_slot_release(dword_47A77C->dp_player_slot);
+        DP_player_slot_release(MEMORY[0x47A77C]->dp_player_slot);
         return;
       }
       v65 = 0;
       v66 = rand() % 6;
-      while ( ::a3[28 * v66] )
+      while ( MEMORY[0x47A780][28 * v66] )
       {
         if ( ++v66 == 6 )
           v66 = 0;
@@ -42568,25 +42393,25 @@ LABEL_108:
       a3 = v66;
       if ( v66 == -1 )
       {
-        NETZ_send(dword_47A77C->dp_player_slot, 76, nullptr, 0, 1);
-        DP_player_slot_release(dword_47A77C->dp_player_slot);
+        NETZ_send(MEMORY[0x47A77C]->dp_player_slot, 76, nullptr, 0, 1);
+        DP_player_slot_release(MEMORY[0x47A77C]->dp_player_slot);
       }
       else
       {
         v67 = 7 * v66;
-        player[v67] = dword_47A77C->dp_player_slot;
-        ::a3[v67 * 4] = 1;
-        dword_47A798[v67] = 0;
+        MEMORY[0x47A790][v67] = MEMORY[0x47A77C]->dp_player_slot;
+        MEMORY[0x47A780][v67 * 4] = 1;
+        MEMORY[0x47A798][v67] = 0;
       }
       return;
     case 6:
       if ( g_netz_is_game_host )
       {
-        v71 = player;
+        v71 = MEMORY[0x47A790];
         a1->dp_player_slot = a1->dp_player_slot;
-        v69 = dword_47A77C;
+        v69 = MEMORY[0x47A77C];
         v68 = 0;
-        while ( *((_BYTE *)v71 - 16) != 1 || *v71 != dword_47A77C->dp_player_slot )
+        while ( *((_BYTE *)v71 - 16) != 1 || *v71 != MEMORY[0x47A77C]->dp_player_slot )
         {
           v71 += 7;
           ++v68;
@@ -42603,11 +42428,11 @@ LABEL_108:
       {
         v68 = 0;
         a1->dp_player_slot = a1->dp_player_slot;
-        v69 = dword_47A77C;
-        v70 = player;
+        v69 = MEMORY[0x47A77C];
+        v70 = MEMORY[0x47A790];
         do
         {
-          if ( *((_BYTE *)v70 - 16) == 1 && *v70 == dword_47A77C->dp_player_slot )
+          if ( *((_BYTE *)v70 - 16) == 1 && *v70 == MEMORY[0x47A77C]->dp_player_slot )
             goto LABEL_178;
           v70 += 7;
           ++v68;
@@ -42620,8 +42445,8 @@ LABEL_178:
         if ( v68 != -1 )
         {
           v72 = 7 * v68;
-          player[v72] = -1;
-          ::a3[v72 * 4] = 0;
+          MEMORY[0x47A790][v72] = -1;
+          MEMORY[0x47A780][v72 * 4] = 0;
           DP_player_slot_release(v69->dp_player_slot);
           --dword_468B50;
         }
@@ -42648,7 +42473,6 @@ LABEL_181:
 // 46E3F0: using guessed type int dword_46E3F0;
 // 47050C: using guessed type int dword_47050C;
 // 479530: using guessed type int g_rand_seed;
-// 47A738: using guessed type int dword_47A738;
 // 47A778: using guessed type int g_netz_is_game_finished;
 // 47A790: using guessed type int player[];
 // 47A794: using guessed type int dword_47A794[];
@@ -42705,16 +42529,16 @@ UINT __usercall NETZ_42F650@<eax>(UINT a1@<eax>)
   _DWORD v20[15]; // [esp+Ch] [ebp-40h] BYREF
   char *v21; // [esp+48h] [ebp-4h]
 
-  g_last_result = a1;
+  g_last_async_result = a1;
   v1 = g_coroutine_current;
-  if ( g_coroutine_list_head != v1 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v19;
+  if ( g_coroutine_list_head != v1 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)&v19;
   dword_468B54 = -1;
   g_netz_is_game_started = 0;
   dword_47A828 = 0;
   dword_468B50 = 0;
   v2 = 0;
-  v3 = dword_47A798;
+  v3 = MEMORY[0x47A798];
   do
   {
     *((_BYTE *)v3 - 24) = 0;
@@ -42728,7 +42552,7 @@ UINT __usercall NETZ_42F650@<eax>(UINT a1@<eax>)
   srand(v4);
   v5 = 0;
   v6 = rand() % 6;
-  while ( a3[28 * v6] )
+  while ( MEMORY[0x47A780][28 * v6] )
   {
     if ( ++v6 == 6 )
       v6 = 0;
@@ -42742,7 +42566,7 @@ UINT __usercall NETZ_42F650@<eax>(UINT a1@<eax>)
 LABEL_12:
   memset(v20, 0, sizeof(v20));
   v8 = 0;
-  v9 = byte_47A781;
+  v9 = MEMORY[0x47A781];
   do
   {
     if ( *(v9 - 1) && v8 != v7 )
@@ -42766,22 +42590,22 @@ LABEL_12:
   v12 = v11;
 LABEL_24:
   v13 = 28 * v7;
-  byte_47A781[v13] = v12;
+  MEMORY[0x47A781][v13] = v12;
   v14 = dword_468B58;
   v15 = dword_468B58;
-  a3[v13] = 2;
-  byte_47A782[v13] = 0;
-  v21 = &byte_47A783[28 * v7];
+  MEMORY[0x47A780][v13] = 2;
+  MEMORY[0x47A782][v13] = 0;
+  v21 = &MEMORY[0x47A783][28 * v7];
   dword_468B58 = v7;
-  strcpy(v21, &byte_47A783[4 * (8 * v15 - v14)]);
+  strcpy(v21, &MEMORY[0x47A783][4 * (8 * v15 - v14)]);
   v16 = dword_468B50 + 1;
-  dword_47A798[7 * v7] = 1;
+  MEMORY[0x47A798][7 * v7] = 1;
   dword_468B50 = v16;
-  g_last_result = v16;
+  g_last_async_result = v16;
   v17 = g_coroutine_current;
   if ( g_coroutine_list_head != v17 )
-    --dword_47734C;
-  return g_last_result;
+    --g_coroutine_nesting_depth;
+  return g_last_async_result;
 }
 // 468B50: using guessed type int dword_468B50;
 // 468B58: using guessed type int dword_468B58;
@@ -44396,7 +44220,7 @@ LABEL_15:
             {
               if ( unit->player_num == g_player_num )
               {
-                SOUND_play(SoundId_Surv_UnitReady, 0, g_4690A8_sfx_volume, 16, 0);
+                SOUND_play(SoundId_Surv_UnitReady, 0, g_sfx_vol, 16, 0);
                 show_message_unit(nullptr, "Unit Ready");
               }
             }
@@ -44554,7 +44378,7 @@ void __fastcall unit_mode_outpost_431680(KKND::Unit *unit)
   unit->mode_arrive = nullptr;
   unit_mode_outpost_on_completed(unit);
   if ( g_player_num == unit->player_num && !unit->entity->cplc_spawn_params && !is_player_evolved() )
-    SOUND_play(SoundId_32, 0, g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_32, 0, g_sfx_vol, 16, 0);
   turret = unit->turret;
   if ( turret )
     turret->entity->rn->flags &= ~0x40000000u;
@@ -44615,7 +44439,7 @@ LABEL_17:
       case 4:
         if ( (g_lvl_desc[v5].disabled_units_mask & 0x200) == 0 )
           sidebar_disable_production(g_sidebar_tower_prod, UnitType_SurvCannonTower);
-        sub_447250();
+        aircraft_revoke_production();
         goto LABEL_17;
     }
     v7 = dword_47B3DC[v4--];                    // BUG -1 index
@@ -44633,7 +44457,7 @@ LABEL_22:
       dword_47B3D8 = 1;
     }
     sub_446860(g_sidebar_tower_prod);
-    sub_447250();
+    aircraft_revoke_production();
     sub_446860(g_sidebar_aircraft_prod);
     g_sidebar_aircraft_prod = nullptr;
     g_sidebar_tower_prod = nullptr;
@@ -44737,10 +44561,10 @@ UINT __fastcall sub_431980(KKND::PaletteEntry *a1)
   v2 = a1;
   if ( g_window_bpp == 8 )
   {
-    g_last_result = 8;
+    g_last_async_result = 8;
     v3 = g_coroutine_current;
-    if ( g_coroutine_list_head != v3 && ++dword_47734C == 1 )
-      dword_477344 = (int)&v11;
+    if ( g_coroutine_list_head != v3 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)&v11;
     dword_47C018 = 0;
     dword_468FD4 = 1;
     dword_468FD8 = 2;
@@ -44801,11 +44625,11 @@ UINT __fastcall sub_431980(KKND::PaletteEntry *a1)
       }
       is_primary_surface_lost = (IDirectDrawPalette *)RealizePalette(g_window_hdc);
     }
-    g_last_result = (UINT)is_primary_surface_lost;
+    g_last_async_result = (UINT)is_primary_surface_lost;
     v10 = g_coroutine_current;
     if ( g_coroutine_list_head != v10 )
-      --dword_47734C;
-    return g_last_result;
+      --g_coroutine_nesting_depth;
+    return g_last_async_result;
   }
   return result;
 }
@@ -44917,10 +44741,10 @@ int __usercall sub_431C40@<eax>(int result@<eax>)
         result = (unsigned __int8)stru_47B408[i];
       byte_47BC10[i] = result;
     }
-    g_last_result = result;
+    g_last_async_result = result;
     v3 = g_coroutine_current;
-    if ( g_coroutine_list_head != v3 && ++dword_47734C == 1 )
-      dword_477344 = (int)&v12;
+    if ( g_coroutine_list_head != v3 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)&v12;
     v4 = byte_47BC10;
     dword_47C018 = 0;
     dword_468FD4 = 1;
@@ -44982,11 +44806,11 @@ int __usercall sub_431C40@<eax>(int result@<eax>)
       }
       is_primary_surface_lost = (IDirectDrawPalette *)RealizePalette(g_window_hdc);
     }
-    g_last_result = (UINT)is_primary_surface_lost;
+    g_last_async_result = (UINT)is_primary_surface_lost;
     v11 = g_coroutine_current;
     if ( g_coroutine_list_head != v11 )
-      --dword_47734C;
-    return g_last_result;
+      --g_coroutine_nesting_depth;
+    return g_last_async_result;
   }
   return result;
 }
@@ -45011,7 +44835,7 @@ void __cdecl __noreturn sub_431E60(KKND::Task *sender)
   sender->netz_flags = TaskNetzFlags_EnabledForMultiplayer;
   TSK_yield(sender, Task_Sleep, 2);
   if ( !TSK_CreateAsync(TaskChannel_None, (KKND::TaskFn)sub_425400, 0) )
-    g_game_loop = 3u;
+    g_game_loop = GameLoop_PreviousScreen;
   while ( 1 )
   {
     TSK_yield(sender, Task_Sleep, 1);
@@ -45077,9 +44901,9 @@ void __cdecl sub_431F10(KKND::Task *task)
     else
     {
       v5 = ctx == (void *)1;
-      v6 = g_4690A8_sfx_volume;
+      v6 = g_sfx_vol;
       if ( !v5 )
-        v6 = dword_4690AC;
+        v6 = g_music_vol;
       v3->x = entity->x + (((v6 << 7) / 16) << 8);
     }
     v3->y = entity->y;
@@ -45087,7 +44911,7 @@ void __cdecl sub_431F10(KKND::Task *task)
   }
   do
   {
-    if ( (TSK_yield(task, Task_Yield, 1) & 0x40000000) != 0 )
+    if ( (TSK_yield(task, Task_Yield, 1) & Task_Wait) != 0 )
     {
       for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
@@ -45137,17 +44961,17 @@ void __cdecl sub_431F10(KKND::Task *task)
         v15 = 16 * ((v13 - entity->x) >> 8) / 128;
         if ( v12 == (void *)1 )
         {
-          g_4690A8_sfx_volume = v15;
+          g_sfx_vol = v15;
         }
         else
         {
-          dword_4690AC = v15;
+          g_music_vol = v15;
           if ( v15 )
             goto LABEL_35;
           if ( dword_4690B0 && dword_47C5D4 )
           {
             sub_43A2B0((void *)dword_47C5D4);
-            v15 = dword_4690AC;
+            v15 = g_music_vol;
           }
           if ( v15 )
           {
@@ -45155,13 +44979,13 @@ LABEL_35:
             if ( !dword_4690B0 )
             {
               sprintf(Buffer, "%s\\LEVELS\\%s", g_app_root, g_lvl_desc[g_current_lvl_id].wav_filename);
-              sub_439AA0(Buffer, 1, dword_4690AC, 16, 0);
-              v15 = dword_4690AC;
+              sub_439AA0(Buffer, 1, g_music_vol, 16, nullptr);
+              v15 = g_music_vol;
             }
             if ( v15 )
             {
-              sub_43A800(v15);
-              v15 = dword_4690AC;
+              SOUND_43A800_set_volume(v15);
+              v15 = g_music_vol;
             }
           }
           dword_4690B0 = v15;
@@ -45174,7 +44998,7 @@ LABEL_35:
   entity_remove(entity);
   TSK_terminate(task);
 }
-// 4690AC: using guessed type int dword_4690AC;
+// 4690AC: using guessed type int g_music_vol;
 // 4690B0: using guessed type int dword_4690B0;
 // 4690B4: using guessed type int dword_4690B4;
 // 47C5D4: using guessed type int dword_47C5D4;
@@ -45224,7 +45048,7 @@ KKND::Entity *__thiscall sub_4321A0(KKND::Task *this)
   }
   else
   {
-    g_game_loop = 3u;
+    g_game_loop = GameLoop_PreviousScreen;
   }
   return result;
 }
@@ -46384,18 +46208,18 @@ void __cdecl sub_433AF0(KKND::Task *task)
     if ( !g_is_single_player )
     {
       if ( dword_468B50 <= 2 )
-        g_netz_is_game_finished = 1;
+        *(_DWORD *)&g_netz_players[0].name[17] = 1;
       sub_449FF0();
       g_netz_synchronized_lockstep_mode = 0;
       dword_47C030 = -1;
       dword_47050C = -1;
-      dword_47A738 = 0;
+      g_netz_enable_lockstep_mode = 0;
       dword_47CB14 = -1;
       g_mission_outcome = MissionOutcome_Abandoned;
     }
     FADE_408500(task);
     sub_425660();
-    g_game_loop = 3u;
+    g_game_loop = GameLoop_PreviousScreen;
   }
   entity = task->entity;
   entity_remove((KKND::Entity *)task->ctx);
@@ -46917,50 +46741,51 @@ int __stdcall sub_434740(int *a1, int a2, int a3)
 }
 
 //----- (00434790) --------------------------------------------------------
-UINT __usercall sub_434790@<eax>(UINT a1@<eax>, int a2@<ecx>)
+UINT __fastcall REND_clear_impl(BOOL front)
 {
+  UINT v1; // eax
   KKND::Coroutine *v3; // et1
   int v4; // eax
   struct IDirectDrawSurfaceVtbl *lpVtbl; // eax
   struct IDirectDrawSurfaceVtbl *v6; // eax
   KKND::Coroutine *v7; // et1
   int v9; // [esp+0h] [ebp-6Ch] BYREF
-  _DWORD v10[25]; // [esp+8h] [ebp-64h] BYREF
+  DDBLTFX v10; // [esp+8h] [ebp-64h] BYREF
 
-  g_last_result = a1;
+  g_last_async_result = v1;
   v3 = g_coroutine_current;
-  if ( g_coroutine_list_head != v3 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v9;
-  v4 = g_last_result;
+  if ( g_coroutine_list_head != v3 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = &v9;
+  v4 = g_last_async_result;
   if ( dword_4798AC == 1 )
   {
     v4 = g_pdds->lpVtbl->EnumAttachedSurfaces(g_pdds, nullptr, (LPDDENUMSURFACESCALLBACK)sub_434740);
   }
   else if ( g_pdds2 )
   {
-    memset(v10, 0, sizeof(v10));
-    v10[20] = 0;
+    memset(&v10, 0, sizeof(v10));
+    v10.dwFillColor = 0;
     lpVtbl = g_pdds2->lpVtbl;
-    v10[0] = 100;
-    v4 = lpVtbl->Blt(g_pdds2, &stru_46BB50, nullptr, nullptr, 16778240, (LPDDBLTFX)v10);
+    v10.dwSize = 100;
+    v4 = lpVtbl->Blt(g_pdds2, &stru_46BB50, nullptr, nullptr, 16778240, &v10);
   }
-  if ( a2 && g_pdds )
+  if ( front && g_pdds )
   {
-    memset(v10, 0, sizeof(v10));
-    v10[20] = 0;
+    memset(&v10, 0, sizeof(v10));
+    v10.dwFillColor = 0;
     v6 = g_pdds->lpVtbl;
-    v10[0] = 100;
-    v4 = v6->Blt(g_pdds, &stru_46BB50, nullptr, nullptr, 16778240, (LPDDBLTFX)v10);
+    v10.dwSize = 100;
+    v4 = v6->Blt(g_pdds, &stru_46BB50, nullptr, nullptr, 16778240, &v10);
   }
-  g_last_result = v4;
+  g_last_async_result = v4;
   v7 = g_coroutine_current;
   if ( g_coroutine_list_head != v7 )
-    --dword_47734C;
-  return g_last_result;
+    --g_coroutine_nesting_depth;
+  return g_last_async_result;
 }
+// 43479A: variable 'v1' is possibly undefined
 // 46BB50: using guessed type struct tagRECT stru_46BB50;
-// 477344: using guessed type int dword_477344;
-// 47734C: using guessed type int dword_47734C;
+// 47734C: using guessed type int g_coroutine_nesting_depth;
 // 4798AC: using guessed type int dword_4798AC;
 
 //----- (00434890) --------------------------------------------------------
@@ -47832,9 +47657,9 @@ void __fastcall unit_mode_435980_power_station(KKND::Unit *unit)
   {
     show_message_unit(nullptr, "Building completed");
     if ( is_player_evolved() )
-      SOUND_play(SoundId_96, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_96, 0, g_sfx_vol, 16, 0);
     else
-      SOUND_play(SoundId_32, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_32, 0, g_sfx_vol, 16, 0);
   }
   if ( unit->entity->cplc_spawn_params )
     unit->mode = UNIT_mode_building_snap_to_grid_cplc;
@@ -47940,7 +47765,7 @@ void __cdecl proj_mode_grenade(KKND::Task *task)
   if ( v8->mobd_lookup_offset_impact != -1 )
   {
     entity->z = 255;
-    v23 = g_4690A8_sfx_volume;
+    v23 = g_sfx_vol;
     v21 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 120);
     entity_play_sound(entity, dword_46BB80[v21 % 2], v23, 0);
     entity->mobd_id = MobdId_Explosions;
@@ -48088,7 +47913,7 @@ void __cdecl proj_mode_rocket(KKND::Task *task)
   v22 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 207);
   entity->collider = &g_null_collision;
   v23 = 16 * (v22 % (100 - v20) - (100 - v21) / 2);
-  entity_play_sound(entity, SoundId_14, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_14, g_sfx_vol, 0);
   entity->x_speed = (v18 + proj->speed * g_sin_tbl[g_orientation_to_sin[v35]]) >> 1;
   entity->y_speed = (v23 - proj->speed * g_sin_tbl[g_orientation_to_sin[v35] + 8]) >> 1;
   if ( v36 > 0 )
@@ -48116,7 +47941,7 @@ void __cdecl proj_mode_rocket(KKND::Task *task)
   entity->z_acceleration = 0;
   if ( proj->mobd_lookup_offset_impact != -1 )
   {
-    v30 = g_4690A8_sfx_volume;
+    v30 = g_sfx_vol;
     v25 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 262);
     entity_play_sound(entity, dword_46BB80[v25 % 2], v30, 0);
     entity->mobd_id = MobdId_Explosions;
@@ -48178,7 +48003,7 @@ void __cdecl __noreturn task_flamethrower_proj(KKND::Task *task)
   v6 = (v5->y - entity->y) >> 8;
   v7 = (v5->x - x) >> 8;
   v9 = vec2_orientation(v7, v6);
-  entity_play_sound(entity, SoundId_86, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_86, g_sfx_vol, 0);
   entity_anim_init(entity, 496);
   entity->x_speed = (kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 301) & 0xF)
                   + proj->speed * g_sin_tbl[g_orientation_to_sin[v9]]
@@ -48302,7 +48127,7 @@ void __cdecl __noreturn task_giant_beetle_proj(KKND::Task *task)
   entity->z_speed = 0;
   entity->z_acceleration = 0;
   entity->z = 255;
-  entity_play_sound(entity, SoundId_161, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_161, g_sfx_vol, 0);
   entity->mobd_id = MobdId_Explosions;
   entity_anim_init(entity, 704);
   entity->anim_speed = 0x20000000;
@@ -48360,7 +48185,7 @@ void __cdecl proj_mode_giant_beetle(KKND::Task *task)
   v24 = (v5->y - entity->y) >> 8;
   v20 = vec2_orientation(v25, v24);
   v22 = 0;
-  entity_play_sound(parent->entity, SoundId_161, g_4690A8_sfx_volume, 0);
+  entity_play_sound(parent->entity, SoundId_161, g_sfx_vol, 0);
   if ( g_num_active_projectiles < 200 )
   {
     ++g_num_active_projectiles;
@@ -48472,7 +48297,7 @@ int __cdecl sub_4368B0(KKND::Task *a1)
   entity->z_speed = 0;
   entity->z_acceleration = 0;
   entity->z = 255;
-  v11 = g_4690A8_sfx_volume;
+  v11 = g_sfx_vol;
   v9 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 515);
   entity_play_sound(entity, dword_46BB80[v9 % 2], v11, 0);
   entity->mobd_id = MobdId_PlasmaTank;
@@ -48589,7 +48414,7 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     v14 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 554);
     entity->z = parent->entity->z + 2560;
     v15 = 8 * (v14 % (100 - v13) - (100 - v49) / 2);
-    entity_play_sound(parent->entity, SoundId_87, g_4690A8_sfx_volume, 0);
+    entity_play_sound(parent->entity, SoundId_87, g_sfx_vol, 0);
     entity->x_speed = v54 + proj->speed * g_sin_tbl[g_orientation_to_sin[v50]];
     entity->y_speed = v15 - proj->speed * g_sin_tbl[g_orientation_to_sin[v50] + 8];
     v16 = MATH_vec2_length(v8, v56);
@@ -48598,7 +48423,7 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     entity->y_speed = 0;
     if ( proj->mobd_lookup_offset_impact != -1 )
     {
-      v45 = g_4690A8_sfx_volume;
+      v45 = g_sfx_vol;
       v17 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 564);
       entity_play_sound(entity, dword_46BB80[v17 % 2], v45, 0);
       entity->mobd_id = MobdId_Explosions;
@@ -48657,7 +48482,7 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     v37 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 592);
     entity->collider = &g_null_collision;
     v38 = 16 * (v37 % (100 - v35) - (100 - v36) / 2);
-    entity_play_sound(entity, SoundId_14, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_14, g_sfx_vol, 0);
     entity->x_speed = (v33 + proj->speed * g_sin_tbl[g_orientation_to_sin[v51]]) >> 1;
     entity->y_speed = (v38 - proj->speed * g_sin_tbl[g_orientation_to_sin[v51] + 8]) >> 1;
     if ( v57 > 0 )
@@ -48685,7 +48510,7 @@ void __cdecl proj_mode_mech(KKND::Task *task)
     entity->z_acceleration = 0;
     if ( proj->mobd_lookup_offset_impact != -1 )
     {
-      v46 = g_4690A8_sfx_volume;
+      v46 = g_sfx_vol;
       v40 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 618);
       entity_play_sound(entity, dword_46BB80[v40 % 2], v46, 0);
       entity->mobd_id = MobdId_Explosions;
@@ -48732,7 +48557,7 @@ int __cdecl sub_436FB0(KKND::Task *a1)
 
   entity = a1->entity;
   TSK_yield(a1, Task_Sleep, 30);
-  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_3, g_sfx_vol, 0);
   entity_remove(entity);
   return --g_num_active_projectiles;
 }
@@ -48799,7 +48624,7 @@ void __cdecl sub_4370D0(KKND::Task *task)
   KKND::Entity *entity; // esi
 
   entity = task->entity;
-  entity_play_sound(entity, SoundId_187, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_187, g_sfx_vol, 0);
   TSK_yield(task, Task_Yield_10000000, 0);
   entity_remove(entity);
 }
@@ -48835,7 +48660,7 @@ int __cdecl sub_437110(KKND::Task *sender)
   v4->x = mode_turret;
   v4->y = ctx[23]->sleep + 2560;
   entity_anim_init(v4, 2112);
-  entity_play_sound(*((KKND::Entity **)v3 + 23), SoundId_188, g_4690A8_sfx_volume, 0);
+  entity_play_sound(*((KKND::Entity **)v3 + 23), SoundId_188, g_sfx_vol, 0);
   entity->z = *(_DWORD *)(*((_DWORD *)v3 + 23) + 24) + 5120;
   while ( !*((_DWORD *)v3 + 35) )
   {
@@ -48886,25 +48711,25 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
   {
     case UnitType_Mute_Shotgunner:
     case UnitType_Mute_DireWolf:
-      entity_play_sound(parent->entity, SoundId_16|SoundId_1, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_16|SoundId_1, g_sfx_vol, 0);
       break;
     case UnitType_Mute_CrazyHarry:
     case UnitType_Surv_Atv:
-      entity_play_sound(parent->entity, SoundId_8, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_8, g_sfx_vol, 0);
       break;
     case UnitType_Surv_DirkBike:
     case UnitType_Surv_4x4Pickup:
     case UnitType_Mute_MonsterTruck:
-      entity_play_sound(parent->entity, SoundId_5, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_5, g_sfx_vol, 0);
       break;
     case UnitType_Mute_BikeAndSidecar:
-      entity_play_sound(parent->entity, SoundId_7, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_7, g_sfx_vol, 0);
       break;
     case UnitType_Surv_AutocannonTank:
-      entity_play_sound(parent->entity, SoundId_6, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_6, g_sfx_vol, 0);
       break;
     default:
-      entity_play_sound(parent->entity, SoundId_4, g_4690A8_sfx_volume, 0);
+      entity_play_sound(parent->entity, SoundId_4, g_sfx_vol, 0);
       break;
   }
   if ( !parent->destroyed )
@@ -48968,7 +48793,7 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
   entity_anim_init(entity, dword_46BB60[v11 % 3]);
   if ( !(kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 816) % 3) )
   {
-    v15 = g_4690A8_sfx_volume;
+    v15 = g_sfx_vol;
     v12 = kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 817);
     entity_play_sound(entity, dword_46BB70[v12 % 3], v15, 0);
   }
@@ -48976,7 +48801,7 @@ void __cdecl proj_mode_machinegun(KKND::Task *task)
   if ( (type == UnitType_Surv_Rifleman || type == UnitType_Mute_Shotgunner || type == UnitType_Mute_DireWolf)
     && !(kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 820) % 3) )
   {
-    entity_play_sound(entity, SoundId_190, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_190, g_sfx_vol, 0);
   }
   if ( !v16 )
     entity->z = 2048;
@@ -49044,7 +48869,7 @@ void __cdecl proj_mode_437690(KKND::Task *task)
   v13 = 8 * (kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 847) % (100 - v12) - (100 - v14) / 2);
   if ( proj->speed )
   {
-    entity_play_sound(parent->entity, SoundId_87, g_4690A8_sfx_volume, 0);
+    entity_play_sound(parent->entity, SoundId_87, g_sfx_vol, 0);
     entity->x_speed = v10 + proj->speed * g_sin_tbl[g_orientation_to_sin[v16]];
     entity->y_speed = v13 - proj->speed * g_sin_tbl[g_orientation_to_sin[v16] + 8];
   }
@@ -49094,7 +48919,7 @@ void __cdecl proj_mode_bow(KKND::Task *task)
   v5 = (v4->y - entity->y) >> 8;
   v6 = (v4->x - x) >> 8;
   v21 = vec2_orientation(v6, v5);
-  entity_play_sound(parent->entity, SoundId_89, g_4690A8_sfx_volume, 0);
+  entity_play_sound(parent->entity, SoundId_89, g_sfx_vol, 0);
   entity->rn->cmd.palette_override = g_tint_palettes_per_player[g_palette_idx_per_player[parent->player_num]];
   entity->rn->flags |= 0x10000000u;
   v7 = g_veterancy_accuracy_bonus[parent->veterancy] + parent->stats->accuracy;
@@ -49123,7 +48948,7 @@ void __cdecl proj_mode_bow(KKND::Task *task)
     v13 = MATH_vec2_length(v6, v5);
     v14 = task;
     TSK_yield(task, Task_Sleep, v13 / proj->speed);
-    entity_play_sound(entity, SoundId_90, g_4690A8_sfx_volume, 0);
+    entity_play_sound(entity, SoundId_90, g_sfx_vol, 0);
   }
   else
   {
@@ -49213,15 +49038,15 @@ void __cdecl proj_mode_generic(KKND::Task *task)
     type = v26->type;
     if ( type == UnitType_Mute_GiantScorpion )
     {
-      entity_play_sound(v26->entity, SoundId_161, g_4690A8_sfx_volume, 0);
+      entity_play_sound(v26->entity, SoundId_161, g_sfx_vol, 0);
     }
     else if ( type == UnitType_PlasmaTank || type == UnitType_SentinelDroid )
     {
-      entity_play_sound(v26->entity, SoundId_87, g_4690A8_sfx_volume, 0);
+      entity_play_sound(v26->entity, SoundId_87, g_sfx_vol, 0);
     }
     else
     {
-      entity_play_sound(v26->entity, SoundId_9, g_4690A8_sfx_volume, 0);
+      entity_play_sound(v26->entity, SoundId_9, g_sfx_vol, 0);
     }
     entity->x_speed = v23 + proj->speed * g_sin_tbl[g_orientation_to_sin[v27]];
     entity->y_speed = v15 - proj->speed * g_sin_tbl[g_orientation_to_sin[v27] + 8];
@@ -49235,11 +49060,11 @@ void __cdecl proj_mode_generic(KKND::Task *task)
   {
     if ( v14->type == UnitType_Mute_GiantScorpion )
     {
-      entity_play_sound(entity, SoundId_161, g_4690A8_sfx_volume, 0);
+      entity_play_sound(entity, SoundId_161, g_sfx_vol, 0);
     }
     else
     {
-      v20 = g_4690A8_sfx_volume;
+      v20 = g_sfx_vol;
       v18 = dword_46BB80[kknd_rand_1("C:\\k\\Scripts\\Projectl.cpp", 945) % 2];
       entity_play_sound(entity, v18, v20, 0);
     }
@@ -49434,9 +49259,9 @@ void __fastcall unit_mode_repair_building_437F30(KKND::Unit *unit)
   {
     show_message_unit(nullptr, "Building completed");
     if ( is_player_evolved() )
-      SOUND_play(SoundId_96, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_96, 0, g_sfx_vol, 16, 0);
     else
-      SOUND_play(SoundId_32, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_32, 0, g_sfx_vol, 16, 0);
   }
   if ( unit->entity->cplc_spawn_params )
     unit->mode = UNIT_mode_building_snap_to_grid_cplc;
@@ -49638,17 +49463,17 @@ void __fastcall MessageHandler_RepairBuilding_2(
           if ( is_player_evolved() )
           {
             if ( kknd_rand_2() % 2 )
-              SOUND_play(SoundId_104, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_104, 0, g_sfx_vol, 16, 0);
             else
-              SOUND_play(SoundId_102, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_102, 0, g_sfx_vol, 16, 0);
           }
           else if ( kknd_rand_2() % 2 )
           {
-            SOUND_play(SoundId_62, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_62, 0, g_sfx_vol, 16, 0);
           }
           else
           {
-            SOUND_play(SoundId_55, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_55, 0, g_sfx_vol, 16, 0);
           }
         }
         break;
@@ -49685,9 +49510,9 @@ void __fastcall MessageHandler_RepairBuilding_2(
           {
             show_message_unit(nullptr, "Commencing upgrade");
             if ( is_player_evolved() )
-              SOUND_play(SoundId_Mute_ResearchStarted, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Mute_ResearchStarted, 0, g_sfx_vol, 16, 0);
             else
-              SOUND_play(SoundId_Surv_ResearchStarted, 0, g_4690A8_sfx_volume, 16, 0);
+              SOUND_play(SoundId_Surv_ResearchStarted, 0, g_sfx_vol, 16, 0);
           }
         }
         break;
@@ -49738,9 +49563,9 @@ void __fastcall unit_mode_research_building_438550(KKND::Unit *a1)
   {
     show_message_unit(nullptr, "Building completed");
     if ( is_player_evolved() )
-      SOUND_play(SoundId_96, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_96, 0, g_sfx_vol, 16, 0);
     else
-      SOUND_play(SoundId_32, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_32, 0, g_sfx_vol, 16, 0);
   }
   a1->task->message_handler = MessageHandler_RepairBuilding_2;
   a1->task->channel = TaskChannel_ResearchLab;
@@ -49833,12 +49658,12 @@ BOOL sub_438740()
   if ( !byte_47C050[24 * dword_47C330] )
     return 0;
   sprintf(byte_47C230, "%s\\game%d.sav", g_game_path, dword_47C330);
-  if ( !sub_41CAE0(byte_47C230, *(&level_id + 6 * v0)) )
+  if ( !GAME_load_begin(byte_47C230, *(&level_id + 6 * v0)) )
     return 0;
-  g_game_loop = 1;
+  g_game_loop = GameLoop_NextMission;
   sprintf(byte_47C230, "%s\\save.lst", g_game_path);
   SetFileAttributesA(byte_47C230, 0x80u);
-  v1 = fopen(byte_47C230, aW);
+  v1 = fopen(byte_47C230, "w");
   v2 = v1;
   if ( !v1 )
     return 0;
@@ -49858,7 +49683,7 @@ BOOL sub_438740()
 }
 
 //----- (00438840) --------------------------------------------------------
-int sub_438840()
+BOOL sub_438840()
 {
   int v0; // esi
   FILE *v1; // eax
@@ -49870,11 +49695,11 @@ int sub_438840()
   if ( !byte_47C050[24 * dword_47C330] )
     return 0;
   sprintf(byte_47C230, "%s\\game%d.sav", g_game_path, dword_47C330);
-  if ( !sub_41CB30(byte_47C230, *(&level_id + 6 * v0)) )
+  if ( !GAME_save_begin(byte_47C230, *(&level_id + 6 * v0)) )
     return 0;
   sprintf(byte_47C230, "%s\\save.lst", g_game_path);
   SetFileAttributesA(byte_47C230, 0x80u);
-  v1 = fopen(byte_47C230, aW);
+  v1 = fopen(byte_47C230, "w");
   v2 = v1;
   if ( !v1 )
     return 0;
@@ -49888,7 +49713,7 @@ int sub_438840()
     v4 += 24;
     ++v3;
   }
-  while ( (int)v4 < (int)byte_47C230 );
+  while ( (int)v4 < (int)byte_47C230 );         // BUG
   fclose(v2);
   return 1;
 }
@@ -50230,7 +50055,7 @@ void __cdecl __noreturn task_439050_explosion(KKND::Task *task)
   memset(v2, 0, sizeof(v2));
   if ( !entity->ctx )
     entity->ctx = v2;
-  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_3, g_sfx_vol, 0);
   entity_anim_init(entity, 144);
   TSK_yield(task, Task_Yield_10000000, 0);
   if ( g_num_explosions > 0 )
@@ -50638,10 +50463,10 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
   char *v39; // [esp+38h] [ebp-4h] BYREF
 
   v33 = a3;
-  g_last_result = v5;
+  g_last_async_result = v5;
   v6 = g_coroutine_current;
-  if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v29;
+  if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)&v29;
   v7 = 0;
   v31 = 0;
   v30 = 0;
@@ -50654,10 +50479,10 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
       v10 = *(void **)(dword_47C4E0 + 4 * sound_id);
       if ( v10 == dword_47C5C8 || !v10 )
       {
-        g_last_result = 0;
+        g_last_async_result = 0;
         v23 = g_coroutine_current;
         if ( g_coroutine_list_head != v23 )
-          --dword_47734C;
+          --g_coroutine_nesting_depth;
         return 0;
       }
       else
@@ -50697,10 +50522,10 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
             v21 = g_sounds_free_head;
             v11[14] = g_sounds_free_head;
             g_sounds_free_head = v11;
-            g_last_result = (int)v21;
+            g_last_async_result = (int)v21;
             v22 = g_coroutine_current;
             if ( g_coroutine_list_head != v22 )
-              --dword_47734C;
+              --g_coroutine_nesting_depth;
             return 0;
           }
           else
@@ -50733,10 +50558,10 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
               v27 = g_sounds_free_head;
               v11[14] = g_sounds_free_head;
               g_sounds_free_head = v11;
-              g_last_result = (int)v27;
+              g_last_async_result = (int)v27;
               v28 = g_coroutine_current;
               if ( g_coroutine_list_head != v28 )
-                --dword_47734C;
+                --g_coroutine_nesting_depth;
               return 0;
             }
             else
@@ -50761,39 +50586,39 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
                 ++v11[6];
               else
                 v17 = (*(int (__stdcall **)(_DWORD, _DWORD, _DWORD, int))(*(_DWORD *)v11[1] + 48))(v11[1], 0, 0, v33);
-              g_last_result = v17;
+              g_last_async_result = v17;
               v18 = g_coroutine_current;
               if ( g_coroutine_list_head != v18 )
-                --dword_47734C;
+                --g_coroutine_nesting_depth;
               return *v11;
             }
           }
         }
         else
         {
-          g_last_result = v7;
+          g_last_async_result = v7;
           v12 = g_coroutine_current;
           if ( g_coroutine_list_head != v12 )
-            --dword_47734C;
+            --g_coroutine_nesting_depth;
           return 0;
         }
       }
     }
     else
     {
-      g_last_result = 0;
+      g_last_async_result = 0;
       v24 = g_coroutine_current;
       if ( g_coroutine_list_head != v24 )
-        --dword_47734C;
+        --g_coroutine_nesting_depth;
       return 0;
     }
   }
   else
   {
-    g_last_result = 0;
+    g_last_async_result = 0;
     v8 = g_coroutine_current;
     if ( g_coroutine_list_head != v8 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     return 0;
   }
 }
@@ -50813,7 +50638,7 @@ int __fastcall SOUND_play(KKND::SoundId sound_id, int a3, int volume, int a5, un
 // 47C5D0: using guessed type int dword_47C5D0;
 
 //----- (00439AA0) --------------------------------------------------------
-int __fastcall sub_439AA0(const char *a1, int a2, int a3, int a4, int a5)
+int __fastcall sub_439AA0(const char *a1, int a2, int a3, int a4, KKND::Task *a5)
 {
   KKND::stru7_sound *v6; // ebx
   KKND::stru7_sound *v7; // eax
@@ -50823,7 +50648,7 @@ int __fastcall sub_439AA0(const char *a1, int a2, int a3, int a4, int a5)
   const char *v11; // edi
   uintptr_t v12; // eax
   int stru7_sound_0; // ecx
-  int stru7_sound_34; // eax
+  UINT stru7_sound_34; // eax
   KKND::Coroutine *v15; // et1
   int v16; // [esp+0h] [ebp-10h] BYREF
   const char *v17; // [esp+Ch] [ebp-4h]
@@ -50841,15 +50666,15 @@ int __fastcall sub_439AA0(const char *a1, int a2, int a3, int a4, int a5)
   v6->_stru7_sound_0 = dword_47C5C4;
   v7 = g_sounds_head;
   v6->next = g_sounds_head;
-  v6->_stru7_sound_3C = (int)&dword_47C398;
-  g_sounds_head->_stru7_sound_3C = (int)v6;
+  v6->_stru7_sound_3C = (KKND::stru7_sound *)&dword_47C398;
+  g_sounds_head->_stru7_sound_3C = v6;
   g_sounds_head = v6;
   if ( !v6 )
     return 0;
-  g_last_result = (int)v7;
+  g_last_async_result = (UINT)v7;
   v8 = g_coroutine_current;
-  if ( g_coroutine_list_head != v8 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v16;
+  if ( g_coroutine_list_head != v8 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = &v16;
   v9 = v6->_stru7_sound_34 | 8;
   v6->task = a5;
   v6->_stru7_sound_14 = -3;
@@ -50871,15 +50696,13 @@ int __fastcall sub_439AA0(const char *a1, int a2, int a3, int a4, int a5)
   stru7_sound_34 = v6->_stru7_sound_34;
   LOBYTE(stru7_sound_34) = stru7_sound_34 | 8;
   v6->_stru7_sound_34 = stru7_sound_34;
-  g_last_result = stru7_sound_34;
+  g_last_async_result = stru7_sound_34;
   v15 = g_coroutine_current;
   if ( g_coroutine_list_head != v15 )
-    --dword_47734C;
+    --g_coroutine_nesting_depth;
   return v6->_stru7_sound_0;
 }
-// 477340: using guessed type int dword_477340;
-// 477344: using guessed type int dword_477344;
-// 47734C: using guessed type int dword_47734C;
+// 47734C: using guessed type int g_coroutine_nesting_depth;
 // 47C5C4: using guessed type int dword_47C5C4;
 // 47C5D4: using guessed type int dword_47C5D4;
 
@@ -51587,7 +51410,7 @@ int __fastcall sub_43A710(_DWORD *a1, _DWORD *a2, _DWORD *a3, unsigned int *a4)
 }
 
 //----- (0043A800) --------------------------------------------------------
-void __fastcall sub_43A800(int a1)
+void __fastcall SOUND_43A800_set_volume(int volume)
 {
   KKND::stru7_sound *v1; // eax
   IDirectSoundBuffer *dsb; // edx
@@ -51599,9 +51422,9 @@ void __fastcall sub_43A800(int a1)
     {
 LABEL_6:
       dsb = v1->dsb;
-      v1->volume = a1;
+      v1->volume = volume;
       if ( dsb )
-        dsb->lpVtbl->SetVolume(dsb, g_sound_volumes[a1]);
+        dsb->lpVtbl->SetVolume(dsb, g_sound_volumes[volume]);
     }
     else
     {
@@ -51637,7 +51460,7 @@ void __fastcall SOUND_43A850(KKND::stru7_sound *a1)
       if ( (v2 & 0x40) == 0 )
       {
         do
-          Sleep(20u);
+          Sleep(0x14u);
         while ( (a1->_stru7_sound_34 & 0x40) == 0 );
       }
       file = a1->file;
@@ -51655,9 +51478,9 @@ void __fastcall SOUND_43A850(KKND::stru7_sound *a1)
       a1->dsb = nullptr;
     }
     if ( a1->task )
-      TSK_send_message(nullptr, TaskMessage_SoundCleanupComplete, nullptr, a1->task);
+      TSK_send_message(nullptr, TaskMessage_SoundCleanupComplete, nullptr, (KKND::Task *)a1->task);
     next = a1->next;
-    a1->task = nullptr;
+    a1->task = 0;
     if ( next )
       next->_stru7_sound_3C = a1->_stru7_sound_3C;
     stru7_sound_3C = a1->_stru7_sound_3C;
@@ -54103,7 +53926,7 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
     TSK_yield(task, Task_Sleep, 10);
     dword_47C6BC = dword_47C6C0;
     dword_47C6C0 = 12;
-    FADE_408500(task);
+    ((void (__thiscall *)(KKND::Task *))FADE_408500)(task);
     sub_443B40(task);
     dword_47C6D4 = 0;
     v3 = (char *)malloc(0x1E0u);
@@ -54124,7 +53947,7 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
     MAPD_RemoveRenderable(dword_47A010[0]);
     TSK_yield(task, Task_Sleep, 3);
     Section = LVL_FindSection("MAPD");
-    PAL_apply((KKND::Palette *)(Section[12] + 12));
+    PAL_apply((KKND::PaletteEntry *)(Section[12] + 12));
     dword_47A010[0] = MAPD_Draw(MenuId_Credits, 0, -10);
     CPLC_select(12);
     CPLC_viewport_update();
@@ -54141,13 +53964,13 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
       v14 = 18000;
       dword_47C6BC = 0;
       dword_47C6C0 = 12;
-      FADE_408500(task);
+      ((void (__thiscall *)(KKND::Task *))FADE_408500)(task);
       sub_443B40(task);
       sub_443980();
       MAPD_RemoveRenderable(dword_47A010[0]);
       TSK_yield(task, Task_Sleep, 3);
       v6 = LVL_FindSection("MAPD");
-      PAL_apply((KKND::Palette *)(v6[12] + 12));
+      PAL_apply((KKND::PaletteEntry *)(v6[12] + 12));
       dword_47A010[0] = MAPD_Draw(MenuId_Credits, 0, -10);
       CPLC_select(12);
       CPLC_viewport_update();
@@ -54183,9 +54006,9 @@ void __cdecl __noreturn task_43BBA0_mobd79(KKND::Task *task)
             }
             else
             {
-              FADE_408500(task);
+              ((void (__thiscall *)(KKND::Task *))FADE_408500)(task);
               sub_443B40(task);
-              g_game_loop = 3u;
+              g_game_loop = GameLoop_PreviousScreen;
               entity_remove(task->entity);
               TSK_terminate(task);
             }
@@ -54309,7 +54132,7 @@ LABEL_56:
   v11 = *(_DWORD *)(v12 + 8);
 LABEL_54:
   if ( v11 )
-    sub_43BAB0();
+    ((void (*)(void))sub_43BAB0)();
   goto LABEL_56;
 }
 // 4084A0: using guessed type int __thiscall sub_4084A0(_DWORD);
@@ -54903,7 +54726,7 @@ LABEL_8:
   }
   FADE_408500(task);
   sub_443B40(task);
-  g_game_loop = 3u;
+  g_game_loop = GameLoop_PreviousScreen;
 }
 // 47C610: using guessed type int dword_47C610;
 
@@ -56772,24 +56595,24 @@ void __cdecl sub_43F0E0(KKND::Task *task)
         break;
       v3 = (int *)*v3;
     }
-    g_last_result = (int)v3;
+    g_last_async_result = (int)v3;
     v5 = g_coroutine_current;
-    if ( g_coroutine_list_head != v5 && ++dword_47734C == 1 )
-      dword_477344 = (int)v14;
+    if ( g_coroutine_list_head != v5 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v14;
     v6 = NETZ_switch_host_or_join(nullptr);
-    g_last_result = v6;
+    g_last_async_result = v6;
     v7 = g_coroutine_current;
     if ( g_coroutine_list_head != v7 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     v8 = g_coroutine_current;
-    if ( g_coroutine_list_head != v8 && ++dword_47734C == 1 )
-      dword_477344 = (int)v14;
+    if ( g_coroutine_list_head != v8 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v14;
     ShowCursor(1);
     NETZ_poll(0, nullptr);
-    g_last_result = ShowCursor(0);
+    g_last_async_result = ShowCursor(0);
     v9 = g_coroutine_current;
     if ( g_coroutine_list_head != v9 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
   }
   while ( v6 );
   v10 = dword_47C6C0;
@@ -56874,16 +56697,16 @@ void __cdecl sub_43F330(KKND::Task *task)
         break;
       v3 = (int *)*v3;
     }
-    g_last_result = (int)v3;
+    g_last_async_result = (int)v3;
     v5 = g_coroutine_current;
-    if ( g_coroutine_list_head != v5 && ++dword_47734C == 1 )
-      dword_477344 = (int)&v12;
+    if ( g_coroutine_list_head != v5 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)&v12;
     ShowCursor(1);
     v6 = NETZ_switch_host_or_join((void *)1);
-    g_last_result = ShowCursor(0);
+    g_last_async_result = ShowCursor(0);
     v7 = g_coroutine_current;
     if ( g_coroutine_list_head != v7 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
   }
   while ( v6 );
   v8 = dword_47C6C0;
@@ -57097,21 +56920,21 @@ void __cdecl __noreturn sub_43F7C0(KKND::Task *task)
   while ( 1 )
   {
     v13 = TSK_yield(v1, Task_Yield, 1);
-    g_last_result = v13;
+    g_last_async_result = v13;
     v6 = g_coroutine_current;
-    if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-      dword_477344 = (int)&v12;
-    g_last_result = NETZ_poll(0, nullptr);
+    if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)&v12;
+    g_last_async_result = NETZ_poll(0, nullptr);
     v7 = g_coroutine_current;
     if ( g_coroutine_list_head != v7 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     if ( v14 )
     {
       UISTR_clear(v3);
       v8 = 0;
       v3->cursor_row = 0;
       dword_47C6B8 = 0;
-      v9 = dword_47A798;
+      v9 = MEMORY[0x47A798];
       do
       {
         if ( *((_BYTE *)v9 - 24) && *v9 )
@@ -57289,15 +57112,15 @@ void __cdecl __noreturn sub_43FAD0(KKND::Task *task)
         {
           if ( v9 < 0 && !g_netz_is_game_host )
           {
-            g_last_result = 0;
+            g_last_async_result = 0;
             v10 = g_coroutine_current;
-            if ( g_coroutine_list_head != v10 && ++dword_47734C == 1 )
-              dword_477344 = (int)&v16;
+            if ( g_coroutine_list_head != v10 && ++g_coroutine_nesting_depth == 1 )
+              g_stack_frame = (int)&v16;
             dword_47A934 = 1;
-            g_last_result = NETZ_poll(0, nullptr);
+            g_last_async_result = NETZ_poll(0, nullptr);
             v11 = g_coroutine_current;
             if ( g_coroutine_list_head != v11 )
-              --dword_47734C;
+              --g_coroutine_nesting_depth;
           }
           UISTR_clear(v6);
           v12 = 0;
@@ -57475,16 +57298,16 @@ void __cdecl sub_43FF30(KKND::Task *task)
     entity_anim_init_directional(v4, 1824, 3);
     dword_468B54 = -1;
     dword_47C5FC = 1280;
-    g_last_result = v5;
+    g_last_async_result = v5;
     v6 = g_coroutine_current;
-    if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-      dword_477344 = (int)v18;
+    if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v18;
     player = NETZ_create_player((int)dword_47C608);
-    g_last_result = player;
+    g_last_async_result = player;
     v8 = g_coroutine_current;
     if ( g_coroutine_list_head != v8 )
-      --dword_47734C;
-    v9 = g_last_result;
+      --g_coroutine_nesting_depth;
+    v9 = g_last_async_result;
     if ( player == NetzError_Ok )
     {
       v9 = -1;
@@ -57492,14 +57315,14 @@ void __cdecl sub_43FF30(KKND::Task *task)
       dword_46E3F0 = -1;
       while ( (dword_468B54 == -1 || v9 == -1) && v10 < 1800 )
       {
-        g_last_result = TSK_yield(task, Task_Sleep, 1);
+        g_last_async_result = TSK_yield(task, Task_Sleep, 1);
         v11 = g_coroutine_current;
-        if ( g_coroutine_list_head != v11 && ++dword_47734C == 1 )
-          dword_477344 = (int)v18;
-        g_last_result = NETZ_poll(0, nullptr);
+        if ( g_coroutine_list_head != v11 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = (int)v18;
+        g_last_async_result = NETZ_poll(0, nullptr);
         v12 = g_coroutine_current;
         if ( g_coroutine_list_head != v12 )
-          --dword_47734C;
+          --g_coroutine_nesting_depth;
         v9 = dword_46E3F0;
         ++v10;
       }
@@ -57507,15 +57330,15 @@ void __cdecl sub_43FF30(KKND::Task *task)
         break;
     }
     dword_468B54 = -1;
-    g_last_result = v9;
+    g_last_async_result = v9;
     v13 = g_coroutine_current;
-    if ( g_coroutine_list_head != v13 && ++dword_47734C == 1 )
-      dword_477344 = (int)v18;
-    g_last_result = NETZ_session_close();
+    if ( g_coroutine_list_head != v13 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v18;
+    g_last_async_result = NETZ_session_close();
     v14 = g_coroutine_current;
     if ( g_coroutine_list_head != v14 )
-      --dword_47734C;
-    NETZ_42F650(g_last_result);
+      --g_coroutine_nesting_depth;
+    NETZ_42F650(g_last_async_result);
   }
   dword_47C6BC = dword_47C6C0;
   dword_47C6C0 = 8;
@@ -57598,15 +57421,15 @@ void __cdecl sub_4402A0(KKND::Task *task)
   srand(v4);
   v5 = strlen(aPlayer) + 1;
   qmemcpy((void *)(28 * dword_468B58 + 4695939), aPlayer, v5);
-  g_last_result = v5;
+  g_last_async_result = v5;
   v6 = g_coroutine_current;
-  if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v13;
+  if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)&v13;
   v7 = NETZ_switch_host_or_join((void *)1);
-  g_last_result = v7;
+  g_last_async_result = v7;
   v8 = g_coroutine_current;
   if ( g_coroutine_list_head != v8 )
-    --dword_47734C;
+    --g_coroutine_nesting_depth;
   if ( !v7 )
   {
     v9 = dword_47C6C0;
@@ -57709,16 +57532,16 @@ void __cdecl sub_4404D0(KKND::Task *task)
   {
     v6 = clock();
     srand(v6);
-    v7 = strlen(aPlayer) + 1;
-    qmemcpy((void *)(28 * dword_468B58 + 4695939), aPlayer, v7);
-    g_last_result = v7;
+    v7 = strlen("PLAYER") + 1;
+    qmemcpy((void *)(28 * dword_468B58 + 4695939), "PLAYER", v7);
+    g_last_async_result = v7;
     v8 = g_coroutine_current;
-    if ( g_coroutine_list_head != v8 && ++dword_47734C == 1 )
-      dword_477344 = (int)&v20;
-    g_last_result = NETZ_switch_host_or_join((void *)1);
+    if ( g_coroutine_list_head != v8 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = &v20;
+    g_last_async_result = ((int (__thiscall *)(void *))NETZ_switch_host_or_join)((void *)1);
     v9 = g_coroutine_current;
     if ( g_coroutine_list_head != v9 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     v1 = task;
   }
   v10 = entity_create_ex(MobdId_45, entity, sub_440810, TaskKind_Coroutine, nullptr);
@@ -57730,7 +57553,7 @@ void __cdecl sub_4404D0(KKND::Task *task)
   }
   else
   {
-    g_game_loop = 3u;
+    g_game_loop = GameLoop_PreviousScreen;
   }
   v12 = entity_create_ex(MobdId_45, entity, sub_441470, TaskKind_Coroutine, nullptr);
   if ( v12 )
@@ -57791,6 +57614,7 @@ void __cdecl sub_4404D0(KKND::Task *task)
 // 47C5FC: using guessed type int dword_47C5FC;
 // 47C6BC: using guessed type int dword_47C6BC;
 // 47C6C0: using guessed type int dword_47C6C0;
+// 47734C: using guessed type int g_coroutine_nesting_depth;
 
 //----- (00440770) --------------------------------------------------------
 KKND::Entity *__fastcall sub_440770(char *a1, unsigned __int16 a2)
@@ -57866,7 +57690,7 @@ void __cdecl __noreturn sub_440810(KKND::Task *task)
   }
   if ( dword_47C6C0 != 15 && !g_netz_is_game_host )
   {
-    strcpy(&byte_47A783[28 * dword_468B58], "PLAYER");
+    strcpy(&MEMORY[0x47A783][28 * dword_468B58], "PLAYER");
     v1 = task;
   }
   UISTR_clear(dword_47C65C);
@@ -57975,16 +57799,16 @@ LABEL_29:
     entity_anim_clear(dword_47C664);
     if ( dword_47C6C0 != 15 && g_netz_is_game_host )
     {
-      g_last_result = g_netz_is_game_host;
+      g_last_async_result = g_netz_is_game_host;
       v17 = g_coroutine_current;
-      if ( g_coroutine_list_head != v17 && ++dword_47734C == 1 )
-        dword_477344 = (int)&v21;
-      g_last_result = j_DP_session_set_name("PLAYER");
+      if ( g_coroutine_list_head != v17 && ++g_coroutine_nesting_depth == 1 )
+        g_stack_frame = (int)&v21;
+      g_last_async_result = j_DP_session_set_name("PLAYER");
       v18 = g_coroutine_current;
       if ( g_coroutine_list_head != v18 )
-        --dword_47734C;
+        --g_coroutine_nesting_depth;
     }
-    strcpy(&byte_47A783[28 * dword_468B58], "PLAYER");
+    strcpy(&MEMORY[0x47A783][28 * dword_468B58], "PLAYER");
     UISTR_clear(dword_47C65C);
     dword_47C65C->cursor_col = 0;
     dword_47C65C->cursor_row = 0;
@@ -58036,7 +57860,7 @@ void __cdecl __noreturn sub_440CA0(KKND::Task *task)
   if ( dword_47C6C0 == 15 )
     byte_47C654 = 0;
   else
-    byte_47C654 = byte_47A781[28 * dword_468B58];
+    byte_47C654 = MEMORY[0x47A781][28 * dword_468B58];
   v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0xA4, 116, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
@@ -58077,7 +57901,7 @@ void __cdecl __noreturn sub_440CA0(KKND::Task *task)
       while ( !v9 );
       if ( v9 == 300 )
       {
-        byte_47C654 = byte_47A781[28 * dword_468B58];
+        byte_47C654 = MEMORY[0x47A781][28 * dword_468B58];
       }
       else
       {
@@ -58088,9 +57912,9 @@ void __cdecl __noreturn sub_440CA0(KKND::Task *task)
           byte_47C654 = 0;
         }
         v11 = dword_468B58;
-        byte_47A781[28 * dword_468B58] = v10;
+        MEMORY[0x47A781][28 * dword_468B58] = v10;
         sub_42E450(v11, 1, 69);
-        byte_47C654 = byte_47A781[28 * dword_468B58];
+        byte_47C654 = MEMORY[0x47A781][28 * dword_468B58];
       }
     }
     while ( !sub_443780(task, 2056, 1, 2) )
@@ -58101,7 +57925,7 @@ void __cdecl __noreturn sub_440CA0(KKND::Task *task)
       if ( ++v4 >= 15 )
         v4 = 0;
       v5 = 0;
-      v6 = dword_47A798;
+      v6 = MEMORY[0x47A798];
       while ( v5 == dword_468B58 || !*((_BYTE *)v6 - 24) || !*v6 || *((_BYTE *)v6 - 23) != v4 )
       {
         v6 += 7;
@@ -58119,7 +57943,7 @@ LABEL_22:
     while ( v7 );
     byte_47C654 = v4;
     v8 = 7 * dword_468B58;
-    byte_47A781[4 * v8] = v4;
+    MEMORY[0x47A781][4 * v8] = v4;
     sub_42E450(v8, 0, 65);
   }
 }
@@ -58144,7 +57968,7 @@ void __cdecl __noreturn sub_440ED0(KKND::Task *task)
   if ( dword_47C6C0 == 15 )
     g_demo_faction = 0;
   else
-    g_demo_faction = byte_47A782[28 * dword_468B58];
+    g_demo_faction = MEMORY[0x47A782][28 * dword_468B58];
   v1 = ui_string_create(nullptr, g_mobd[80].layers[0], (char *)0x8E, 156, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = entity_create(MobdId_45, nullptr, entity);
@@ -58178,7 +58002,7 @@ void __cdecl __noreturn sub_440ED0(KKND::Task *task)
     while ( !v7 );
     if ( v7 == 300 )
     {
-      g_demo_faction = byte_47A782[28 * dword_468B58];
+      g_demo_faction = MEMORY[0x47A782][28 * dword_468B58];
     }
     else
     {
@@ -58186,7 +58010,7 @@ LABEL_12:
       v5 = g_netz_is_game_host;
       v6 = !g_netz_is_game_host;
       g_demo_faction ^= 1u;
-      byte_47A782[28 * dword_468B58] = g_demo_faction;
+      MEMORY[0x47A782][28 * dword_468B58] = g_demo_faction;
       if ( v6 )
         sub_42E450(v5, 0, 66);
       else
@@ -58690,24 +58514,24 @@ void __cdecl sub_441940(KKND::Task *task)
   }
   else
   {
-    g_last_result = 15;
+    g_last_async_result = 15;
     v4 = g_coroutine_current;
-    if ( g_coroutine_list_head != v4 && ++dword_47734C == 1 )
-      dword_477344 = (int)v16;
+    if ( g_coroutine_list_head != v4 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v16;
     NETZ_send(-1, 67, nullptr, 0, 1);
     NETZ_poll(0, nullptr);
-    g_last_result = NETZ_session_close();
+    g_last_async_result = NETZ_session_close();
     v5 = g_coroutine_current;
     if ( g_coroutine_list_head != v5 )
-      --dword_47734C;
-    g_last_result = NETZ_42F650(g_last_result);
+      --g_coroutine_nesting_depth;
+    g_last_async_result = NETZ_42F650(g_last_async_result);
     v6 = g_coroutine_current;
-    if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-      dword_477344 = (int)v16;
-    g_last_result = NETZ_switch_host_or_join(0);
+    if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v16;
+    g_last_async_result = NETZ_switch_host_or_join(0);
     v7 = g_coroutine_current;
     if ( g_coroutine_list_head != v7 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
   }
   if ( g_netz_protocol == NetzProtocol_Serial || g_netz_protocol == NetzProtocol_IPX )
   {
@@ -58819,7 +58643,7 @@ void __cdecl sub_441CE0(int a1)
   else
   {
     if ( !TSK_CreateAsync(TaskChannel_KaosMenu, sub_43F7C0, 0) )
-      g_game_loop = 3u;
+      g_game_loop = GameLoop_PreviousScreen;
     do
     {
       while ( !sub_443780((KKND::Task *)v1, 1872, dword_47C6B8, 0) )
@@ -58845,28 +58669,28 @@ void __cdecl sub_441CE0(int a1)
     if ( !g_demo_faction )
       g_player_num = v11 - 1;
     g_current_lvl_id = SHIBYTE(dword_47C5FC) + 30;
-    g_game_loop = 1;
+    g_game_loop = GameLoop_NextMission;
     if ( g_47C6E0_mobd79_task )
       TASK_terminate(g_47C6E0_mobd79_task);
   }
   else
   {
     a1 = v7;
-    g_last_result = v6;
+    g_last_async_result = v6;
     v9 = g_coroutine_current;
-    if ( g_coroutine_list_head != v9 && ++dword_47734C == 1 )
-      dword_477344 = (int)&v12;
-    g_last_result = NETZ_disable_joining();
+    if ( g_coroutine_list_head != v9 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = &v12;
+    g_last_async_result = NETZ_disable_joining();
     v10 = g_coroutine_current;
     if ( g_coroutine_list_head != v10 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     sub_44A2A0(71, &a1, 4u);
     g_is_demo_build = 0;
     g_is_single_player = 0;
     g_level_loading_lock = 1;
     NETZ_game_start();
     g_current_lvl_id = SHIBYTE(dword_47C5FC) + 30;
-    g_game_loop = 1;
+    g_game_loop = GameLoop_NextMission;
     if ( g_47C6E0_mobd79_task )
     {
       TASK_terminate(g_47C6E0_mobd79_task);
@@ -58884,6 +58708,7 @@ void __cdecl sub_441CE0(int a1)
 // 47C658: using guessed type char g_demo_faction;
 // 47C6B8: using guessed type int dword_47C6B8;
 // 47C6C0: using guessed type int dword_47C6C0;
+// 47734C: using guessed type int g_coroutine_nesting_depth;
 
 //----- (00441EF0) --------------------------------------------------------
 int __thiscall sub_441EF0(int *this)
@@ -58994,7 +58819,7 @@ void __cdecl __noreturn sub_441FC0(KKND::Task *task)
   else
   {
     sub_443B40(task);
-    g_game_loop = 3u;
+    g_game_loop = GameLoop_PreviousScreen;
   }
   v8 = entity_create_ex(MobdId_45, v5, sub_440CA0, TaskKind_Coroutine, nullptr);
   if ( v8 )
@@ -59108,16 +58933,16 @@ void __cdecl __noreturn sub_4421F0(KKND::Task *task)
     g_game_loop = GameLoop_PreviousScreen;
   while ( !sub_443780(task, 2044, 1, 0) )
     ;
-  g_last_result = sub_44A220(68, nullptr, 0);
+  g_last_async_result = sub_44A220(68, nullptr, 0);
   v7 = g_coroutine_current;
-  if ( g_coroutine_list_head != v7 && ++dword_47734C == 1 )
-    dword_477344 = (int)&v18;
+  if ( g_coroutine_list_head != v7 && ++g_coroutine_nesting_depth == 1 )
+    g_stack_frame = (int)&v18;
   NETZ_poll(0, nullptr);
-  g_last_result = NETZ_session_close();
+  g_last_async_result = NETZ_session_close();
   v8 = g_coroutine_current;
   if ( g_coroutine_list_head != v8 )
-    --dword_47734C;
-  NETZ_42F650(g_last_result);
+    --g_coroutine_nesting_depth;
+  NETZ_42F650(g_last_async_result);
   if ( dword_47C6C4 )
   {
     v9 = g_47C6E0_mobd79_task->entity;
@@ -59283,22 +59108,22 @@ void __cdecl sub_4426D0(KKND::Task *task)
     do
       v3 = sub_443780(task, 1840, dword_47C6EC, 0);
     while ( !v3 );
-    g_last_result = v3;
+    g_last_async_result = v3;
     v4 = g_coroutine_current;
-    if ( g_coroutine_list_head != v4 && ++dword_47734C == 1 )
-      dword_477344 = (int)&v12;
+    if ( g_coroutine_list_head != v4 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)&v12;
     pal_40E560();
     ShowCursor(1);
     v5 = NETZ_switch_host_or_join((void *)1);
     ShowCursor(0);
-    g_last_result = pal_40E6B0();
+    g_last_async_result = pal_40E6B0();
     v6 = g_coroutine_current;
     if ( g_coroutine_list_head != v6 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     if ( !v5 )
       break;
     v7 = g_netz_protocol;
-    sub_42E390(g_last_result);
+    sub_42E390(g_last_async_result);
     sub_42E170(v7, aPlayer);
   }
   v8 = dword_47C6C0;
@@ -59381,43 +59206,43 @@ void __cdecl sub_4428C0(KKND::Task *task)
     do
       v3 = sub_443780(task, 2080, 1, 0);
     while ( !v3 );
-    g_last_result = v3;
+    g_last_async_result = v3;
     v4 = g_coroutine_current;
-    if ( g_coroutine_list_head != v4 && ++dword_47734C == 1 )
-      dword_477344 = (int)v17;
+    if ( g_coroutine_list_head != v4 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v17;
     v5 = NETZ_switch_host_or_join(nullptr);
     dword_47A934 = 1;
-    g_last_result = v5;
+    g_last_async_result = v5;
     v6 = g_coroutine_current;
     if ( g_coroutine_list_head != v6 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     v7 = g_coroutine_current;
-    if ( g_coroutine_list_head != v7 && ++dword_47734C == 1 )
-      dword_477344 = (int)v17;
+    if ( g_coroutine_list_head != v7 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v17;
     pal_40E560();
     ShowCursor(1);
     NETZ_poll(0, nullptr);
     v8 = NETZ_create_player(nullptr);
     ShowCursor(0);
-    g_last_result = pal_40E6B0();
+    g_last_async_result = pal_40E6B0();
     v9 = g_coroutine_current;
     if ( g_coroutine_list_head != v9 )
-      --dword_47734C;
-    v10 = g_last_result;
+      --g_coroutine_nesting_depth;
+    v10 = g_last_async_result;
     if ( !v8 )
     {
       v10 = -1;
       dword_46E3F0 = -1;
       while ( (dword_468B54 == -1 || v10 == -1) && v8 < 1800 )
       {
-        g_last_result = TSK_yield(task, Task_Sleep, 1);
+        g_last_async_result = TSK_yield(task, Task_Sleep, 1);
         v11 = g_coroutine_current;
-        if ( g_coroutine_list_head != v11 && ++dword_47734C == 1 )
-          dword_477344 = (int)v17;
-        g_last_result = NETZ_poll(0, nullptr);
+        if ( g_coroutine_list_head != v11 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = (int)v17;
+        g_last_async_result = NETZ_poll(0, nullptr);
         v12 = g_coroutine_current;
         if ( g_coroutine_list_head != v12 )
-          --dword_47734C;
+          --g_coroutine_nesting_depth;
         v10 = dword_46E3F0;
         ++v8;
       }
@@ -59848,7 +59673,7 @@ void __cdecl sub_443140(KKND::Task *task)
   if ( v2 )
     entity_anim_init(v2, 1048);
   else
-    g_game_loop = 3u;
+    g_game_loop = GameLoop_PreviousScreen;
   v3 = task->entity;
   v4 = entity_create(MobdId_45, nullptr, v3);
   v3->mobd_id = MobdId_45;
@@ -59899,7 +59724,7 @@ void __cdecl sub_443140(KKND::Task *task)
   g_47C6E0_mobd79_task = nullptr;
   sub_443B40(task);
   FADE_408500(task);
-  g_game_loop = 1;
+  g_game_loop = GameLoop_NextMission;
 }
 // 47C6C0: using guessed type int dword_47C6C0;
 // 47C6E4: using guessed type int dword_47C6E4;
@@ -60361,7 +60186,7 @@ int *__fastcall sub_4439F0(_DWORD *a1, int a2, int a3, int a4, int a5)
     }
     else
     {
-      g_game_loop = 3u;
+      g_game_loop = GameLoop_PreviousScreen;
     }
   }
   else
@@ -60383,7 +60208,7 @@ int *__fastcall sub_4439F0(_DWORD *a1, int a2, int a3, int a4, int a5)
     }
     else
     {
-      g_game_loop = 3u;
+      g_game_loop = GameLoop_PreviousScreen;
     }
   }
   if ( a3 )
@@ -60740,7 +60565,7 @@ int sub_443F20()
   memset(&filename[20], 0, 0x1Cu);
   v2 = 0;
   result = dword_47C6EC;
-  if ( dword_47C6EC )
+  if ( dword_47C6EC )                           // OS_is_drive_cdrom optimized out
   {
     dword_47C6EC = 1;
     return dword_47A2E4;
@@ -61128,11 +60953,11 @@ LABEL_22:
         {
           if ( !is_player_evolved() )
           {
-            SOUND_play(SoundId_Surv_LowOilWarning, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_Surv_LowOilWarning, 0, g_sfx_vol, 16, 0);
             unit->mode = UNIT_mode_tanker_load_oil;
             goto LABEL_22;
           }
-          SOUND_play(SoundId_Mute_LowOilWarning, 0, g_4690A8_sfx_volume, 16, 0);
+          SOUND_play(SoundId_Mute_LowOilWarning, 0, g_sfx_vol, 16, 0);
         }
         unit->mode = UNIT_mode_tanker_load_oil;
         goto LABEL_22;
@@ -61368,7 +61193,7 @@ void __fastcall UNIT_mode_tanker_unload_oil(KKND::Unit *unit)
     unit->mode = UNIT_mode_tanker_unload_oil;
     state->_0_oil_loaded -= 20;
     if ( unit->player_num == g_player_num )
-      SOUND_play(SoundId_OilUnloading, 0, g_4690A8_sfx_volume, 16, 0);
+      SOUND_play(SoundId_OilUnloading, 0, g_sfx_vol, 16, 0);
     add_cash(&g_cash.cash[unit->player_num], 20);
     unit_tanker_healthbar_update_oil_bar(unit);
     TSK_yield(unit->task, Task_Sleep, 20);
@@ -61550,9 +61375,9 @@ void __fastcall MessageHandler_444D60(
         {
           unit->cplc_spawn_param = 1000;
           if ( is_player_evolved() )
-            SOUND_play(SoundId_132, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_132, 0, g_sfx_vol, 16, 0);
           else
-            SOUND_play(SoundId_60, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_60, 0, g_sfx_vol, 16, 0);
         }
         break;
       case TaskMessage_ReceiveDamage:
@@ -61673,9 +61498,9 @@ LABEL_63:
         if ( unit->player_num == g_player_num )
         {
           if ( unit->type == UnitType_Mute_Tanker )
-            SOUND_play(SoundId_133, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_133, 0, g_sfx_vol, 16, 0);
           else
-            SOUND_play(SoundId_43, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_43, 0, g_sfx_vol, 16, 0);
         }
         break;
       case TaskMessage_TankerAssignedNewDrillrig:
@@ -61697,9 +61522,9 @@ LABEL_63:
         if ( unit->player_num == g_player_num )
         {
           if ( unit->type == UnitType_Mute_Tanker )
-            SOUND_play(SoundId_131, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_131, 0, g_sfx_vol, 16, 0);
           else
-            SOUND_play(SoundId_49, 0, g_4690A8_sfx_volume, 16, 0);
+            SOUND_play(SoundId_49, 0, g_sfx_vol, 16, 0);
         }
         break;
       case TaskMessage_RepairBayAssigned:
@@ -62388,7 +62213,7 @@ void __fastcall ui_string_free(KKND::UiStr *str)
 // 47C76C: using guessed type int dword_47C76C;
 
 //----- (00445AE0) --------------------------------------------------------
-int __fastcall UISTR_clear(KKND::UiStr *str)
+int __fastcall UISTR_reset(KKND::UiStr *str)
 {
   KKND::Glyph *glyphs; // edx
   int v2; // esi
@@ -62448,7 +62273,7 @@ void __fastcall UISTR_cleanup()
 // 47C76C: using guessed type int g_glyph_free_count;
 
 //----- (00445C00) --------------------------------------------------------
-int __fastcall count_lines_wrapped(const char *text, int a2)
+int __fastcall ui_string_445C00(const char *a1, int a2)
 {
   char v2; // al
   int v3; // edx
@@ -62457,10 +62282,10 @@ int __fastcall count_lines_wrapped(const char *text, int a2)
   int v6; // esi
   char i; // bl
 
-  if ( !text )
+  if ( !a1 )
     return 0;
-  v2 = *text;
-  if ( !*text )
+  v2 = *a1;
+  if ( !*a1 )
     return 0;
   v3 = 1;
   v4 = 0;
@@ -62470,7 +62295,7 @@ int __fastcall count_lines_wrapped(const char *text, int a2)
     v6 = 0;
     if ( v2 != ' ' )
     {
-      for ( i = v2; i != ' '; i = text[++v6] )
+      for ( i = v2; i != ' '; i = a1[++v6] )
       {
         if ( !i )
           break;
@@ -62489,16 +62314,16 @@ int __fastcall count_lines_wrapped(const char *text, int a2)
     }
     if ( v2 == '\n' || v5 )
     {
-      ++text;
+      ++a1;
     }
     else
     {
       v4 += v6;
-      text += v6;
+      a1 += v6;
     }
-    v2 = *text;
+    v2 = *a1;
   }
-  while ( *text );
+  while ( *a1 );
   return v3;
 }
 
@@ -62569,7 +62394,7 @@ int __fastcall measure_width(const char *text, int a2)
 }
 
 //----- (00445D40) --------------------------------------------------------
-BOOL __fastcall sub_445D40(int a1, int a2)
+BOOL __fastcall sub_445D40(KKND::Unit *unit, int a2)
 {
   int v2; // eax
 
@@ -62580,19 +62405,19 @@ BOOL __fastcall sub_445D40(int a1, int a2)
       if ( g_player_num == 2 )
       {
         v2 = 1;
-        return v2 && a2 == 1 && *(_DWORD *)(a1 + 16) == 61;
+        return v2 && a2 == 1 && unit->type == UnitType_Mute_Blacksmith;
       }
     }
-    else if ( byte_47A766[28 * g_player_num] )
+    else if ( g_netz_players[g_player_num].faction )
     {
       v2 = 1;
-      return v2 && a2 == 1 && *(_DWORD *)(a1 + 16) == 61;
+      return v2 && a2 == 1 && unit->type == UnitType_Mute_Blacksmith;
     }
     v2 = 0;
-    return v2 && a2 == 1 && *(_DWORD *)(a1 + 16) == 61;
+    return v2 && a2 == 1 && unit->type == UnitType_Mute_Blacksmith;
   }
   v2 = g_demo_faction;
-  return v2 && a2 == 1 && *(_DWORD *)(a1 + 16) == 61;
+  return v2 && a2 == 1 && unit->type == UnitType_Mute_Blacksmith;
 }
 // 47C658: using guessed type char g_demo_faction;
 
@@ -63030,7 +62855,7 @@ KKND::SidebarFactoryProduction *__fastcall unit_enable_production(
       goto LABEL_16;
     }
   }
-  else if ( byte_47A766[28 * g_player_num] )
+  else if ( g_netz_players[g_player_num].faction )
   {
     v7 = 1;
     goto LABEL_16;
@@ -63067,7 +62892,7 @@ LABEL_25:
         goto LABEL_33;
       }
     }
-    else if ( byte_47A766[28 * g_player_num] )
+    else if ( g_netz_players[g_player_num].faction )
     {
       v10 = 1;
       goto LABEL_33;
@@ -63317,7 +63142,7 @@ void __thiscall sub_446860(KKND::SidebarFactoryProduction *prod)
           goto LABEL_12;
         }
       }
-      else if ( byte_47A766[28 * g_player_num] )
+      else if ( g_netz_players[g_player_num].faction )
       {
         v6 = 1;
         goto LABEL_12;
@@ -63450,7 +63275,7 @@ BOOL GAME_sidebar_init()
     if ( g_player_num == 2 )
       goto LABEL_16;
   }
-  else if ( byte_47A766[28 * g_player_num] )
+  else if ( g_netz_players[g_player_num].faction )
   {
 LABEL_16:
     v7 = 11;
@@ -63514,8 +63339,8 @@ LABEL_16:
                          sidebar_mode_airstrike_open,
                          sidebar_mode_airstrike_close,
                          (void *)0xFFFFFFF6);
-  dword_47CA2C = 0;
-  if ( !GAME_IsLoading() )
+  g_aircraft_unlocked = 0;
+  if ( !GAME_is_load_initiated() )
   {
     v22 = entity_create_ex(MobdId_Sidebar, nullptr, sidebar_task_401C30, TaskKind_Callback, nullptr);
     if ( v22 )
@@ -63537,9 +63362,8 @@ LABEL_16:
   }
   return 1;
 }
-// 478A8C: using guessed type int g_screen_width;
 // 47C658: using guessed type char g_demo_faction;
-// 47CA2C: using guessed type int dword_47CA2C;
+// 47CA2C: using guessed type int g_aircraft_unlocked;
 
 //----- (00446D60) --------------------------------------------------------
 void __fastcall sidebar_mode_cash_open(KKND::SidebarButton *button)
@@ -63611,7 +63435,7 @@ void __cdecl __noreturn sub_446ED0(KKND::Task *a1)
   v1 = g_production_buttons;
   do
     TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, (*v1++)->task);
-  while ( (int)v1 < (int)&dword_47CA2C );
+  while ( (int)v1 < (int)&g_aircraft_unlocked );
   TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_sidebar_button_minimap->task);
   TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_help_button[1]->task);
   while ( 1 )
@@ -63642,7 +63466,7 @@ BOOL is_player_evolved()
     if ( g_player_num == Race_Evolved )
       return 1;
   }
-  else if ( byte_47A766[28 * g_player_num] )
+  else if ( g_netz_players[g_player_num].faction )
   {
     return 1;
   }
@@ -63655,7 +63479,7 @@ KKND::Entity *enable_minimap()
 {
   KKND::Entity *result; // eax
 
-  if ( GAME_IsLoading() )
+  if ( GAME_is_load_initiated() )
     return (KKND::Entity *)TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_sidebar_button_minimap->task);
   result = &g_mobd[g_sidebar_button_minimap->entity->mobd_id].layers[0][49].frames[0].sound_id != (KKND::SoundId *)g_sidebar_button_minimap->entity->anim
          ? g_sidebar_button_minimap->entity
@@ -63679,13 +63503,13 @@ unsigned __int32 try_unlock_aircraft()
   int v1; // eax
   KKND::UnitType v2; // edx
 
-  result = dword_47CA2C;
-  if ( dword_47CA2C )
+  result = g_aircraft_unlocked;
+  if ( g_aircraft_unlocked )
     return result;
   result = 48 * g_current_lvl_id;
   if ( (g_lvl_desc[g_current_lvl_id].disabled_units_mask & 0x2000) != 0 )
     return result;
-  dword_47CA2C = 1;
+  g_aircraft_unlocked = 1;
   if ( !g_is_demo_build )
   {
     if ( g_is_single_player )
@@ -63696,7 +63520,7 @@ unsigned __int32 try_unlock_aircraft()
         goto LABEL_11;
       }
     }
-    else if ( byte_47A766[28 * g_player_num] )
+    else if ( g_netz_players[g_player_num].faction )
     {
       v1 = 1;
       goto LABEL_11;
@@ -63713,14 +63537,14 @@ LABEL_11:
   return TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_production_buttons[4]->task);
 }
 // 47C658: using guessed type char g_demo_faction;
-// 47CA2C: using guessed type int dword_47CA2C;
+// 47CA2C: using guessed type int g_aircraft_unlocked;
 
 //----- (00447120) --------------------------------------------------------
 void on_airstrike_ready()
 {
   int v0; // eax
 
-  if ( !dword_47CA2C )
+  if ( !g_aircraft_unlocked )
     return;
   if ( !g_is_demo_build )
   {
@@ -63732,7 +63556,7 @@ void on_airstrike_ready()
         goto LABEL_10;
       }
     }
-    else if ( byte_47A766[28 * g_player_num] )
+    else if ( g_netz_players[g_player_num].faction )
     {
       v0 = 1;
       goto LABEL_10;
@@ -63743,10 +63567,10 @@ void on_airstrike_ready()
   v0 = g_demo_faction;
 LABEL_10:
   if ( v0 )
-    SOUND_play(SoundId_136, 0, (int)g_4690A8_sfx_volume, 16, 0);
+    SOUND_play(SoundId_136, 0, g_sfx_vol, 16, 0);
   else
-    SOUND_play(SoundId_66, 0, (int)g_4690A8_sfx_volume, 16, 0);
-  if ( dword_47CA2C )
+    SOUND_play(SoundId_66, 0, g_sfx_vol, 16, 0);
+  if ( g_aircraft_unlocked )
   {
     TSK_send_message(nullptr, TaskMessage_1514_sidebar, nullptr, g_airstrike_button->task);
     TSK_send_message(nullptr, TaskMessage_UnitSelected, nullptr, g_47C970_sidebar_task);
@@ -63754,7 +63578,7 @@ LABEL_10:
   ++g_num_player_units;
 }
 // 47C658: using guessed type char g_demo_faction;
-// 47CA2C: using guessed type int dword_47CA2C;
+// 47CA2C: using guessed type int g_aircraft_unlocked;
 // 47DCC8: using guessed type int g_num_player_units;
 
 //----- (004471E0) --------------------------------------------------------
@@ -63782,19 +63606,19 @@ int sub_4471E0()
 // 47DCC8: using guessed type int g_num_player_units;
 
 //----- (00447250) --------------------------------------------------------
-int sub_447250()
+BOOL aircraft_revoke_production()
 {
-  int result; // eax
+  BOOL result; // eax
   int v1; // eax
 
-  result = dword_47CA2C;
-  if ( dword_47CA2C )
+  result = g_aircraft_unlocked;
+  if ( g_aircraft_unlocked )
   {
     if ( g_is_demo_build )
     {
       v1 = g_demo_faction;
 LABEL_10:
-      dword_47CA2C = 0;
+      g_aircraft_unlocked = 0;
       sidebar_disable_production(g_sidebar_aircraft_prod, (KKND::UnitType)(UnitType_Surv_Bomber - (v1 != 0)));
       TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_production_buttons[4]->task);
       TSK_send_message(nullptr, TaskMessage_SidebarRefreshOptions, nullptr, g_airstrike_button->task);
@@ -63808,7 +63632,7 @@ LABEL_10:
         goto LABEL_10;
       }
     }
-    else if ( byte_47A766[28 * g_player_num] )
+    else if ( g_netz_players[g_player_num].faction )
     {
       v1 = 1;
       goto LABEL_10;
@@ -63819,7 +63643,7 @@ LABEL_10:
   return result;
 }
 // 47C658: using guessed type char g_demo_faction;
-// 47CA2C: using guessed type int dword_47CA2C;
+// 47CA2C: using guessed type int g_aircraft_unlocked;
 
 //----- (00447310) --------------------------------------------------------
 KKND::Entity *sub_447310()
@@ -64084,8 +63908,8 @@ void __fastcall unit_tower_on_attack_order(KKND::Unit *unit, void *a2)
               sprintf(
                 byte_47CA30,
                 "%s's allegiance with %s is broken",
-                (const char *)&unk_47A767 + 28 * v8,
-                (const char *)&unk_47A767 + 28 * unit->player_num);
+                g_netz_players[v8].name,
+                g_netz_players[unit->player_num].name);
               show_message_unit(nullptr, byte_47CA30);
             }
           }
@@ -65507,7 +65331,7 @@ void __cdecl sub_448F30(KKND::Task *sender)
       {
         goto LABEL_95;
       }
-      show_message_unit(nullptr, aCouldnTCreateN);
+      show_message_unit(nullptr, "Couldn't create new building");
       v2->type = GameEvent_None;
       return;
     case GameEvent_MobileBaseDeployed:
@@ -65560,13 +65384,13 @@ void __cdecl sub_448F30(KKND::Task *sender)
       if ( g_is_single_player )
         goto LABEL_95;
       dword_47050C = 1;
-      dword_47A738 = 1;
+      g_netz_enable_lockstep_mode = 1;
       v2->type = GameEvent_None;
       return;
     case GameEvent_GameResumed:
       if ( g_is_single_player )
         goto LABEL_95;
-      dword_47A738 = 0;
+      g_netz_enable_lockstep_mode = 0;
       dword_47050C = -1;
       v2->type = GameEvent_None;
       return;
@@ -65574,7 +65398,7 @@ void __cdecl sub_448F30(KKND::Task *sender)
       if ( g_is_single_player )
         goto LABEL_95;
       dword_47050C = -1;
-      dword_47A738 = 1;
+      g_netz_enable_lockstep_mode = 1;
       v2->type = GameEvent_None;
       return;
     case GameEvent_18:
@@ -65615,13 +65439,13 @@ void __cdecl sub_448F30(KKND::Task *sender)
       v43 = *(_DWORD *)v2->payload;
       if ( g_is_single_player )
         entity_create_by_unit_type(
-          (KKND::UnitType)((v43 != 2) + 43),
+          (KKND::UnitType)((v43 != 2) + UnitType_Mute_Wasp),
           *(_DWORD *)&v2->payload[4],
           *(_DWORD *)&v2->payload[8],
           *(_DWORD *)v2->payload);
       else
         entity_create_by_unit_type(
-          (KKND::UnitType)(44 - (byte_47A766[28 * v43] != 0)),
+          (KKND::UnitType)(UnitType_Surv_Bomber - (g_netz_players[v43].faction != NetzFaction_Surv)),
           *(_DWORD *)&v2->payload[4],
           *(_DWORD *)&v2->payload[8],
           *(_DWORD *)v2->payload);
@@ -65641,8 +65465,8 @@ void __cdecl sub_448F30(KKND::Task *sender)
       sprintf(
         Buffer,
         "%s Swearing allegiance to %s",
-        (const char *)(28 * (_DWORD)v32 + 4695911),
-        (const char *)(28 * *(_DWORD *)v2->payload + 4695911));
+        g_netz_players[(_DWORD)v32].name,
+        g_netz_players[*(_DWORD *)v2->payload].name);
       show_message_unit(nullptr, Buffer);
       v2->type = GameEvent_None;
       break;
@@ -65653,7 +65477,6 @@ LABEL_95:
   }
 }
 // 47050C: using guessed type int dword_47050C;
-// 47A738: using guessed type int dword_47A738;
 
 //----- (00449670) --------------------------------------------------------
 BOOL UNIT_tasks_init()
@@ -65675,7 +65498,7 @@ BOOL UNIT_tasks_init()
   v0 = g_is_single_player;
   v1 = 0;
   v8 = dword_470510;
-  v2 = a3;
+  v2 = MEMORY[0x47A780];
   do
   {
     if ( !v0 && *(v2 - 28) != 0 || v0 && v1 == g_player_num )
@@ -65788,7 +65611,7 @@ void __cdecl sub_449820(KKND::Task *task)
   int v36; // [esp+68h] [ebp-8h]
   int v37; // [esp+6Ch] [ebp-4h]
 
-  g_netz_is_game_finished = 0;
+  MEMORY[0x47A778] = 0;
   dword_47CB1C = 1;
   g_opportunity_timer = 0;
   palette_408460();
@@ -65798,13 +65621,13 @@ void __cdecl sub_449820(KKND::Task *task)
   {
     g_netz_is_game_started_2_unused = 1;
     dword_47CB10 = dword_468B50 - 1;
-    v2 = dword_47A794;
+    v2 = MEMORY[0x47A794];
     do
     {
       *v2 = 0;
       v2 += 7;
     }
-    while ( (int)v2 < (int)&dword_47A83C );
+    while ( (int)v2 < (int)&dword_47A83C );     // BUG
     sub_42E690((UINT)v2, 50);
     Time = timeGetTime();
     v4 = timeGetTime();
@@ -65813,17 +65636,17 @@ void __cdecl sub_449820(KKND::Task *task)
     {
       while ( 1 )
       {
-        g_last_result = v5;
+        g_last_async_result = v5;
         v6 = g_coroutine_current;
-        if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-          dword_477344 = (int)v33;
-        g_last_result = NETZ_poll(0, (void *)1);
+        if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = v33;
+        g_last_async_result = NETZ_poll(0, (void *)1);
         v7 = g_coroutine_current;
         if ( g_coroutine_list_head != v7 )
-          --dword_47734C;
+          --g_coroutine_nesting_depth;
         if ( timeGetTime() - v4 > 0x7530 )
         {
-          v8 = dword_47A794;
+          v8 = MEMORY[0x47A794];
           dword_47CB10 = dword_468B50 - 1;
           do
           {
@@ -65873,7 +65696,7 @@ LABEL_18:
         v36 = 0;
         v37 = 0;
         v13 = byte_47CA80;
-        v14 = ::a3;
+        v14 = MEMORY[0x47A780];
         do
         {
           if ( *v14 && *v13 )
@@ -65896,26 +65719,26 @@ LABEL_18:
         LOBYTE(v13) = v36;
         v16 = 0;
         a3 = v36;
-        v17 = player;
+        v17 = MEMORY[0x47A790];
         do
         {
           if ( *((_BYTE *)v17 - 16) == 1 && v16 != v10 )
           {
-            g_last_result = (UINT)v13;
+            g_last_async_result = (UINT)v13;
             v18 = g_coroutine_current;
-            if ( g_coroutine_list_head != v18 && ++dword_47734C == 1 )
-              dword_477344 = (int)v33;
-            g_last_result = NETZ_send(*v17, 51, &a3, v12 - &a3, 0);
+            if ( g_coroutine_list_head != v18 && ++g_coroutine_nesting_depth == 1 )
+              g_stack_frame = v33;
+            g_last_async_result = NETZ_send(*v17, 51, &a3, v12 - &a3, 0);
             v19 = g_coroutine_current;
             if ( g_coroutine_list_head != v19 )
-              --dword_47734C;
-            v13 = (char *)g_last_result;
+              --g_coroutine_nesting_depth;
+            v13 = (char *)g_last_async_result;
             v10 = dword_468B58;
           }
           v17 += 7;
           ++v16;
         }
-        while ( (int)v17 < (int)&dword_47A838 );
+        while ( (int)v17 < (int)&dword_47A838 );// BUG
         if ( dword_47CB0C )
           TSK_yield(task, Task_Sleep, 4);
         else
@@ -65923,14 +65746,14 @@ LABEL_18:
         if ( dword_47CB1C != 1 )
           break;
         dword_47CB14 = dword_468B50 - 1;
-        v20 = dword_47A794;
+        v20 = MEMORY[0x47A794];
         do
         {
           *v20 = 0;
           v20 += 7;
         }
-        while ( (int)v20 < (int)&dword_47A83C );
-        if ( sub_449E00(&dword_47CB14, 0x9C40u, (int)aWaitingForPlay) )
+        while ( (int)v20 < (int)&dword_47A83C );// BUG
+        if ( sub_449E00(&dword_47CB14, 0x9C40u, "waiting for player packet") )
           goto LABEL_56;
         if ( dword_47CB1C != 1 )
           break;
@@ -65940,7 +65763,7 @@ LABEL_18:
         if ( dword_468B50 > 0 )
         {
           v23 = byte_47CA80;
-          v24 = ::a3;
+          v24 = MEMORY[0x47A780];
           do
           {
             if ( *v24 == 1 && *v23 == 15 )
@@ -65962,14 +65785,14 @@ LABEL_18:
   }
   else
   {
-    g_last_result = v1;
+    g_last_async_result = v1;
     v25 = g_coroutine_current;
-    if ( g_coroutine_list_head != v25 && ++dword_47734C == 1 )
-      dword_477344 = (int)v33;
-    g_last_result = NETZ_send(dword_468B54, 59, nullptr, 0, 1);
+    if ( g_coroutine_list_head != v25 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = v33;
+    g_last_async_result = NETZ_send(dword_468B54, 59, nullptr, 0, 1);
     v26 = g_coroutine_current;
     if ( g_coroutine_list_head != v26 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     v27 = dword_47CB1C;
     if ( dword_47CB1C == 1 )
     {
@@ -65978,15 +65801,15 @@ LABEL_18:
         if ( v27 != 1 )
           goto LABEL_57;
         dword_47CB14 = 1;
-        if ( sub_449E00(&dword_47CB14, 0x9C40u, (int)aWaitingForServ) )
+        if ( sub_449E00(&dword_47CB14, 0x9C40u, "waiting for server packet") )
         {
 LABEL_56:
-          dword_47A738 = 0;
+          g_netz_enable_lockstep_mode = 0;
           g_netz_synchronized_lockstep_mode = 0;
           sub_42F620();
           dword_47CB14 = -1;
           dword_47CB18 = 1;
-          g_netz_is_game_finished = 0;
+          MEMORY[0x47A778] = 0;
           goto LABEL_57;
         }
         if ( dword_47CB1C != 1 )
@@ -66013,19 +65836,19 @@ LABEL_56:
             g_47CAE0.type = GameEvent_None;
           }
         }
-        g_last_result = (UINT)v28;
+        g_last_async_result = (UINT)v28;
         v29 = g_coroutine_current;
-        if ( g_coroutine_list_head != v29 && ++dword_47734C == 1 )
-          dword_477344 = (int)v33;
+        if ( g_coroutine_list_head != v29 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = v33;
         if ( g_47CAE0.type )
           v30 = (void *)NETZ_send(dword_468B54, 52, &g_47CAE0, 0xDu, 0);
         else
           v30 = (void *)NETZ_send(dword_468B54, 52, &g_47CAE0, 1u, 0);
         v31 = v30;
-        g_last_result = (UINT)v30;
+        g_last_async_result = (UINT)v30;
         v32 = g_coroutine_current;
         if ( g_coroutine_list_head != v32 )
-          --dword_47734C;
+          --g_coroutine_nesting_depth;
         sub_42E400(v30);
         if ( v31 )
           break;
@@ -66044,16 +65867,14 @@ LABEL_57:
     dword_47CB18 = 0;
   }
   if ( dword_468B50 <= 2 )
-    g_netz_is_game_finished = 1;
+    MEMORY[0x47A778] = 1;
   TSK_terminate(task);
 }
 // 468B50: using guessed type int dword_468B50;
 // 468B58: using guessed type int dword_468B58;
 // 47050C: using guessed type int dword_47050C;
-// 477344: using guessed type int dword_477344;
-// 47734C: using guessed type int dword_47734C;
+// 47734C: using guessed type int g_coroutine_nesting_depth;
 // 47953C: using guessed type int g_opportunity_timer;
-// 47A738: using guessed type int dword_47A738;
 // 47A778: using guessed type int g_netz_is_game_finished;
 // 47A790: using guessed type int player[];
 // 47A794: using guessed type int dword_47A794[];
@@ -66070,10 +65891,10 @@ LABEL_57:
 // 47CB1C: using guessed type int dword_47CB1C;
 
 //----- (00449E00) --------------------------------------------------------
-BOOL __fastcall sub_449E00(_DWORD *a1, unsigned int a2, int a3)
+BOOL __fastcall sub_449E00(_DWORD *a1, unsigned int a2, const char *a3)
 {
   DWORD Time; // esi
-  unsigned int v5; // eax
+  UINT v5; // eax
   KKND::Coroutine *v6; // et1
   KKND::Coroutine *v7; // et1
   char *v8; // esi
@@ -66095,48 +65916,48 @@ BOOL __fastcall sub_449E00(_DWORD *a1, unsigned int a2, int a3)
     v5 = timeGetTime() - v16;
     if ( v5 >= v15 )
       break;
-    g_last_result = v5;
+    g_last_async_result = v5;
     v6 = g_coroutine_current;
-    if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-      dword_477344 = (int)v14;
-    g_last_result = NETZ_poll(0, (void *)1);
+    if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = v14;
+    g_last_async_result = NETZ_poll(0, (void *)1);
     v7 = g_coroutine_current;
     if ( g_coroutine_list_head != v7 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     if ( *a1 == -1 || dword_47CB1C != 1 )
       break;
     if ( timeGetTime() - Time > 0x1F4 )
     {
       if ( g_netz_is_game_host )
       {
-        v8 = ::a3;
+        v8 = MEMORY[0x47A780];
         do
         {
           if ( (*v8 == 1 || *v8 == 3) && !*((_DWORD *)v8 + 5) )
           {
-            g_last_result = 0;
+            g_last_async_result = 0;
             v9 = g_coroutine_current;
-            if ( g_coroutine_list_head != v9 && ++dword_47734C == 1 )
-              dword_477344 = (int)v14;
-            g_last_result = j_NETZ_resend_to_player(*((_DWORD *)v8 + 4), 0);
+            if ( g_coroutine_list_head != v9 && ++g_coroutine_nesting_depth == 1 )
+              g_stack_frame = v14;
+            g_last_async_result = j_NETZ_resend_to_player(*((_DWORD *)v8 + 4), 0);
             v10 = g_coroutine_current;
             if ( g_coroutine_list_head != v10 )
-              --dword_47734C;
+              --g_coroutine_nesting_depth;
           }
           v8 += 28;
         }
-        while ( (int)v8 < (int)&dword_47A828 );
+        while ( (int)v8 < (int)&dword_47A828 ); // BUG
       }
       else
       {
-        g_last_result = 0;
+        g_last_async_result = 0;
         v11 = g_coroutine_current;
-        if ( g_coroutine_list_head != v11 && ++dword_47734C == 1 )
-          dword_477344 = (int)v14;
-        g_last_result = j_NETZ_resend_to_player(player[7 * dword_468B54], 0);
+        if ( g_coroutine_list_head != v11 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = v14;
+        g_last_async_result = j_NETZ_resend_to_player(MEMORY[0x47A790][7 * dword_468B54], 0);
         v12 = g_coroutine_current;
         if ( g_coroutine_list_head != v12 )
-          --dword_47734C;
+          --g_coroutine_nesting_depth;
       }
       Time = timeGetTime();
     }
@@ -66144,11 +65965,8 @@ BOOL __fastcall sub_449E00(_DWORD *a1, unsigned int a2, int a3)
   while ( *a1 );
   return *a1 && *a1 != -1;
 }
-// 468B54: using guessed type int dword_468B54;
-// 477340: using guessed type int dword_477340;
-// 477344: using guessed type int dword_477344;
-// 47734C: using guessed type int dword_47734C;
-// 47A790: using guessed type int dword_47A790[];
+// 47734C: using guessed type int g_coroutine_nesting_depth;
+// 47A790: using guessed type int player[];
 // 47A828: using guessed type int dword_47A828;
 // 47CB1C: using guessed type int dword_47CB1C;
 
@@ -66166,22 +65984,22 @@ char sub_449FF0()
   v0 = g_netz_is_game_host;
   if ( g_netz_is_game_host )
   {
-    g_netz_is_game_finished = 1;
-    v1 = player;
+    MEMORY[0x47A778] = 1;
+    v1 = MEMORY[0x47A790];
     do
     {
       if ( *((_BYTE *)v1 - 16) == 1 )
       {
-        g_last_result = v0;
+        g_last_async_result = v0;
         v2 = g_coroutine_current;
-        if ( g_coroutine_list_head != v2 && ++dword_47734C == 1 )
-          dword_477344 = (int)v7;
+        if ( g_coroutine_list_head != v2 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = (int)v7;
         NETZ_send(*v1, 61, nullptr, 0, 1);
-        g_last_result = NETZ_poll(0, nullptr);
+        g_last_async_result = NETZ_poll(0, nullptr);
         v3 = g_coroutine_current;
         if ( g_coroutine_list_head != v3 )
-          --dword_47734C;
-        v0 = g_last_result;
+          --g_coroutine_nesting_depth;
+        v0 = g_last_async_result;
       }
       v1 += 7;
     }
@@ -66190,21 +66008,21 @@ char sub_449FF0()
   else
   {
     if ( dword_468B50 == 2 )
-      g_netz_is_game_finished = 1;
+      MEMORY[0x47A778] = 1;
     v0 = dword_468B58;
-    LOBYTE(v0) = a3[28 * dword_468B58];
+    LOBYTE(v0) = MEMORY[0x47A780][28 * dword_468B58];
     if ( (_BYTE)v0 )
     {
-      g_last_result = v0;
+      g_last_async_result = v0;
       v4 = g_coroutine_current;
-      if ( g_coroutine_list_head != v4 && ++dword_47734C == 1 )
-        dword_477344 = (int)v7;
+      if ( g_coroutine_list_head != v4 && ++g_coroutine_nesting_depth == 1 )
+        g_stack_frame = (int)v7;
       NETZ_send(dword_468B54, 62, (const void *)(28 * dword_468B58 + 4695936), 0x1Cu, 1);
-      g_last_result = NETZ_poll(0, nullptr);
+      g_last_async_result = NETZ_poll(0, nullptr);
       v5 = g_coroutine_current;
       if ( g_coroutine_list_head != v5 )
-        --dword_47734C;
-      LOBYTE(v0) = g_last_result;
+        --g_coroutine_nesting_depth;
+      LOBYTE(v0) = g_last_async_result;
     }
   }
   dword_47CB18 = 1;
@@ -66240,21 +66058,21 @@ char __fastcall sub_44A160(char a1, const void *a2, unsigned int a3)
   if ( g_netz_is_game_host )
   {
     v4 = 0;
-    v5 = player;
+    v5 = MEMORY[0x47A790];
     do
     {
       LOBYTE(v3) = *((_BYTE *)v5 - 16);
       if ( (_BYTE)v3 && v4 != dword_468B58 )
       {
-        g_last_result = v3;
+        g_last_async_result = v3;
         v6 = g_coroutine_current;
-        if ( g_coroutine_list_head != v6 && ++dword_47734C == 1 )
-          dword_477344 = (int)&v9;
-        g_last_result = NETZ_send(*v5, v11, v10, a3, 1);
+        if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = (int)&v9;
+        g_last_async_result = NETZ_send(*v5, v11, v10, a3, 1);
         v7 = g_coroutine_current;
         if ( g_coroutine_list_head != v7 )
-          --dword_47734C;
-        v3 = g_last_result;
+          --g_coroutine_nesting_depth;
+        v3 = g_last_async_result;
       }
       v5 += 7;
       ++v4;
@@ -66279,15 +66097,15 @@ UINT __fastcall sub_44A220(char a1, const void *a2, unsigned int a4)
   result = g_netz_is_game_host;
   if ( !g_netz_is_game_host )
   {
-    g_last_result = 0;
+    g_last_async_result = 0;
     v4 = g_coroutine_current;
-    if ( g_coroutine_list_head != v4 && ++dword_47734C == 1 )
-      dword_477344 = (int)&savedregs;
-    g_last_result = NETZ_send(dword_468B54, a1, a2, a4, 1);
+    if ( g_coroutine_list_head != v4 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)&savedregs;
+    g_last_async_result = NETZ_send(dword_468B54, a1, a2, a4, 1);
     v5 = g_coroutine_current;
     if ( g_coroutine_list_head != v5 )
-      --dword_47734C;
-    return g_last_result;
+      --g_coroutine_nesting_depth;
+    return g_last_async_result;
   }
   return result;
 }
@@ -66326,7 +66144,7 @@ UINT __fastcall sub_44A2A0(char a1, void *edx0, unsigned int a4)
   v21 = timeGetTime();
   dword_47CB20 = 1;
   dword_47CB10 = dword_468B50 - 1;
-  v5 = dword_47A794;
+  v5 = MEMORY[0x47A794];
   do
   {
     *v5 = 0;
@@ -66337,21 +66155,21 @@ UINT __fastcall sub_44A2A0(char a1, void *edx0, unsigned int a4)
   if ( g_netz_is_game_host )
   {
     v7 = 0;
-    v8 = player;
+    v8 = MEMORY[0x47A790];
     do
     {
       LOBYTE(v6) = *((_BYTE *)v8 - 16);
       if ( (_BYTE)v6 && v7 != dword_468B58 )
       {
-        g_last_result = v6;
+        g_last_async_result = v6;
         v9 = g_coroutine_current;
-        if ( g_coroutine_list_head != v9 && ++dword_47734C == 1 )
-          dword_477344 = (int)v20;
-        g_last_result = NETZ_send(*v8, a2, a3, a4, 1);
+        if ( g_coroutine_list_head != v9 && ++g_coroutine_nesting_depth == 1 )
+          g_stack_frame = (int)v20;
+        g_last_async_result = NETZ_send(*v8, a2, a3, a4, 1);
         v10 = g_coroutine_current;
         if ( g_coroutine_list_head != v10 )
-          --dword_47734C;
-        v6 = g_last_result;
+          --g_coroutine_nesting_depth;
+        v6 = g_last_async_result;
       }
       v8 += 7;
       ++v7;
@@ -66364,18 +66182,18 @@ UINT __fastcall sub_44A2A0(char a1, void *edx0, unsigned int a4)
     result = v3() - v21;
     if ( result >= 0x9C40 )
       break;
-    g_last_result = result;
+    g_last_async_result = result;
     v12 = g_coroutine_current;
-    if ( g_coroutine_list_head != v12 && ++dword_47734C == 1 )
-      dword_477344 = (int)v20;
-    g_last_result = NETZ_poll(0, nullptr);
+    if ( g_coroutine_list_head != v12 && ++g_coroutine_nesting_depth == 1 )
+      g_stack_frame = (int)v20;
+    g_last_async_result = NETZ_poll(0, nullptr);
     v13 = g_coroutine_current;
     if ( g_coroutine_list_head != v13 )
-      --dword_47734C;
+      --g_coroutine_nesting_depth;
     if ( v3() - Time > 0x1F4 )
     {
       dword_47CB10 = dword_468B50 - 1;
-      v14 = dword_47A794;
+      v14 = MEMORY[0x47A794];
       do
       {
         *v14 = 0;
@@ -66386,21 +66204,21 @@ UINT __fastcall sub_44A2A0(char a1, void *edx0, unsigned int a4)
       if ( g_netz_is_game_host )
       {
         v16 = 0;
-        v17 = player;
+        v17 = MEMORY[0x47A790];
         do
         {
           LOBYTE(v15) = *((_BYTE *)v17 - 16);
           if ( (_BYTE)v15 && v16 != dword_468B58 )
           {
-            g_last_result = v15;
+            g_last_async_result = v15;
             v18 = g_coroutine_current;
-            if ( g_coroutine_list_head != v18 && ++dword_47734C == 1 )
-              dword_477344 = (int)v20;
-            g_last_result = NETZ_send(*v17, a2, a3, a4, 1);
+            if ( g_coroutine_list_head != v18 && ++g_coroutine_nesting_depth == 1 )
+              g_stack_frame = (int)v20;
+            g_last_async_result = NETZ_send(*v17, a2, a3, a4, 1);
             v19 = g_coroutine_current;
             if ( g_coroutine_list_head != v19 )
-              --dword_47734C;
-            v15 = g_last_result;
+              --g_coroutine_nesting_depth;
+            v15 = g_last_async_result;
           }
           v17 += 7;
           ++v16;
@@ -67992,7 +67810,7 @@ void __cdecl __noreturn task_explosion_1(KKND::Task *task)
   memset(v3, 0, sizeof(v3));
   if ( !entity->ctx )
     entity->ctx = v3;
-  entity_play_sound(entity, SoundId_3, g_4690A8_sfx_volume, 0);
+  entity_play_sound(entity, SoundId_3, g_sfx_vol, 0);
   rend = entity->rn;
   entity->z = 0;
   rend->render_state_handler = (KKND::RenderStateUpdater)render_state_handler_explosion;
@@ -68165,7 +67983,7 @@ int sub_44C010()
   g_palette_idx_per_player[0] = 3;
   if ( !g_is_single_player )
   {
-    v18 = byte_47A781;
+    v18 = MEMORY[0x47A781];
     v19 = &g_palette_idx_per_player[1];
     do
     {

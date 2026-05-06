@@ -4332,7 +4332,7 @@ struct KKND::stru7_sound
   int _stru7_sound_30;
   int _stru7_sound_34;
   KKND::stru7_sound *next;
-  int _stru7_sound_3C;
+  KKND::stru7_sound *_stru7_sound_3C;
   int _stru7_sound_40;
   char filename[32];
   char _stru7_sound_64[42];
@@ -4628,5 +4628,33 @@ enum KKND::NetzError : unsigned __int32
   NetzError_Disabled = 0xFE0012,
   NetzError_NotImplemented = 0xFE0013,
   NetzError_Fatal = 0xFFFFFFFF,
+};
+
+/* 362 */
+enum __dec MACRO_DRIVE
+{
+  DRIVE_UNKNOWN = 0,
+  DRIVE_NO_ROOT_DIR = 1,
+  DRIVE_REMOVABLE = 2,
+  DRIVE_FIXED = 3,
+  DRIVE_REMOTE = 4,
+  DRIVE_CDROM = 5,
+  DRIVE_RAMDISK = 6,
+};
+
+/* 364 */
+enum __dec KKND::NetzFaction : unsigned __int8
+{
+  NetzFaction_Surv = 0,
+  NetzFaction_Mute = 1,
+};
+
+/* 363 */
+struct KKND::NetzPlayer
+{
+  KKND::NetzFaction faction;
+  char name[25];
+  char connection_status;
+  char palette_idx;
 };
 
