@@ -26,6 +26,7 @@ pub fn build(b: *std.Build) void {
     });
 
     kknd_mod.addIncludePath(b.path("src/kknd"));
+    kknd_mod.addSystemIncludePath(b.path("vendor"));
     kknd_mod.addIncludePath(raylib_dep.path("src"));
     kknd_mod.linkLibrary(raylib_lib);
 
