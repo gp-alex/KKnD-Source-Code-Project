@@ -2,268 +2,116 @@
 #include <windows.h>
 #include <math.h>
 
+#include <stdio.h> // File
+
 #include <ddraw.h>
 #include <dplay.h>
 #include <dsound.h>
 
+typedef struct Entity Entity;
+typedef struct Unit Unit;
+typedef struct MenuWidget MenuWidget;
 
-struct KKND::TaskLocal;
-struct KKND::Task;
-struct KKND::BoxdAabb;
-struct KKND::BoxdCollisionShape;
-struct KKND::CplcSpawnParams;
-struct KKND::CplcEntity;
-struct KKND::CplcEntityInViewport;
-struct KKND::MobdImageData;
-struct KKND::MobdSprtImage;
-struct KKND::MobdAnimFrame;
-struct KKND::Entity;
-struct KKND::MobdAnimation;
-struct KKND::BoxdCollisionHandler;
-struct KKND::RenderViewport;
-struct KKND::OilPatch;
-struct KKND::Unit;
-struct KKND::RenderNode;
-struct KKND::UnitStats;
-struct KKND::Turret;
-struct KKND::UnitEscortNode;
-struct KKND::UnitAttachment;
-struct KKND::UnitProjectileType;
-union KKND::UnitUnion1;
-struct KKND::CursorUnitSelection;
-struct KKND::BuildingPlannerPayload;
-struct KKND::SidebarFactoryProductionOption;
-struct KKND::Sidebar;
-struct KKND::ProductionSharedState;
-struct KKND::Glyph;
-struct KKND::AiUnitNode;
-struct KKND::AiWandererNode;
-struct KKND::AiAttackerNode;
-struct KKND::AiBuildNode;
-struct KKND::AiDrillrigNode;
-struct KKND::AiTankerNode;
-struct KKND::AiPowerPlantNode;
-struct KKND::AiEnemyNode;
-struct KKND::AiSquadNode;
-struct KKND::AiBuildOrderNode;
-struct KKND::AiBuildingPlacementNode;
-struct KKND::RenderImage;
-struct KKND::MenuWidget;
-struct KKND::GlyphDesc;
-struct KKND::FontMobd;
+typedef __int32 fixed;
 
+typedef struct {
+  fixed x;
+  fixed y;
+} Vec2i;
 
+typedef struct {
+  typeof_unqual(struct OilPatch) *next;
+  typeof_unqual(struct OilPatch) *prev;
+  Entity *entity;
+  int amount;
+  Unit *drillrig;
+  int drillrig_unit_id;
+} OilPatch;
 
-/* 161 */
-enum KKND::TaskChannel : unsigned __int32
-{
-  TaskChannel_None = 0x0,
-  TaskChannel_MainMenu = 0x1,
-  TaskChannel_MultiplayerProvider = 0x2,
-  TaskChannel_4_Menu = 0x4,
-  TaskChannel_5_Multiplayer = 0x5,
-  TaskChannel_6_Multiplayer = 0x6,
-  TaskChannel_7_Menu = 0x7,
-  TaskChannel_KaosMenu = 0x8,
-  TaskChannel_KaosLobbyWatch = 0x9,
-  TaskChannel_10_Menu = 0xA,
-  TaskChannel_PlayMission = 0xD,
-  TaskChannel_14_Menu = 0xE,
-  TaskChannel_CampaignFactionSelect = 0xF,
-  TaskChannel_16_Menu = 0x10,
-  TaskChannel_MenuCancel = 0x11,
-  TaskChannel_TextInput = 0x12,
-  TaskChannel_MainMenuLoad = 0x13,
-  TaskChannel_UnitEvents = 0x9876,
-  TaskChannel_SidebarButton = 0xBABA,
-  TaskChannel_SidebarHelp = 0xBBBB,
-  TaskChannel_SidebarPlaceholder = 0xCACA,
-  TaskChannel_Units = 0xEAEA,
-  TaskChannel_Outpost = 0xCA000000,
-  TaskChannel_Clanhall = 0xCA000001,
-  TaskChannel_MachineShop = 0xCA000002,
-  TaskChannel_Blacksmith = 0xCA000004,
-  TaskChannel_BeastEnclosure = 0xCA000005,
-  TaskChannel_RepairBay = 0xCA000006,
-  TaskChannel_ResearchLab = 0xCA00000A,
-  TaskChannel_PowerPlant = 0xCA00000D,
-  TaskChannel_Drillrig = 0xCA00000E,
-  TaskChannel_Tanker = 0xCA00000F,
-  TaskChannel_MobileDerrick = 0xCA000010,
-  TaskChannel_unused_tanker_broadcast = 0xCA000012,
-  TaskChannel_UpgradeProgress = 0xCA000013,
-  TaskChannel_unused_CA000014 = 0xCA000014,
-  TaskChannel_IngameMenuController = 0xDA000000,
-  TaskChannel_UiSlider_or_SaveLoadIngame = 0xDA000001,
-  TaskChannel_IngameMenuButton = 0xDA000002,
-  TaskChannel_IngameMenuYesNo = 0xDA000003,
-  TaskChannel_SaveLoad_Ingame = 0xDA000006,
-  TaskChannel_SaveLoad_MainMenu = 0xDA000007,
-  TaskChannel_SaveLoad = 0xDA000008,
-  TaskChannel_Everyone = 0xFFFFFFFF,
-};
+typedef enum : unsigned int {
+  UnitType_Surv_Rifleman = 0,
+  UnitType_Mute_Berserker = 1,
+  UnitType_Surv_Flamer = 2,
+  UnitType_Mute_Pyromaniac = 3,
+  UnitType_Surv_Swat = 4,
+  UnitType_Mute_Shotgunner = 5,
+  UnitType_Surv_Sapper = 6,
+  UnitType_Mute_Rioter = 7,
+  UnitType_Surv_ElPresidente = 8,
+  UnitType_Mute_KingZog = 9,
+  UnitType_Surv_Saboteur = 10,
+  UnitType_Mute_Vandal = 11,
+  UnitType_Surv_Technician = 12,
+  UnitType_Mute_Makanik = 13,
+  UnitType_Surv_RpgLauncher = 14,
+  UnitType_Mute_Bazooka = 15,
+  UnitType_Surv_Sniper = 16,
+  UnitType_Mute_CrazyHarry = 17,
+  UnitType_Surv_General = 18,
+  UnitType_Mute_Warlord = 19,
+  UnitType_Surv_Scout = 20,
+  UnitType_Surv_MobileDerrick = 21,
+  UnitType_Mute_MobileDerrick = 22,
+  UnitType_Surv_Tanker = 23,
+  UnitType_Mute_Tanker = 24,
+  UnitType_TankerConvoy = 25,
+  UnitType_Surv_DirkBike = 26,
+  UnitType_Mute_DireWolf = 27,
+  UnitType_Surv_4x4Pickup = 28,
+  UnitType_Mute_BikeAndSidecar = 29,
+  UnitType_Surv_Atv = 30,
+  UnitType_Mute_MonsterTruck = 31,
+  UnitType_Surv_AtvFlamethrower = 32,
+  UnitType_Mute_GiantScorpion = 33,
+  UnitType_Surv_AnacondaTank = 34,
+  UnitType_Mute_WarMastadont = 35,
+  UnitType_Surv_BarrageCraft = 36,
+  UnitType_Mute_GiantBeetle = 37,
+  UnitType_Surv_AutocannonTank = 38,
+  UnitType_Mute_MissileCrab = 39,
+  UnitType_Surv_MobileOutpost = 40,
+  UnitType_Mute_ClanhallWagon = 41,
+  UnitType_42 = 42,
+  UnitType_Mute_Wasp = 43,
+  UnitType_Surv_Bomber = 44,
+  UnitType_45 = 45,
+  UnitType_Surv_Drillrig = 46,
+  UnitType_Mute_Drillrig = 47,
+  UnitType_Surv_PowerStation = 48,
+  UnitType_Mute_PowerStation = 49,
+  UnitType_Surv_DetentionCenter = 50,
+  UnitType_Mute_HoldingPens = 51,
+  UnitType_Surv_GuardTower = 52,
+  UnitType_Mute_MachinegunNest = 53,
+  UnitType_SurvCannonTower = 54,
+  UnitType_Mute_GrapeshotTower = 55,
+  UnitType_Surv_MissileBattery = 56,
+  UnitType_Mute_RotaryCannon = 57,
+  UnitType_Surv_Outpost = 58,
+  UnitType_Mute_Clanhall = 59,
+  UnitType_Surv_MachineShop = 60,
+  UnitType_Mute_Blacksmith = 61,
+  UnitType_Mute_BeastEnclosure = 62,
+  UnitType_Surv_RepairBay = 63,
+  UnitType_Mute_Menagerie = 64,
+  UnitType_Surv_ResearchLab = 65,
+  UnitType_Surv_AlchemyHall = 66,
+  UnitType_TechBunker = 67,
+  UnitType_Hut = 68,
+  UnitType_Wall1 = 69,
+  UnitType_Wall2 = 70,
+  UnitType_Wall3 = 71,
+  UnitType_Wall4 = 72,
+  UnitType_Gort = 74,
+  UnitType_75 = 75,
+  UnitType_PlasmaTank = 76,
+  UnitType_SentinelDroid = 77,
+  UnitType_Mech = 78,
+  UnitType_Last = 88,
+  UnitType_Invalid = (unsigned int)-1,
+} UnitType;
 
-/* 165 */
-enum KKND::TaskMessageType : unsigned __int32
-{
-  TaskMessage_Attacked = 1497u,
-  TaskMessage_MissionFailed = 1498u,
-  TaskMessage_Crushed = 1499u,
-  TaskMessage_DestroyAttachment = 1500u,
-  TaskMessage_ReceiveDamage = 1503u,
-  TaskMessage_GainExperience = 1505u,
-  TaskMessage_Sabotage = 1506u,
-  TaskMessage_EscortBegin_or_SaveGame = 1507u,
-  TaskMessage_EscortRetaliate = 1508u,
-  TaskMessage_EscortEnd_or_LoadGame = 1509u,
-  TaskMessage_RepairTick = 1510u,
-  TaskMessage_UnitSelected_or_UiLeftClick = 1511u,
-  TaskMessage_UnitDeselected_or_SaveLoadScrollDown_or_ShowNotificationBox = 1512u,
-  TaskMessage_SiderbarRightClick = 1513u,
-  TaskMessage_SidebarForceClose = 1514u, ///< e.g a prod building is destroyed
-  TaskMessage_ShowHint_or_SaveLoadScrollUp = 1515u,
-  TaskMessage_HideHint = 1516u,
-  TaskMessage_Destroy = 1517u,
-  TaskMessage_1518 = 1518u,
-  TaskMessage_AirstrikeSetTargetingMode = 1519u,
-  TaskMessage_AirstrikeClearTargetingMode = 1520u,
-  TaskMessage_UnitCreated = 1521u,
-  TaskMessage_BuildingPlacementModeBegin_or_BackToMenu = 1522u,
-  TaskMessage_AttackOrder_or_QuitGame = 1523u,
-  TaskMessage_MoveOrder_or_SoundSettings_or_DoSaveGame = 1524u,
-  TaskMessage_MissionAccomplished = 1524u, ///< Duplicated enum value as far as I understand, used depending on context
-  TaskMessage_GuardAreaOrder = 1525u,
-  TaskMessage_Infiltrate_or_ShowBriefing = 1526u,
-  TaskMessage_OpenBriefing = 1526u,
-  TaskMessage_Follow_or_RestartGame = 1527u,
-  TaskMessage_RestartLevel = 1527u,
-  TaskMessage_Retreat_or_CancelUi = 1528u,
-  TaskMessage_CloseDialog = 1528u,
-  TaskMessage_AdvanceConstructionStage = 1529u,
-  TaskMessage_ToggleIngameMenu = 1530u,
-  TaskMessage_MissionOutcomePopup = 1531u,
-  TaskMessage_PauseGame = 1532u,
-  TaskMessage_ResumeGame = 1533u,
-  TaskMessage_UnitReady = 1535u,
-  TaskMessage_BuildingComplete = 1537u,
-  TaskMessage_BroadcastBuildingComplete = 1538u,
-  TaskMessage_PowerPlantDown = 1539u,
-  TaskMessage_DrillrigDown = 1540u,
-  TaskMessage_TankerAssignedNewPowerPlant = 1541u,
-  TaskMessage_TankerAssignedNewDrillrig = 1542u,
-  TaskMessage_UpgradeComplete = 1543u,
-  TaskMessage_UpgradeStarted = 1544u,
-  TaskMessage_UpgradeCancelled = 1545u,
-  TaskMessage_RepairBayAssigned = 1546u,
-  TaskMessage_TechnicianAssigned = 1547u,
-  TaskMessage_SidebarRefreshOptions = 1548u,
-  TaskMessage_SpawnTanker_or_DoLoadGame_or_LobbyRefreshSettings = 1549u,
-  TaskMessage_LoadGame = 1549u,
-  TaskMessage_TowerReady = 1551u,
-  TaskMessage_SoundPanTransitionComplete = 4294967291u,
-  TaskMessage_SoundVolumeTransitionComplete = 4294967292u,
-  TaskMessage_SoundCleanupComplete = 4294967293u,
-  TaskMessage_MouseHover = 4294967294u,
-  TaskMessage_AnimationAdvanced = 4294967295u,
-  TaskMessage_1534 = 1534u,
-};
-
-/* 162 */
-struct KKND::TaskMessage
-{
-  KKND::TaskMessage *next;
-  struct KKND::Task *task;
-  KKND::TaskMessageType type;
-  void *payload;
-};
-
-/* 163 */
-enum KKND::TaskKind : unsigned __int32
-{
-  TaskKind_Coroutine = 0,
-  TaskKind_Callback = 1,
-};
-
-/* 203 */
-enum KKND::TaskNetzFlags : unsigned __int32
-{
-  Task_CanRunDuringSync = 0x1,
-};
-
-/* 374 */
-enum KKND::TaskEvents : unsigned __int32
-{
-  TaskEvent_OilDepleted = 0x1,
-  TaskEvent_AnimCompleted = 0x10000000,
-  TaskEvent_AnimAdvanced = 0x40000,
-  TaskEvent_ProjectileHit = 0x2,
-  TaskEvent_CplcSpawn = 0x20000,
-  TaskEvent_CollisionPosZ = 0x80000,
-  TaskEvent_CollisionNegZ = 0x100000,
-  TaskEvent_CollisionPosY = 0x200000,
-  TaskEvent_CollisionNegY = 0x400000,
-  TaskEvent_CollisionPosX = 0x800000,
-  TaskEvent_CollisionNegX = 0x1000000,
-  TaskEvent_SpeedLimitZ = 0x2000000,
-  TaskEvent_SpeedLimitY = 0x4000000,
-  TaskEvent_SpeedLimitX = 0x8000000,
-  TaskEvent_Terminated = 0x20000000,
-  TaskEvent_Message = 0x40000000,
-  TaskEvent_Wake = 0x80000000,          ///< Sleep interval expired
-};
-
-/* 226 */
-enum KKND::TaskWaitFlags : unsigned __int32
-{
-  TaskWait_OilDepleted = 0x1,
-  TaskWait_Terminated = 0x20000000,
-  TaskWait_Message = 0x40000000,
-  TaskWait_Interval = 0x80000000,       ///< Sleep: Wake up after sleep interval
-  TaskWait_Any = 0xC0000000,            ///< Yield: wake up on any condition
-  TaskWait_AnimCompletion = 0x10000000, ///< Wake up when the current animation is completed
-  TaskWait_AnimAdvancement = 0x40000,
-  TaskWait_ProjectileHit = 0x2,
-};
-
-/* 235 */
-typedef void (__fastcall *KKND::MessageHandler)(KKND::Task *receiver, KKND::Task *sender, KKND::TaskMessageType message, void *payload);
-
-/* 178 */
-typedef void (__cdecl *KKND::TaskFn)(KKND::Task *task);
-
-/* 166 */
-struct KKND::Task
-{
-  KKND::Task *next;
-  KKND::Task *prev;
-  KKND::TaskLocal *locals;
-  KKND::TaskChannel channel;
-  int _task_field_10;
-  int sleep;
-  KKND::TaskKind kind;
-  KKND::TaskNetzFlags netz_flags;
-  KKND::TaskEvents transient_events;    ///< events happened this task run - zeroed out on TSK_yield()
-  KKND::TaskEvents sticky_events;       ///< sticky events that happenned over the entire lifetime (they are cleared manually in some circumstances)
-  KKND::TaskWaitFlags wait_flags;
-  int wait_filter;                      ///< wake filter is actually quite weird.. it serves both as a number of ticks to sleep but also it can have a bitmask of events that should NOT wake the yield
-  KKND::TaskMessage *message_queue;
-  KKND::MessageHandler message_handler;
-  KKND::Entity *entity;
-  void *ctx;
-  KKND::TaskFn entry_point;
-};
-
-/* 164 */
-struct __unaligned KKND::TaskLocal
-{
-  KKND::TaskLocal *next;
-  KKND::TaskLocal *prev;
-  char data[1];
-};
-
-/* 175 */
-enum KKND::MobdId : unsigned __int32
-{
+typedef enum : unsigned int {
   MobdId_Mute_AlchemyHall = 0,
   MobdId_Surv_Atv = 1,
   MobdId_Surv_BarrageCraft = 2,
@@ -349,88 +197,9 @@ enum KKND::MobdId : unsigned __int32
   MobdId_Mute_Wasp = 82,
   MobdId_Surv_Bomber = 83,
   MobdId_Invalid = -1,
-};
+} MobdId;
 
-/* 380 */
-struct KKND::EntityBuildingContext
-{
-  int hitpoints;                        ///< HP inhereted from the deploying unit (base, drillrig)
-  int _unused;
-};
-
-/* 381 */
-struct KKND::EntityProjectileContext
-{
-  KKND::Unit *attacker;                 ///< who fired the projectile
-  int attacker_unit_id;
-};
-
-/* 382 */
-union KKND::EntityContext
-{
-  KKND::EntityBuildingContext building_ctx;
-  KKND::EntityProjectileContext projectile_ctx;
-  KKND::MenuWidget *widget;
-};
-
-/* 198 */
-struct KKND::Entity
-{
-  KKND::Entity *next;
-  KKND::Entity *prev;
-  KKND::Entity *parent;
-  KKND::MobdId mobd_id;
-  int x;
-  int y;
-  int z;
-  int x_speed;
-  int y_speed;
-  int z_speed;
-  int x_acceleration;
-  int y_acceleration;
-  int z_acceleration;
-  int x_speed_limit;
-  int y_speed_limit;
-  int z_speed_limit;
-  int x_drag;                           ///< x/y/z_drag is friction/drag. It decelerates x_speed toward zero regardless of direction:
-                                        ///<
-                                        ///< If moving right (x_speed > 0): x_speed -= x_drag, clamped to 0
-                                        ///< If moving left (x_speed < 0): x_speed += x_drag, clamped to 0
-  int y_drag;
-  int z_drag;
-  KKND::MobdAnimation *anim;
-  KKND::MobdAnimation *anim_cursor;
-  KKND::MobdAnimFrame *anim_current_frame;
-  KKND::BoxdCollisionShape *shape;
-  KKND::BoxdCollisionHandler *collider;
-  int anim_speed;                       ///< anim_speed format: 4.28 fixed-point. Top 4 bits = whole frames to advance per tick.
-                                        ///< 0x10000000 (1<<28) = 1 frame/tick. 0x20000000 (2<<28) = 2 frames/tick.
-                                        ///< 0x08000000 = 0.5 frames/tick (half speed). 0 = frozen.
-  int anim_timer;                       ///< remaining ticks on the anim
-  KKND::RenderNode *rn;
-  KKND::Task *task;
-  KKND::CplcSpawnParams *cplc_spawn_params;
-  KKND::CplcEntity *cplc_meta;
-  KKND::CplcEntityInViewport *cplc_view;
-  void *ctx1;
-  KKND::EntityContext ctx2;
-  BOOL is_collidable;
-  __int16 infantry_damage;
-  __int16 vehicle_damage;
-  __int16 building_damage;
-  __int16 _92_padding;
-};
-
-/* 202 */
-struct KKND::MobdAnimation
-{
-  int anim_speed;
-  KKND::MobdAnimFrame *frames[1];
-};
-
-/* 190 */
-enum KKND::SoundId : unsigned __int32
-{
+typedef enum : unsigned int {
   SoundId_Surv_GenericRookie_Move_1 = 0,
   SoundId_1 = 1,
   SoundId_2 = 2,
@@ -625,52 +394,338 @@ enum KKND::SoundId : unsigned __int32
   SoundId_OilUnloading = 191,
   SoundId_Surv_ScoutRecall = 192,
   SoundId_BuildingPlace = 193,
-};
+} SoundId;
 
-/* 194 */
-struct KKND::MobdPoint
+typedef enum : unsigned int {
+  TaskChannel_None = 0x0,
+  TaskChannel_MainMenu = 0x1,
+  TaskChannel_MultiplayerProvider = 0x2,
+  TaskChannel_4_Menu = 0x4,
+  TaskChannel_5_Multiplayer = 0x5,
+  TaskChannel_6_Multiplayer = 0x6,
+  TaskChannel_7_Menu = 0x7,
+  TaskChannel_KaosMenu = 0x8,
+  TaskChannel_KaosLobbyWatch = 0x9,
+  TaskChannel_10_Menu = 0xA,
+  TaskChannel_PlayMission = 0xD,
+  TaskChannel_14_Menu = 0xE,
+  TaskChannel_CampaignFactionSelect = 0xF,
+  TaskChannel_16_Menu = 0x10,
+  TaskChannel_MenuCancel = 0x11,
+  TaskChannel_TextInput = 0x12,
+  TaskChannel_MainMenuLoad = 0x13,
+  TaskChannel_UnitEvents = 0x9876,
+  TaskChannel_SidebarButton = 0xBABA,
+  TaskChannel_SidebarHelp = 0xBBBB,
+  TaskChannel_SidebarPlaceholder = 0xCACA,
+  TaskChannel_Units = 0xEAEA,
+  TaskChannel_Outpost = 0xCA000000,
+  TaskChannel_Clanhall = 0xCA000001,
+  TaskChannel_MachineShop = 0xCA000002,
+  TaskChannel_Blacksmith = 0xCA000004,
+  TaskChannel_BeastEnclosure = 0xCA000005,
+  TaskChannel_RepairBay = 0xCA000006,
+  TaskChannel_ResearchLab = 0xCA00000A,
+  TaskChannel_PowerPlant = 0xCA00000D,
+  TaskChannel_Drillrig = 0xCA00000E,
+  TaskChannel_Tanker = 0xCA00000F,
+  TaskChannel_MobileDerrick = 0xCA000010,
+  TaskChannel_unused_tanker_broadcast = 0xCA000012,
+  TaskChannel_UpgradeProgress = 0xCA000013,
+  TaskChannel_unused_CA000014 = 0xCA000014,
+  TaskChannel_IngameMenuController = 0xDA000000,
+  TaskChannel_UiSlider_or_SaveLoadIngame = 0xDA000001,
+  TaskChannel_IngameMenuButton = 0xDA000002,
+  TaskChannel_IngameMenuYesNo = 0xDA000003,
+  TaskChannel_SaveLoad_Ingame = 0xDA000006,
+  TaskChannel_SaveLoad_MainMenu = 0xDA000007,
+  TaskChannel_SaveLoad = 0xDA000008,
+  TaskChannel_Everyone = 0xFFFFFFFF,
+} TaskChannel;
+
+typedef enum : unsigned int {
+  TaskMessage_Attacked = 1497,
+  TaskMessage_MissionFailed = 1498,
+  TaskMessage_Crushed = 1499,
+  TaskMessage_DestroyAttachment = 1500,
+  TaskMessage_ReceiveDamage = 1503,
+  TaskMessage_GainExperience = 1505,
+  TaskMessage_Sabotage = 1506,
+  TaskMessage_EscortBegin_or_SaveGame = 1507,
+  TaskMessage_EscortRetaliate = 1508,
+  TaskMessage_EscortEnd_or_LoadGame = 1509,
+  TaskMessage_RepairTick = 1510,
+  TaskMessage_UnitSelected_or_UiLeftClick = 1511,
+  TaskMessage_UnitDeselected_or_SaveLoadScrollDown_or_ShowNotificationBox = 1512,
+  TaskMessage_SiderbarRightClick = 1513,
+  TaskMessage_SidebarForceClose = 1514, ///< e.g a prod building is destroyed
+  TaskMessage_ShowHint_or_SaveLoadScrollUp = 1515,
+  TaskMessage_HideHint = 1516,
+  TaskMessage_Destroy = 1517,
+  TaskMessage_1518 = 1518,
+  TaskMessage_AirstrikeSetTargetingMode = 1519,
+  TaskMessage_AirstrikeClearTargetingMode = 1520,
+  TaskMessage_UnitCreated = 1521,
+  TaskMessage_BuildingPlacementModeBegin_or_BackToMenu = 1522,
+  TaskMessage_AttackOrder_or_QuitGame = 1523,
+  TaskMessage_MoveOrder_or_SoundSettings_or_DoSaveGame = 1524,
+  TaskMessage_MissionAccomplished = 1524, ///< Duplicated enum value as far as I understand, used depending on context
+  TaskMessage_GuardAreaOrder = 1525,
+  TaskMessage_Infiltrate_or_ShowBriefing = 1526,
+  TaskMessage_OpenBriefing = 1526,
+  TaskMessage_Follow_or_RestartGame = 1527,
+  TaskMessage_RestartLevel = 1527,
+  TaskMessage_Retreat_or_CancelUi = 1528,
+  TaskMessage_CloseDialog = 1528,
+  TaskMessage_AdvanceConstructionStage = 1529,
+  TaskMessage_ToggleIngameMenu = 1530,
+  TaskMessage_MissionOutcomePopup = 1531,
+  TaskMessage_PauseGame = 1532,
+  TaskMessage_ResumeGame = 1533,
+  TaskMessage_1534 = 1534,
+  TaskMessage_UnitReady = 1535,
+  TaskMessage_BuildingComplete = 1537,
+  TaskMessage_BroadcastBuildingComplete = 1538,
+  TaskMessage_PowerPlantDown = 1539,
+  TaskMessage_DrillrigDown = 1540,
+  TaskMessage_TankerAssignedNewPowerPlant = 1541,
+  TaskMessage_TankerAssignedNewDrillrig = 1542,
+  TaskMessage_UpgradeComplete = 1543,
+  TaskMessage_UpgradeStarted = 1544,
+  TaskMessage_UpgradeCancelled = 1545,
+  TaskMessage_RepairBayAssigned = 1546,
+  TaskMessage_TechnicianAssigned = 1547,
+  TaskMessage_SidebarRefreshOptions = 1548,
+  TaskMessage_SpawnTanker_or_DoLoadGame_or_LobbyRefreshSettings = 1549,
+  TaskMessage_LoadGame = 1549,
+  TaskMessage_TowerReady = 1551,
+  TaskMessage_SoundPanTransitionComplete = 0xFFFFFFFB,
+  TaskMessage_SoundVolumeTransitionComplete = 0xFFFFFFFC,
+  TaskMessage_SoundCleanupComplete = 0xFFFFFFFD,
+  TaskMessage_MouseHover = 0xFFFFFFFE,
+  TaskMessage_AnimationAdvanced = 0xFFFFFFFF,
+} TaskMessageType;
+
+typedef struct {
+  typeof_unqual(struct TaskMessage) *next;
+  struct Task *task;
+  TaskMessageType type;
+  void *payload;
+} TaskMessage;
+
+typedef enum : unsigned int {
+  TaskKind_Coroutine = 0,
+  TaskKind_Callback = 1,
+} TaskKind;
+
+typedef enum : unsigned int {
+  Task_CanRunDuringSync = 1,
+} TaskNetzFlags;
+
+typedef enum  : unsigned int {
+  TaskEvent_OilDepleted   = 0x00000001,
+  TaskEvent_ProjectileHit = 0x00000002,
+  TaskEvent_CplcSpawn     = 0x00020000,
+  TaskEvent_AnimAdvanced  = 0x00040000,
+  TaskEvent_CollisionPosZ = 0x00080000,
+  TaskEvent_CollisionNegZ = 0x00100000,
+  TaskEvent_CollisionPosY = 0x00200000,
+  TaskEvent_CollisionNegY = 0x00400000,
+  TaskEvent_CollisionPosX = 0x00800000,
+  TaskEvent_CollisionNegX = 0x01000000,
+  TaskEvent_SpeedLimitZ   = 0x02000000,
+  TaskEvent_SpeedLimitY   = 0x04000000,
+  TaskEvent_SpeedLimitX   = 0x08000000,
+  TaskEvent_AnimCompleted = 0x10000000,
+  TaskEvent_Terminated    = 0x20000000,
+  TaskEvent_Message       = 0x40000000,
+  TaskEvent_Wake          = 0x80000000,          ///< Sleep interval expired
+} TaskEvents;
+
+typedef enum : unsigned int {
+  TaskWait_OilDepleted     = 0x00000001,
+  TaskWait_ProjectileHit   = 0x00000002,
+  TaskWait_AnimAdvancement = 0x00040000,
+  TaskWait_AnimCompletion  = 0x10000000,  // Wake up when the current animation is completed
+  TaskWait_Terminated      = 0x20000000,
+  TaskWait_Message         = 0x40000000,
+  TaskWait_Interval        = 0x80000000,  // Sleep: Wake up after sleep interval
+  TaskWait_Any             = 0xC0000000,  // Yield: wake up on any condition
+} TaskWaitFlags;
+
+/* 235 */
+typedef void (__fastcall *MessageHandler)(struct Task *receiver, struct Task *sender, TaskMessageType message, void *payload);
+
+/* 178 */
+typedef void (__cdecl *TaskFn)(struct Task *task);
+
+typedef struct
 {
-  int id;
+  typeof_unqual(struct TaskLocal) *next;
+  typeof_unqual(struct TaskLocal) *prev;
+  char data[];
+} TaskLocal;
+
+typedef struct {
+  typeof_unqual(struct Task) *next;
+  typeof_unqual(struct Task) *prev;
+  TaskLocal *locals;
+  TaskChannel channel;
+  int _task_field_10;
+  int sleep;
+  TaskKind kind;
+  TaskNetzFlags netz_flags;
+  TaskEvents transient_events;    ///< events happened this task run - zeroed out on TSK_yield()
+  TaskEvents sticky_events;       ///< sticky events that happenned over the entire lifetime (they are cleared manually in some circumstances)
+  TaskWaitFlags wait_flags;
+  int wait_filter;                      ///< wake filter is actually quite weird.. it serves both as a number of ticks to sleep but also it can have a bitmask of events that should NOT wake the yield
+  TaskMessage *message_queue;
+  MessageHandler message_handler;
+  Entity *entity;
+  void *ctx;
+  TaskFn entry_point;
+} Task;
+
+typedef struct {
+  int hitpoints;                        ///< HP inhereted from the deploying unit (base, drillrig)
+  int _unused;
+} EntityBuildingContext;
+
+typedef struct {
+  Unit *attacker;                 ///< who fired the projectile
+  int attacker_unit_id;
+} EntityProjectileContext;
+
+typedef union {
+  EntityBuildingContext building_ctx;
+  EntityProjectileContext projectile_ctx;
+  MenuWidget *widget;
+} EntityContext;
+
+typedef enum : unsigned int {
+  BlitterMode_Render = 0,
+  BlitterMode_GetWidth = 1,
+  BlitterMode_GetHeight = 2,
+} BlitterMode;
+
+typedef struct RenderCommand RenderCommand;
+
+typedef int (__fastcall *Blitter)(RenderCommand *cmd, BlitterMode mode);
+
+typedef struct RenderNode RenderNode;
+
+typedef void (__fastcall *RenderTransform)(void *renderable, RenderNode *node);
+
+typedef struct {
+  Blitter blitter;                ///< It's actually polymorphic - Scrl and Sprt image objects are assigned to this, both having blitter as the first field so in terms of binary they're compatible
+} RenderImage;
+
+typedef enum : unsigned int {
+  RenderCommand_PaletteOverride = 0x10000000,
+} RenderCommandFlags;
+
+typedef struct {
+  typeof_unqual(struct RenderViewport) *next;
+  typeof_unqual(struct RenderViewport) *prev;
+  int flags;
+  int brightness;                       ///< Seemingly uses 8.23 format - brightness factor actually used is (brightness >> 23)
+  int clip_x;
+  int clip_y;
+  int clip_w;
+  int clip_h;
+  int _render_viewport_20;
+} RenderViewport;
+
+struct RenderCommand {
+  RenderCommandFlags flags;
+  RenderImage *image;             ///< It's actually polymorphic - Scrl and Sprt image objects are assigned to this, both having blitter as the first field so in terms of binary they're compatible
+  int _render_command_field_8;
+  RenderViewport *viewport;
   int x;
   int y;
   int z;
+  unsigned __int8 *palette_override;    ///< use it when flags & RenderCommand_PaletteOverride
 };
 
-/* 195 */
-struct KKND::MobdAnimFrame
-{
-  int x;
-  int y;
-  int flags;
-  KKND::MobdSprtImage *sprt;
-  KKND::BoxdCollisionShape *shape;
-  KKND::SoundId sound_id;
-  KKND::MobdPoint points[];
+typedef enum : unsigned int {
+  RenderNode_PaletteOverride = 0x10000000, ///< use palette override in the render command, see RenderCommandFlags
+  RenderNode_Skip            = 0x40000000,         ///< skip rendering (invisible)
+  RenderNode_Deleted         = 0x80000000,      ///< node pending deletion
+} RenderNodeFlags;
+
+struct RenderNode {
+  RenderNode *next;
+  RenderNode *prev;
+  RenderNodeFlags flags;
+  void *payload;
+  RenderTransform transform;
+  RenderCommand cmd;
+  int _render_node_field_34;
+  int _render_node_field_38;
 };
 
-/* 170 */
-struct KKND::BoxdCollisionShape
-{
-  KKND::BoxdAabb *box;
-};
+typedef struct __attribute__((packed)) {
+  int width;
+  int height;
+  unsigned __int8 format;               ///< pixel format: 0=raw, 2=RLE compressed
+                                        ///< raw: one byte per pixel (palette index). Zero bytes are transparent
+  unsigned __int8 pixels[];
+} MobdImageData;
 
-/* 205 */
-enum KKND::BoxdCollisionAxis : unsigned __int32
-{
+typedef struct {
+  Blitter blitter;
+  int flags;                            ///< &1 = flip horizontally
+  MobdImageData *bitmap;
+} MobdSprtImage;
+
+typedef enum : unsigned int {
   BoxdCollisionAxis_NegX = 0,
   BoxdCollisionAxis_PosX = 1,
   BoxdCollisionAxis_NegY = 2,
   BoxdCollisionAxis_PosY = 3,
   BoxdCollisionAxis_NegZ = 4,
   BoxdCollisionAxis_PosZ = 5,
-};
+} BoxdCollisionAxis;
 
-/* 204 */
-struct KKND::BoxdCollisionHandler
-{
+typedef enum : unsigned int {
+  BoxdCollisionType_Unit = 0,
+  BoxdCollisionType_Solid = 1,
+  BoxdCollisionType_Floor = 2,
+  BoxdCollisionType_RampLtr = 3,
+  BoxdCollisionType_RampRtl = 4,
+  BoxdCollisionType_SlopeLeft = 5,
+  BoxdCollisionType_SlopeRight = 6,
+  BoxdCollisionType_FloorAlt = 7,
+  BoxdCollisionType_Skip = (unsigned int)-3,
+  BoxdCollisionType_OffGrid = (unsigned int)-2,
+  BoxdCollisionType_Always = (unsigned int)-1,
+} BoxdCollisionType;
+
+typedef enum : unsigned int {
+  Boxd_Impassable = 0,                  ///< Terrain wall — impassable ground, no building on it
+  Boxd_PartiallyOccupied = 1,           ///< Partially occupied — entities present but slots in flux (room to squeeze)
+  Boxd_Clear = 2,                       ///< Free/clear tile — walkable, nobody there (the unit itself is not counted as obstacle)
+  Boxd_FullyOccupied = 3,               ///< Fully occupied — all entity slots stably filled / building
+  Boxd_MovementSucceeded = 4,           ///< Function is really a dual-purpose "try-move-or-classify" — returns classification only when move fails, returns 4 when move succeeds. This makes it a tagged union of success(4) vs failure-reason(0-3)
+} BoxdPathingClassification;
+
+typedef struct {
+  BoxdCollisionType type;
+  int min_x;
+  int min_y;
+  int min_z;
+  int max_x;
+  int max_y;
+} BoxdAabb;
+
+typedef struct {
+  BoxdAabb *box;
+} BoxdCollisionShape;
+
+typedef struct {
   int collides_with_categories;         ///< The collision only proceeds if there is any bit in common between the mover's collides_with_categories (outgoing) and the target shape's category (incoming).
   int category;
-  BOOL (__fastcall *mover_response)(KKND::Entity *, KKND::Entity *, KKND::BoxdCollisionAxis, KKND::BoxdAabb *, KKND::BoxdAabb *); ///<
+  BOOL (__fastcall *mover_response)(Entity *, Entity *, BoxdCollisionAxis, BoxdAabb *, BoxdAabb *); ///<
                                                                                                                                   ///< Two handlers enable asymmetric collision pairs where one side is authoritative:
                                                                                                                                   ///<
                                                                                                                                   ///< Obstacle-driven (terrain/buildings): Mover has primary=NULL at its root shape. Each obstacle sub-shape defines its own geometry response in secondary. A unit walking into a ramp gets ramp behavior; walking into a wall gets solid push-out — all without the mover knowing what it hit.
@@ -686,157 +741,25 @@ struct KKND::BoxdCollisionHandler
                                                                                                                                   ///< - Different weight classes that get pushed differently by the same obstacle
                                                                                                                                   ///<
                                                                                                                                   ///< None of these shipped, so every game entity uses index 0 (root) with primary=NULL, deferring entirely to the obstacle's secondary. The cursor is the sole example of a mover-driven response. The two-slot design is architectural foresight that simplified to a one-sided dispatch in practice.
-  BOOL (__fastcall *obstacle_response)(KKND::Entity *, KKND::Entity *, KKND::BoxdCollisionAxis, KKND::BoxdAabb *, KKND::BoxdAabb *);
-};
+  BOOL (__fastcall *obstacle_response)(Entity *, Entity *, BoxdCollisionAxis, BoxdAabb *, BoxdAabb *);
+} BoxdCollisionHandler;
 
-/* 352 */
-enum KKND::RenderNodeFlags : unsigned __int32
-{
-  RenderNode_PaletteOverride = 0x10000000, ///< use palette override in the render command, see RenderCommandFlags
-  RenderNode_Skip = 0x40000000,         ///< skip rendering (invisible)
-  RenderNode_Deleted = 0x80000000,      ///< node pending deletion
-};
-
-/* 282 */
-typedef void (__fastcall *KKND::RenderTransform)(void *renderable, KKND::RenderNode *node);
-
-/* 351 */
-enum KKND::RenderCommandFlags : unsigned __int32
-{
-  RenderCommand_PaletteOverride = 0x10000000,
-};
-
-/* 253 */
-struct KKND::RenderCommand
-{
-  KKND::RenderCommandFlags flags;
-  KKND::RenderImage *image;             ///< It's actually polymorphic - Scrl and Sprt image objects are assigned to this, both having blitter as the first field so in terms of binary they're compatible
-  int _render_command_field_8;
-  KKND::RenderViewport *viewport;
-  int x;
-  int y;
-  int z;
-  unsigned __int8 *palette_override;    ///< use it when flags & RenderCommand_PaletteOverride
-};
-
-/* 221 */
-struct KKND::RenderNode
-{
-  KKND::RenderNode *next;
-  KKND::RenderNode *prev;
-  KKND::RenderNodeFlags flags;
-  void *payload;
-  KKND::RenderTransform transform;
-  KKND::RenderCommand cmd;
-  int _render_node_field_34;
-  int _render_node_field_38;
-};
-
-/* 176 */
-enum KKND::UnitType : unsigned __int32
-{
-  UnitType_Surv_Rifleman = 0,
-  UnitType_Mute_Berserker = 1,
-  UnitType_Surv_Flamer = 2,
-  UnitType_Mute_Pyromaniac = 3,
-  UnitType_Surv_Swat = 4,
-  UnitType_Mute_Shotgunner = 5,
-  UnitType_Surv_Sapper = 6,
-  UnitType_Mute_Rioter = 7,
-  UnitType_Surv_ElPresidente = 8,
-  UnitType_Mute_KingZog = 9,
-  UnitType_Surv_Saboteur = 10,
-  UnitType_Mute_Vandal = 11,
-  UnitType_Surv_Technician = 12,
-  UnitType_Mute_Makanik = 13,
-  UnitType_Surv_RpgLauncher = 14,
-  UnitType_Mute_Bazooka = 15,
-  UnitType_Surv_Sniper = 16,
-  UnitType_Mute_CrazyHarry = 17,
-  UnitType_Surv_General = 18,
-  UnitType_Mute_Warlord = 19,
-  UnitType_Surv_Scout = 20,
-  UnitType_Surv_MobileDerrick = 21,
-  UnitType_Mute_MobileDerrick = 22,
-  UnitType_Surv_Tanker = 23,
-  UnitType_Mute_Tanker = 24,
-  UnitType_TankerConvoy = 25,
-  UnitType_Surv_DirkBike = 26,
-  UnitType_Mute_DireWolf = 27,
-  UnitType_Surv_4x4Pickup = 28,
-  UnitType_Mute_BikeAndSidecar = 29,
-  UnitType_Surv_Atv = 30,
-  UnitType_Mute_MonsterTruck = 31,
-  UnitType_Surv_AtvFlamethrower = 32,
-  UnitType_Mute_GiantScorpion = 33,
-  UnitType_Surv_AnacondaTank = 34,
-  UnitType_Mute_WarMastadont = 35,
-  UnitType_Surv_BarrageCraft = 36,
-  UnitType_Mute_GiantBeetle = 37,
-  UnitType_Surv_AutocannonTank = 38,
-  UnitType_Mute_MissileCrab = 39,
-  UnitType_Surv_MobileOutpost = 40,
-  UnitType_Mute_ClanhallWagon = 41,
-  UnitType_42 = 42,
-  UnitType_Mute_Wasp = 43,
-  UnitType_Surv_Bomber = 44,
-  UnitType_45 = 45,
-  UnitType_Surv_Drillrig = 46,
-  UnitType_Mute_Drillrig = 47,
-  UnitType_Surv_PowerStation = 48,
-  UnitType_Mute_PowerStation = 49,
-  UnitType_Surv_DetentionCenter = 50,
-  UnitType_Mute_HoldingPens = 51,
-  UnitType_Surv_GuardTower = 52,
-  UnitType_Mute_MachinegunNest = 53,
-  UnitType_SurvCannonTower = 54,
-  UnitType_Mute_GrapeshotTower = 55,
-  UnitType_Surv_MissileBattery = 56,
-  UnitType_Mute_RotaryCannon = 57,
-  UnitType_Surv_Outpost = 58,
-  UnitType_Mute_Clanhall = 59,
-  UnitType_Surv_MachineShop = 60,
-  UnitType_Mute_Blacksmith = 61,
-  UnitType_Mute_BeastEnclosure = 62,
-  UnitType_Surv_RepairBay = 63,
-  UnitType_Mute_Menagerie = 64,
-  UnitType_Surv_ResearchLab = 65,
-  UnitType_Surv_AlchemyHall = 66,
-  UnitType_TechBunker = 67,
-  UnitType_Hut = 68,
-  UnitType_Wall1 = 69,
-  UnitType_Wall2 = 70,
-  UnitType_Wall3 = 71,
-  UnitType_Wall4 = 72,
-  UnitType_Gort = 74,
-  UnitType_75 = 75,
-  UnitType_PlasmaTank = 76,
-  UnitType_SentinelDroid = 77,
-  UnitType_Mech = 78,
-  UnitType_Last = 88,
-  UnitType_Invalid = -1,
-};
-
-/* 177 */
-struct KKND::CplcSpawnParams
-{
-  KKND::MobdId mobd_id;
-  KKND::TaskFn task;
-  KKND::TaskKind task_kind;
+typedef struct {
+  MobdId mobd_id;
+  TaskFn task;
+  TaskKind task_kind;
   BOOL skip_spawning;
-  KKND::Entity *entity;
+  Entity *entity;
   int _cplc_sawpn_params_field_14;
   int player_side_or_spawn_table_idx;
   int spawn_param;
-  KKND::UnitType unit_id;
+  UnitType unit_id;
   int player_num;
   int _cplc_spawn_params_field_28;
   int _cplc_spawn_params_field_2c;
-};
+} CplcSpawnParams;
 
-/* 183 */
-enum KKND::TaskType : __int32
-{
+typedef enum : unsigned int {
   TaskType_DetentionCenter = 2,
   TaskType_HoldingPens = 3,
   TaskType_Clanhall = 4,
@@ -854,48 +777,109 @@ enum KKND::TaskType : __int32
   TaskType_NewMissionsSelect = 85,      ///< 442BB0 New Missions menu level selection
   TaskType_Reinforcements = 122,        ///< 4269B0
   TaskType_Max = 196,
-  TaskType_Invalid = -1,
-};
+  TaskType_Invalid = (unsigned int)-1,
+} TaskType;
 
-/* 179 */
-struct KKND::CplcEntity
-{
-  KKND::TaskType task_type;
+typedef struct {
+  TaskType task_type;
   int x;
   int y;
   int z;
-  KKND::CplcEntity *next_x_sorted;
-  KKND::CplcEntity *prev_x_sorted;
-  KKND::CplcEntity *next_y_sorted;
-  KKND::CplcEntity *prev_y_sorted;
-  KKND::CplcSpawnParams spawn_params;
+  typeof_unqual(struct CplcEntity) *next_x_sorted;
+  typeof_unqual(struct CplcEntity) *prev_x_sorted;
+  typeof_unqual(struct CplcEntity) *next_y_sorted;
+  typeof_unqual(struct CplcEntity) *prev_y_sorted;
+  CplcSpawnParams spawn_params;
+} CplcEntity;
+
+typedef struct {
+  typeof_unqual(struct CplcEntityInViewport) *next;
+  typeof_unqual(struct CplcEntityInViewport) *prev;
+  Entity *entity;
+} CplcEntityInViewport;
+
+typedef struct {
+  int size;
+  CplcEntity *next_x_sorted;
+  CplcEntity *prev_x_sorted;
+  CplcEntity *next_y_sorted;
+  CplcEntity *prev_y_sorted;
+} LevelCplcSurface;
+
+typedef struct {
+  LevelCplcSurface *layers;
+} LevelCplc;
+
+typedef struct {
+  int id;
+  int x;
+  int y;
+  int z;
+} MobdPoint;
+
+typedef struct {
+  int x;
+  int y;
+  int flags;
+  MobdSprtImage *sprt;
+  BoxdCollisionShape *shape;
+  SoundId sound_id;
+  MobdPoint points[];
+} MobdAnimFrame;
+
+typedef struct {
+  int anim_speed;
+  MobdAnimFrame *frames[1];
+} MobdAnimation;
+
+struct Entity {
+  Entity *next;
+  Entity *prev;
+  Entity *parent;
+  MobdId mobd_id;
+  int x;
+  int y;
+  int z;
+  int x_speed;
+  int y_speed;
+  int z_speed;
+  int x_acceleration;
+  int y_acceleration;
+  int z_acceleration;
+  int x_speed_limit;
+  int y_speed_limit;
+  int z_speed_limit;
+  int x_drag;                           ///< x/y/z_drag is friction/drag. It decelerates x_speed toward zero regardless of direction:
+                                        ///<
+                                        ///< If moving right (x_speed > 0): x_speed -= x_drag, clamped to 0
+                                        ///< If moving left (x_speed < 0): x_speed += x_drag, clamped to 0
+  int y_drag;
+  int z_drag;
+  MobdAnimation *anim;
+  MobdAnimation *anim_cursor;
+  MobdAnimFrame *anim_current_frame;
+  BoxdCollisionShape *shape;
+  BoxdCollisionHandler *collider;
+  int anim_speed;                       ///< anim_speed format: 4.28 fixed-point. Top 4 bits = whole frames to advance per tick.
+                                        ///< 0x10000000 (1<<28) = 1 frame/tick. 0x20000000 (2<<28) = 2 frames/tick.
+                                        ///< 0x08000000 = 0.5 frames/tick (half speed). 0 = frozen.
+  int anim_timer;                       ///< remaining ticks on the anim
+  RenderNode *rn;
+  Task *task;
+  CplcSpawnParams *cplc_spawn_params;
+  CplcEntity *cplc_meta;
+  CplcEntityInViewport *cplc_view;
+  void *ctx1;
+  EntityContext ctx2;
+  BOOL is_collidable;
+  __int16 infantry_damage;
+  __int16 vehicle_damage;
+  __int16 building_damage;
+  __int16 _92_padding;
 };
 
-/* 182 */
-struct KKND::CplcEntityInViewport
-{
-  KKND::CplcEntityInViewport *next;
-  KKND::CplcEntityInViewport *prev;
-  KKND::Entity *entity;
-};
-
-/* 234 */
-typedef void (__fastcall *KKND::UnitMode)(KKND::Unit *);
-
-/* 236 */
-struct KKND::UnitMobdAnchors
-{
-  KKND::MobdPoint *turret;
-  KKND::MobdPoint *rally;
-  KKND::MobdPoint *render;
-  KKND::MobdPoint *grid;
-  KKND::MobdPoint *_unit_mobd_anchors_10_unused;
-  KKND::MobdPoint *dock_point;
-};
-
-/* 237 */
 /// actually a typedef int, with various enum values are simply #defines - there are units with 8 and 16 orientations (potentially more) both use this type for their orientation holding variables
-enum KKND::MobdOrientation : unsigned __int32
+typedef enum : unsigned int
 {
   MobdOrientation_N = 0,
   MobdOrientation_NNE = 16,
@@ -909,21 +893,32 @@ enum KKND::MobdOrientation : unsigned __int32
   MobdOrientation_W = 192,
   MobdOrientation_NW = 224,
   MobdOrientation_NNW = 240,
-};
+} MobdOrientation;
 
-/* 238 */
-enum KKND::Veterancy : unsigned __int32
+
+/// Direction is actually a typedef int, but some well-known values like Direction8 (for sprites) and Direction16 (for pathing) are commonly used
+typedef enum
 {
-  Veterancy_Rookie = 0x0,
-  Veterancy_Mature = 0x1,
-  Veterancy_Veteran = 0x2,
-};
+  Direction_N = 0,
+  Direction_NE = 1,
+  Direction_E = 2,
+  Direction_SE = 3,
+  Direction_S = 4,
+  Direction_SW = 5,
+  Direction_W = 6,
+  Direction_NW = 7,
+  Direction_Invalid = -1,
+} Direction;
 
-/* 239 */
-typedef __int32 fixed;
+typedef enum : unsigned int
+{
+  Veterancy_Rookie = 0,
+  Veterancy_Mature = 0,
+  Veterancy_Veteran = 0,
+} Veterancy;
 
 /* 240 */
-enum KKND::UnitTilePosition : unsigned __int32
+typedef enum : unsigned int
 {
   UnitPosition_Slot0 = 0,               ///< Always 0 for all non-infantry units
   UnitPosition_Slot1 = 1,
@@ -932,10 +927,9 @@ enum KKND::UnitTilePosition : unsigned __int32
   UnitPosition_Slot4 = 4,
   UnitTilePosition_Invalid = 5,
   UnitTilePosition_BuildingPlacement = 64,
-};
+} UnitTilePosition;
 
-/* 241 */
-enum KKND::UnitOrderType : unsigned __int32
+typedef enum : unsigned int
 {
   UnitOrder_Idle = 0,
   UnitOrder_Move = 1,
@@ -950,10 +944,9 @@ enum KKND::UnitOrderType : unsigned __int32
   UnitOrder_RepairBayDock = 10,
   UnitOrder_ReturnToPosition = 11,      ///< after ATTACK: target destroyed/lost during attack → return to home
                                         ///< after RETREAT: retreat completed → return to home
-};
+} UnitOrderType;
 
-/* 247 */
-enum KKND::UnitPathFlags : unsigned __int32
+typedef enum : unsigned int
 {
   UnitPathFlags_ApproachingWaypoint = 0x1, ///< close to target, skip rotation; cleared on path reset
   UnitPathFlags_CwPassThrough = 0x2,    ///< close to target, skip rotation; cleared on path reset
@@ -964,25 +957,9 @@ enum KKND::UnitPathFlags : unsigned __int32
   UnitPathFlags_PassThroughFriendly = 0x40, ///< set when blocked by slower same-direction units; cleared on nudge
   UnitPathFlags_AiWanderer = 0x80,      ///< created from prison/bunker/outpost
   UnitPathFlags_AiSquadlessRoamer = 0x200,
-};
+} UnitPathFlags;
 
-/* 225 */
-/// Direction is actually a typedef int, but some well-known values like Direction8 (for sprites) and Direction16 (for pathing) are commonly used
-enum KKND::Direction
-{
-  Direction_N = 0,
-  Direction_NE = 1,
-  Direction_E = 2,
-  Direction_SE = 3,
-  Direction_S = 4,
-  Direction_SW = 5,
-  Direction_W = 6,
-  Direction_NW = 7,
-  Direction_Invalid = -1,
-};
-
-/* 250 */
-enum KKND::BoxdRaycastResult : unsigned __int32
+typedef enum : unsigned int
 {
   BoxdRaycastResult_ClearWithWaypoints = 0,
   BoxdRaycastResult_UnitObstacle = 1,
@@ -990,83 +967,180 @@ enum KKND::BoxdRaycastResult : unsigned __int32
   BoxdRaycastResult_TerrainObstacle = 3,
   BoxdRaycastResult_ClearStraightLine = 4,
   BoxdRaycastResult_InvalidState = 5,
-};
+} BoxdRaycastResult;
 
-/* 249 */
-/// Scan-phase pathing working state.
-struct KKND::UnitScanPhaseNav
+// Scan-phase pathing working state.
+typedef struct
 {
   int ray_stack;                        ///< Stack index into raycast results
   int cw_scan_x;                        ///< CW scan probe tile position. Also used directly for movement target when scan finds passable tile. Also used outside scanning as a general "current target tile" — written when finding a blocked unit, and for blocked-unit speed comparison tiles.
   int cw_scan_y;
   int ccw_scan_x;
   int ccw_scan_y;
-  KKND::Direction cw_heading;           ///< Approach direction rotated 90° CW to step around obstacles
-  KKND::Direction ccw_heading;          ///< Approach direction rotated 90° CCW to step around obstacles
+  Direction cw_heading;           ///< Approach direction rotated 90° CW to step around obstacles
+  Direction ccw_heading;          ///< Approach direction rotated 90° CCW to step around obstacles
   int first_clear_tile_x;               ///< Blocked-tile fallback target. This is the first free tile hit by the ray that has no prior passable tiles — meaning the ray started directly inside an obstacle and this is the first clear tile found. Used as fallback waypoint in raycast results 2 and 5 — replaces order_next_waypoint when primary path data is incomplete.
                                         ///< Initialized to (0,0) every raycast. Nonzero check = "was a fallback found?"
   int first_clear_tile_y;
-  KKND::BoxdRaycastResult ray_result;
+  BoxdRaycastResult ray_result;
   int disperse_timer;                   ///< Temporarily treat partially occupied tiles as impassible to avoid congestion
   int push_through_timer;               ///< Temporarily treat partially occupied tiles as clear to help the unit push through (e.g a freshly created unit leaving its production building)
+} UnitScanPhaseNav;
+
+typedef enum : unsigned int {
+  UnitSize_None = 0,
+  UnitSize_Regular = 128,               ///< 1 tile unit
+  UnitSize_Small = 512,                 ///< sub-tile unit (infantry) - up to 5 in one tile
+  UnitSize_XL = 4096,                   ///< 2x2 tiles unit
+} UnitSize;
+
+typedef enum : unsigned int {
+  Race_Survivors = 1,
+  Race_Evolved = 2,
+} Race;
+
+typedef struct {
+  MobdId mobd_id;
+  void (__cdecl *task_fn)(Task *task);
+  ptrdiff_t mobd_lookup_offset_travel;
+  ptrdiff_t mobd_lookup_offset_impact;
+  int speed;
+  int damage_to_infantry;
+  int damage_to_vehicles;
+  int damage_to_buildings;
+  int radius;                     ///< 32 for most, 128 for bombers - radius/8 tiles around the impact
+  int _projectile_type_field_24;
+} UnitProjectileType;
+
+typedef struct {
+  MobdId mobd_id;
+  void (__fastcall *mode_attach)(Task *task);
+  int rotation_speed;
+  int reload_time;                ///< fire -> fire delay -> fire -> fire delay -> ... end of volley -> wait reload_time
+  int reload2_time;
+  int volley_size;
+  ptrdiff_t mobd_lookup_offset_idle;
+  ptrdiff_t mobd_lookup_offset_attack;
+  UnitProjectileType *projectile_type;
+  int _unit_attachment_field_24;
+} UnitAttachment;
+
+typedef struct {
+  MobdId mobd_id;
+  TaskFn task_fn;
+  const char *name;
+  int cost;
+  int hitpoints;
+  int speed;
+  int reload2_time;
+  int turning_speed;
+  int view_range;
+  int firing_range;
+  int accuracy;
+  BOOL can_crush;
+  BOOL is_infantry;
+  ptrdiff_t mobd_lookup_offset_attack;  ///< -1 for turreted units
+  ptrdiff_t mobd_lookup_offset_move;
+  ptrdiff_t mobd_lookup_offset_idle;
+  ptrdiff_t mobd_lookup_offset_4;       ///< damaged_buildings?
+  UnitAttachment *attachment;
+  UnitProjectileType *projectile;
+  UnitSize size;                  ///< map tile size
+                                        ///<
+                                        ///< 4096: XL (2x2 tiles)
+                                        ///< autocannon, missile crab, mobile outposts, gort, plasma tank
+                                        ///<
+                                        ///< 512: 1/5th of a tile
+                                        ///< infantry
+                                        ///<
+                                        ///< 128: exactly 1 tile
+                                        ///< vehicles, buildings,
+                                        ///< tech bunker, sentinel droid
+                                        ///< gorn, tree, hut
+  Race race;
+  int ai_threat_weight;
+  int ai_strategic_value;
+  UnitType factory;
+  int production_time;
+} UnitStats;
+
+
+typedef struct Turret Turret;
+
+typedef void (__fastcall *TurretMode)(Turret *);
+
+struct Turret {
+  Task *task;
+  Entity *entity;
+  Unit *parent;
+  Unit *target;
+  TurretMode mode;
+  ptrdiff_t current_mobd_frame;
+  int reload_timer;
+  int volley_remaining;
+  int volley_reload_time;
+  MobdPoint *projectile_spawn_anchor;
+  UnitAttachment *attachment;
+  int _turret_field_2C_unused;
+  int target_unit_id;
+  int _turret_field_34_unused;
 };
 
-/* 350 */
-enum KKND::BlitterMode : unsigned __int32 {
-  BlitterMode_Render = 0,
-  BlitterMode_GetWidth = 1,
-  BlitterMode_GetHeight = 2,
-};
+typedef void (__fastcall *UnitMode)(Unit *);
 
-/* 192 */
-/// mode =
-/// 0: render
-/// 1: query width
-/// 2: query height
-typedef int (__fastcall *KKND::Blitter)(KKND::RenderCommand *cmd, KKND::BlitterMode mode);
+typedef struct {
+  MobdPoint *turret;
+  MobdPoint *rally;
+  MobdPoint *render;
+  MobdPoint *grid;
+  MobdPoint *_unit_mobd_anchors_10_unused;
+  MobdPoint *dock_point;
+} UnitMobdAnchors;
 
-/* 193 */
-struct KKND::MobdSprtImage
+typedef struct
 {
-  KKND::Blitter blitter;
-  int flags;                            ///< &1 = flip horizontally
-  KKND::MobdImageData *bitmap;
-};
+  typeof_unqual(struct UnitEscortNode) *next;
+  typeof_unqual(struct UnitEscortNode) *prev;
+  Unit *escort;
+} UnitEscortNode;
 
-/* 220 */
-struct KKND::Unit
-{
-  KKND::Unit *next;
-  KKND::Unit *prev;
-  KKND::Unit *locked_target;            ///< current active target
-  KKND::Task *task;
-  KKND::UnitType type;
+typedef union {
+  Vec2i infantry_return;
+  OilPatch *oil_patch;
+} UnitUnion1;
+
+struct Unit {
+  Unit *next;
+  Unit *prev;
+  Unit *locked_target;            ///< current active target
+  Task *task;
+  UnitType type;
   int player_num;
-  KKND::UnitStats *stats;
-  KKND::Turret *turret;
+  UnitStats *stats;
+  Turret *turret;
   void *state;
   void *ai_node_per_side[7];
-  KKND::UnitMode mode;
-  KKND::UnitMode mode_idle;
-  KKND::UnitMode mode_arrive;
-  KKND::UnitMode mode_attacked;
-  KKND::UnitMode mode_return;
-  KKND::UnitMode mode_turn_return;
-  KKND::MessageHandler message_handler;
-  KKND::Entity *entity;
-  KKND::UnitMobdAnchors mobd_anchors;
+  UnitMode mode;
+  UnitMode mode_idle;
+  UnitMode mode_arrive;
+  UnitMode mode_attacked;
+  UnitMode mode_return;
+  UnitMode mode_turn_return;
+  MessageHandler message_handler;
+  Entity *entity;
+  UnitMobdAnchors mobd_anchors;
   int _unit_field_78_unused;
-  KKND::MobdOrientation orientation;
+  MobdOrientation orientation;
   int _unit_field_80_unused;
   int _unit_field_84_unused;
-  KKND::MobdOrientation target_orientation;
+  MobdOrientation target_orientation;
   BOOL destroyed;
   int hitpoints;
   int experience;
-  KKND::Veterancy veterancy;
+  Veterancy veterancy;
   fixed hp_regen_accumulator;           ///< classic fixed-point fractional accumulation: accumulator overflows by 256 → gain 1 HP. Each idle tick: accumulator += increment. When high byte changes ((new ^ old) & 0xFFFFFF00), integer HP crossed → hitpoints++
   fixed hp_regen_rate;
-  KKND::UnitTilePosition tile_position;
+  UnitTilePosition tile_position;
   int map_x;
   int map_y;
   int order_next_waypoint_x;
@@ -1081,24 +1155,24 @@ struct KKND::Unit
   int path_scan_direction;              ///< Direction flag for wall-following. Set to 1 or 0 depending which clockwise/counterclockwise scan found shorter path. Checked as: not clockwise ? -1 : 1 (scan direction multiplier), and if clockwise → orientation +64, else -64.
                                         ///< → path_scan_direction (0 = counterclockwise, 1 = clockwise)
   int path_scan_orientation;            ///< Orientation for pathfinding obstacle avoidance. Set from (orientation ± 64) & 0xE0 — perpendicular to current facing. Used as (path_scan_direction >> 5) to get 3-bit direction index for tile neighbor scanning.
-  KKND::UnitOrderType order;
-  KKND::Unit *order_target;             ///< Primary target of current order (attack, repair, dock target)
-  KKND::Unit *opportunity_target;       ///< Attack-move opportunity target or when enemy approaches an idle unit
-  KKND::Unit *escort_target;
+  UnitOrderType order;
+  Unit *order_target;             ///< Primary target of current order (attack, repair, dock target)
+  Unit *opportunity_target;       ///< Attack-move opportunity target or when enemy approaches an idle unit
+  Unit *escort_target;
   int order_target_id;
   int opportunity_target_id;
   int active_target_id;
   int escort_target_id;
   int order_target_x;
   int order_target_y;
-  KKND::UnitEscortNode *escort_list_head;
-  KKND::UnitEscortNode *escort_list_tail;
+  UnitEscortNode *escort_list_head;
+  UnitEscortNode *escort_list_tail;
   int _unit_field_10C_unused;
   int _unit_field_110_unused;
   int _unit_field_114_unused;
-  KKND::Unit *last_attacker;
-  KKND::UnitUnion1 _u1;
-  KKND::UnitPathFlags path_flags;
+  Unit *last_attacker;
+  UnitUnion1 _u1;
+  UnitPathFlags path_flags;
   int multi_purpose_field_1;            ///< 1. Infantry/Vehicle — Obstacle wait countdown (value: 60)
                                         ///<     Set to 60 when unit hits blocked tile (another unit in way)
                                         ///<     Decremented each frame in entity_mode_417FC0, entity_mode_4181B0
@@ -1233,17 +1307,17 @@ struct KKND::Unit
   int ray_unit_obstacle_map_ys[10];
   int ray_terrain_obstacle_xs[10];      ///< Last terrain-wall (class-0) tile — fallback approach for when entity obstacles are unreliable198.
   int ray_terrain_obstacle_ys[10];
-  KKND::UnitScanPhaseNav scan_pathing;  ///< Pathing works in two phases:
+  UnitScanPhaseNav scan_pathing;  ///< Pathing works in two phases:
                                         ///<     1. Raycast phase (0041B970 BOXD_pathing_bresenham_raycast) — Cast Bresenham ray from unit to target. Records obstacle boundaries into ray_exit_* / ray_obstacle_* / ray_terrain_* arrays, indexed by ray_stack.
                                         ///<     2. Obstacle-scan phase (e.g unit_mode_416060, unit_mode_attack_move) — fine-grained local navigation: for each waypoint, run CW + CCW wall-following scans around the obstacle. Two scan probes advance independently, each tracking its current tile position.
                                         ///<
                                         ///< This is actually a union and some of these fields are used for
                                         ///< different purposes e.g to save x/y speed values depending on context
                                         ///<
-  KKND::Unit *nav_obstacle;             ///< Pointer to blocking/obstructing entity found during pathfinding tile checks.
+  Unit *nav_obstacle;             ///< Pointer to blocking/obstructing entity found during pathfinding tile checks.
   int nav_obstacle_id;
-  KKND::MobdSprtImage overlay_sprt;     ///< Overlay sprite (selection, healthbar)
-  KKND::RenderNode *overlay_rn;         ///< Render node that controls ovelay sprite rendering (not sure why the sprite is held separately since render node already owns the image unit->overlay->image = &unit->overlay_sprt)
+  MobdSprtImage overlay_sprt;     ///< Overlay sprite (selection, healthbar)
+  RenderNode *overlay_rn;         ///< Render node that controls ovelay sprite rendering (not sure why the sprite is held separately since render node already owns the image unit->overlay->image = &unit->overlay_sprt)
   unsigned __int8 control_groups[8];
   __int16 idle_fidget_timer;
   __int16 last_stuck_tile_x;
@@ -1251,349 +1325,109 @@ struct KKND::Unit
   __int16 stuck_timer;                  ///< If unit is stuck in the same tile , stuck timer accumulates and unit sleeps for increasing amount of time waiting to get unstuck
   __int16 next_order;                   ///< New interrupting order received mid-action: 0=idle, 1=move, 2=attack
   __int16 _unit_field_2A6;
-  KKND::Unit *next_order_target;
+  Unit *next_order_target;
   int next_order_target_id;
   int next_order_target_x;
   int next_order_target_y;
 };
 
 /* 370 */
-struct KKND::MenuWidget
+struct MenuWidget
 {
-  KKND::MenuWidget *next;
-  KKND::MenuWidget *prev;
-  KKND::Entity *entity;
+  MenuWidget *next;
+  MenuWidget *prev;
+  Entity *entity;
   int flags;
 };
 
-/* 206 */
-enum KKND::BoxdCollisionType : unsigned __int32
-{
-  BoxdCollisionType_Unit = 0,
-  BoxdCollisionType_Solid = 1,
-  BoxdCollisionType_Floor = 2,
-  BoxdCollisionType_RampLtr = 3,
-  BoxdCollisionType_RampRtl = 4,
-  BoxdCollisionType_SlopeLeft = 5,
-  BoxdCollisionType_SlopeRight = 6,
-  BoxdCollisionType_FloorAlt = 7,
-  BoxdCollisionType_Skip = -3,
-  BoxdCollisionType_OffGrid = -2,
-  BoxdCollisionType_Always = -1,
-};
-
-/* 169 */
-struct KKND::BoxdAabb
-{
-  KKND::BoxdCollisionType type;
-  int min_x;
-  int min_y;
-  int min_z;
-  int max_x;
-  int max_y;
-};
-
-/* 349 */
-struct KKND::RenderImage
-{
-  KKND::Blitter blitter;                ///< It's actually polymorphic - Scrl and Sprt image objects are assigned to this, both having blitter as the first field so in terms of binary they're compatible
-};
-
-/* 208 */
-struct KKND::RenderViewport
-{
-  KKND::RenderViewport *next;
-  KKND::RenderViewport *prev;
-  int flags;
-  int brightness;                       ///< Seemingly uses 8.23 format - brightness factor actually used is (brightness >> 23)
-  int clip_x;
-  int clip_y;
-  int clip_w;
-  int clip_h;
-  int _render_viewport_20;
-};
-
-/* 285 */
-enum KKND::UnitSize : unsigned __int32
-{
-  UnitSize_None = 0,
-  UnitSize_Regular = 128,               ///< 1 tile unit
-  UnitSize_Small = 512,                 ///< sub-tile unit (infantry) - up to 5 in one tile
-  UnitSize_XL = 4096,                   ///< 2x2 tiles unit
-};
-
-/* 229 */
-enum KKND::Race : unsigned __int32
-{
-  Race_Survivors = 1,
-  Race_Evolved = 2,
-};
-
-/* 227 */
-struct KKND::UnitStats
-{
-  KKND::MobdId mobd_id;
-  KKND::TaskFn task_fn;
-  const char *name;
-  int cost;
-  int hitpoints;
-  int speed;
-  int reload2_time;
-  int turning_speed;
-  int view_range;
-  int firing_range;
-  int accuracy;
-  BOOL can_crush;
-  BOOL is_infantry;
-  ptrdiff_t mobd_lookup_offset_attack;  ///< -1 for turreted units
-  ptrdiff_t mobd_lookup_offset_move;
-  ptrdiff_t mobd_lookup_offset_idle;
-  ptrdiff_t mobd_lookup_offset_4;       ///< damaged_buildings?
-  KKND::UnitAttachment *attachment;
-  KKND::UnitProjectileType *projectile;
-  KKND::UnitSize size;                  ///< map tile size
-                                        ///<
-                                        ///< 4096: XL (2x2 tiles)
-                                        ///< autocannon, missile crab, mobile outposts, gort, plasma tank
-                                        ///<
-                                        ///< 512: 1/5th of a tile
-                                        ///< infantry
-                                        ///<
-                                        ///< 128: exactly 1 tile
-                                        ///< vehicles, buildings,
-                                        ///< tech bunker, sentinel droid
-                                        ///< gorn, tree, hut
-  KKND::Race race;
-  int ai_threat_weight;
-  int ai_strategic_value;
-  KKND::UnitType factory;
-  int production_time;
-};
-
-/* 283 */
-typedef void (__fastcall *KKND::TurretMode)(KKND::Turret *);
-
-/* 228 */
-struct KKND::Turret
-{
-  KKND::Task *task;
-  KKND::Entity *entity;
-  KKND::Unit *parent;
-  KKND::Unit *target;
-  KKND::TurretMode mode;
-  ptrdiff_t current_mobd_frame;
-  int reload_timer;
-  int volley_remaining;
-  int volley_reload_time;
-  KKND::MobdPoint *projectile_spawn_anchor;
-  KKND::UnitAttachment *attachment;
-  int _turret_field_2C_unused;
-  int target_unit_id;
-  int _turret_field_34_unused;
-};
-
-/* 231 */
-struct KKND::UnitEscortNode
-{
-  KKND::UnitEscortNode *next;
-  KKND::UnitEscortNode *prev;
-  KKND::Unit *escort;
-};
-
-/* 246 */
-struct KKND::Vec2i
-{
-  fixed x;
-  fixed y;
-};
-
-/* 244 */
-union KKND::UnitUnion1
-{
-  KKND::Vec2i infantry_return;
-  KKND::OilPatch *oil_patch;
-};
-
-/* 191 */
-struct __unaligned __declspec(align(1)) KKND::MobdImageData
-{
-  int width;
-  int height;
-  unsigned __int8 format;               ///< pixel format: 0=raw, 2=RLE compressed
-                                        ///< raw: one byte per pixel (palette index). Zero bytes are transparent
-  unsigned __int8 pixels[];
-};
-
-/* 232 */
-struct KKND::UnitAttachment
-{
-  KKND::MobdId mobd_id;
-  void (__fastcall *mode_attach)(KKND::Task *task);
-  int rotation_speed;
-  int reload_time;                ///< fire -> fire delay -> fire -> fire delay -> ... end of volley -> wait reload_time
-  int reload2_time;
-  int volley_size;
-  ptrdiff_t mobd_lookup_offset_idle;
-  ptrdiff_t mobd_lookup_offset_attack;
-  KKND::UnitProjectileType *projectile_type;
-  int _unit_attachment_field_24;
-};
-
-/* 233 */
-struct KKND::UnitProjectileType
-{
-  KKND::MobdId mobd_id;
-  void (__cdecl *task_fn)(KKND::Task *task);
-  ptrdiff_t mobd_lookup_offset_travel;
-  ptrdiff_t mobd_lookup_offset_impact;
-  int speed;
-  int damage_to_infantry;
-  int damage_to_vehicles;
-  int damage_to_buildings;
-  int radius;                     ///< 32 for most, 128 for bombers - radius/8 tiles around the impact
-  int _projectile_type_field_24;
-};
-
-/* 219 */
-struct KKND::OilPatch
-{
-  KKND::OilPatch *next;
-  KKND::OilPatch *prev;
-  KKND::Entity *entity;
-  int amount;
-  KKND::Unit *drillrig;
-  int drillrig_unit_id;
-};
-
-/* 167 */
-struct KKND::LevelHunkSection
-{
+typedef struct {
   char name[4];
   void *ptr;
-};
+} LevelHunkSection;
 
-/* 168 */
-struct KKND::LevelHunk
-{
-  KKND::LevelHunkSection *sections[];
-};
+typedef struct {
+  LevelHunkSection *sections[];
+} LevelHunk;
 
-/* 171 */
-struct KKND::BoxdSpatialHashEntry
+typedef struct
 {
-  KKND::BoxdCollisionShape *shape;
-  KKND::Entity *entity;
-  KKND::BoxdSpatialHashEntry *next;
-};
+  BoxdCollisionShape *shape;
+  Entity *entity;
+  typeof_unqual(struct BoxdSpatialHashEntry) *next;
+} BoxdSpatialHashEntry;
 
-/* 173 */
-struct BoxdGrid
-{
+typedef struct {
   int max_collision_buckets;
   int world_to_tile_x;
   int world_to_tile_y;
   int num_tiles_x;
   int num_tiles_y;
-  KKND::BoxdAabb *tiles[1];
-};
+  BoxdAabb *tiles[1];
+} BoxdGrid;
 
-/* 174 */
-struct KKND::LevelBoxd
-{
+typedef struct {
   BoxdGrid *grid[1];
-};
+} LevelBoxd;
 
-/* 180 */
-struct KKND::LevelCplcSurface
-{
-  int size;
-  KKND::CplcEntity *next_x_sorted;
-  KKND::CplcEntity *prev_x_sorted;
-  KKND::CplcEntity *next_y_sorted;
-  KKND::CplcEntity *prev_y_sorted;
-};
-
-/* 181 */
-struct KKND::LevelCplc
-{
-  KKND::LevelCplcSurface *layers;
-};
-
-/* 184 */
-struct KKND::MapdCamera
-{
+typedef struct {
   int x;
   int y;
   int z;
-};
+} MapdCamera;
 
-/* 185 */
-struct __unaligned KKND::MapdScrlImageTile
-{
+typedef struct {
   int flags;
-  unsigned __int8 pixels[1];
-};
+  unsigned __int8 pixels[];
+} MapdScrlImageTile;
 
-/* 186 */
-struct KKND::MapdScrlImage
-{
-  KKND::Blitter renderer;
+typedef struct {
+  Blitter renderer;
   int tile_x_size;
   int tile_y_size;
   int num_x_tiles;
   int num_y_tiles;
-  KKND::MapdScrlImageTile *tiles[16];
-};
+  MapdScrlImageTile *tiles[16];
+} MapdScrlImage;
 
-/* 200 */
-struct KKND::PaletteEntry
-{
+typedef struct {
   unsigned __int8 r;
   unsigned __int8 g;
   unsigned __int8 b;
   unsigned __int8 flags;
-};
+} PaletteEntry;
 
-/* 187 */
-struct KKND::LevelMapdSurface
-{
+typedef struct {
+  PaletteEntry entries[256];
+} Palette;
+
+typedef struct {
   int num_images;
-  KKND::MapdScrlImage *images[1];
+  MapdScrlImage **images; // pointer to dynamic-sized array
   int num_palette_entries;
-  KKND::PaletteEntry palette[1];
-};
+  PaletteEntry palette[];
+} LevelMapdSurface;
 
-/* 188 */
-struct KKND::LevelMapd
-{
-  KKND::LevelMapdSurface *layers;
-};
+typedef struct {
+  LevelMapdSurface *layers;
+} LevelMapd;
 
-/* 189 */
-struct KKND::MapdRenderNode
-{
-  KKND::MapdRenderNode *next;
-  KKND::MapdRenderNode *prev;
-  KKND::RenderNode *rn;
-  KKND::MapdScrlImage *scrl;
+typedef struct {
+  typeof_unqual(struct MapdRenderNode) *next;
+  typeof_unqual(struct MapdRenderNode) *prev;
+  RenderNode *rn;
+  MapdScrlImage *scrl;
   int z;
-};
+} MapdRenderNode;
 
-/* 196 */
-struct KKND::LevelMobdSurface
-{
-  KKND::MobdAnimFrame frames[1];
-};
+typedef struct {
+  MobdAnimFrame frames[];
+} LevelMobdSurface;
 
-/* 197 */
-struct KKND::LevelMobd
-{
-  KKND::LevelMobdSurface *layers[1];
-};
+typedef struct {
+  LevelMobdSurface *layers[1];
+} LevelMobd;
 
-/* 199 */
-enum KKND::MenuId : unsigned __int32
-{
+typedef enum : unsigned int {
   MenuId_Main = 0,
   MenuId_Multiplayer = 1,
   MenuId_NewCampaign = 2,
@@ -1610,51 +1444,36 @@ enum KKND::MenuId : unsigned __int32
   MenuId_MissionComplete = 13,
   MenuId_NewMissions = 14,
   MenuId_Kaos = 15,
-};
+} MenuId;
 
-/* 201 */
-struct KKND::Palette
-{
-  KKND::PaletteEntry entries[256];
-};
-
-/* 209 */
-struct KKND::Coroutine
-{
-  KKND::Coroutine *yield_to;
+typedef struct {
+  typeof_unqual(struct Coroutine) *yield_to;
   int *context;
   void *stack;
-  KKND::Coroutine *next;
-};
+  typeof_unqual(struct Coroutine) *next;
+} Coroutine;
 
-/* 210 */
-struct KKND::RenderBatch
-{
-  KKND::RenderNode *next;
-  KKND::RenderNode *prev;
-};
+typedef struct {
+  typeof_unqual(struct RenderBatch) *next;
+  typeof_unqual(struct RenderBatch) *prev;
+} RenderBatch;
 
-/* 212 */
 /// The game does NOT use a traditional switch-based game state dispatcher. Instead, three nested `do/while` loops share a single guard variable `g_game_loop`. Value `0` means "keep ticking current loop.
-enum KKND::GameLoop : unsigned __int32
-{
+typedef enum : unsigned int {
   GameLoop_Continue = 0,
   GameLoop_NextMission = 1,
   GameLoop_EndMission = 2,
   GameLoop_PreviousScreen = 3,
-};
+} GameLoop;
 
-/* 213 */
-enum KKND::MissionOutcome : unsigned __int32
-{
-  MissionOutcome_NotStarted = 0x0,
-  MissionOutcome_Defeat = 0x1,
-  MissionOutcome_Victory = 0x2,
-  MissionOutcome_Abandoned = 0x6,
-};
+typedef enum : unsigned int {
+  MissionOutcome_NotStarted = 0,
+  MissionOutcome_Defeat = 1,
+  MissionOutcome_Victory = 2,
+  MissionOutcome_Abandoned = 6,
+} MissionOutcome;
 
-/* 214 */
-enum KKND::LevelId : unsigned __int32
+typedef enum : unsigned int
 {
   LevelId_Surv_01_TheNextGeneration = 0,
   LevelId_Surv_02_BuildAnOutpost = 1,
@@ -1706,31 +1525,26 @@ enum KKND::LevelId : unsigned __int32
   LevelId_Mute_23 = 65,
   LevelId_Mute_24 = 66,
   LevelId_Mute_25 = 67,
-  LevelId_Invalid = -1,
-};
+  LevelId_Invalid = (unsigned int)-1,
+} LevelId;
 
-/* 366 */
-enum KKND::MissionVictoryConditionBits : unsigned __int32
+typedef enum : unsigned int
 {
-  VictoryCondition_KrushKillnDestroy = 0x1, ///< Destroy all enemy buildings
-  VictoryCondition_Timed = 0x2,         ///< Stay alive for 108000 ticks (30min at 60tps)
-  VictoryCondition_Economic = 0x4,      ///< Accumulate 5000 and keep Power Plant alive
-  VictoryCondition_Survive = 0x8,       ///< Keep own buildings alive
-  VictoryCondition_300 = 0x300,         ///< Always set; cut feature - must have been something e.g 0x100 keep unuts 0x200 keep buildings
-};
+  VictoryCondition_KrushKillnDestroy = 0x1,    // Destroy all enemy buildings
+  VictoryCondition_Timed             = 0x2,    // Stay alive for 108000 ticks (30min at 60tps)
+  VictoryCondition_Economic          = 0x4,    // Accumulate 5000 and keep Power Plant alive
+  VictoryCondition_Survive           = 0x8,    // Keep own buildings alive
+  VictoryCondition_300               = 0x300,  // Always set; cut feature - must have been something e.g 0x100 keep unuts 0x200 keep buildings
+} MissionVictoryConditionBits;
 
-/* 321 */
-struct KKND::AiAirstrikeConfig
-{
+typedef struct {
   __int16 count;
   __int16 interval;
   unsigned __int16 rng_interval_min;
   unsigned __int16 rng_interval_max;
-};
+} AiAirstrikeConfig;
 
-/* 215 */
-struct KKND::LevelDesc
-{
+typedef struct {
   const char *lvl_filename;
   const char *wav_filename;
   const char *vbc_filename;
@@ -1741,109 +1555,83 @@ struct KKND::LevelDesc
   __int16 max_tech_level;
   __int16 _level_desc_field_16;
   unsigned int disabled_units_mask;
-  KKND::MissionVictoryConditionBits victory_condition;
-  KKND::AiAirstrikeConfig superlvl_ai_airstrike_count_enemy;
-  KKND::AiAirstrikeConfig superlvl_ai_airstrike_count_ally;
-};
+  MissionVictoryConditionBits victory_condition;
+  AiAirstrikeConfig superlvl_ai_airstrike_count_enemy;
+  AiAirstrikeConfig superlvl_ai_airstrike_count_ally;
+} LevelDesc;
 
-/* 216 */
-struct KKND::MissionCashTable
-{
+typedef struct {
   int cash[7];
-};
+} MissionCashTable;
 
-/* 217 */
-struct KKND::MissionDiplomacyTable
-{
+typedef struct {
   BOOL is_ally[7][7];
-};
+} MissionDiplomacyTable;
 
-/* 218 */
-struct KKND::OilPatchSaveStruct
-{
+typedef struct {
   __int32 amount;
   __int32 x;
   __int32 y;
   __int32 drillrig_entity_id;
-};
+} OilPatchSaveStruct;
 
-/* 223 */
-enum KKND::TerrainTileFlags1 : unsigned __int8
+typedef enum : unsigned __int8
 {
-  TerrainTileFlags1_None = 0x0,
-  TerrainTileFlags1_InfantrySlot0 = 0x1, ///< Infantry slot bitmask. Each bit = 1 of 5 infantry sub-positions within the tile. Set when an infantry unit occupies that slot.
-  TerrainTileFlags1_InfantrySlot1 = 0x2,
-  TerrainTileFlags1_InfantrySlot2 = 0x4,
-  TerrainTileFlags1_InfantrySlot3 = 0x8,
-  TerrainTileFlags1_InfantrySlot4 = 0x10,
-  TerrainTileFlags1_Obstructed = 0x20,  ///< Obstructed terrain (edges of landscape features)
-  TerrainTileFlags1_Blocked = 0x40,     ///< Blocked terrain (impassable - buildings with speed=0 also set this)
-  TerrainTileFlags1_Impassible = 0x60,  ///< Obstructed|Blocked
-  TerrainTileFlags1_VehicleOrBuilding = 0x80, ///< Vehicle/building occupying the tile (a single entity fills the whole tile)
-};
+  TerrainTileFlags1_None              = 0x0,
+  TerrainTileFlags1_InfantrySlot0     = 0x1,   // Infantry slot bitmask. Each bit = 1 of 5 infantry sub-positions within the tile. Set when an infantry unit occupies that slot.
+  TerrainTileFlags1_InfantrySlot1     = 0x2,
+  TerrainTileFlags1_InfantrySlot2     = 0x4,
+  TerrainTileFlags1_InfantrySlot3     = 0x8,
+  TerrainTileFlags1_InfantrySlot4     = 0x10,
+  TerrainTileFlags1_Obstructed        = 0x20,  // Obstructed terrain (edges of landscape features)
+  TerrainTileFlags1_Blocked           = 0x40,  // Blocked terrain (impassable - buildings with speed=0 also set this)
+  TerrainTileFlags1_Impassible        = 0x60,  // Obstructed|Blocked
+  TerrainTileFlags1_VehicleOrBuilding = 0x80,  // Vehicle/building occupying the tile (a single entity fills the whole tile)
+} TerrainTileFlags1;
 
-/* 224 */
-enum KKND::TerrainTileFlags2 : unsigned __int8
+typedef enum : unsigned __int8
 {
-  TerrainTileFlags2_None = 0x0,
-  TerrainTileFlags2_MoverBlocksSlot0 = 0x1, ///< The XOR pattern (flags ^ flags2) & 0x1F is the key trick — it detects tiles where occupied slots, returning what tile slots can be attempted to path through
-  TerrainTileFlags2_MoverBlocksSlot1 = 0x2,
-  TerrainTileFlags2_MoverBlocksSlot2 = 0x4,
-  TerrainTileFlags2_MoverBlocksSlot3 = 0x8,
-  TerrainTileFlags2_MoverBlocksSlot4 = 0x10,
+  TerrainTileFlags2_None              = 0x0,
+  TerrainTileFlags2_MoverBlocksSlot0  = 0x1,   // The XOR pattern (flags ^ flags2) & 0x1F is the key trick — it detects tiles where occupied slots, returning what tile slots can be attempted to path through
+  TerrainTileFlags2_MoverBlocksSlot1  = 0x2,
+  TerrainTileFlags2_MoverBlocksSlot2  = 0x4,
+  TerrainTileFlags2_MoverBlocksSlot3  = 0x8,
+  TerrainTileFlags2_MoverBlocksSlot4  = 0x10,
   TerrainTileFlags2_CantPlaceBuilding = 0x40,
-  TerrainTileFlags2_OilPatch = 0x80,
-};
+  TerrainTileFlags2_OilPatch          = 0x80,
+} TerrainTileFlags2;
 
-/* 222 */
-struct KKND::TerrainTile
-{
-  KKND::TerrainTileFlags1 flags1;
-  KKND::TerrainTileFlags2 flags2;
+typedef struct {
+  TerrainTileFlags1 flags1;
+  TerrainTileFlags2 flags2;
   char _pad_2;
   char _pad_3;
-  KKND::Unit *units[5];
-};
+  Unit *units[5];
+} TerrainTile;
 
-/* 230 */
-struct KKND::TechLevels
-{
+typedef struct {
   int num_buildings_by_level[5];
   int _tech_levels_unused_field_10;
   int _tech_levels_unused_field_14;
   int _tech_levels_unused_field_18;
   int _tech_levels_unused_field_1C;
-  int max_level;                        ///< memset sizes are inconsistent throughout the codebase. should be of size 28   BUG fix 24 size memsets
-};
+  int max_level;
+} TechLevels;
 
-/* 248 */
-enum KKND::BoxdPathingClassification : unsigned __int32
-{
-  Boxd_Impassable = 0,                  ///< Terrain wall — impassable ground, no building on it
-  Boxd_PartiallyOccupied = 1,           ///< Partially occupied — entities present but slots in flux (room to squeeze)
-  Boxd_Clear = 2,                       ///< Free/clear tile — walkable, nobody there (the unit itself is not counted as obstacle)
-  Boxd_FullyOccupied = 3,               ///< Fully occupied — all entity slots stably filled / building
-  Boxd_MovementSucceeded = 4,           ///< Function is really a dual-purpose "try-move-or-classify" — returns classification only when move fails, returns 4 when move succeeds. This makes it a tagged union of success(4) vs failure-reason(0-3)
-};
-
-/* 251 */
-struct KKND::TankerState
-{
+typedef struct {
   int oil_loaded;
-  KKND::Unit *current_destination;
-  KKND::Unit *powerplant;
-  KKND::Unit *drillrig;
+  Unit *current_destination;
+  Unit *powerplant;
+  Unit *drillrig;
   int drillrig_unit_id;
   int powerplant_unit_id;
   int current_destination_unit_id;
   int num_destinations;
-  KKND::Unit *destinations[20];
-  KKND::MobdImageData *img;
-};
+  Unit *destinations[20];
+  MobdImageData *img;
+} TankerState;
 
-/* 254 */
-enum KKND::GameEventType : unsigned __int8
-{
+typedef enum : unsigned __int8 {
   GameEvent_None = 0,
   GameEvent_SelectedBox = 1,
   GameEvent_SelectedUnit = 2,
@@ -1872,34 +1660,28 @@ enum KKND::GameEventType : unsigned __int8
   GameEvent_AirstrikeCalled = 25,
   GameEvent_BuildingSold = 26,
   GameEvent_SwearAllegiance = 27,
-};
+} GameEventType;
 
-/* 255 */
 /// Game Events are primitives that should be synched during the multiplayer game
 /// (during the local game they're just dequeued locally).
 /// One event is dequeued per tick
 ///
-/// Verified NOT KKND::NetzGameEvent
-struct KKND::GameEvent
-{
-  KKND::GameEventType type;
+/// Verified NOT NetzGameEvent
+typedef struct {
+  GameEventType type;
   char payload[12];
   bool ready_to_consume;                ///< when produced, is set to true
                                         ///< when NETZ consumes the event, is set to false
-};
+} GameEvent;
 
-/* 256 */
-struct __unaligned GameEventNode
-{
-  GameEventNode *next;
-  KKND::GameEvent evt;
+typedef struct __attribute__((packed)) {
+  typeof_unqual(struct GameEventNode) *next;
+  GameEvent evt;
   char field_12;
   char field_13;
-};
+} GameEventNode;
 
-/* 259 */
-enum KKND::UnitCommandArchetype : unsigned __int32
-{
+typedef enum : unsigned int {
   UnitCommandArchetype_None = 0,
   UnitCommandArchetype_Tanker = 1,
   UnitCommandArchetype_Lab = 2,
@@ -1910,19 +1692,30 @@ enum KKND::UnitCommandArchetype : unsigned __int32
   UnitCommandArchetype_MobileBase = 7,
   UnitCommandArchetype_MobileDerrick = 8,
   UnitCommandArchetype_CombatInfantry = 9,
-};
+} UnitCommandArchetype;
 
-/* 257 */
-struct KKND::CursorState
-{
-  KKND::CursorUnitSelection *selection_head;
-  KKND::CursorUnitSelection *selection_tail;
-  KKND::Task *_cursor_state_task_8;
-  KKND::CursorUnitSelection *selection_pool;
-  KKND::CursorUnitSelection *selection_free_head;
-  KKND::Task *cursor_task;
-  KKND::Task *hovered_ui_task;
-  KKND::Task *hovered_unit_task;
+typedef struct {
+  typeof_unqual(struct CursorUnitSelection) *next;
+  typeof_unqual(struct CursorUnitSelection) *prev;
+  Task *unit_task;
+} CursorUnitSelection;
+
+typedef struct {
+  UnitType type;
+  int footprint_width;
+  int footprint_height;
+  int cost;
+} BuildingPlannerPayload;
+
+typedef struct {
+  CursorUnitSelection *selection_head;
+  CursorUnitSelection *selection_tail;
+  Task *_cursor_state_task_8;
+  CursorUnitSelection *selection_pool;
+  CursorUnitSelection *selection_free_head;
+  Task *cursor_task;
+  Task *hovered_ui_task;
+  Task *hovered_unit_task;
   int cursor_mobd_offset;
   BOOL is_help_mode;
   BOOL is_airstrike_targeting;
@@ -1933,7 +1726,7 @@ struct KKND::CursorState
   BOOL is_single_unit_selected;
   BOOL are_movable_units_selected;
   BOOL are_attacker_units_selected;
-  KKND::UnitType unit_type_to_voice_response;
+  UnitType unit_type_to_voice_response;
   BOOL is_rmb_scrolling;                ///< RMB drag = scroll camera.
                                         ///< On release, if total drift was tiny (< 4096 in both axes = less than ~16px), treat it as right-click → deselect all.
                                         ///< Otherwise it was intentional camera pan, no deselect.
@@ -1943,35 +1736,18 @@ struct KKND::CursorState
   int rmb_scrolling_max_dy;
   int rmb_scrolling_dx;
   int rmb_scrolling_dy;
-  KKND::Unit *selection_executing_representative; ///< When a mixed group of units selected, determine which unit takes command priority
+  Unit *selection_executing_representative; ///< When a mixed group of units selected, determine which unit takes command priority
                                                   ///< I.e: a lab and a technic is slected at the same time. Clicking on the lab would start reseach rather than repairs because lab takes execution priority
-  KKND::UnitCommandArchetype selection_executing_archetype;
-  KKND::Entity *cursor_hitbox_tester;
-  KKND::Entity *cursor_entity;
-  KKND::BuildingPlannerPayload *planner;
-};
-
-/* 258 */
-struct KKND::CursorUnitSelection
-{
-  KKND::CursorUnitSelection *next;
-  KKND::CursorUnitSelection *prev;
-  KKND::Task *unit_task;
-};
-
-/* 260 */
-struct KKND::BuildingPlannerPayload
-{
-  KKND::UnitType type;
-  int footprint_width;
-  int footprint_height;
-  int cost;
-};
+  UnitCommandArchetype selection_executing_archetype;
+  Entity *cursor_hitbox_tester;
+  Entity *cursor_entity;
+  BuildingPlannerPayload *planner;
+} CursorState;
 
 /* 261 */
-struct KKND::BuildingBlueprint
+struct BuildingBlueprint
 {
-  KKND::UnitType type;
+  UnitType type;
   int footprint_width;
   int footprint_height;
   int _building_blueprint_field_C_unused; ///< Values: 25–1000. Never accessed in the code — cost is taken from unit stats table instead. Vestigial data, possibly original dev cost or HP table.
@@ -1985,79 +1761,60 @@ struct KKND::BuildingBlueprint
                                          ///<     Walls (1×1): 0xFFFFFFFF → all solid (every bit set)
 };
 
-/* 263 */
-enum KKND::ConstructStage : unsigned __int32
-{
+typedef enum : unsigned int {
   BuildingConstructionStage_1 = 1,
   BuildingConstructionStage_2 = 2,
   BuildingConstructionStage_Complete = 3,
-};
+} ConstructStage;
 
-/* 262 */
-struct KKND::Construct
-{
-  KKND::Construct *next;
-  KKND::Construct *prev;
+typedef struct {
+  typeof_unqual(struct Construct) *next;
+  typeof_unqual(struct Construct) *prev;
   int unit_id;
   int player_num;
-  KKND::ConstructStage stage;
+  ConstructStage stage;
   int cost;
   int remaining_cost;
   int cost_per_tick;                    ///< (cost << 8) / (60 * build_time) -- 60 is the global FPS constant (or rather ticks per second)
-};
+} Construct;
 
-/* 267 */
-enum KKND::MouseActions : unsigned __int32
-{
-  Mouse_MoveUp = 0x1,
-  Mouse_MoveDown = 0x2,
-  Mouse_MoveLeft = 0x4,
-  Mouse_MoveRight = 0x8,
-  Mouse_LButton = 0x10,
-  Mouse_RButton = 0x20,
-  Mouse_MButton = 0x80,
-};
+typedef enum : unsigned int {
+  Mouse_MoveUp    =  0x1,
+  Mouse_MoveDown  =  0x2,
+  Mouse_MoveLeft  =  0x4,
+  Mouse_MoveRight =  0x8,
+  Mouse_LButton   = 0x10,
+  Mouse_RButton   = 0x20,
+  Mouse_MButton   = 0x80,
+} MouseActions;
 
-/* 264 */
-struct KKND::MouseState
-{
-  KKND::MouseActions held_actions_mask;
-  KKND::MouseActions new_actions_mask;
-  KKND::MouseActions released_actions_mask;
-  KKND::Direction direction;            ///< mouse move direction (not used)
+typedef struct {
+  MouseActions held_actions_mask;
+  MouseActions new_actions_mask;
+  MouseActions released_actions_mask;
+  Direction direction;            ///< mouse move direction (not used)
   fixed cursor_x;
   fixed cursor_y;
   fixed cursor_dx;
   fixed cursor_dy;
-};
+} MouseState;
 
-/* 268 */
-enum KKND::KeyboardActions : unsigned __int32
-{
-  Keyboard_Up = 0x1,
-  Keyboard_Down = 0x2,
-  Keyboard_Left = 0x4,
-  Keyboard_Right = 0x8,
-  Keyboard_Arrows = 0xF,
-  Keyboard_Ctrl = 0x10,
-  Keyboard_Numeric = 0x20,
-  Keyboard_Shift = 0x40,
-  Keyboard_Enter = 0x80,
-  Keyboard_Tab = 0x100,
-  Keyboard_Esc = 0x200,
-};
+typedef enum : unsigned int {
+  Keyboard_Up      =   0x1,
+  Keyboard_Down    =   0x2,
+  Keyboard_Left    =   0x4,
+  Keyboard_Right   =   0x8,
+  Keyboard_Arrows  =   0xF,
+  Keyboard_Ctrl    =  0x10,
+  Keyboard_Numeric =  0x20,
+  Keyboard_Shift   =  0x40,
+  Keyboard_Enter   =  0x80,
+  Keyboard_Tab     = 0x100,
+  Keyboard_Esc     = 0x200,
+} KeyboardActions;
 
-/* 270 */
-enum KKND::KeyboardDosScancodes : unsigned __int32
-{
+typedef enum : unsigned int {
   Scancode_None = 0,
-  Scancode_Ctrl = 29,
-  Scancode_Alt = 56,
-  Scancode_Q = 16,
-  Scancode_W = 17,
-  Scancode_T = 20,
-  Scancode_A = 30,
-  Scancode_M = 50,
   Scancode_1 = 2,
   Scancode_2 = 3,
   Scancode_3 = 4,
@@ -2068,53 +1825,65 @@ enum KKND::KeyboardDosScancodes : unsigned __int32
   Scancode_8 = 9,
   Scancode_9 = 10,
   Scancode_0 = 11,
-};
+  Scancode_Q = 16,
+  Scancode_W = 17,
+  Scancode_T = 20,
+  Scancode_Ctrl = 29,
+  Scancode_A = 30,
+  Scancode_M = 50,
+  Scancode_Alt = 56,
+} KeyboardDosScancodes;
 
-/* 265 */
-struct KKND::KeyboardState
-{
-  KKND::KeyboardActions held_actions_mask;
-  KKND::KeyboardActions new_actions_mask;
-  KKND::KeyboardActions released_actions_mask;
-  KKND::Direction direction;            ///< Current *arrow* key combo direction e.g top and right keys held => Direction_NE
-  KKND::KeyboardDosScancodes last_key_scancode; ///< 2-11: CTRL+num
+typedef struct {
+  KeyboardActions held_actions_mask;
+  KeyboardActions new_actions_mask;
+  KeyboardActions released_actions_mask;
+  Direction direction;            ///< Current *arrow* key combo direction e.g top and right keys held => Direction_NE
+  KeyboardDosScancodes last_key_scancode; ///< 2-11: CTRL+num
                                                 ///< 30 -> 'A'
                                                 ///< ...
-};
+} KeyboardState;
 
-/* 271 */
-struct KKND::SidebarButton
-{
-  KKND::SidebarButton *next;
-  KKND::SidebarButton *prev;
-  KKND::Task *task;
-  void (__fastcall *mode_open)(KKND::SidebarButton *);
-  void (__fastcall *mode_close)(KKND::SidebarButton *);
+typedef struct {
+  int remaining_cost;
+  int num_orders;
+  Entity *progress_bar;
+  Entity *queue_size_label;
+} ProductionSharedState;
+
+typedef struct {
+  typeof_unqual(struct SidebarButton) *next;
+  typeof_unqual(struct SidebarButton) *prev;
+  Task *task;
+  void (__fastcall *mode_open)(typeof_unqual(struct SidebarButton) *);
+  void (__fastcall *mode_close)(typeof_unqual(struct SidebarButton) *);
   ptrdiff_t icon_mobd_frame;
   int base_cost;                        ///< for progress bar calc
-  KKND::ProductionSharedState *production_state;
+  ProductionSharedState *production_state;
   void *ctx;                            ///< - RenderString* for cash button
                                         ///< - SidebarFactoryProductionOption* for unit/vehicle buttons
                                         ///< - UnitType for building buttons
-  KKND::Entity *entity;
-};
+  Entity *entity;
+} SidebarButton;
 
-/* 281 */
-struct KKND::ProductionSharedState
-{
-  int remaining_cost;
-  int num_orders;
-  KKND::Entity *progress_bar;
-  KKND::Entity *queue_size_label;
-};
+/// One per buildable unit type within SidebarFactoryProduction parent
+typedef struct {
+  typeof_unqual(struct SidebarFactoryProductionOption) *next;
+  typeof_unqual(struct SidebarFactoryProductionOption) *prev;
+  Unit *factory;                  ///< factory unit ptr
+  UnitType product_type;          ///< type of unit being produced
+  ptrdiff_t icon_mobd_frame;            ///< sidebar icon mobd offset
+  ProductionSharedState state;    ///< passed to factory production as a pointer
+  int base_cost;
+  int production_time;                  ///< unit_stats.production_time x 60; bandwidth = (cost << 8) / production_time_x60
+  int key;                              ///< Grouping key : slot_index + 16 * PRODUCTION_GROUP_ID. Used to match new jobs to existing factory. -1 = ungrouped (AI/building construction)14.
+} SidebarFactoryProductionOption;
 
-/* 272 */
 /// One for each type of parent factory's production (tank, tanker, etc) - see FactoryProduction
 /// Player can enqueue more than one of the same unit, but it's managed in the sidebar logic
-struct KKND::FactoryProdJob
-{
-  KKND::FactoryProdJob *next;
-  KKND::FactoryProdJob *prev;
+typedef struct {
+  typeof_unqual(struct FactoryProdJob) *next;
+  typeof_unqual(struct FactoryProdJob) *prev;
   int base_bandwidth;                   ///< max amount of money factory can spend per tick
   int effective_bandwidth;              ///< effective amount of money this production receives based on number of other concurrent productions
   int base_cost;                        ///< base total cost of the unit
@@ -2122,47 +1891,50 @@ struct KKND::FactoryProdJob
   int *remaining_cash;                  ///< ptr to player's cash (managed separately)
   int accumulator;                      ///< each tick: += effective_bandwith;  256 bandwidth spent = $1 towards production
   int *num_orders;                      ///< num of the same unit ordered in sidebar; when production finishes, if num_orders > 1 - remaining_cost resets and production continues (actual value stored and managed in sidebar)
-  KKND::SidebarFactoryProductionOption *notification_arg; ///< Param to send with Unit Ready msg. For sidebar units = ProductionOption *. For AI/buildings -> NULL
-  KKND::Task *notification_task;        ///< Task that receives Unit Ready msg when cost hits 0. For sidebar = g_game_update_loop_task. For AI = entity script or 0
-};
+  SidebarFactoryProductionOption *notification_arg; ///< Param to send with Unit Ready msg. For sidebar units = ProductionOption *. For AI/buildings -> NULL
+  Task *notification_task;        ///< Task that receives Unit Ready msg when cost hits 0. For sidebar = g_game_update_loop_task. For AI = entity script or 0
+} FactoryProdJob;
 
-/* 275 */
-/// One per buildable unit type within SidebarFactoryProduction parent
-struct KKND::SidebarFactoryProductionOption
-{
-  KKND::SidebarFactoryProductionOption *next;
-  KKND::SidebarFactoryProductionOption *prev;
-  KKND::Unit *factory;                  ///< factory unit ptr
-  KKND::UnitType product_type;          ///< type of unit being produced
-  ptrdiff_t icon_mobd_frame;            ///< sidebar icon mobd offset
-  KKND::ProductionSharedState state;    ///< passed to factory production as a pointer
-  int base_cost;
-  int production_time;                  ///< unit_stats.production_time x 60; bandwidth = (cost << 8) / production_time_x60
-  int key;                              ///< Grouping key : slot_index + 16 * PRODUCTION_GROUP_ID. Used to match new jobs to existing factory. -1 = ungrouped (AI/building construction)14.
-};
-
-/* 276 */
-enum KKND::SidebarFactoryProductionType : unsigned __int32
-{
+typedef enum : unsigned int {
   ProductionType_Infantry = 0,
   ProductionType_Vehicles = 1,
   ProductionType_Buildings = 2,
   ProductionType_Towers = 3,
   ProductionType_Aircraft = 4,
   ProductionType_Blacksmith = 5,
-};
+} SidebarFactoryProductionType;
 
-/* 273 */
-struct KKND::SidebarFactoryProduction
-{
-  KKND::SidebarFactoryProduction *next;
-  KKND::SidebarFactoryProduction *prev;
-  KKND::SidebarFactoryProductionType type;
-  KKND::Unit *factory_or_factory_type;
-  KKND::Sidebar *sidebar;
-  KKND::SidebarFactoryProductionOption *prod_head;
-  KKND::SidebarFactoryProductionOption *prod_tail;
-  KKND::Unit *base_building_for_aircraft_spawn;
+typedef struct {
+  typeof_unqual(struct Sidebar) *next;
+  typeof_unqual(struct Sidebar) *prev;
+  Task *task;
+  int num_buttons;
+  fixed x;
+  fixed y;
+  int h_spacing;
+  int v_spacing;
+  Entity *entity;
+  SidebarButton *button_list_head;
+  SidebarButton *button_list_tail;
+  int _sidebar_field_2C_unused;
+  int _sidebar_field_30_unused;
+  int _sidebar_field_34_unused;
+  int _sidebar_field_38_unused;
+  int _sidebar_field_3C_unused;
+  int _sidebar_field_40_unused;
+  int _sidebar_field_44_unused;
+  int _sidebar_field_48_unused;
+} Sidebar;
+
+typedef struct {
+  typeof_unqual(struct SidebarFactoryProduction) *next;
+  typeof_unqual(struct SidebarFactoryProduction) *prev;
+  SidebarFactoryProductionType type;
+  Unit *factory_or_factory_type;
+  Sidebar *sidebar;
+  SidebarFactoryProductionOption *prod_head;
+  SidebarFactoryProductionOption *prod_tail;
+  Unit *base_building_for_aircraft_spawn;
   int _sidebar_factory_production_field_20;
   int _sidebar_factory_production_field_24;
   int _sidebar_factory_production_field_28;
@@ -2173,41 +1945,15 @@ struct KKND::SidebarFactoryProduction
   int _sidebar_factory_production_field_3C;
   int key;
   int factory_header_color_idx;         ///< multiple factories of the same type have differently coloured header bars
-  KKND::Entity *icon_entity;
-};
+  Entity *icon_entity;
+} SidebarFactoryProduction;
 
-/* 277 */
-struct KKND::Sidebar
-{
-  KKND::Sidebar *next;
-  KKND::Sidebar *prev;
-  KKND::Task *task;
-  int num_buttons;
-  fixed x;
-  fixed y;
-  int h_spacing;
-  int v_spacing;
-  KKND::Entity *entity;
-  KKND::SidebarButton *button_list_head;
-  KKND::SidebarButton *button_list_tail;
-  int _sidebar_field_2C_unused;
-  int _sidebar_field_30_unused;
-  int _sidebar_field_34_unused;
-  int _sidebar_field_38_unused;
-  int _sidebar_field_3C_unused;
-  int _sidebar_field_40_unused;
-  int _sidebar_field_44_unused;
-  int _sidebar_field_48_unused;
-};
-
-/* 274 */
 /// Production per individual factory
-struct KKND::FactoryProd
-{
-  KKND::FactoryProd *next;
-  KKND::FactoryProd *prev;
-  KKND::FactoryProdJob *jobs_head;
-  KKND::FactoryProdJob *jobs_tail;
+typedef struct {
+  typeof_unqual(struct FactoryProd) *next;
+  typeof_unqual(struct FactoryProd) *prev;
+  FactoryProdJob *jobs_head;
+  FactoryProdJob *jobs_tail;
   int _factory_production_field_10_unused;
   int _factory_production_field_14_unused;
   int _factory_production_field_18_unused;
@@ -2221,466 +1967,301 @@ struct KKND::FactoryProd
   int _factory_production_field_38_unused;
   int key;                              ///< Grouping key : slot_index + 16 * PRODUCTION_GROUP_ID. Used to match new jobs to existing factory. -1 = ungrouped (AI/building construction)
   int num_active_productions;           ///< the length of the production list (production nodes get recycled on production complete)
-};
+} FactoryProd;
 
-/* 278 */
-struct KKND::BuildingState
-{
+typedef struct {
   void *ctx;                            ///< drillrig: OilPatch*
                                         ///< lab: Task* for the research task
   int upgrade_level;
   int upgrade_timer;
   __int16 same_building_count;
   __int16 garrison_strength;            ///< Init from params (typically 5). Friendly unit enters → increment (max 5). Enemy saboteur → decrement. Zero = building captured/destroyed.
-  KKND::SidebarFactoryProduction *prod;
-  KKND::MobdImageData *status_bar;
-  KKND::Unit *docked_tanker;
+  SidebarFactoryProduction *prod;
+  MobdImageData *status_bar;
+  Unit *docked_tanker;
   int docked_tanker_unit_id;
-  KKND::Entity *repair_anim;            ///< wrench
+  Entity *repair_anim;                  ///< wrench
   int num_active_repairs;               ///< e.g 2 technicians enter the building
-};
+} BuildingState;
 
-/* 284 */
-struct KKND::Bomber
-{
-  KKND::Bomber *next;
-  KKND::Bomber *prev;
-  KKND::Unit *unit;
-};
+typedef struct {
+  typeof_unqual(struct Bomber) *next;
+  typeof_unqual(struct Bomber) *prev;
+  Unit *unit;
+} Bomber;
 
-/* 286 */
-struct KKND::TankerConvoyState
-{
-  int x;
-  int y;
+typedef struct {
+  fixed x;
+  fixed y;
   int checkpoint;
-};
+} TankerConvoyState;
 
-/* 287 */
-struct KKND::Vec2
-{
+typedef struct {
   int x;
   int y;
-};
+} Vec2;
 
-/* 288 */
-struct KKND::BuildLimits
-{
-  KKND::BuildLimits *next;
-  KKND::BuildLimits *prev;
-  KKND::UnitType type;
+typedef struct {
+  typeof_unqual(struct BuildLimits) *next;
+  typeof_unqual(struct BuildLimits) *prev;
+  UnitType type;
   int num_buildings_of_this_type;
-};
+} BuildLimits;
 
-/* 289 */
-struct KKND::BuildingStartingProduction
-{
+typedef struct {
   unsigned __int32 mask;
-  KKND::UnitType type;
+  UnitType type;
   ptrdiff_t mobd_lookup;
-};
+} BuildingStartingProduction;
 
-/* 290 */
-struct KKND::DrillrigState
-{
-};
+typedef struct {
+} DrillrigState;
 
-/* 291 */
-struct KKND::Scar
-{
-  KKND::Scar *next;
-  KKND::Scar *prev;
+typedef struct {
+  typeof_unqual(struct Scar) *next;
+  typeof_unqual(struct Scar) *prev;
   ptrdiff_t mobd_frame;
-  KKND::Entity *entity;
+  Entity *entity;
+} Scar;
+
+typedef struct Nuke Nuke;
+
+struct Nuke {
+  void (__fastcall *mode)(Nuke *);
+  Entity *entity;
+  Task *task;
 };
 
-/* 292 */
-struct KKND::Nuke
-{
-  void (__fastcall *mode)(KKND::Nuke *);
-  KKND::Entity *entity;
-  KKND::Task *task;
-};
+typedef struct UpgradeProcess UpgradeProcess;
 
-/* 293 */
-struct KKND::UpgradeProcess
-{
-  void (__fastcall *mode)(KKND::UpgradeProcess *);
+struct UpgradeProcess {
+  void (__fastcall *mode)(UpgradeProcess *);
   int pulse_cooldown;
   int stage;                            ///< 1 to 6
   BOOL cancelled;
-  KKND::Unit *building;
+  Unit *building;
   int _upgrade_state_field_14;
-  KKND::Entity *progress_bar;
-  KKND::Task *task;
+  Entity *progress_bar;
+  Task *task;
 };
 
-/* 294 */
-struct KKND::ScriptType4
-{
-  KKND::MobdId mobd_id;
-  void (__cdecl __noreturn *handler)(KKND::Task *);
-  KKND::TaskKind kind;
+typedef struct {
+  MobdId mobd_id;
+  void (__cdecl *handler)(Task *);
+  TaskKind kind;
   int script_type_4_field_C;
   int script_type_4_field_10;
-  KKND::UnitType unit_type;
-};
+  UnitType unit_type;
+} ScriptType4;
 
-/* 295 */
 /// might be type 4 with extra padding
-struct KKND::ScriptType1
-{
-  KKND::MobdId mobd_id;
-  void (__cdecl *handler)(KKND::Task *);
-  KKND::TaskKind kind;
+typedef struct {
+  MobdId mobd_id;
+  void (__cdecl *handler)(Task *);
+  TaskKind kind;
   int script_type_1_field_C;
   int script_type_1_field_10;
-  KKND::UnitType unit_type;
+  UnitType unit_type;
   int script_type_1_field_18;
   int script_type_1_field_1C;
   int script_type_1_field_20;
   int script_type_1_field_24;
-};
+} ScriptType1;
 
-/* 296 */
 /// might be type 4 with extra padding
-struct KKND::ScriptType2
-{
-  KKND::MobdId mobd_id;
-  void (__cdecl *handler)(KKND::Task *);
-  KKND::TaskKind kind;
+typedef struct {
+  MobdId mobd_id;
+  void (__cdecl *handler)(Task *);
+  TaskKind kind;
   int script_type_2_field_C;
   int script_type_2_field_10;
-  KKND::UnitType unit_type;
+  UnitType unit_type;
   int script_type_2_field_18;
   int script_type_2_field_1C;
-};
+} ScriptType2;
 
-/* 297 */
-struct KKND::ScriptType3
-{
-  KKND::MobdId mobd_id;
-  void (__cdecl *handler)(KKND::Task *);
-  KKND::TaskKind kind;
+typedef struct {
+  MobdId mobd_id;
+  void (__cdecl *handler)(Task *);
+  TaskKind kind;
   int script_type_3_field_C;
   int script_type_3_field_10;
   int script_type_3_field_14;
   int script_type_3_field_18;
   int script_type_3_field_1C;
-  KKND::UnitType unit_type;
+  UnitType unit_type;
   int script_type_3_field_24;
   int script_type_3_field_28;
   int script_type_3_field_2C;
-};
+} ScriptType3;
 
-/* 298 */
-enum KKND::ScriptType
-{
+typedef enum {
   ScriptType_DetentionCenter = 3,
-  ScriptType_HoldingPens = 4,
-  ScriptType_Clanhall = 5,
-  ScriptType_Outpost = 6,
-};
+  ScriptType_HoldingPens     = 4,
+  ScriptType_Clanhall        = 5,
+  ScriptType_Outpost         = 6,
+} ScriptType;
 
-/* 299 */
-struct KKND::UiStr
-{
-  KKND::UiStr *next;
-  KKND::UiStr *prev;
-  KKND::Glyph *glyphs;
-  int cols;
-  int rows;
-  KKND::FontMobd *font;
-  int cursor_col;
-  int cursor_row;
-};
+typedef struct {
+  typeof_unqual(struct Glyph) *next;
+  RenderNode *rn;
+} Glyph;
 
-/* 300 */
-struct KKND::Glyph
-{
-  KKND::Glyph *next;
-  KKND::RenderNode *rn;
-};
-
-/* 428 */
-struct KKND::FontMobd
-{
-  int _font_mobd_0;
-  KKND::GlyphDesc *glyphs[];
-};
-
-/* 427 */
-struct KKND::GlyphDesc
-{
+typedef struct {
   int x;
   int y;
   int _glyph_desc_field_8;
-  KKND::RenderImage *img;
+  RenderImage *img;
   void *_glyph_desc_field_10;
   void *_glyph_desc_field_14;
   void *advance;
-};
+} GlyphDesc;
 
-/* 304 */
+typedef struct {
+  int _font_mobd_0;
+  GlyphDesc *glyphs[];
+} FontMobd;
+
+typedef struct {
+  typeof_unqual(struct UiStr) *next;
+  typeof_unqual(struct UiStr) *prev;
+  Glyph *glyphs;
+  int cols;
+  int rows;
+  FontMobd *font;
+  int cursor_col;
+  int cursor_row;
+} UiStr;
+
 /// formerly _stru9_unit_order_2
-struct KKND::SelectionNode
-{
-  KKND::SelectionNode *next;
-  KKND::SelectionNode *prev;
-  KKND::Task *unit_task;
-};
+typedef struct {
+  typeof_unqual(struct SelectionNode) *next;
+  typeof_unqual(struct SelectionNode) *prev;
+  Task *unit_task;
+} SelectionNode;
 
-/* 302 */
-struct KKND::AttackOrderPayload
-{
+typedef struct {
   int player_num;
-  KKND::Unit *target;
-};
+  Unit *target;
+} AttackOrderPayload;
 
-/* 301 */
-struct KKND::UnitOrderCtx
-{
-  KKND::SelectionNode sentinel;
-  KKND::SelectionNode *selection_pool;
-  KKND::SelectionNode *selection_head;
-  KKND::Task *_stru9_unit_task_field_14;
-  int player_num;
-  int owns_selection;
-  KKND::AttackOrderPayload attack_order;
-  KKND::AttackOrderPayload move_order;
-  int _stru9_unit_task_field_30;
-};
-
-/* 303 */
-struct KKND::MoveOrderPayload
-{
+typedef struct {
   int player_num;
   int dst_x;
   int dst_y;
-};
+} MoveOrderPayload;
 
-/* 305 */
-struct KKND::AiController
-{
-  KKND::AiController *next;
-  KKND::AiController *prev;
-  void *ctx1;
-  void *ctx2;
-  KKND::AiUnitNode *unit_node_pool;
-  KKND::AiUnitNode *unit_free_head;
-  KKND::AiWandererNode *new_wanderer_head;
-  KKND::AiWandererNode *new_wanderer_tail;
-  int _ai_controller_20_ai_strategic_value_threshold;
-  int _ai_controller_24;
-  KKND::AiWandererNode *wanderer_pool;
-  KKND::AiWandererNode *wanderer_free_head;
-  KKND::AiWandererNode *active_wanderer_head;
-  KKND::AiWandererNode *active_wanderer_tail;
-  char _ai_controller_38[8];
-  KKND::AiWandererNode *active_wanderer_pool;
-  KKND::AiWandererNode *active_wanderer_free_head;
-  KKND::AiAttackerNode *unassigned_attacker_head;
-  KKND::AiAttackerNode *unassigned_attacker_tail;
-  char _ai_controller_50[8];
-  KKND::AiAttackerNode *attacker_pool;
-  KKND::AiAttackerNode *attacker_free_head;
-  KKND::AiAttackerNode *convoy_escort_head;
-  KKND::AiAttackerNode *convoy_escort_tail;
-  char _ai_controller_68[8];
-  KKND::AiAttackerNode *convoy_escort_pool;
-  KKND::AiAttackerNode *convoy_escort_free_head;
-  KKND::AiBuildNode *build_head;
-  KKND::AiBuildNode *build_tail;
-  char _ai_controller_80[20];
-  KKND::AiBuildNode *build_pool;
-  KKND::AiBuildNode *build_free_head;
-  KKND::AiDrillrigNode *drillrig_head;
-  KKND::AiDrillrigNode *drillrig_tail;
-  char _ai_controller_A4[44];
-  int _ai_controller_D0;
-  KKND::AiDrillrigNode *drillrig_pool;
-  KKND::AiDrillrigNode *drillrig_free_head;
-  KKND::AiTankerNode *tanker_head;
-  KKND::AiTankerNode *tanker_tail;
-  int _ai_controller_E4;
-  int _ai_controller_E8;
-  KKND::AiTankerNode *tanker_pool;
-  KKND::AiTankerNode *tanker_free_head;
-  KKND::AiPowerPlantNode *powerplant_head;
-  KKND::AiPowerPlantNode *powerplant_tail;
-  int _ai_controller_FC;
-  KKND::AiPowerPlantNode *powerplant_pool;
-  KKND::AiPowerPlantNode *powerplant_free_head;
-  KKND::AiEnemyNode *enemy_head;
-  KKND::AiEnemyNode *enemy_tail;
-  int _ai_controller_110;
-  KKND::AiEnemyNode *enemy_pool;
-  KKND::AiEnemyNode *enemy_free_head;
-  KKND::AiSquadNode *attack_squad_head;
-  KKND::AiSquadNode *attack_squad_tail;
-  char _ai_controller_124[60];
-  KKND::AiSquadNode *squad_pool;
-  KKND::AiSquadNode *squad_pool_free_head;
-  KKND::AiSquadNode *patrol_squad_head;
-  KKND::AiSquadNode *patrol_squad_tail;
-  char _ai_controller_170[60];
-  int _ai_controller_1AC;
-  int _ai_controller_1B0;
-  KKND::AiSquadNode *retreat_squad_head;
-  KKND::AiSquadNode *retreat_squad_tail;
-  char _ai_controller_1BC[60];
-  int _ai_controller_1F8;
-  int _ai_controller_1FC;
-  int _ai_controller_200_head;
-  int _ai_controller_200_tail;
-  char _ai_controller_208[60];
-  int _ai_controller_244;
-  int _ai_controller_248;
-  KKND::AiSquadNode *staging_squad;
-  int base_area_min_x;
-  int base_area_min_y;
-  int base_area_max_x;
-  int base_area_max_y;
-  KKND::AiBuildOrderNode *build_order_head;
-  KKND::AiBuildOrderNode *build_order_tail;
-  int _ai_controller_268;
-  KKND::AiBuildOrderNode *build_order_pool;
-  KKND::AiBuildOrderNode *build_order_free_head;
-  KKND::AiBuildOrderNode *build_order_current;
-  int rally_x;
-  int rally_y;
-  KKND::Vec2 patrol_waypoints[4];
+typedef struct {
+  SelectionNode sentinel;
+  SelectionNode *selection_pool;
+  SelectionNode *selection_head;
+  Task *_stru9_unit_task_field_14;
   int player_num;
-  KKND::Race player_race;
-  int *cash;
-  int attacker_count;
-  int max_units;
-  int squad_threshold;
-  int attack_confidence;
-  int base_threat;
-  int max_squad_threat;
-  int best_patrol_waypoint_idx;
-  int patrol_threat[5];
-  KKND::UnitType last_unit_produced;
-  KKND::UnitType last_unit_produced_factory;
-  BOOL tanker_production_in_progress;
-  KKND::AiDrillrigNode *preferred_drillrig;
-  KKND::AiBuildingPlacementNode *building_replacement_head;
-  KKND::AiBuildingPlacementNode *building_replacement_tail;
-  char _ai_controller_2F4[28];
-  KKND::AiBuildingPlacementNode *building_replacement_pool;
-  KKND::AiBuildingPlacementNode *building_replacement_free_head;
-  KKND::AiBuildingPlacementNode *drillrig_replacement_head;
-  KKND::AiBuildingPlacementNode *drillrig_replacement_tail;
-  char _ai_controller_320[28];
-  int _ai_controller_33C;
-  int _ai_controller_340;
-  int construction_state;
-  int construction_base_cost;
-  int construction_remaining_cost;
-  int construction_countdown;           ///< small 10 ticks stagger before placing a new building
-  int construction_cost_per_tick;
-  KKND::Task *construction_task;        ///< current building under construction
-  int airstrike_interval;
-  int airstrike_count;
-};
+  int owns_selection;
+  AttackOrderPayload attack_order;
+  MoveOrderPayload move_order;
+} UnitOrderCtx;
 
-/* 307 */
-struct KKND::AiUnitNode
-{
-  KKND::AiUnitNode *next;
-  KKND::AiUnitNode *prev;
-  KKND::Unit *unit;
-  KKND::AiSquadNode *squad;
-};
+typedef struct AiSquadNode AiSquadNode;
 
-/* 308 */
-struct KKND::AiWandererNode
-{
-  KKND::AiWandererNode *next;
-  KKND::AiWandererNode *prev;
+typedef struct {
+  typeof_unqual(struct AiUnitNode) *next;
+  typeof_unqual(struct AiUnitNode) *prev;
+  Unit *unit;
+  AiSquadNode *squad;
+} AiUnitNode;
+
+typedef struct {
+  typeof_unqual(struct AiWandererNode) *next;
+  typeof_unqual(struct AiWandererNode) *prev;
   int _ai_wanderer_node_8;
-  KKND::Unit *unit;
-};
+  Unit *unit;
+} AiWandererNode;
 
-/* 310 */
-struct KKND::AiAttackerNode
-{
-  KKND::AiAttackerNode *next;
-  KKND::AiAttackerNode *prev;
-  KKND::AiSquadNode *squad;
-  KKND::Unit *unit;
-};
+typedef struct {
+  typeof_unqual(struct AiAttackerNode) *next;
+  typeof_unqual(struct AiAttackerNode) *prev;
+  AiSquadNode *squad;
+  Unit *unit;
+} AiAttackerNode;
 
-/* 311 */
-struct KKND::AiBuildNode
-{
-  KKND::AiBuildNode *next;
-  KKND::AiBuildNode *prev;
-  KKND::Unit *unit;
+typedef struct {
+  typeof_unqual(struct AiBuildNode) *next;
+  typeof_unqual(struct AiBuildNode) *prev;
+  Unit *unit;
   int remaining_cost;
-  KKND::UnitType unit_type;
+  UnitType unit_type;
   int base_cost;
   int cost_per_tick;
-};
+} AiBuildNode;
 
-/* 312 */
-struct KKND::AiDrillrigNode
-{
-  KKND::AiDrillrigNode *next;
-  KKND::AiDrillrigNode *prev;
-  KKND::AiTankerNode *tanker_next;
-  KKND::AiTankerNode *tanker_prev;
+typedef struct AiDrillrigNode AiDrillrigNode;
+
+typedef struct {
+  typeof_unqual(struct AiTankerNode) *next;
+  typeof_unqual(struct AiTankerNode) *prev;
+  AiDrillrigNode *drillrig;
+  Unit *unit;
+} AiTankerNode;
+
+typedef struct {
+  typeof_unqual(struct AiPowerPlantNode) *next;
+  typeof_unqual(struct AiPowerPlantNode) *prev;
+  Unit *unit;
+} AiPowerPlantNode;
+
+struct AiDrillrigNode {
+  AiDrillrigNode *next;
+  AiDrillrigNode *prev;
+  AiTankerNode *tanker_next;
+  AiTankerNode *tanker_prev;
   int _ai_drillrig_node_10;
   int _ai_drillrig_node_14;
   int _ai_drillrig_node_18;
   int _ai_drillrig_node_1C;
-  KKND::Unit *unit;
-  KKND::AiSquadNode *guard_squad;
-  KKND::AiPowerPlantNode *nearest_powerplant;
+  Unit *unit;
+  AiSquadNode *guard_squad;
+  AiPowerPlantNode *nearest_powerplant;
   int local_threat;
   int current_tanker_count;
   int desired_tanker_count;
 };
 
-/* 313 */
-struct KKND::AiTankerNode
-{
-  KKND::AiTankerNode *next;
-  KKND::AiTankerNode *prev;
-  KKND::AiDrillrigNode *drillrig;
-  KKND::Unit *unit;
-};
+typedef struct {
+  typeof_unqual(struct AiEnemyNode) *next;
+  typeof_unqual(struct AiEnemyNode) *prev;
+  Unit *unit;
+} AiEnemyNode;
 
-/* 314 */
-struct KKND::AiPowerPlantNode
-{
-  KKND::AiPowerPlantNode *next;
-  KKND::AiPowerPlantNode *prev;
-  KKND::Unit *unit;
-};
+typedef struct {
+  typeof_unqual(struct AiBuildOrderNode) *next;
+  typeof_unqual(struct AiBuildOrderNode) *prev;
+  int _ai_stru26C_node_8;
+} AiBuildOrderNode;
 
-/* 315 */
-struct KKND::AiEnemyNode
-{
-  KKND::AiEnemyNode *next;
-  KKND::AiEnemyNode *prev;
-  KKND::Unit *unit;
-};
+typedef struct {
+  typeof_unqual(struct AiBuildingPlacementNode) *next;
+  typeof_unqual(struct AiBuildingPlacementNode) *prev;
+  Unit *unit;
+  UnitType unit_type;
+  int unit_x;
+  int unit_y;
+  int grid_anchor_x;
+  int grid_anchor_y;
+  int strategic_value;
+} AiBuildingPlacementNode;
 
-/* 316 */
-struct KKND::AiSquadNode
-{
-  KKND::AiSquadNode *next;
-  KKND::AiSquadNode *prev;
-  KKND::AiSquadNode *merge_target_squad;
-  KKND::AiAttackerNode *attackers_head;
-  KKND::AiAttackerNode *attackers_tail;
+struct SquadNode {
+  AiSquadNode *next;
+  AiSquadNode *prev;
+  AiSquadNode *merge_target_squad;
+  AiAttackerNode *attackers_head;
+  AiAttackerNode *attackers_tail;
   int _ai_stru160_node_14_unused;
   int _ai_stru160_node_18_unused;
   int flags;
-  KKND::AiAttackerNode *last_attacker;
-  KKND::AiEnemyNode *enemy_target;
+  AiAttackerNode *last_attacker;
+  AiEnemyNode *enemy_target;
   int retarget_cooldown;
   int total_squad_threat;
   int area_threat;
@@ -2690,123 +2271,131 @@ struct KKND::AiSquadNode
   int destination_y;
 };
 
-/* 317 */
-struct KKND::AiBuildOrderNode
-{
-  KKND::AiBuildOrderNode *next;
-  KKND::AiBuildOrderNode *prev;
-  int _ai_stru26C_node_8;
-};
+typedef struct {
+  typeof_unqual(struct AiController) *next;
+  typeof_unqual(struct AiController) *prev;
+  void *ctx1;
+  void *ctx2;
+  AiUnitNode *unit_node_pool;
+  AiUnitNode *unit_free_head;
+  AiWandererNode *new_wanderer_head;
+  AiWandererNode *new_wanderer_tail;
+  int _ai_controller_20_ai_strategic_value_threshold;
+  int _ai_controller_24;
+  AiWandererNode *wanderer_pool;
+  AiWandererNode *wanderer_free_head;
+  AiWandererNode *active_wanderer_head;
+  AiWandererNode *active_wanderer_tail;
+  char _ai_controller_38[8];
+  AiWandererNode *active_wanderer_pool;
+  AiWandererNode *active_wanderer_free_head;
+  AiAttackerNode *unassigned_attacker_head;
+  AiAttackerNode *unassigned_attacker_tail;
+  char _ai_controller_50[8];
+  AiAttackerNode *attacker_pool;
+  AiAttackerNode *attacker_free_head;
+  AiAttackerNode *convoy_escort_head;
+  AiAttackerNode *convoy_escort_tail;
+  char _ai_controller_68[8];
+  AiAttackerNode *convoy_escort_pool;
+  AiAttackerNode *convoy_escort_free_head;
+  AiBuildNode *build_head;
+  AiBuildNode *build_tail;
+  char _ai_controller_80[20];
+  AiBuildNode *build_pool;
+  AiBuildNode *build_free_head;
+  AiDrillrigNode *drillrig_head;
+  AiDrillrigNode *drillrig_tail;
+  char _ai_controller_A4[44];
+  int _ai_controller_D0;
+  AiDrillrigNode *drillrig_pool;
+  AiDrillrigNode *drillrig_free_head;
+  AiTankerNode *tanker_head;
+  AiTankerNode *tanker_tail;
+  int _ai_controller_E4;
+  int _ai_controller_E8;
+  AiTankerNode *tanker_pool;
+  AiTankerNode *tanker_free_head;
+  AiPowerPlantNode *powerplant_head;
+  AiPowerPlantNode *powerplant_tail;
+  int _ai_controller_FC;
+  AiPowerPlantNode *powerplant_pool;
+  AiPowerPlantNode *powerplant_free_head;
+  AiEnemyNode *enemy_head;
+  AiEnemyNode *enemy_tail;
+  int _ai_controller_110;
+  AiEnemyNode *enemy_pool;
+  AiEnemyNode *enemy_free_head;
+  AiSquadNode *attack_squad_head;
+  AiSquadNode *attack_squad_tail;
+  char _ai_controller_124[60];
+  AiSquadNode *squad_pool;
+  AiSquadNode *squad_pool_free_head;
+  AiSquadNode *patrol_squad_head;
+  AiSquadNode *patrol_squad_tail;
+  char _ai_controller_170[60];
+  int _ai_controller_1AC;
+  int _ai_controller_1B0;
+  AiSquadNode *retreat_squad_head;
+  AiSquadNode *retreat_squad_tail;
+  char _ai_controller_1BC[60];
+  int _ai_controller_1F8;
+  int _ai_controller_1FC;
+  int _ai_controller_200_head;
+  int _ai_controller_200_tail;
+  char _ai_controller_208[60];
+  int _ai_controller_244;
+  int _ai_controller_248;
+  AiSquadNode *staging_squad;
+  int base_area_min_x;
+  int base_area_min_y;
+  int base_area_max_x;
+  int base_area_max_y;
+  AiBuildOrderNode *build_order_head;
+  AiBuildOrderNode *build_order_tail;
+  int _ai_controller_268;
+  AiBuildOrderNode *build_order_pool;
+  AiBuildOrderNode *build_order_free_head;
+  AiBuildOrderNode *build_order_current;
+  int rally_x;
+  int rally_y;
+  Vec2 patrol_waypoints[4];
+  int player_num;
+  Race player_race;
+  int *cash;
+  int attacker_count;
+  int max_units;
+  int squad_threshold;
+  int attack_confidence;
+  int base_threat;
+  int max_squad_threat;
+  int best_patrol_waypoint_idx;
+  int patrol_threat[5];
+  UnitType last_unit_produced;
+  UnitType last_unit_produced_factory;
+  BOOL tanker_production_in_progress;
+  AiDrillrigNode *preferred_drillrig;
+  AiBuildingPlacementNode *building_replacement_head;
+  AiBuildingPlacementNode *building_replacement_tail;
+  char _ai_controller_2F4[28];
+  AiBuildingPlacementNode *building_replacement_pool;
+  AiBuildingPlacementNode *building_replacement_free_head;
+  AiBuildingPlacementNode *drillrig_replacement_head;
+  AiBuildingPlacementNode *drillrig_replacement_tail;
+  char _ai_controller_320[28];
+  int _ai_controller_33C;
+  int _ai_controller_340;
+  int construction_state;
+  int construction_base_cost;
+  int construction_remaining_cost;
+  int construction_countdown;           ///< small 10 ticks stagger before placing a new building
+  int construction_cost_per_tick;
+  Task *construction_task;        ///< current building under construction
+  int airstrike_interval;
+  int airstrike_count;
+} AiController;
 
-/* 318 */
-struct KKND::AiBuildingPlacementNode
-{
-  KKND::AiBuildingPlacementNode *next;
-  KKND::AiBuildingPlacementNode *prev;
-  KKND::Unit *unit;
-  KKND::UnitType unit_type;
-  int unit_x;
-  int unit_y;
-  int grid_anchor_x;
-  int grid_anchor_y;
-  int strategic_value;
-};
-
-/* 306 */
-struct KKND:___void_ptr_in_fact_:AiController_struC
-{
-  KKND::AiSquadNode *_ai_controller_strucC_0;
-  int _ai_controller_strucC_4;
-  int _ai_controller_strucC_8;
-  KKND::AiAttackerNode *_ai_controller_strucC_C;
-  int _ai_controller_strucC_10;
-  int _ai_controller_strucC_14;
-  int _ai_controller_strucC_18;
-  int _ai_controller_strucC_1C;
-  int _ai_controller_strucC_20;
-  int _ai_controller_strucC_24;
-  int _ai_controller_strucC_28;
-  int _ai_controller_strucC_2C;
-  int _ai_controller_strucC_30;
-  int _ai_controller_strucC_34;
-  int _ai_controller_strucC_38;
-  int _ai_controller_strucC_3C;
-  int _ai_controller_strucC_40;
-  int _ai_controller_strucC_44;
-  int _ai_controller_strucC_48;
-  int _ai_controller_strucC_4C;
-  int _ai_controller_strucC_50;
-  int _ai_controller_strucC_54;
-  int _ai_controller_strucC_58;
-  int _ai_controller_strucC_5C;
-  int _ai_controller_strucC_60;
-  int _ai_controller_strucC_64;
-  int _ai_controller_strucC_68;
-  int _ai_controller_strucC_6C;
-  int _ai_controller_strucC_70;
-  int _ai_controller_strucC_74;
-  int _ai_controller_strucC_78;
-  int _ai_controller_strucC_7C;
-  int _ai_controller_strucC_80;
-  int _ai_controller_strucC_84;
-  int _ai_controller_strucC_88;
-  int _ai_controller_strucC_8C;
-  int _ai_controller_strucC_90;
-  int _ai_controller_strucC_94;
-  int _ai_controller_strucC_98;
-  int _ai_controller_strucC_9C;
-  int _ai_controller_strucC_A0;
-  int _ai_controller_strucC_A4;
-  int _ai_controller_strucC_A8;
-  int _ai_controller_strucC_AC;
-  int _ai_controller_strucC_B0;
-  int _ai_controller_strucC_B4;
-  int _ai_controller_strucC_B8;
-  int _ai_controller_strucC_BC;
-  int _ai_controller_strucC_C0;
-  int _ai_controller_strucC_C4;
-  int _ai_controller_strucC_C8;
-  int _ai_controller_strucC_CC;
-  int _ai_controller_strucC_D0;
-  int _ai_controller_strucC_D4;
-  int _ai_controller_strucC_D8;
-  int _ai_controller_strucC_DC;
-  int _ai_controller_strucC_E0;
-  int _ai_controller_strucC_E4;
-  int _ai_controller_strucC_E8;
-  int _ai_controller_strucC_EC;
-  int _ai_controller_strucC_F0;
-  int _ai_controller_strucC_F4;
-  int _ai_controller_strucC_F8;
-  int _ai_controller_strucC_FC;
-  int _ai_controller_strucC_100;
-  int _ai_controller_strucC_104;
-  int _ai_controller_strucC_108;
-  int _ai_controller_strucC_10C;
-  int _ai_controller_strucC_110;
-  int _ai_controller_strucC_114;
-  int _ai_controller_strucC_118;
-  int _ai_controller_strucC_11C;
-  int _ai_controller_strucC_120;
-  int _ai_controller_strucC_124;
-  int _ai_controller_strucC_128;
-  int _ai_controller_strucC_12C;
-  int _ai_controller_strucC_130;
-};
-
-/* 309 */
-/// AiWandererNode
-struct KKND::____delete___Ai_stru40_Node
-{
-  KKND::AiWandererNode *next;
-  KKND::AiWandererNode *prev;
-  int _ai_wanderer_node_8;
-  KKND::Unit *unit;
-};
-
-/* 389 */
-struct KKND::AiSquadNodeSaveStruct
-{
+typedef struct {
   __int32 num_attacker_nodes;
   __int32 enemy_target_unit_id;
   __int32 attacker_head_unit_id;
@@ -2817,11 +2406,9 @@ struct KKND::AiSquadNodeSaveStruct
   __int32 center_y;
   __int32 destination_x;
   __int32 destination_y;
-};
+} AiSquadNodeSaveStruct;
 
-/* 319 */
-const struct KKND::AiPlayersSaveStruct
-{
+typedef struct {
   int ai_task_handler_id;
   int num_unit_nodes;
   int num_wanderer_nodes;
@@ -2894,7 +2481,7 @@ const struct KKND::AiPlayersSaveStruct
   int _ai_players_save_struct_114;
   int _ai_players_save_struct_118;
   int unit_free_head_unit_id;
-  KKND::AiSquadNodeSaveStruct squad_node;
+  AiSquadNodeSaveStruct squad_node;
   int attacker_free_head_unit_id;
   int _ai_players_save_struct_14C;
   int _ai_players_save_struct_150;
@@ -2922,40 +2509,35 @@ const struct KKND::AiPlayersSaveStruct
   int _ai_players_save_struct_1D4;
   int _ai_players_save_struct_1D8;
   int _ai_players_save_struct_1DC;
-};
+} AiPlayersSaveStruct;
 
-/* 371 */
-typedef int KKND::CreatureId;
+typedef int CreatureId;
 
-/* 320 */
-struct KKND::CreatureIdToUnitId
-{
-  KKND::CreatureId creature_id;   ///< actually offset into scripts fn table
+typedef struct {
+  CreatureId creature_id;   ///< actually offset into scripts fn table
                                   ///< task type, but referenced as "Creature ID" in EnemyAI
-  KKND::UnitType unit_type;
+  UnitType unit_type;
+} CreatureIdToUnitId;
+
+typedef struct XMark XMark;
+
+struct XMark {
+  void (__fastcall *mode)(XMark *);
+  Task *task;
+  Entity *entity;
 };
 
-/* 322 */
-struct KKND::XMark
-{
-  void (__fastcall *mode)(KKND::XMark *);
-  KKND::Task *task;
-  KKND::Entity *entity;
-};
+typedef struct AirstrikeSidebar;
 
-/* 323 */
-struct KKND::AirstrikeSidebar
-{
-  void (__fastcall *mode)(KKND::AirstrikeSidebar *);
+struct AirstrikeSidebar {
+  void (__fastcall *mode)(AirstrikeSidebar *);
   int num_airstrikes_available;
-  KKND::Entity *counter;
-  KKND::Entity *button;
-  KKND::Task *task;
+  Entity *counter;
+  Entity *button;
+  Task *task;
 };
 
-/* 324 */
-struct KKND::EntitySaveStruct
-{
+typedef struct {
   __int32 mobd_id;
   __int32 x;
   __int32 y;
@@ -2966,11 +2548,9 @@ struct KKND::EntitySaveStruct
   __int32 mobd_offset;
   __int32 _54_inside_mobd_ptr4;
   __int32 anim_speed;
-};
+} EntitySaveStruct;
 
-/* 325 */
-struct KKND::UnitSaveStruct
-{
+typedef struct {
   __int32 locked_target_unit_id;
   __int32 task_channel;
   __int32 creature_id;
@@ -2990,7 +2570,7 @@ struct KKND::UnitSaveStruct
   __int32 turret_task_global_events;
   __int32 turret_task_wait_flags;
   __int32 turret_task_field_2C;
-  KKND::EntitySaveStruct turret;
+  EntitySaveStruct turret;
   __int32 turret_target_unit_id;
   __int32 turret_mode;
   __int32 turret_mobd_lookup_id;
@@ -3007,7 +2587,7 @@ struct KKND::UnitSaveStruct
   __int32 unit_mode_return;
   __int32 unit_mode_turn_return;
   __int32 unit_message_handler;
-  KKND::EntitySaveStruct entity;
+  EntitySaveStruct entity;
   __int32 unit_field_78;
   __int32 orientation;
   __int32 unit_field_80;
@@ -3071,64 +2651,54 @@ struct KKND::UnitSaveStruct
   __int16 last_stuck_tile_x;
   __int16 last_stuck_tile_y;
   __int16 stuck_timer;
-};
+} UnitSaveStruct;
 
-/* 326 */
-struct KKND::BlitterDesc
-{
+typedef struct {
   int hunk;
   BOOL (*mode_init)();
-  KKND::Blitter mode_draw;
+  Blitter mode_draw;
   int (__fastcall *mode_cleanup)();
-};
+} BlitterDesc;
 
-/* 327 */
-struct KKND::RenderBlitter
-{
-  KKND::RenderBlitter *next;
-  KKND::RenderBlitter *prev;
+typedef struct {
+  typeof_unqual(struct RenderBlitter) *next;
+  typeof_unqual(struct RenderBlitter) *prev;
   int hunk;
   int (__fastcall *mode_init)();
-  KKND::Blitter mode_render;
+  Blitter mode_render;
   int (__fastcall *mode_cleanup)();
-};
+} RenderBlitter;
 
-/* 375 */
-enum KKND::FileFlags : unsigned __int32
+typedef enum : unsigned int
 {
-  File_Stdio = 0x1,
-  File_MemoryMapped = 0x2,
-};
+  File_Stdio = 1,
+  File_MemoryMapped = 2,
+} FileFlags;
 
-/* 328 */
-struct KKND::File
-{
-  KKND::FileFlags flags;
+typedef struct {
+  FileFlags flags;
   FILE *fp;
   HANDLE map_handle;
   void *map_base;
   void *map_cursor;
   void *map_end;
-  KKND::File *next;
-  KKND::File *prev;
-};
+  typeof_unqual(struct File) *next;
+  typeof_unqual(struct File) *prev;
+} File;
 
-/* 425 */
-enum KKND::SoundPlaybackMode : unsigned __int32
+typedef enum : unsigned int
 {
-  SoundPlayback_Normal = -2,
-  SoundPlayback_Streaming = -3,
-};
+  SoundPlayback_Normal = (unsigned int)-2,
+  SoundPlayback_Streaming = (unsigned int)-3,
+} SoundPlaybackMode;
 
-/* 336 */
-struct KKND::SoundStream
-{
+typedef struct {
   int id;
   IDirectSoundBuffer *dsb;
-  KKND::Task *task;
-  KKND::File *file;
+  Task *task;
+  File *file;
   uintptr_t thread;
-  KKND::SoundPlaybackMode playback_mode;
+  SoundPlaybackMode playback_mode;
   int num_play_attempts_while_paused;
   int volume;
   int vol_transition_remaining_ticks;
@@ -3137,27 +2707,24 @@ struct KKND::SoundStream
   int pan_transition_remaining_ticks;
   int pan_transition_per_tick;
   int flags;
-  KKND::SoundStream *next;
-  KKND::SoundStream *prev;
+  typeof_unqual(struct SoundStream) *next;
+  typeof_unqual(struct SoundStream) *prev;
   int streaming_bytes_remaining;
   char filename[32];
   char _stru7_sound_64[42];
   char _stru7_sound_8E[100];
   char _stru7_sound_F2[82];
   int _stru7_sound_144;
-};
+} SoundStream;
 
-/* 376 */
-enum KKND::MovieBppFlags : unsigned __int16
+typedef enum : unsigned __int16
 {
-  MovieBpp_8 = 0x1,
-  MovieBpp_16 = 0x2,
-};
+  MovieBpp_8 = 1,
+  MovieBpp_16 = 2,
+} MovieBppFlags;
 
-/* 341 */
-struct KKND::MovieHeader
-{
-  KKND::MovieBppFlags bpp;
+typedef struct {
+  MovieBppFlags bpp;
   __int16 width;
   __int16 height;
   __int16 _movie_header_6;
@@ -3172,10 +2739,9 @@ struct KKND::MovieHeader
   __int16 *sound_bytes;
   int subtitles_len;
   const char *subtitles;
-};
+} MovieHeader;
 
-/* 372 */
-enum KKND::MovieFlags : unsigned __int16
+typedef enum : unsigned __int16
 {
   Movie_HasPosition = 0x1,
   Movie_HasAudio = 0x4,
@@ -3183,18 +2749,16 @@ enum KKND::MovieFlags : unsigned __int16
   Movie_HasPalette = 0x10,
   Movie_HasTiming = 0x20,
   Movie_HasSubtitles = 0x40,
-};
+} MovieFlags;
 
-/* 342 */
-struct KKND::MovieFrame
-{
+typedef struct {
   int size;
-  KKND::MovieFlags flags;
+  MovieFlags flags;
   __int16 x;                            ///< partial update position
   __int16 y;
   __int16 _movie_frame_A;
   char _movie_frame_C[8];
-  KKND::MovieBppFlags bpp;
+  MovieBppFlags bpp;
   __int16 width;
   __int16 height;
   __int16 _movie_frame_1A;
@@ -3213,32 +2777,32 @@ struct KKND::MovieFrame
   __int16 _movie_frame_36;
   __int16 _movie_frame_38;
   __int16 _movie_frame_3A;
-};
+} MovieFrame;
 
 /* 343 */
-struct __unaligned __declspec(align(1)) KKND::Movie
+struct __unaligned __declspec(align(1)) Movie
 {
-  KKND::MovieHeader header;
+  MovieHeader header;
   char _movie_2C[372];
   int _movie_1A0[80];
   char _movie_2E0[36];
   int _movie_304[9];
   char _movie_328[8];
-  KKND::MovieFlags frame_flags;
+  MovieFlags frame_flags;
   __int16 active_decode_buffer;
   FILE *file;
   size_t first_frame_offset;            ///< for rewinding
   void *decode_buffers[2];
   int block_offset_lut[256];
-  KKND::MovieFrame frame;
+  MovieFrame frame;
   char _movie_780[131016];
   char data[1];
 };
 
 /* 344 */
-struct KKND::FmvFrameImage
+struct FmvFrameImage
 {
-  KKND::Blitter mode_render;
+  Blitter mode_render;
   int width;
   int height;
   int _movie_frame_image_C;
@@ -3253,7 +2817,7 @@ struct KKND::FmvFrameImage
 };
 
 /* 348 */
-enum KKND::HunkFixupType : unsigned __int32
+enum HunkFixupType : unsigned __int32
 {
   HunkFixup_SimplePointer = 0x0,
   HunkFixup_BatchPointer = 0x40000000,
@@ -3261,7 +2825,7 @@ enum KKND::HunkFixupType : unsigned __int32
 };
 
 /* 353 */
-enum KKND::NetzProtocol : unsigned __int32
+enum NetzProtocol : unsigned __int32
 {
   NetzProtocol_TCP = 0,
   NetzProtocol_IPX = 1,
@@ -3271,16 +2835,16 @@ enum KKND::NetzProtocol : unsigned __int32
 };
 
 /* 359 */
-struct KKND::DpProvider
+struct DpProvider
 {
   BOOL active;
   GUID guid;
   const char *name;
-  KKND::DpProvider *next;
+  DpProvider *next;
 };
 
 /* 412 */
-enum KKND::NetzMessageType : unsigned __int32
+enum NetzMessageType : unsigned __int32
 {
   NetzMessageType_0 = 0,
   NetzMessageType_Data = 1,
@@ -3293,17 +2857,17 @@ enum KKND::NetzMessageType : unsigned __int32
 };
 
 /* 360 */
-struct KKND::NetzMessage
+struct NetzMessage
 {
   int _netz_stru2_0;
   int _netz_stru2_4;
   int _netz_stru2_8;
-  KKND::NetzMessageType type;
+  NetzMessageType type;
   int _netz_stru2_10;
   int _netz_stru2_14;
   int _netz_stru2_18;
   int _netz_stru2_1C;
-  void (__fastcall *handler)(KKND::NetzMessage *);
+  void (__fastcall *handler)(NetzMessage *);
   BOOL is_locally_generated;
   __int16 pkt;
   __int16 _netz_stru2_2A;
@@ -3322,7 +2886,7 @@ struct KKND::NetzMessage
 };
 
 /* 361 */
-enum KKND::NetzError : unsigned __int32
+enum NetzError : unsigned __int32
 {
   NetzError_Ok = 0x0,
   NetzError_OutOfMemory = 0xFE0000,
@@ -3349,7 +2913,7 @@ enum KKND::NetzError : unsigned __int32
 };
 
 /* 398 */
-enum KKND::NetzConnectionStatus : unsigned __int8
+enum NetzConnectionStatus : unsigned __int8
 {
   NetzConnection_None = 0x0,            ///< Free slot
   NetzConnection_Joined = 0x1,          ///< Remote player joined the lobby
@@ -3358,18 +2922,18 @@ enum KKND::NetzConnectionStatus : unsigned __int8
 };
 
 /* 364 */
-enum KKND::NetzFaction : unsigned __int8
+enum NetzFaction : unsigned __int8
 {
   NetzFaction_Surv = 0,
   NetzFaction_Mute = 1,
 };
 
 /* 363 */
-struct KKND::NetzPlayer
+struct NetzPlayer
 {
-  KKND::NetzConnectionStatus connection_status;
+  NetzConnectionStatus connection_status;
   char palette_idx;
-  KKND::NetzFaction faction;
+  NetzFaction faction;
   char name[8];
   char __netz_player_field_B;
   char __netz_player_field_C;
@@ -3383,10 +2947,10 @@ struct KKND::NetzPlayer
 };
 
 /* 367 */
-struct KKND::ReinforcementsState
+struct ReinforcementsState
 {
-  void (__fastcall *mode)(KKND::ReinforcementsState *);
-  KKND::Task *task;
+  void (__fastcall *mode)(ReinforcementsState *);
+  Task *task;
   unsigned int spawn_x;
   unsigned int spawn_y;
   int player_num;
@@ -3399,30 +2963,30 @@ struct KKND::ReinforcementsState
 };
 
 /* 368 */
-struct KKND::Reinforcements
+struct Reinforcements
 {
-  KKND::UnitType *units;
+  UnitType *units;
   int trigger_time;
   int wave_delay;
   int waves_remaining;
 };
 
 /* 369 */
-struct KKND::Briefing
+struct Briefing
 {
   const char **lines;
   const char *wav;
 };
 
 /* 373 */
-struct KKND::FactoryColorStripe
+struct FactoryColorStripe
 {
   int palette_idx;
   int sidebar_icon_mobd_frame;
 };
 
 /* 383 */
-struct KKND::GuardAreaOrderPayload
+struct GuardAreaOrderPayload
 {
   int player_num;
   int dst_x;
@@ -3430,28 +2994,28 @@ struct KKND::GuardAreaOrderPayload
 };
 
 /* 384 */
-struct KKND::KeyBinding
+struct KeyBinding
 {
   int scancode;
-  KKND::KeyboardActions action;
+  KeyboardActions action;
 };
 
 /* 386 */
-enum KKND::BoxdRaycastPhase : unsigned __int32
+enum BoxdRaycastPhase : unsigned __int32
 {
   RaycastPhase_ScanningClear = 0x0,
   RaycastPhase_InsideObstacle = 0x1,
 };
 
 /* 387 */
-enum KKND::BoxdRaycastStepResult : unsigned __int32
+enum BoxdRaycastStepResult : unsigned __int32
 {
   RaycastStepResult_Continue = 6,
   RaycastStepResult_Stop = 1,
 };
 
 /* 388 */
-struct KKND::TankerSaveStruct
+struct TankerSaveStruct
 {
   __int32 oil_loaded;
   __int32 current_destination_unit_id;
@@ -3465,7 +3029,7 @@ struct KKND::TankerSaveStruct
 };
 
 /* 391 */
-struct KKND::TechLevelsSaveStruct
+struct TechLevelsSaveStruct
 {
   __int32 num_buildings_by_level[5];
   __int32 _tech_levels_save_stru_unused_field_10;
@@ -3476,7 +3040,7 @@ struct KKND::TechLevelsSaveStruct
 };
 
 /* 392 */
-struct KKND::ConstructSaveStruct
+struct ConstructSaveStruct
 {
   __int32 unit_id;
   __int32 player_num;
@@ -3487,15 +3051,15 @@ struct KKND::ConstructSaveStruct
 };
 
 /* 390 */
-struct KKND::MetaSaveStruct
+struct MetaSaveStruct
 {
   __int32 building_construction_byte_size;
   __int32 num_units_in_group[11];
   __int32 is_building_suspended;
-  KKND::TechLevelsSaveStruct outpost;
-  KKND::TechLevelsSaveStruct clanhall;
-  KKND::TechLevelsSaveStruct machine_shop;
-  KKND::TechLevelsSaveStruct beast_enclosure;
+  TechLevelsSaveStruct outpost;
+  TechLevelsSaveStruct clanhall;
+  TechLevelsSaveStruct machine_shop;
+  TechLevelsSaveStruct beast_enclosure;
   __int32 sidebar_color_bars_used[6];
   __int32 num_player_units;
   __int32 num_ai_units;
@@ -3510,7 +3074,7 @@ struct KKND::MetaSaveStruct
   __int32 is_aircraft_unlocked;
   __int32 aircraft_mode_id;
   __int32 num_airstrikes_available;
-  KKND::EntitySaveStruct airstrike_counter_entity;
+  EntitySaveStruct airstrike_counter_entity;
   __int32 aircraft_sidebar_task_channel;
   __int32 aircraft_sidebar_task_id;
   __int32 aircraft_sidebar_task_message_handler;
@@ -3520,33 +3084,33 @@ struct KKND::MetaSaveStruct
   __int32 aircraft_sidebar_task_wait_flags;
   __int32 aircraft_sidebar_task_field_2C;
   __int32 _meta_save_struct_field_174;
-  KKND::ConstructSaveStruct constructs[1];
+  ConstructSaveStruct constructs[1];
 };
 
 /* 393 */
-struct KKND::UnitSaveIndex
+struct UnitSaveIndex
 {
   int unit_id;
   size_t size;
 };
 
 /* 395 */
-struct KKND::UnitTypeTag
+struct UnitTypeTag
 {
   const char *tag;
-  KKND::UnitType type;
+  UnitType type;
 };
 
 /* 396 */
-/// Verified NOT KKND::GameEvent
-struct __unaligned KKND::NetzGameEvent
+/// Verified NOT GameEvent
+struct __unaligned NetzGameEvent
 {
-  KKND::GameEventType type;
+  GameEventType type;
   char payload[12];
 };
 
 /* 397 */
-enum KKND::MovieType : unsigned __int32
+enum MovieType : unsigned __int32
 {
   MovieType_Intro = 0x0,
   MovieType_CampaignBriefing = 0x1,
@@ -3554,7 +3118,7 @@ enum KKND::MovieType : unsigned __int32
 };
 
 /* 400 */
-struct KKND::CplcPlayerSpawn
+struct CplcPlayerSpawn
 {
   int x;
   int y;
@@ -3562,7 +3126,7 @@ struct KKND::CplcPlayerSpawn
 };
 
 /* 401 */
-enum KKND::WellKnownMobdIds
+enum WellKnownMobdIds
 {
   MOBD_CURSOR_DEFAULT_ARROW = 0xC,
   MOBD_CURSOR_UNIT_HOVER = 0x30,
@@ -3585,7 +3149,7 @@ enum KKND::WellKnownMobdIds
 };
 
 /* 402 */
-enum KKND::NetzPacketType : unsigned __int8
+enum NetzPacketType : unsigned __int8
 {
   NETZ_PKT_EVENT_BROADCAST = 51,        ///< Host distributes collected game events from all players
   NETZ_PKT_CLIENT_EVENT = 52,           ///< Client submits it's game event for the current lockstep tick (13 bytes if event, 1 if none)
@@ -3616,59 +3180,59 @@ enum KKND::NetzPacketType : unsigned __int8
 };
 
 /* 404 */
-enum KKND::NetzLinkConnectionState : unsigned __int32
+enum NetzLinkConnectionState : unsigned __int32
 {
   NetzLinkConnectionState_None = 0,
   NetzLinkConnectionState_Connected = 2,
 };
 
 /* 403 */
-struct KKND::NetzLink
+struct NetzLink
 {
-  KKND::NetzLinkConnectionState connection_state;
+  NetzLinkConnectionState connection_state;
   int _netz_link_field_4[8];
   DPID dpid;
   BOOL is_active;
 };
 
 /* 406 */
-struct KKND::NetzSendBuffer
+struct NetzSendBuffer
 {
   uint8_t recv_seq;
   uint8_t send_seq;
   uint8_t _netz_send_buffer_field_2;
-  KKND::NetzPacketType pkt;
+  NetzPacketType pkt;
   uint8_t buf[280];
   int last_send_size;
 };
 
 /* 407 */
-struct __unaligned KKND::KaosSettings
+struct __unaligned KaosSettings
 {
   int settings;
   char _kaos_settings_field_4;
 };
 
 /* 408 */
-struct KKND::FollowOrderPayload
+struct FollowOrderPayload
 {
   int player_num;
-  KKND::Unit *target;
+  Unit *target;
 };
 
 /* 409 */
-struct KKND::DplaySession
+struct DplaySession
 {
   GUID session_guid;
   int num_current_players;
   int max_players;
   int flags;
   char session_name[16];
-  KKND::DplaySession *next;
+  DplaySession *next;
 };
 
 /* 410 */
-struct KKND::NetzRosterPlayer
+struct NetzRosterPlayer
 {
   uint8_t present;
   uint8_t name[12];
@@ -3677,15 +3241,15 @@ struct KKND::NetzRosterPlayer
 };
 
 /* 411 */
-struct KKND::NetzRoster
+struct NetzRoster
 {
   unsigned __int32 num_players;
   unsigned __int32 slot;
-  KKND::NetzRosterPlayer players[6];    ///< sender's slot or recipient's assigned slot
+  NetzRosterPlayer players[6];    ///< sender's slot or recipient's assigned slot
 };
 
 /* 413 */
-enum KKND::NetzJoinState : __int32
+enum NetzJoinState : __int32
 {
   NetzJoinState_Idle = -2,
   NetzJoinState_Connecting = -1,
@@ -3694,7 +3258,7 @@ enum KKND::NetzJoinState : __int32
 };
 
 /* 414 */
-struct KKND::NetzProvider
+struct NetzProvider
 {
   int _netz_provider_field_0;
   const char *names[3];
@@ -3704,10 +3268,10 @@ struct KKND::NetzProvider
 };
 
 /* 415 */
-struct KKND::NetzTimer
+struct NetzTimer
 {
   BOOL active;
-  KKND::NetzTimer *next;
+  NetzTimer *next;
   int _netz_timer_field_8[2];
   int fire_at;
   int retries;
@@ -3715,7 +3279,7 @@ struct KKND::NetzTimer
 };
 
 /* 416 */
-struct __unaligned KKND::NetzJoinPkt
+struct __unaligned NetzJoinPkt
 {
   uint8_t name[7];
   uint8_t palette;
@@ -3725,26 +3289,26 @@ struct __unaligned KKND::NetzJoinPkt
 };
 
 /* 418 */
-struct KKND::DplayPlayer
+struct DplayPlayer
 {
   char short_name[16];
   char long_name[16];
   DPID player_id;
-  KKND::DplayPlayer *next;
+  DplayPlayer *next;
 };
 
 /* 422 */
-struct KKND::SaveSlot
+struct SaveSlot
 {
   char name[20];
-  KKND::LevelId level_id;
+  LevelId level_id;
 };
 
 /* 426 */
-struct KKND::NetzMobemPhonebook
+struct NetzMobemPhonebook
 {
-  KKND::NetzMobemPhonebook *next;
-  KKND::NetzMobemPhonebook *prev;
+  NetzMobemPhonebook *next;
+  NetzMobemPhonebook *prev;
   char name[12];
   char phone[12];
   int baud_index;
@@ -3757,8 +3321,8 @@ struct KKND::NetzMobemPhonebook
 #define END(x) ((void*)&x)
 
 
-static inline void TECHLVL_reset(KKND::TechLevels *tech) {
-  memset(tech, 0, sizeof(KKND::TechLevels));
+static inline void TECHLVL_reset(TechLevels *tech) {
+  memset(tech, 0, sizeof(TechLevels));
   tech->max_level = 1;
 }
 

@@ -13,7 +13,16 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": []
+            "problemMatcher": [],
+            "dependsOn": [
+                "clear"
+            ],
+            "dependsOrder": "sequence"
+        },
+        {
+            "label": "clear",
+            "type": "shell",
+            "command": "clear"
         }
     ]
 }
