@@ -1,8 +1,8 @@
+#include <stdint.h>
+#include <stdio.h> // File
 
 #include <windows.h>
 #include <math.h>
-
-#include <stdio.h> // File
 
 #include <ddraw.h>
 #include <dplay.h>
@@ -10,9 +10,9 @@
 
 typedef struct Entity Entity;
 typedef struct Unit Unit;
-typedef struct MenuWidget MenuWidget;
 
 typedef __int32 fixed;
+typedef unsigned short bool16_t;
 
 typedef struct {
   fixed x;
@@ -553,10 +553,8 @@ typedef enum : unsigned int {
   TaskWait_Any             = 0xC0000000,  // Yield: wake up on any condition
 } TaskWaitFlags;
 
-/* 235 */
 typedef void (__fastcall *MessageHandler)(struct Task *receiver, struct Task *sender, TaskMessageType message, void *payload);
 
-/* 178 */
 typedef void (__cdecl *TaskFn)(struct Task *task);
 
 typedef struct
@@ -595,6 +593,13 @@ typedef struct {
   Unit *attacker;                 ///< who fired the projectile
   int attacker_unit_id;
 } EntityProjectileContext;
+
+typedef struct {
+  typeof_unqual(struct MenuWidget) *next;
+  typeof_unqual(struct MenuWidget) *prev;
+  Entity *entity;
+  int flags;
+} MenuWidget;
 
 typedef union {
   EntityBuildingContext building_ctx;
@@ -879,8 +884,7 @@ struct Entity {
 };
 
 /// actually a typedef int, with various enum values are simply #defines - there are units with 8 and 16 orientations (potentially more) both use this type for their orientation holding variables
-typedef enum : unsigned int
-{
+typedef enum : unsigned int {
   MobdOrientation_N = 0,
   MobdOrientation_NNE = 16,
   MobdOrientation_NE = 32,
@@ -897,8 +901,7 @@ typedef enum : unsigned int
 
 
 /// Direction is actually a typedef int, but some well-known values like Direction8 (for sprites) and Direction16 (for pathing) are commonly used
-typedef enum
-{
+typedef enum {
   Direction_N = 0,
   Direction_NE = 1,
   Direction_E = 2,
@@ -910,22 +913,19 @@ typedef enum
   Direction_Invalid = -1,
 } Direction;
 
-typedef enum : unsigned int
-{
-  Veterancy_Rookie = 0,
-  Veterancy_Mature = 0,
+typedef enum : unsigned int {
+  Veterancy_Rookie  = 0,
+  Veterancy_Mature  = 0,
   Veterancy_Veteran = 0,
 } Veterancy;
 
-/* 240 */
-typedef enum : unsigned int
-{
-  UnitPosition_Slot0 = 0,               ///< Always 0 for all non-infantry units
-  UnitPosition_Slot1 = 1,
-  UnitPosition_Slot2 = 2,
-  UnitPosition_Slot3 = 3,
-  UnitPosition_Slot4 = 4,
-  UnitTilePosition_Invalid = 5,
+typedef enum : unsigned int {
+  UnitPosition_Slot0                 = 0,  // Always 0 for all non-infantry units
+  UnitPosition_Slot1                 = 1,
+  UnitPosition_Slot2                 = 2,
+  UnitPosition_Slot3                 = 3,
+  UnitPosition_Slot4                 = 4,
+  UnitTilePosition_Invalid           = 5,
   UnitTilePosition_BuildingPlacement = 64,
 } UnitTilePosition;
 
@@ -1331,15 +1331,6 @@ struct Unit {
   int next_order_target_y;
 };
 
-/* 370 */
-struct MenuWidget
-{
-  MenuWidget *next;
-  MenuWidget *prev;
-  Entity *entity;
-  int flags;
-};
-
 typedef struct {
   char name[4];
   void *ptr;
@@ -1667,7 +1658,7 @@ typedef enum : unsigned __int8 {
 /// One event is dequeued per tick
 ///
 /// Verified NOT NetzGameEvent
-typedef struct {
+typedef struct __attribute__((packed)) {
   GameEventType type;
   char payload[12];
   bool ready_to_consume;                ///< when produced, is set to true
@@ -1744,9 +1735,7 @@ typedef struct {
   BuildingPlannerPayload *planner;
 } CursorState;
 
-/* 261 */
-struct BuildingBlueprint
-{
+typedef struct {
   UnitType type;
   int footprint_width;
   int footprint_height;
@@ -1759,7 +1748,7 @@ struct BuildingBlueprint
                                          ///<     Drill Rig (3×2): 0xE0000000 = 111 000 → top row solid, bottom passable
                                          ///<     Machine Shop (4×4): 0xFF000000 = 1111 1111 0000 0000 → top 2 rows solid, bottom 2 passable
                                          ///<     Walls (1×1): 0xFFFFFFFF → all solid (every bit set)
-};
+} BuildingBlueprint;
 
 typedef enum : unsigned int {
   BuildingConstructionStage_1 = 1,
@@ -2527,7 +2516,7 @@ struct XMark {
   Entity *entity;
 };
 
-typedef struct AirstrikeSidebar;
+typedef struct AirstrikeSidebar AirstrikeSidebar;
 
 struct AirstrikeSidebar {
   void (__fastcall *mode)(AirstrikeSidebar *);
@@ -2743,15 +2732,15 @@ typedef struct {
 
 typedef enum : unsigned __int16
 {
-  Movie_HasPosition = 0x1,
-  Movie_HasAudio = 0x4,
-  Movie_HasVideo = 0x8,
-  Movie_HasPalette = 0x10,
-  Movie_HasTiming = 0x20,
+  Movie_HasPosition  =  0x1,
+  Movie_HasAudio     =  0x4,
+  Movie_HasVideo     =  0x8,
+  Movie_HasPalette   = 0x10,
+  Movie_HasTiming    = 0x20,
   Movie_HasSubtitles = 0x40,
 } MovieFlags;
 
-typedef struct {
+typedef struct __attribute__((packed)) {
   int size;
   MovieFlags flags;
   __int16 x;                            ///< partial update position
@@ -2765,7 +2754,7 @@ typedef struct {
   __int16 _movie_frame_1C;
   __int16 num_frames;
   __int16 sound_flags;
-  __unaligned __declspec(align(1)) int sound_sample_rate;
+  int sound_sample_rate;
   __int16 _movie_frame_26;
   __int16 _movie_frame_28;
   __int16 _movie_frame_2A;
@@ -2779,9 +2768,22 @@ typedef struct {
   __int16 _movie_frame_3A;
 } MovieFrame;
 
-/* 343 */
-struct __unaligned __declspec(align(1)) Movie
-{
+typedef struct {
+  Blitter mode_render;
+  int width;
+  int height;
+  int _movie_frame_image_C;
+  int _movie_frame_image_10;
+  BOOL interlaced;
+  void *pixels;
+  int _movie_frame_image_1C;
+  int _movie_frame_image_20;
+  int _movie_frame_image_24;
+  int _movie_frame_image_28;
+  int _movie_frame_image_2C;
+} FmvFrameImage;
+
+typedef struct __attribute__((packed)) {
   MovieHeader header;
   char _movie_2C[372];
   int _movie_1A0[80];
@@ -2797,68 +2799,46 @@ struct __unaligned __declspec(align(1)) Movie
   MovieFrame frame;
   char _movie_780[131016];
   char data[1];
-};
+} Movie;
 
-/* 344 */
-struct FmvFrameImage
+typedef enum : unsigned __int32
 {
-  Blitter mode_render;
-  int width;
-  int height;
-  int _movie_frame_image_C;
-  int _movie_frame_image_10;
-  BOOL interlaced;
-  void *pixels;
-  int _movie_frame_image_1C;
-  int _movie_frame_image_20;
-  int _movie_frame_image_24;
-  int _movie_frame_image_28;
-  int _movie_frame_image_2C;
-};
+  HunkFixup_SimplePointer =        0x0,
+  HunkFixup_BatchPointer  = 0x40000000,
+  HunkFixup_Renderer      = 0x80000000,
+} HunkFixupType;
 
-/* 348 */
-enum HunkFixupType : unsigned __int32
+typedef enum : unsigned __int32
 {
-  HunkFixup_SimplePointer = 0x0,
-  HunkFixup_BatchPointer = 0x40000000,
-  HunkFixup_Renderer = 0x80000000,
-};
-
-/* 353 */
-enum NetzProtocol : unsigned __int32
-{
-  NetzProtocol_TCP = 0,
-  NetzProtocol_IPX = 1,
-  NetzProtocol_Serial = 2,
-  NetzProtocol_Count = 3,
+  NetzProtocol_TCP     = 0,
+  NetzProtocol_IPX     = 1,
+  NetzProtocol_Serial  = 2,
+  NetzProtocol_Count   = 3,
   NetzProtocol_Invalid = -1,
-};
+} NetzProtocol;
 
-/* 359 */
-struct DpProvider
-{
+typedef struct {
   BOOL active;
   GUID guid;
   const char *name;
-  DpProvider *next;
-};
+  typeof_unqual(struct DpProvider) *next;
+} DpProvider;
 
-/* 412 */
-enum NetzMessageType : unsigned __int32
+typedef enum : unsigned int
 {
-  NetzMessageType_0 = 0,
-  NetzMessageType_Data = 1,
-  NetzMessageType_2 = 2,
-  NetzMessageType_Connected = 3,
-  NetzMessageType_ConnectionReq = 4,
-  NetzMessageType_5 = 5,
-  NetzMessageType_Disconnected = 6,
+  NetzMessageType_0              = 0,
+  NetzMessageType_Data           = 1,
+  NetzMessageType_2              = 2,
+  NetzMessageType_Connected      = 3,
+  NetzMessageType_ConnectionReq  = 4,
+  NetzMessageType_5              = 5,
+  NetzMessageType_Disconnected   = 6,
   NetzMessageType_ConnectionLost = 7,
-};
+} NetzMessageType;
 
-/* 360 */
-struct NetzMessage
-{
+typedef struct NetzMessage NetzMessage;
+
+struct NetzMessage {
   int _netz_stru2_0;
   int _netz_stru2_4;
   int _netz_stru2_8;
@@ -2885,52 +2865,47 @@ struct NetzMessage
   int _netz_stru2_58;
 };
 
-/* 361 */
-enum NetzError : unsigned __int32
+typedef enum : unsigned int
 {
-  NetzError_Ok = 0x0,
-  NetzError_OutOfMemory = 0xFE0000,
-  NetzError_LinkInUse = 0xFE0001,
-  NetzError_NoFreeLinks = 0xFE0002,
-  NetzError_LinkNotConnected = 0xFE0003,
-  NetzError_ProtocolNotPresent = 0xFE0004,
-  NetzError_LinkNotOpen = 0xFE0005,
-  NetzError_6 = 0xFE0006,
-  NetzError_WrongTypeOfLink = 0xFE0007,
-  NetzError_InvalidAddress = 0xFE0008,
-  NetzError_ResourcePoolEmpty = 0xFE0009,
-  NetzError_PacketTooBig = 0xFE000A,
+  NetzError_Ok                  =        0,
+  NetzError_OutOfMemory         = 0xFE0000,
+  NetzError_LinkInUse           = 0xFE0001,
+  NetzError_NoFreeLinks         = 0xFE0002,
+  NetzError_LinkNotConnected    = 0xFE0003,
+  NetzError_ProtocolNotPresent  = 0xFE0004,
+  NetzError_LinkNotOpen         = 0xFE0005,
+  NetzError_6                   = 0xFE0006,
+  NetzError_WrongTypeOfLink     = 0xFE0007,
+  NetzError_InvalidAddress      = 0xFE0008,
+  NetzError_ResourcePoolEmpty   = 0xFE0009,
+  NetzError_PacketTooBig        = 0xFE000A,
   NetzError_CantCreateNetzEvent = 0xFE000B,
-  NetzError_WrongMode = 0xFE000C,
-  NetzError_NameNotUnique = 0xFE000D,
-  NetzError_Failed = 0xFE000E,
-  NetzError_OsLame = 0xFE000F,
-  NetzError_Processor = 0xFE0010,
-  NetzError_LinkLost = 0xFE0011,
-  NetzError_Disabled = 0xFE0012,
-  NetzError_NotImplemented = 0xFE0013,
-  NetzError_Fatal = 0xFFFFFFFF,
-};
+  NetzError_WrongMode           = 0xFE000C,
+  NetzError_NameNotUnique       = 0xFE000D,
+  NetzError_Failed              = 0xFE000E,
+  NetzError_OsLame              = 0xFE000F,
+  NetzError_Processor           = 0xFE0010,
+  NetzError_LinkLost            = 0xFE0011,
+  NetzError_Disabled            = 0xFE0012,
+  NetzError_NotImplemented      = 0xFE0013,
+  NetzError_Fatal               = 0xFFFFFFFF,
+} NetzError;
 
-/* 398 */
-enum NetzConnectionStatus : unsigned __int8
+typedef enum : uint8_t
 {
-  NetzConnection_None = 0x0,            ///< Free slot
-  NetzConnection_Joined = 0x1,          ///< Remote player joined the lobby
-  NetzConnection_Local = 0x2,           ///< Local player (self)
-  NetzConnection_Synced = 0x3,          ///< Player is confirmed and synced (game starting)
-};
+  NetzConnection_None   = 0x0,  // Free slot
+  NetzConnection_Joined = 0x1,  // Remote player joined the lobby
+  NetzConnection_Local  = 0x2,  // Local player (self)
+  NetzConnection_Synced = 0x3,  // Player is confirmed and synced (game starting)
+} NetzConnectionStatus;
 
-/* 364 */
-enum NetzFaction : unsigned __int8
+typedef enum : uint8_t
 {
   NetzFaction_Surv = 0,
   NetzFaction_Mute = 1,
-};
+} NetzFaction;
 
-/* 363 */
-struct NetzPlayer
-{
+typedef struct {
   NetzConnectionStatus connection_status;
   char palette_idx;
   NetzFaction faction;
@@ -2944,11 +2919,11 @@ struct NetzPlayer
   BOOL event_received_this_tick;
   BOOL synced;                          ///< true: player has received & ack'd the latest roster
                                         ///< false: sent roster but no ack yet
-};
+} NetzPlayer;
 
-/* 367 */
-struct ReinforcementsState
-{
+typedef struct ReinforcementsState ReinforcementsState;
+
+struct ReinforcementsState {
   void (__fastcall *mode)(ReinforcementsState *);
   Task *task;
   unsigned int spawn_x;
@@ -2962,172 +2937,141 @@ struct ReinforcementsState
   int enemy_player_num;
 };
 
-/* 368 */
-struct Reinforcements
-{
+typedef struct {
   UnitType *units;
   int trigger_time;
   int wave_delay;
   int waves_remaining;
-};
+} Reinforcements;
 
-/* 369 */
-struct Briefing
-{
+typedef struct {
   const char **lines;
   const char *wav;
-};
+} Briefing;
 
-/* 373 */
-struct FactoryColorStripe
-{
+typedef struct {
   int palette_idx;
   int sidebar_icon_mobd_frame;
-};
+} FactoryColorStripe;
 
-/* 383 */
-struct GuardAreaOrderPayload
-{
+typedef struct {
   int player_num;
   int dst_x;
   int dst_y;
-};
+} GuardAreaOrderPayload;
 
-/* 384 */
-struct KeyBinding
-{
+typedef struct {
   int scancode;
   KeyboardActions action;
-};
+} KeyBinding;
 
-/* 386 */
-enum BoxdRaycastPhase : unsigned __int32
+typedef enum : unsigned int
 {
-  RaycastPhase_ScanningClear = 0x0,
-  RaycastPhase_InsideObstacle = 0x1,
-};
+  RaycastPhase_ScanningClear  = 0,
+  RaycastPhase_InsideObstacle = 0,
+} BoxdRaycastPhase;
 
-/* 387 */
-enum BoxdRaycastStepResult : unsigned __int32
+typedef enum : unsigned int
 {
+  RaycastStepResult_Stop     = 1,
   RaycastStepResult_Continue = 6,
-  RaycastStepResult_Stop = 1,
-};
+} BoxdRaycastStepResult;
 
-/* 388 */
-struct TankerSaveStruct
-{
-  __int32 oil_loaded;
-  __int32 current_destination_unit_id;
-  __int32 powerplant_unit_id;
-  __int32 drillrig_unit_id;
-  __int32 drillrig_unit_id_2;
-  __int32 powerplant_unit_id_2;
-  __int32 current_destination_unit_id_2;
-  __int32 num_destinations;
-  __int32 destinations[20];
-};
+typedef struct {
+  int32_t oil_loaded;
+  int32_t current_destination_unit_id;
+  int32_t powerplant_unit_id;
+  int32_t drillrig_unit_id;
+  int32_t drillrig_unit_id_2;
+  int32_t powerplant_unit_id_2;
+  int32_t current_destination_unit_id_2;
+  int32_t num_destinations;
+  int32_t destinations[20];
+} TankerSaveStruct;
 
-/* 391 */
-struct TechLevelsSaveStruct
-{
-  __int32 num_buildings_by_level[5];
-  __int32 _tech_levels_save_stru_unused_field_10;
-  __int32 _tech_levels_save_stru_unused_field_14;
-  __int32 _tech_levels_save_stru_unused_field_18;
-  __int32 _tech_levels_save_stru_unused_field_1C;
-  __int32 max_level;
-};
+typedef struct {
+  int32_t num_buildings_by_level[5];
+  int32_t _tech_levels_save_stru_unused_field_10;
+  int32_t _tech_levels_save_stru_unused_field_14;
+  int32_t _tech_levels_save_stru_unused_field_18;
+  int32_t _tech_levels_save_stru_unused_field_1C;
+  int32_t max_level;
+} TechLevelsSaveStruct;
 
-/* 392 */
-struct ConstructSaveStruct
-{
-  __int32 unit_id;
-  __int32 player_num;
-  __int32 stage;
-  __int32 cost;
-  __int32 remaining_cost;
-  __int32 cost_per_tick;
-};
+typedef struct {
+  int32_t unit_id;
+  int32_t player_num;
+  int32_t stage;
+  int32_t cost;
+  int32_t remaining_cost;
+  int32_t cost_per_tick;
+} ConstructSaveStruct;
 
-/* 390 */
-struct MetaSaveStruct
-{
-  __int32 building_construction_byte_size;
-  __int32 num_units_in_group[11];
-  __int32 is_building_suspended;
+typedef struct {
+  int32_t building_construction_byte_size;
+  int32_t num_units_in_group[11];
+  int32_t is_building_suspended;
   TechLevelsSaveStruct outpost;
   TechLevelsSaveStruct clanhall;
   TechLevelsSaveStruct machine_shop;
   TechLevelsSaveStruct beast_enclosure;
-  __int32 sidebar_color_bars_used[6];
-  __int32 num_player_units;
-  __int32 num_ai_units;
-  __int32 num_towers;
-  __int32 victory_condition_ticks;
-  __int32 victory_condition_bits;
-  __int32 num_convoy_tankers_en_route;
-  __int32 scout_unit_id;
-  __int32 player_bases_unit_ids[4];
-  __int32 num_ally_waves_remaining;
-  __int32 num_enemy_waves_remaining;
-  __int32 is_aircraft_unlocked;
-  __int32 aircraft_mode_id;
-  __int32 num_airstrikes_available;
+  int32_t sidebar_color_bars_used[6];
+  int32_t num_player_units;
+  int32_t num_ai_units;
+  int32_t num_towers;
+  int32_t victory_condition_ticks;
+  int32_t victory_condition_bits;
+  int32_t num_convoy_tankers_en_route;
+  int32_t scout_unit_id;
+  int32_t player_bases_unit_ids[4];
+  int32_t num_ally_waves_remaining;
+  int32_t num_enemy_waves_remaining;
+  int32_t is_aircraft_unlocked;
+  int32_t aircraft_mode_id;
+  int32_t num_airstrikes_available;
   EntitySaveStruct airstrike_counter_entity;
-  __int32 aircraft_sidebar_task_channel;
-  __int32 aircraft_sidebar_task_id;
-  __int32 aircraft_sidebar_task_message_handler;
-  __int32 aircraft_sidebar_task_transient_events;
-  __int32 aircraft_sidebar_task_sleep;
-  __int32 aircraft_sidebar_task_global_events;
-  __int32 aircraft_sidebar_task_wait_flags;
-  __int32 aircraft_sidebar_task_field_2C;
-  __int32 _meta_save_struct_field_174;
+  int32_t aircraft_sidebar_task_channel;
+  int32_t aircraft_sidebar_task_id;
+  int32_t aircraft_sidebar_task_message_handler;
+  int32_t aircraft_sidebar_task_transient_events;
+  int32_t aircraft_sidebar_task_sleep;
+  int32_t aircraft_sidebar_task_global_events;
+  int32_t aircraft_sidebar_task_wait_flags;
+  int32_t aircraft_sidebar_task_field_2C;
+  int32_t _meta_save_struct_field_174;
   ConstructSaveStruct constructs[1];
-};
+} MetaSaveStruct;
 
-/* 393 */
-struct UnitSaveIndex
-{
+typedef struct {
   int unit_id;
   size_t size;
-};
+} UnitSaveIndex;
 
-/* 395 */
-struct UnitTypeTag
-{
+typedef struct {
   const char *tag;
   UnitType type;
-};
+} UnitTypeTag;
 
-/* 396 */
 /// Verified NOT GameEvent
-struct __unaligned NetzGameEvent
-{
+typedef struct __attribute__((packed)) {
   GameEventType type;
   char payload[12];
-};
+} NetzGameEvent;
 
-/* 397 */
-enum MovieType : unsigned __int32
+typedef enum : unsigned int
 {
-  MovieType_Intro = 0x0,
+  MovieType_Intro            = 0x0,
   MovieType_CampaignBriefing = 0x1,
-  MovieType_CampaignEnd = 0x2,
-};
+  MovieType_CampaignEnd      = 0x2,
+} MovieType;
 
-/* 400 */
-struct CplcPlayerSpawn
-{
+typedef struct {
   int x;
   int y;
   int player_side;
-};
+} CplcPlayerSpawn;
 
-/* 401 */
-enum WellKnownMobdIds
-{
+typedef enum {
   MOBD_CURSOR_DEFAULT_ARROW = 0xC,
   MOBD_CURSOR_UNIT_HOVER = 0x30,
   MOBD_CURSOR_DRAG_BOX_X = 0x1CC,
@@ -3146,10 +3090,9 @@ enum WellKnownMobdIds
   MOBD_CURSOR_UNAVAILABLE = 0x124,
   MOBD_CURSOR_MOVE_ACK = 0x1FC,
   MOBD_CURSOR_UPGRADE_CANCEL = 0x118,
-};
+} WellKnownMobdIds;
 
-/* 402 */
-enum NetzPacketType : unsigned __int8
+typedef enum : uint8_t
 {
   NETZ_PKT_EVENT_BROADCAST = 51,        ///< Host distributes collected game events from all players
   NETZ_PKT_CLIENT_EVENT = 52,           ///< Client submits it's game event for the current lockstep tick (13 bytes if event, 1 if none)
@@ -3177,142 +3120,114 @@ enum NetzPacketType : unsigned __int8
   NETZ_PKT_JOIN_REQ_WITH_VERSION = 31,
   NETZ_PKT_BROADCAST_PLAYER_KICKED = 68,
   NETZ_PKT_1E = 30,
-};
+} NetzPacketType;
 
-/* 404 */
-enum NetzLinkConnectionState : unsigned __int32
+typedef enum : unsigned int
 {
-  NetzLinkConnectionState_None = 0,
+  NetzLinkConnectionState_None      = 0,
   NetzLinkConnectionState_Connected = 2,
-};
+} NetzLinkConnectionState;
 
-/* 403 */
-struct NetzLink
-{
+typedef struct {
   NetzLinkConnectionState connection_state;
   int _netz_link_field_4[8];
   DPID dpid;
   BOOL is_active;
-};
+} NetzLink;
 
-/* 406 */
-struct NetzSendBuffer
-{
+typedef struct {
   uint8_t recv_seq;
   uint8_t send_seq;
   uint8_t _netz_send_buffer_field_2;
   NetzPacketType pkt;
   uint8_t buf[280];
   int last_send_size;
-};
+} NetzSendBuffer;
 
-/* 407 */
-struct __unaligned KaosSettings
-{
+typedef struct __attribute__((packed)) {
   int settings;
   char _kaos_settings_field_4;
-};
+} KaosSettings;
 
-/* 408 */
-struct FollowOrderPayload
-{
+typedef struct {
   int player_num;
   Unit *target;
-};
+} FollowOrderPayload;
 
-/* 409 */
-struct DplaySession
-{
+typedef struct {
   GUID session_guid;
   int num_current_players;
   int max_players;
   int flags;
   char session_name[16];
-  DplaySession *next;
-};
+  typeof_unqual(struct DplaySession) *next;
+} DplaySession;
 
-/* 410 */
-struct NetzRosterPlayer
-{
+typedef struct {
   uint8_t present;
   uint8_t name[12];
   uint8_t palette;
   uint8_t faction;
-};
+} NetzRosterPlayer;
 
-/* 411 */
-struct NetzRoster
-{
-  unsigned __int32 num_players;
-  unsigned __int32 slot;
+typedef struct {
+  uint32_t num_players;
+  uint32_t slot;
   NetzRosterPlayer players[6];    ///< sender's slot or recipient's assigned slot
-};
+} NetzRoster;
 
-/* 413 */
-enum NetzJoinState : __int32
+typedef enum : int
 {
-  NetzJoinState_Idle = -2,
+  NetzJoinState_Idle       = -2,
   NetzJoinState_Connecting = -1,
-  NetzJoinState_Synced = 0,
-  NetzJoinState_Rejected = 1,
-};
+  NetzJoinState_Synced     = 0,
+  NetzJoinState_Rejected   = 1,
+} NetzJoinState;
 
-/* 414 */
-struct NetzProvider
-{
+typedef struct {
   int _netz_provider_field_0;
   const char *names[3];
   int _netz_provider_field_10;
   int _netz_provider_field_14[2];
   void *vtbl[19];
-};
+} NetzProvider;
 
-/* 415 */
-struct NetzTimer
-{
+typedef struct {
   BOOL active;
-  NetzTimer *next;
+  typeof_unqual(struct NetzTimer) *next;
   int _netz_timer_field_8[2];
   int fire_at;
   int retries;
   void (__fastcall *handler)();
-};
+} NetzTimer;
 
-/* 416 */
-struct __unaligned NetzJoinPkt
-{
+typedef struct __attribute__((packed)) {
   uint8_t name[7];
   uint8_t palette;
   uint32_t flags;
   uint8_t build_date[12];
   uint8_t build_time[9];
-};
+} NetzJoinPkt;
 
-/* 418 */
-struct DplayPlayer
-{
+typedef struct {
   char short_name[16];
   char long_name[16];
   DPID player_id;
-  DplayPlayer *next;
-};
+  typeof_unqual(struct DplayPlayer) *next;
+} DplayPlayer;
 
-/* 422 */
-struct SaveSlot
-{
+typedef struct {
   char name[20];
   LevelId level_id;
-};
+} SaveSlot;
 
-/* 426 */
-struct NetzMobemPhonebook
-{
-  NetzMobemPhonebook *next;
-  NetzMobemPhonebook *prev;
+typedef struct {
+  typeof_unqual(struct NetzMobemPhonebook) *next;
+  typeof_unqual(struct NetzMobemPhonebook) *prev;
   char name[12];
   char phone[12];
   int baud_index;
-};
+} NetzMobemPhonebook;
 
 
 
@@ -3326,7 +3241,11 @@ static inline void TECHLVL_reset(TechLevels *tech) {
   tech->max_level = 1;
 }
 
+#define PLAYERS_MAX 7
+
 static inline int GAME_ai_players_num() {
+  extern BOOL g_is_player_num_ai[8];
+
   int num = 0;
   for (int i = 0; i < PLAYERS_MAX; ++i) {
     if (g_is_player_num_ai[i])

@@ -164,7 +164,7 @@ void __fastcall UNIT_mode_hut_idle(Unit *unit);
 void __fastcall MSG_hut(Task *receiver, Task *sender, TaskMessageType message, void *payload);
 void __fastcall UNIT_mode_hut_snap_to_grid(Unit *unit);
 void __fastcall UNIT_mode_hut_init(Unit *unit);
-void __cdecl __noreturn UNIT_hut_tick(Task *task);
+void __cdecl UNIT_hut_tick(Task *task);
 void __fastcall MSG_drillrig(Task *receiver, Task *sender, TaskMessageType message, void *payload);
 void __cdecl UNIT_drillrig_tick(Task *task);
 void __fastcall UNIT_mode_drillrig_deploy(Unit *unit);
@@ -402,7 +402,7 @@ void __fastcall UNIT_enqueue_move_order(Unit *unit, MoveOrderPayload *order);
 BOOL INPUT_unk_device_init();
 void INPUT_keyboard_update();
 BOOL __fastcall INPUT_get_keyboard_state(KeyboardState *state);
-_BOOL2 __fastcall INPUT_text_edit(char *out_buf, unsigned __int16 max_len, void (__fastcall *updater)(char *, int), int unused, Task *task);
+bool16_t __fastcall INPUT_text_edit(char *out_buf, unsigned __int16 max_len, void (__fastcall *updater)(char *, int), int unused, Task *task);
 BOOL __fastcall BOXD_collide_ui_hover_always(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
 BOOL __fastcall BOXD_collide_ui_hover_if_waiting(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
 BOOL __fastcall BOXD_collide_projectile(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
@@ -605,7 +605,7 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg);
 void NETZ_mission_victory();
 void __fastcall NETZ_join_locally();
 int __stdcall sub_42F820(int a1, int a2);
-NetzError __fastcall NETZ_init(NetzProtocol protocol, int (__fastcall *a2)(_DWORD), void (__fastcall *msg_loop)(NetzMessage *));
+NetzError __fastcall NETZ_init(NetzProtocol protocol, int (__fastcall *a2)(int), void (__fastcall *msg_loop)(NetzMessage *));
 NetzError __fastcall NETZ_host_or_join(BOOL is_host);
 NetzError __fastcall NETZ_switch_host_or_join(BOOL is_host);
 NetzError __fastcall NETZ_set_protocol(NetzProtocol protocol);
@@ -662,7 +662,7 @@ void PAL_gdi_cleanup();
 UINT __fastcall PAL_commit(PaletteEntry *pal);
 HPALETTE __fastcall PAL_gdi_palette_create(unsigned __int8 *pal, int size);
 int PAL_restore_on_win32_activate();
-void __cdecl __noreturn INPUT_keyboard_dispatcher_task(Task *task);
+void __cdecl INPUT_keyboard_dispatcher_task(Task *task);
 void __cdecl UI_slider(Task *task);
 void __fastcall UI_ingame_sound_settings(Task *task);
 void __fastcall UI_ingame_briefing(Task *task);
@@ -791,7 +791,7 @@ BOOL SOUND_init();
 BOOL __fastcall SOUND_bank_load(const char *filename);
 int __fastcall SOUND_play(SoundId sound_id, BOOL loop, int volume, int pan, Task *task);
 int __fastcall SOUND_play_async(const char *filename, BOOL looping, int volume, int pan, Task *task);
-void __cdecl __noreturn SOUND_thread(SoundStream *snd);
+void __cdecl SOUND_thread(SoundStream *snd);
 void __fastcall SOUND_stop(int sound_id);
 void SOUND_unload_bank();
 void SOUND_tick();
@@ -1097,8 +1097,6 @@ unsigned __int8 *__cdecl VBC_decode_16bpp(unsigned __int16 a1, __int16 a2, unsig
 //-------------------------------------------------------------------------
 // Data declarations
 
-_UNKNOWN loc_45D19B; // weak
-_UNKNOWN loc_45D1A4; // weak
 double dbl_463000 = 1000.0; // weak
 const INT g_win32_sys_colors_indices[25] =
 {
@@ -1128,9 +1126,10 @@ const INT g_win32_sys_colors_indices[25] =
   23,
   24
 };
-int g_surv_xor_keys[15] = { 35, 62, 93, 42, 54, 12, 65, 89, 21, 30, 210, 87, 55, 66, 42 };
-int g_mute_xor_keys[15] = { 77, 24, 84, 36, 20, 43, 72, 20, 5, 89, 189, 233, 91, 21, 13 };
-__int128 xmmword_4630E8 = 0x5CC2B8F640009C8311D0BB3187824EC0LL; // weak
+#define NUM_XOR_KEYS 15
+int g_surv_xor_keys[NUM_XOR_KEYS] = { 35, 62, 93, 42, 54, 12, 65, 89, 21, 30, 210, 87, 55, 66, 42 };
+int g_mute_xor_keys[NUM_XOR_KEYS] = { 77, 24, 84, 36, 20, 43, 72, 20, 5, 89, 189, 233, 91, 21, 13 };
+IID IID_KKnD = { 0x87824EC0, 0xBB31, 0x11D0, { 0x83, 0x9C, 0x00, 0x40, 0xF6, 0xB8, 0xC2, 0x5C } };
 double dbl_4630F8 = 0.05882352941176471; // weak
 double dbl_463100 = 1000.0; // weak
 double dbl_463108 = -1000.0; // weak
@@ -4792,7 +4791,7 @@ void (__fastcall *REND_blt_scrl_transparent)(unsigned __int8 *pixels, int x, int
 void (__fastcall *REND_blt_sprt)(unsigned __int8 *, int, int, int, int);
 int g_display_width_2; // weak
 PaletteEntry g_brightness_adjusted_pal_buf[256];
-void (__fastcall *REND_set_clip)(_DWORD, _DWORD, _DWORD, _DWORD);
+void (__fastcall *REND_set_clip)(int, int, int, int);
 void (__fastcall *REND_blt_rle_override_palette_mirrored)(unsigned __int8 *, unsigned __int8 *, int, int, int, int);
 void (__fastcall *REND_blt_sprt_mirrored)(unsigned __int8 *, int, int, int, int);
 BOOL g_478A00_unused;
@@ -4805,8 +4804,8 @@ COLORREF g_win32_sys_colors[25];
 void (__fastcall *REND_blt_rle_override_palette)(unsigned __int8 *, unsigned __int8 *, int, int, int, int);
 int g_display_height_2; // weak
 int g_display_height; // weak
-_DWORD g_rend_screen_height; // idb
-_DWORD g_rend_screen_width; // idb
+int g_rend_screen_height; // idb
+int g_rend_screen_width; // idb
 void (__fastcall *REND_blt_rle_mirrored)(unsigned __int8 *, int, int, int, int);
 BOOL g_478A94_unused;
 int REND_478A98; // weak
@@ -4946,7 +4945,7 @@ int _bug_47A2FC_neg1_index[]; // weak
 Vec2 g_multi_bunker_spawn_positions[2];
 int g_num_ally_waves_remaining;
 CplcPlayerSpawn g_multi_player_spawn_positions[6];
-_DWORD dword_47A3C0[3]; // weak
+int dword_47A3C0[3]; // weak
 Task *g_mission_outcome_task; // idb
 MissionVictoryConditionBits g_victory_condition;
 int g_num_convoy_tankers_destroyed;
@@ -5004,9 +5003,7 @@ UiStr *g_netz_multi_chat_message;
 Task *g_sidebar_tooltip;
 BOOL g_netz_sync_signal;
 char g_netz_chat_buf_static[36];
-NetzPlayer g_netz_players[7];
-#define NETZ_PLAYERS_MAX (sizeof(g_netz_players)/sizeof(*g_netz_players))
-#define PLAYERS_MAX 7
+NetzPlayer g_netz_players[PLAYERS_MAX];
 int g_netz_game_start_signal; // weak
 BOOL g_netz_is_game_started;
 int g_netz_is_game_started_2_unused; // weak
@@ -8000,7 +7997,7 @@ void __fastcall PAL_copy(unsigned __int8 *dst, unsigned __int8 *src)
   v4 = v2 - dst;
   do
   {
-    *(_DWORD *)&dst[v4] = *(_DWORD *)dst;
+    *(int *)&dst[v4] = *(int *)dst;
     dst += 4;
     --v3;
   }
@@ -11511,7 +11508,7 @@ void __fastcall UNIT_mode_hut_init(Unit *unit)
 }
 
 //----- (00407F40) --------------------------------------------------------
-void __cdecl __noreturn UNIT_hut_tick(Task *task)
+void __cdecl UNIT_hut_tick(Task *task)
 {
   Unit *unit; // esi
   int cplc_spawn_param; // eax
@@ -11609,7 +11606,7 @@ void __cdecl UNIT_drillrig_tick(Task *task)
       }
       unit->_u1.oil_patch = patch;
       unit->entity->is_collidable = 1;
-      *(_DWORD *)unit->state = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
+      *(int *)unit->state = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
       if ( unit->entity->cplc_spawn_params )
         unit->mode = UNIT_mode_drillrig_place_without_deployment;// if pre-placed -> skip deployment animation
       else
@@ -11691,9 +11688,9 @@ void __fastcall UNIT_mode_drillrig_adjust_to_oil_patch_position(Unit *unit)
     BOXD_building_claim_area(unit);
   }
   unit->entity->is_collidable = 1;
-  *(_DWORD *)unit->state = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
-  *(_DWORD *)(*(_DWORD *)unit->state + 16) = unit;
-  *(_DWORD *)(*(_DWORD *)unit->state + 20) = unit->unit_id;
+  *(int *)unit->state = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
+  *(int *)(*(int *)unit->state + 16) = unit;
+  *(int *)(*(int *)unit->state + 20) = unit->unit_id;
   UNIT_mode_building_idle_tick(unit);
 }
 
@@ -11885,7 +11882,7 @@ void PAL_multi_apply()
     qmemcpy(g_working_pal, g_level_palette, sizeof(g_working_pal));
     v12 = g_working_pal;
 
-    for (int i = 1; i < NETZ_PLAYERS_MAX; ++i) {
+    for (int i = 1; i < PLAYERS_MAX; ++i) {
       if (NetzConnection_None != g_netz_players[i].connection_status) {
         v15 = ADJ(player)->palette_idx << 6;
         *v14 = v11;
@@ -12056,7 +12053,7 @@ void __fastcall MSG_ai_controller(
   AiBuildOrderNode *build_order_free_head; // edx
   int v19; // ecx
   CplcEntity *cplc_entity; // eax
-  _DWORD *v21; // eax
+  int *v21; // eax
   int v22; // ecx
   int v23; // ecx
   int v24; // ecx
@@ -12533,12 +12530,12 @@ LABEL_82:
                       {
                         ai->build_order_current = nullptr;
                       }
-                      ai->build_order_current->_ai_stru26C_node_8 = *(_DWORD *)(v16 + 24);
+                      ai->build_order_current->_ai_stru26C_node_8 = *(int *)(v16 + 24);
                       ai->build_order_current->next = p_build_order_head->next;
                       ai->build_order_current->prev = p_build_order_head;
                       p_build_order_head->next->prev = ai->build_order_current;
                       p_build_order_head->next = ai->build_order_current;
-                      v19 = *(_DWORD *)(v16 + 20);
+                      v19 = *(int *)(v16 + 20);
                       if ( v19 )
                         v16 = v19 + 32;
                       else
@@ -12553,53 +12550,53 @@ LABEL_82:
                 if ( cplc_entity )
                 {
                   ai->rally_x = cplc_entity->x;
-                  ai->rally_y = *(_DWORD *)(cplc_spawn_params->spawn_param + 8);
-                  v21 = (_DWORD *)(cplc_spawn_params->spawn_param + 32);
-                  v22 = *(_DWORD *)(cplc_spawn_params->spawn_param + 52);
+                  ai->rally_y = *(int *)(cplc_spawn_params->spawn_param + 8);
+                  v21 = (int *)(cplc_spawn_params->spawn_param + 32);
+                  v22 = *(int *)(cplc_spawn_params->spawn_param + 52);
                   if ( v22 )
-                    v23 = *(_DWORD *)(v22 + 4);
+                    v23 = *(int *)(v22 + 4);
                   else
                     v23 = -1;
                   ai->patrol_waypoints[0].x = v23;
                   v24 = v21[5];
                   if ( v24 )
-                    v25 = *(_DWORD *)(v24 + 8);
+                    v25 = *(int *)(v24 + 8);
                   else
                     v25 = -1;
                   ai->patrol_waypoints[0].y = v25;
                   v26 = v21[6];
                   if ( v26 )
-                    v27 = *(_DWORD *)(v26 + 4);
+                    v27 = *(int *)(v26 + 4);
                   else
                     v27 = -1;
                   ai->patrol_waypoints[1].x = v27;
                   v28 = v21[6];
                   if ( v28 )
-                    v29 = *(_DWORD *)(v28 + 8);
+                    v29 = *(int *)(v28 + 8);
                   else
                     v29 = -1;
                   ai->patrol_waypoints[1].y = v29;
                   v30 = v21[7];
                   if ( v30 )
-                    v31 = *(_DWORD *)(v30 + 4);
+                    v31 = *(int *)(v30 + 4);
                   else
                     v31 = -1;
                   ai->patrol_waypoints[2].x = v31;
                   v32 = v21[7];
                   if ( v32 )
-                    v33 = *(_DWORD *)(v32 + 8);
+                    v33 = *(int *)(v32 + 8);
                   else
                     v33 = -1;
                   ai->patrol_waypoints[2].y = v33;
                   v34 = v21[8];
                   if ( v34 )
-                    v35 = *(_DWORD *)(v34 + 4);
+                    v35 = *(int *)(v34 + 4);
                   else
                     v35 = -1;
                   ai->patrol_waypoints[3].x = v35;
                   v36 = v21[8];
                   if ( v36 )
-                    v37 = *(_DWORD *)(v36 + 8);
+                    v37 = *(int *)(v36 + 8);
                   else
                     v37 = -1;
                   ai->patrol_waypoints[3].y = v37;
@@ -14310,7 +14307,7 @@ void __fastcall AI_squad_attack(AiController *ai, AiSquadNode *squad)
           dx = v18->center_x - entity->x;
         if ( dy < 0 )
           dy = v18->center_y - entity->y;
-        if ( *(_DWORD *)(attack_order.player_num + 700) || dx < 0x10000 && dy < 0x10000 )// BUG variable re-use - AiController* ->base_threat
+        if ( *(int *)(attack_order.player_num + 700) || dx < 0x10000 && dy < 0x10000 )// BUG variable re-use - AiController* ->base_threat
         {
           if ( dy + dx < v8 + v6 )
           {
@@ -14697,7 +14694,7 @@ BOOL __fastcall AI_find_nuke_target(AiController *ai, UnitType type, int *out_x,
     if ( *v7 > 0 )
     {
       *out_x = v26 << 14;
-      *out_y = (_DWORD)p_enemy_head << 14;
+      *out_y = (int)p_enemy_head << 14;
       v37 = 1;
     }
     free(Block);
@@ -17239,7 +17236,7 @@ BOOL LVL_terrain_init()
   int v17; // edi
   int v18; // ebp
   int v19; // eax
-  _DWORD *v20; // ecx
+  int *v20; // ecx
   int v21; // edx
   int v22; // ecx
   int v23; // ecx
@@ -17293,7 +17290,7 @@ BOOL LVL_terrain_init()
         {
           v8 += 4;
           --v9;
-          *(_DWORD *)((char *)g_terrain + v8 - 4) = 0;
+          *(int *)((char *)g_terrain + v8 - 4) = 0;
         }
         while ( v9 );
         ++v6;
@@ -17337,9 +17334,9 @@ BOOL LVL_terrain_init()
                       while ( 1 )
                       {
                         v19 = v18 + (j << v1->world_to_tile_x);
-                        v20 = (_DWORD *)v25->type;
+                        v20 = (int *)v25->type;
                         v21 = v17 + (i << v1->world_to_tile_y);
-                        if ( *(_DWORD *)(v25->type + 4) < v19 + 0x2000
+                        if ( *(int *)(v25->type + 4) < v19 + 0x2000
                           && v20[4] > v19
                           && v20[2] < v21 + 0x2000
                           && v20[5] > v21 )
@@ -19175,13 +19172,13 @@ void __fastcall UNIT_tanker_status_bar_update_health(Unit *unit)
   v5 = 28 * v1->hitpoints / v1->stats->hitpoints;
   LOBYTE(v1) = g_healthbar_fill_color_top[(int)(4 * v5) / 28];
   BYTE1(v1) = (_BYTE)v1;
-  v6 = (_DWORD)v1 << 16;
+  v6 = (int)v1 << 16;
   LOWORD(v6) = (_WORD)v1;
   memset32(v4, v6, v5 >> 2);
   memset(&v4[4 * (v5 >> 2)], (char)v1, v5 & 3);
   LOBYTE(v1) = g_healthbar_fill_color_bottom[(int)(4 * v5) / 28];
   BYTE1(v1) = (_BYTE)v1;
-  v7 = (_DWORD)v1 << 16;
+  v7 = (int)v1 << 16;
   LOWORD(v7) = (_WORD)v1;
   memset32(v4 + 32, v7, v5 >> 2);
   memset(&v4[4 * (v5 >> 2) + 32], (char)v1, v5 & 3);
@@ -19347,7 +19344,7 @@ void __fastcall UNIT_status_bar_update_sabotage(Unit *unit)
 //----- (00410950) --------------------------------------------------------
 void __fastcall UNIT_status_bar_update_factory_stripe(Unit *unit, int stripe_color_palette_index)
 {
-  _DWORD *v2; // eax
+  int *v2; // eax
   int v3; // ecx
   int v4; // eax
   int v5; // esi
@@ -19355,7 +19352,7 @@ void __fastcall UNIT_status_bar_update_factory_stripe(Unit *unit, int stripe_col
 
   if ( stripe_color_palette_index )
   {
-    v4 = *((_DWORD *)unit->state + 5) + 203;
+    v4 = *((int *)unit->state + 5) + 203;
     v5 = 11;
     do
     {
@@ -19369,13 +19366,13 @@ void __fastcall UNIT_status_bar_update_factory_stripe(Unit *unit, int stripe_col
   }
   else
   {
-    v2 = (_DWORD *)(*((_DWORD *)unit->state + 5) + 71);
+    v2 = (int *)(*((int *)unit->state + 5) + 71);
     v3 = 15;
     do
     {
       *v2 = 0;
       *(_BYTE *)v2 = -92;
-      v2 = (_DWORD *)((char *)v2 + 66);
+      v2 = (int *)((char *)v2 + 66);
       --v3;
     }
     while ( v3 );
@@ -19562,10 +19559,10 @@ void __fastcall UNIT_building_status_bar_full_redraw(Unit *unit)
   int v7; // ecx
   _WORD *v8; // eax
   int v9; // ecx
-  _DWORD *v10; // eax
+  int *v10; // eax
   UnitType v11; // eax
 
-  v2 = (MobdImageData *)(*((_DWORD *)unit->state + 5) + 9);
+  v2 = (MobdImageData *)(*((int *)unit->state + 5) + 9);
   memset(v2, 1u, 0x3DCu);
   *(_WORD *)&v2->pixels[14][52] = 257;
   memset(v2, 0xA6u, 0x40u);
@@ -19591,7 +19588,7 @@ void __fastcall UNIT_building_status_bar_full_redraw(Unit *unit)
     && unit->player_num == g_player_num )
   {
     v7 = 11;
-    v8 = (_WORD *)(*((_DWORD *)unit->state + 5) + 203);
+    v8 = (_WORD *)(*((int *)unit->state + 5) + 203);
     do
     {
       *v8 = 257;
@@ -19603,12 +19600,12 @@ void __fastcall UNIT_building_status_bar_full_redraw(Unit *unit)
   else
   {
     v9 = 15;
-    v10 = (_DWORD *)(*((_DWORD *)unit->state + 5) + 71);
+    v10 = (int *)(*((int *)unit->state + 5) + 71);
     do
     {
       *v10 = 0;
       *(_BYTE *)v10 = -92;
-      v10 = (_DWORD *)((char *)v10 + 66);
+      v10 = (int *)((char *)v10 + 66);
       --v9;
     }
     while ( v9 );
@@ -19751,7 +19748,7 @@ void __fastcall UNIT_tanker_status_bar_init(Unit *unit)
     v6 = REND_node_add(entity, (RenderTransform)REND_transform_tanker_overlay);
     unit->overlay_rn = v6;
     v6->payload = unit;
-    v7 = (char *)(*((_DWORD *)unit->state + 28) + 9);
+    v7 = (char *)(*((int *)unit->state + 28) + 9);
     memset(v7, 1u, 0x120u);
     memset(v7, 0xA6u, 0x20u);
     v8 = v7 + 256;
@@ -19775,21 +19772,21 @@ void __fastcall UNIT_tanker_status_bar_init(Unit *unit)
     memset(v13, 0xAAu, v14);
     memset(v13 + 32, 0xA9u, v14);
     v15 = unit->state;
-    v16 = *((_DWORD *)v15 + 28) + 75;
+    v16 = *((int *)v15 + 28) + 75;
     memset((void *)v16, 0xA6u, 0x1Cu);
     memset((void *)(v16 + 32), 0xA0u, 0x1Cu);
-    v17 = *((_DWORD *)v15 + 28) + 75;
+    v17 = *((int *)v15 + 28) + 75;
     v20 = 28 * unit->hitpoints / unit->stats->hitpoints;
     v21 = (int)(4 * v20) / 28;
     LOBYTE(v15) = g_healthbar_fill_color_top[v21];
     BYTE1(v15) = (_BYTE)v15;
-    v18 = (_DWORD)v15 << 16;
+    v18 = (int)v15 << 16;
     LOWORD(v18) = (_WORD)v15;
     memset32((void *)v17, v18, v20 >> 2);
     memset((void *)(v17 + 4 * (v20 >> 2)), (char)v15, v20 & 3);
     LOBYTE(v15) = g_healthbar_fill_color_bottom[v21];
     BYTE1(v15) = (_BYTE)v15;
-    v19 = (_DWORD)v15 << 16;
+    v19 = (int)v15 << 16;
     LOWORD(v19) = (_WORD)v15;
     memset32((void *)(v17 + 32), v19, v20 >> 2);
     memset((void *)(v17 + 32 + 4 * (v20 >> 2)), (char)v15, v20 & 3);
@@ -19804,11 +19801,11 @@ BOOL UNIT_status_bar_short_sprites_init()
   MobdImageData **v1; // ebp
   unsigned int v2; // ebx
   MobdImageData *v3; // eax
-  _DWORD *pixels; // edx
+  int *pixels; // edx
   unsigned __int16 v5; // cx
   int v6; // eax
-  _DWORD *v7; // ecx
-  _DWORD *v8; // edi
+  int *v7; // ecx
+  int *v8; // edi
   int v9; // eax
   _BYTE *v10; // edx
   int v11; // edi
@@ -19862,7 +19859,7 @@ BOOL UNIT_status_bar_short_sprites_init()
       v8 = pixels + 20;
       LOBYTE(v7) = g_healthbar_border_color_bottom[v0];
       BYTE1(v7) = (_BYTE)v7;
-      v9 = (_DWORD)v7 << 16;
+      v9 = (int)v7 << 16;
       LOWORD(v9) = (_WORD)v7;
       v10 = pixels + 4;
       *v8 = v9;
@@ -20707,9 +20704,9 @@ void __fastcall REND_draw_batch(RenderBatch *batch)
         PAL_adjust_brightness(g_rend_default_viewport->brightness);
         if ( !g_pdds2->lpVtbl->Lock(g_pdds2, &g_dd_rect, &g_dd_backbuffer_desc, 1, nullptr) )
         {
-          *(_DWORD *)&g_dd_stride = g_dd_backbuffer_desc.lPitch;
+          *(int *)&g_dd_stride = g_dd_backbuffer_desc.lPitch;
           if ( g_window_bpp == 16 )
-            *(_DWORD *)&g_dd_stride = g_dd_backbuffer_desc.lPitch >> 1;
+            *(int *)&g_dd_stride = g_dd_backbuffer_desc.lPitch >> 1;
           g_dd_4798E4_unused = 0;
           g_dd_pixels = g_dd_backbuffer_desc.lpSurface;
           g_is_first_blt = 1;
@@ -22280,7 +22277,7 @@ LABEL_35:
       if ( !v2 )
         goto LABEL_25;
       v5 = v2->unit_id;
-      if ( !v5 || v5 != unit->order_target_id || *((_DWORD *)v2->state + 2) )
+      if ( !v5 || v5 != unit->order_target_id || *((int *)v2->state + 2) )
         goto LABEL_25;
       v6 = unit->entity;
       if ( v6->x - v3 <= 0 )
@@ -25962,7 +25959,7 @@ void __fastcall UNIT_mode_repairbay_undock(Unit *unit)
       if ( unit_id )
       {
         if ( unit_id == unit->order_target_id && repair_bay->task->channel == TaskChannel_RepairBay )
-          *((_DWORD *)repair_bay->state + 2) = 0;// unocuppy
+          *((int *)repair_bay->state + 2) = 0;// unocuppy
       }
     }
     if ( unit->order == UnitOrder_Move )
@@ -26039,7 +26036,7 @@ void __fastcall UNIT_mode_repairbay_heal_tick(Unit *unit)
     MISSION_victory_conditions_on_death(unit);
     goto LABEL_27;
   }
-  v5 = *((_DWORD *)repair_bay->state + 1);
+  v5 = *((int *)repair_bay->state + 1);
   if ( v5 < 4 || v5 > 5 )
     v2 = 5 - v5;
   type = unit->type;
@@ -26152,7 +26149,7 @@ void __fastcall UNIT_mode_repairbay_dock_init(Unit *unit)
     unit->multi_purpose_field_1 = 100;
     unit->order = UnitOrder_Idle;
     unit->mode = UNIT_mode_repairbay_dock;
-    *((_DWORD *)repair_bay->state + 2) = 1;     // repair bay's state
+    *((int *)repair_bay->state + 2) = 1;     // repair bay's state
     unit->message_handler = unit->task->message_handler;
   }
   TSK_yield(unit->task, TaskWait_Interval, 1);
@@ -26494,7 +26491,7 @@ void __fastcall MSG_unit_default(
           if ( !unit->order_target && !unit->locked_target )
           {
             unit->order_target = *((Unit **)payload + 70);
-            unit->order_target_id = *(_DWORD *)(*((_DWORD *)payload + 70) + 304);
+            unit->order_target_id = *(int *)(*((int *)payload + 70) + 304);
             UNIT_mode_build_path(unit);
           }
         }
@@ -26540,7 +26537,7 @@ void __fastcall MSG_unit_default(
           TSK_yield(unit->task, TaskWait_Interval, 1);
           unit->order = UnitOrder_RepairInfiltrate;
           unit->order_target = (Unit *)payload;
-          unit->order_target_id = *((_DWORD *)payload + 76);
+          unit->order_target_id = *((int *)payload + 76);
           unit->opportunity_target = nullptr;
           unit->multi_purpose_field_3 = 600;
           unit->mode_arrive = UNIT_mode_saboteur_entering_building;
@@ -26549,7 +26546,7 @@ void __fastcall MSG_unit_default(
         }
         break;
       case TaskMessage_Follow_or_RestartGame:
-        if ( unit->player_num == *(_DWORD *)payload && *((Unit **)payload + 1) != unit->escort_target )// inlined (?)
+        if ( unit->player_num == *(int *)payload && *((Unit **)payload + 1) != unit->escort_target )// inlined (?)
         {
           TSK_yield(unit->task, TaskWait_Interval, 1);
           unit->order = UnitOrder_Escort;
@@ -26571,15 +26568,15 @@ void __fastcall MSG_unit_default(
         TSK_yield(unit->task, TaskWait_Interval, 1);// inlined - see 41A400
         unit->order = UnitOrder_RepairBayDock;
         unit->order_target = (Unit *)payload;
-        v13 = *((_DWORD *)payload + 76);
+        v13 = *((int *)payload + 76);
         unit->opportunity_target = nullptr;
         unit->order_target_id = v13;
         unit->multi_purpose_field_3 = 600;
         unit->mode_arrive = UNIT_mode_repairbay_dock_init;
-        *(_DWORD *)(*((_DWORD *)payload + 23) + 136) = 1;
-        unit->order_target_x = *(_DWORD *)(*((_DWORD *)payload + 23) + 16) + *(_DWORD *)(*((_DWORD *)payload + 29) + 4);
-        v14 = *(_DWORD *)(*((_DWORD *)payload + 29) + 8);
-        v15 = *(_DWORD *)(*((_DWORD *)payload + 23) + 20);
+        *(int *)(*((int *)payload + 23) + 136) = 1;
+        unit->order_target_x = *(int *)(*((int *)payload + 23) + 16) + *(int *)(*((int *)payload + 29) + 4);
+        v14 = *(int *)(*((int *)payload + 29) + 8);
+        v15 = *(int *)(*((int *)payload + 23) + 20);
         unit->locked_target = nullptr;
         unit->order_target_y = v15 + v14;
         BOXD_pathing_set_friendly_mask(unit, 1);
@@ -26657,7 +26654,7 @@ void __fastcall MSG_non_interruptable(
       UNIT_show_hint(unit);
       break;
     case TaskMessage_AttackOrder_or_QuitGame:
-      if ( unit->player_num == *(_DWORD *)payload )
+      if ( unit->player_num == *(int *)payload )
       {
         unit->next_order = 2;
         v5 = *((Unit **)payload + 1);
@@ -27024,7 +27021,7 @@ void __fastcall UNIT_on_damage_in_repairbay(Unit *victim, Entity *proj)
           if ( unit_id )
           {
             if ( unit_id == victim->order_target_id && order_target->task->channel == TaskChannel_RepairBay )
-              *((_DWORD *)order_target->state + 2) = 0;// clear Repair Bay's occupied status - otherwise no different to UNIT_on_damage
+              *((int *)order_target->state + 2) = 0;// clear Repair Bay's occupied status - otherwise no different to UNIT_on_damage
           }
         }
         victim->hitpoints = 0;
@@ -27377,7 +27374,7 @@ BOOL __fastcall INPUT_get_keyboard_state(KeyboardState *state)
 // Returns:
 // (short)true - Enter (confirm)
 // (short)false - Esc (cancel)
-_BOOL2 __fastcall INPUT_text_edit(
+bool16_t __fastcall INPUT_text_edit(
         char *out_buf,
         unsigned __int16 max_len,
         void (__fastcall *updater)(char *, int),
@@ -30073,7 +30070,7 @@ LABEL_197:
       }
       data[1].task_channel = v103->upgrade_level;
       data[1].creature_id = v103->upgrade_timer;
-      data[1].message_handler_id = *(_DWORD *)&v103->same_building_count;
+      data[1].message_handler_id = *(int *)&v103->same_building_count;
       docked_tanker = v103->docked_tanker;
       docked_tanker_unit_id = v103->docked_tanker_unit_id;
       if ( !docked_tanker )
@@ -30099,7 +30096,7 @@ LABEL_206:
         return 1;
       v111 = g_script_handlers[0];
       v112 = 0;
-      v113 = *((_DWORD *)v103->ctx + 15);
+      v113 = *((int *)v103->ctx + 15);
       if ( g_script_handlers[0] != (void *)-1 )
       {
         v114 = g_script_handlers;
@@ -30118,12 +30115,12 @@ LABEL_206:
       else
         v115 = v112 + 1;
       data[1].task_wait_flags = v115;
-      data[1].task_field_2C = *(_DWORD *)(v113 + 4);
-      data[1].type = *(_DWORD *)(v113 + 8);
-      data[1].player_num = *(_DWORD *)(v113 + 12);
-      v116 = *(_DWORD *)(v113 + 16);
+      data[1].task_field_2C = *(int *)(v113 + 4);
+      data[1].type = *(int *)(v113 + 8);
+      data[1].player_num = *(int *)(v113 + 12);
+      v116 = *(int *)(v113 + 16);
       if ( v116 )
-        v117 = *(_DWORD *)(v116 + 304);
+        v117 = *(int *)(v116 + 304);
       else
         v117 = -1;
       data[1].turret_task_channel = v117;
@@ -30335,12 +30332,12 @@ LABEL_5:
         v8 = g_script_handlers[message_handler_id - 1];
       else
         v8 = 0;
-      *(_DWORD *)(result + 52) = v8;
-      *(_DWORD *)(result + 32) = data->task_transient_events;
-      *(_DWORD *)(result + 20) = data->task_sleep;
-      *(_DWORD *)(result + 36) = data->task_global_events;
-      *(_DWORD *)(result + 40) = data->task_wait_flags;
-      *(_DWORD *)(result + 44) = data->task_field_2C;
+      *(int *)(result + 52) = v8;
+      *(int *)(result + 32) = data->task_transient_events;
+      *(int *)(result + 20) = data->task_sleep;
+      *(int *)(result + 36) = data->task_global_events;
+      *(int *)(result + 40) = data->task_wait_flags;
+      *(int *)(result + 44) = data->task_field_2C;
     }
   }
   unit->task = (Task *)result;
@@ -30367,8 +30364,8 @@ LABEL_5:
         if ( !result )
           return result;
         unit->turret = (Turret *)result;
-        *(_DWORD *)(result + 8) = unit;
-        *(_DWORD *)(result + 40) = unit->stats->attachment;
+        *(int *)(result + 8) = unit;
+        *(int *)(result + 40) = unit->stats->attachment;
         turret_creature_id = data->turret_creature_id;
         if ( turret_creature_id && turret_creature_id <= g_script_handlers_num )
           result = g_script_handlers[turret_creature_id - 1];
@@ -30384,12 +30381,12 @@ LABEL_5:
               v13 = g_script_handlers[turret_message_handler - 1];
             else
               v13 = 0;
-            *(_DWORD *)(result + 52) = v13;
-            *(_DWORD *)(result + 32) = data->turret_task_transient_events;
-            *(_DWORD *)(result + 20) = data->turret_task_sleep;
-            *(_DWORD *)(result + 36) = data->turret_task_global_events;
-            *(_DWORD *)(result + 40) = data->turret_task_wait_flags;
-            *(_DWORD *)(result + 44) = data->turret_task_field_2C;
+            *(int *)(result + 52) = v13;
+            *(int *)(result + 32) = data->turret_task_transient_events;
+            *(int *)(result + 20) = data->turret_task_sleep;
+            *(int *)(result + 36) = data->turret_task_global_events;
+            *(int *)(result + 40) = data->turret_task_wait_flags;
+            *(int *)(result + 44) = data->turret_task_field_2C;
           }
         }
         v10->task = (Task *)result;
@@ -30639,7 +30636,7 @@ LABEL_99:
           if ( !result )
             return result;
           unit->state = (void *)result;
-          *(_DWORD *)result = v43->oil_loaded;
+          *(int *)result = v43->oil_loaded;
           task_channel = data[1].task_channel;
           if ( task_channel == -1 )
             goto LABEL_109;
@@ -30656,7 +30653,7 @@ LABEL_99:
 LABEL_109:
           v45 = nullptr;
 LABEL_110:
-          *(_DWORD *)(result + 4) = v45;
+          *(int *)(result + 4) = v45;
           v46 = data[1].creature_id;
           if ( v46 == -1 || (v47 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
           {
@@ -30672,7 +30669,7 @@ LABEL_114:
                 goto LABEL_114;
             }
           }
-          *(_DWORD *)(result + 8) = v47;
+          *(int *)(result + 8) = v47;
           v48 = data[1].message_handler_id;
           if ( v48 == -1 || (v49 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
           {
@@ -30688,17 +30685,17 @@ LABEL_119:
                 goto LABEL_119;
             }
           }
-          *(_DWORD *)(result + 12) = v49;
-          *(_DWORD *)(result + 16) = data[1].task_transient_events;
-          *(_DWORD *)(result + 20) = data[1].task_sleep;
-          *(_DWORD *)(result + 24) = data[1].task_global_events;
-          *(_DWORD *)(result + 28) = data[1].task_wait_flags;
+          *(int *)(result + 12) = v49;
+          *(int *)(result + 16) = data[1].task_transient_events;
+          *(int *)(result + 20) = data[1].task_sleep;
+          *(int *)(result + 24) = data[1].task_global_events;
+          *(int *)(result + 28) = data[1].task_wait_flags;
           v50 = (Unit **)(result + 32);
           v51 = (char *)v43 - result;
           v52 = 20;
           while ( 1 )
           {
-            v53 = *(int *)((char *)v50 + (_DWORD)v51);
+            v53 = *(int *)((char *)v50 + (int)v51);
             if ( v53 == -1 || (v54 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
             {
 LABEL_125:
@@ -30725,9 +30722,9 @@ LABEL_125:
           if ( !result )
             return result;
           unit->state = (void *)result;
-          *(_DWORD *)result = data[1].locked_target_unit_id;
-          *(_DWORD *)(result + 4) = data[1].task_channel;
-          *(_DWORD *)(result + 8) = data[1].creature_id;
+          *(int *)result = data[1].locked_target_unit_id;
+          *(int *)(result + 4) = data[1].task_channel;
+          *(int *)(result + 8) = data[1].creature_id;
           UNIT_rendering_default(unit);
 LABEL_131:
           unit->entity->is_collidable = 1;
@@ -30826,7 +30823,7 @@ LABEL_143:
       }
       remaining_cost = &v55->upgrade_timer;
       v55->upgrade_timer = data[1].creature_id;
-      *(_DWORD *)&v55->same_building_count = data[1].message_handler_id;
+      *(int *)&v55->same_building_count = data[1].message_handler_id;
       v55->prod = nullptr;
       task_transient_events = data[1].task_transient_events;
       if ( task_transient_events == -1 || (v62 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
@@ -30895,7 +30892,7 @@ LABEL_152:
       v73 = (void **)result;
       if ( result )
       {
-        *(_DWORD *)(result + 28) = v69;
+        *(int *)(result + 28) = v69;
         task_wait_flags = data[1].task_wait_flags;
         if ( task_wait_flags && task_wait_flags <= g_script_handlers_num )
           v75 = g_script_handlers[task_wait_flags - 1];
@@ -30925,8 +30922,8 @@ LABEL_186:
         v73[6] = (void *)result;
         if ( result )
         {
-          *(_DWORD *)(result + 124) = remaining_cost;
-          *((_DWORD *)v73[6] + 2) = remaining_cost;
+          *(int *)(result + 124) = remaining_cost;
+          *((int *)v73[6] + 2) = remaining_cost;
           v69->ctx = v73;
           unit->entity->parent = *((Entity **)v73[4] + 76);
           PROD_enqueue_one_ex(&g_cash.cash[unit->player_num], remaining_cost, 300, 42, unit->task, v73[4], -1);
@@ -31417,9 +31414,9 @@ AiSquadNodeSaveStruct *__fastcall SAVE_pack_ai_players(void *data)
   AiController *ai; // ebx
   AiController *i; // eax
   AiController *j; // edx
-  _DWORD *ctx2; // eax
-  _DWORD *v6; // esi
-  _DWORD *v7; // eax
+  int *ctx2; // eax
+  int *v6; // esi
+  int *v7; // eax
   AiController *k; // eax
   AiController *m; // eax
   AiController *n; // eax
@@ -31428,8 +31425,8 @@ AiSquadNodeSaveStruct *__fastcall SAVE_pack_ai_players(void *data)
   AiController *kk; // eax
   AiController *mm; // edx
   int ai_controller_24; // eax
-  _DWORD *v16; // esi
-  _DWORD *v17; // eax
+  int *v16; // esi
+  int *v17; // eax
   void **nn; // eax
   AiController *i1; // eax
   AiController *i2; // esi
@@ -31459,9 +31456,9 @@ AiSquadNodeSaveStruct *__fastcall SAVE_pack_ai_players(void *data)
   AiController *next; // edi
   char *v45; // eax
   AiSquadNode *v46; // edx
-  _DWORD *v47; // esi
-  _DWORD *v48; // ecx
-  _DWORD *v49; // eax
+  int *v47; // esi
+  int *v48; // ecx
+  int *v49; // eax
   AiController *i12; // eax
   AiController *i13; // eax
   AiController *i14; // eax
@@ -31476,23 +31473,23 @@ AiSquadNodeSaveStruct *__fastcall SAVE_pack_ai_players(void *data)
   int local_threat; // eax
   char *v62; // eax
   AiSquadNode *guard_squad; // edx
-  _DWORD *v64; // esi
+  int *v64; // esi
   AiAttackerNode **v65; // ecx
   AiAttackerNode **v66; // eax
   AiTankerNode *i19; // eax
   AiTankerNode *i20; // eax
   AiSquadNode *i21; // edi
-  _DWORD *v70; // esi
+  int *v70; // esi
   AiAttackerNode *v71; // eax
   AiSquadNode *i23; // edi
-  _DWORD *v73; // esi
+  int *v73; // esi
   AiAttackerNode *v74; // eax
   AiSquadNode *v75; // edx
   AiAttackerNode **v76; // ecx
   AiAttackerNode **v77; // eax
   AiController *v78; // ecx
   AiSquadNode *retreat_squad_head; // edi
-  _DWORD *v80; // esi
+  int *v80; // esi
   AiAttackerNode *v81; // eax
   AiBuildOrderNode *i24; // eax
   AiBuildingPlacementNode *i25; // ecx
@@ -31500,113 +31497,113 @@ AiSquadNodeSaveStruct *__fastcall SAVE_pack_ai_players(void *data)
   Unit *v85; // edx
   int unit_id; // edx
   Task *construction_task; // ecx
-  _DWORD *ctx; // ecx
+  int *ctx; // ecx
   AiController *v89; // [esp+10h] [ebp-30h]
   int v90; // [esp+14h] [ebp-2Ch]
-  _DWORD *v91; // [esp+18h] [ebp-28h]
+  int *v91; // [esp+18h] [ebp-28h]
   AiDrillrigNode **i18; // [esp+1Ch] [ebp-24h]
   AiSquadNodeSaveStruct *v93; // [esp+20h] [ebp-20h]
-  _DWORD v94[7]; // [esp+24h] [ebp-1Ch]
+  int v94[7]; // [esp+24h] [ebp-1Ch]
 
-  *(_DWORD *)data = 0;
+  *(int *)data = 0;
   v1 = g_ai_players_tasks;
   do
   {
     if ( *v1 )
     {
       ai = (AiController *)(*v1)->ctx;
-      *(_DWORD *)data += 284;
+      *(int *)data += 284;
       for ( i = (AiController *)ai->enemy_head; i != (AiController *)&ai->enemy_head; i = i->next )
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       for ( j = ai->next; j != ai; j = j->next )
       {
-        *(_DWORD *)data += 44;
+        *(int *)data += 44;
         ctx2 = j->ctx2;
         if ( ctx2 )
         {
           v6 = ctx2 + 3;
-          v7 = (_DWORD *)ctx2[3];
+          v7 = (int *)ctx2[3];
           if ( v7 != v6 )
           {
             do
             {
-              *(_DWORD *)data += 4;
-              v7 = (_DWORD *)*v7;
+              *(int *)data += 4;
+              v7 = (int *)*v7;
             }
-            while ( v7 != (_DWORD *)j->ctx2 + 3 );
+            while ( v7 != (int *)j->ctx2 + 3 );
           }
         }
       }
       for ( k = (AiController *)ai->new_wanderer_head; k != (AiController *)&ai->new_wanderer_head; k = k->next )
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       for ( m = (AiController *)ai->active_wanderer_head;
             m != (AiController *)&ai->active_wanderer_head;
             m = m->next )
       {
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       }
       for ( n = (AiController *)ai->unassigned_attacker_head;
             n != (AiController *)&ai->unassigned_attacker_head;
             n = n->next )
       {
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       }
       for ( ii = (AiController *)ai->convoy_escort_head;
             ii != (AiController *)&ai->convoy_escort_head;
             ii = ii->next )
       {
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       }
       for ( jj = (AiController *)ai->build_head; jj != (AiController *)&ai->build_head; jj = jj->next )
-        *(_DWORD *)data += 20;
+        *(int *)data += 20;
       for ( kk = (AiController *)ai->powerplant_head; kk != (AiController *)&ai->powerplant_head; kk = kk->next )
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       for ( mm = (AiController *)ai->drillrig_head; mm != (AiController *)&ai->drillrig_head; mm = mm->next )
       {
-        *(_DWORD *)data += 60;
+        *(int *)data += 60;
         ai_controller_24 = mm->_ai_controller_24;
         if ( ai_controller_24 )
         {
-          v16 = (_DWORD *)(ai_controller_24 + 12);
-          v17 = *(_DWORD **)(ai_controller_24 + 12);
+          v16 = (int *)(ai_controller_24 + 12);
+          v17 = *(int **)(ai_controller_24 + 12);
           if ( v17 != v16 )
           {
             do
             {
-              *(_DWORD *)data += 4;
-              v17 = (_DWORD *)*v17;
+              *(int *)data += 4;
+              v17 = (int *)*v17;
             }
-            while ( v17 != (_DWORD *)(mm->_ai_controller_24 + 12) );
+            while ( v17 != (int *)(mm->_ai_controller_24 + 12) );
           }
         }
         for ( nn = (void **)mm->ctx1; nn != &mm->ctx1; nn = (void **)*nn )
-          *(_DWORD *)data += 4;
+          *(int *)data += 4;
       }
       for ( i1 = (AiController *)ai->tanker_head; i1 != (AiController *)&ai->tanker_head; i1 = i1->next )
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       for ( i2 = (AiController *)ai->attack_squad_head;
             i2 != (AiController *)&ai->attack_squad_head;
             i2 = i2->next )
       {
-        *(_DWORD *)data += 40;
+        *(int *)data += 40;
         for ( i3 = (void **)i2->ctx2; i3 != &i2->ctx2; i3 = (void **)*i3 )
-          *(_DWORD *)data += 4;
+          *(int *)data += 4;
       }
       for ( i4 = (AiController *)ai->patrol_squad_head;
             i4 != (AiController *)&ai->patrol_squad_head;
             i4 = i4->next )
       {
-        *(_DWORD *)data += 40;
+        *(int *)data += 40;
         for ( i5 = (void **)i4->ctx2; i5 != &i4->ctx2; i5 = (void **)*i5 )
-          *(_DWORD *)data += 4;
+          *(int *)data += 4;
       }
       for ( i6 = (AiController *)ai->retreat_squad_head;
             i6 != (AiController *)&ai->retreat_squad_head;
             i6 = i6->next )
       {
-        *(_DWORD *)data += 40;
+        *(int *)data += 40;
         for ( i7 = (void **)i6->ctx2; i7 != &i6->ctx2; i7 = (void **)*i7 )
-          *(_DWORD *)data += 4;
+          *(int *)data += 4;
       }
       staging_squad = ai->staging_squad;
       if ( staging_squad )
@@ -31617,7 +31614,7 @@ AiSquadNodeSaveStruct *__fastcall SAVE_pack_ai_players(void *data)
         {
           do
           {
-            *(_DWORD *)data += 4;
+            *(int *)data += 4;
             attackers_head = attackers_head->next;
           }
           while ( attackers_head != (AiSquadNode *)&ai->staging_squad->attackers_head );
@@ -31627,25 +31624,25 @@ AiSquadNodeSaveStruct *__fastcall SAVE_pack_ai_players(void *data)
             i8 != (AiController *)&ai->build_order_head;
             i8 = i8->next )
       {
-        *(_DWORD *)data += 4;
+        *(int *)data += 4;
       }
       for ( i9 = (AiController *)ai->building_replacement_head;
             i9 != (AiController *)&ai->building_replacement_head;
             i9 = i9->next )
       {
-        *(_DWORD *)data += 28;
+        *(int *)data += 28;
       }
       for ( i10 = (AiController *)ai->drillrig_replacement_head;
             i10 != (AiController *)&ai->drillrig_replacement_head;
             i10 = i10->next )
       {
-        *(_DWORD *)data += 28;
+        *(int *)data += 28;
       }
     }
     ++v1;
   }
   while ( (int)v1 < (int)&unk_4778EC );         // BUG
-  result = (AiSquadNodeSaveStruct *)malloc(*(_DWORD *)data);
+  result = (AiSquadNodeSaveStruct *)malloc(*(int *)data);
   v93 = result;
   if ( !result )
   {
@@ -31691,14 +31688,14 @@ LABEL_140:
     v42 = 0;
   else
     v42 = v39 + 1;
-  *(_DWORD *)v37 = v42;
+  *(int *)v37 = v42;
   if ( v42 )
   {
     for ( i11 = ai_->enemy_head; i11 != (AiEnemyNode *)&ai_->enemy_head; i11 = i11->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 10);
-      *((_DWORD *)i22 - 1) = i11->unit->unit_id;
+      ++*((int *)v37 + 10);
+      *((int *)i22 - 1) = i11->unit->unit_id;
     }
     next = ai_->next;
     if ( ai_->next != ai_ )
@@ -31707,30 +31704,30 @@ LABEL_140:
       {
         v45 = (char *)i22;
         i22 = (char *)i22 + 44;
-        ++*((_DWORD *)v37 + 1);
-        *((_DWORD *)i22 - 11) = *((_DWORD *)next->ctx1 + 76);
+        ++*((int *)v37 + 1);
+        *((int *)i22 - 11) = *((int *)next->ctx1 + 76);
         v46 = (AiSquadNode *)next->ctx2;
         if ( v46 )
         {
           v47 = v45 + 4;
           SAVE_pack_squad_node((AiSquadNodeSaveStruct *)(v45 + 4), v46);
           v48 = (char *)next->ctx2 + 12;
-          v49 = (_DWORD *)*v48;
-          if ( (_DWORD *)*v48 != v48 )
+          v49 = (int *)*v48;
+          if ( (int *)*v48 != v48 )
           {
             do
             {
               i22 = (char *)i22 + 4;
               ++*v47;
-              *((_DWORD *)i22 - 1) = *(_DWORD *)(v49[3] + 304);
-              v49 = (_DWORD *)*v49;
+              *((int *)i22 - 1) = *(int *)(v49[3] + 304);
+              v49 = (int *)*v49;
             }
-            while ( v49 != (_DWORD *)next->ctx2 + 3 );
+            while ( v49 != (int *)next->ctx2 + 3 );
           }
         }
         else
         {
-          *((_DWORD *)v45 + 1) = 0;
+          *((int *)v45 + 1) = 0;
         }
         next = next->next;
       }
@@ -31742,78 +31739,78 @@ LABEL_140:
           i12 = i12->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 2);
-      *((_DWORD *)i22 - 1) = *((_DWORD *)i12->ctx2 + 76);
+      ++*((int *)v37 + 2);
+      *((int *)i22 - 1) = *((int *)i12->ctx2 + 76);
     }
     for ( i13 = (AiController *)ai_->active_wanderer_head;
           i13 != (AiController *)&ai_->active_wanderer_head;
           i13 = i13->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 3);
-      *((_DWORD *)i22 - 1) = *((_DWORD *)i13->ctx2 + 76);
+      ++*((int *)v37 + 3);
+      *((int *)i22 - 1) = *((int *)i13->ctx2 + 76);
     }
     for ( i14 = (AiController *)ai_->unassigned_attacker_head;
           i14 != (AiController *)&ai_->unassigned_attacker_head;
           i14 = i14->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 4);
-      *((_DWORD *)i22 - 1) = *((_DWORD *)i14->ctx2 + 76);
+      ++*((int *)v37 + 4);
+      *((int *)i22 - 1) = *((int *)i14->ctx2 + 76);
     }
     for ( i15 = (AiController *)ai_->convoy_escort_head;
           i15 != (AiController *)&ai_->convoy_escort_head;
           i15 = i15->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 5);
-      *((_DWORD *)i22 - 1) = *((_DWORD *)i15->ctx2 + 76);
+      ++*((int *)v37 + 5);
+      *((int *)i22 - 1) = *((int *)i15->ctx2 + 76);
     }
     for ( i16 = (AiController *)ai_->build_head; i16 != (AiController *)&ai_->build_head; i16 = i16->next )
     {
       i22 = (char *)i22 + 20;
-      ++*((_DWORD *)v37 + 6);
-      *((_DWORD *)i22 - 5) = *((_DWORD *)i16->ctx1 + 76);
-      *((_DWORD *)i22 - 4) = i16->ctx2;
-      *((_DWORD *)i22 - 3) = i16->unit_free_head;
-      *((_DWORD *)i22 - 2) = i16->new_wanderer_head;
-      *((_DWORD *)i22 - 1) = i16->unit_node_pool;
+      ++*((int *)v37 + 6);
+      *((int *)i22 - 5) = *((int *)i16->ctx1 + 76);
+      *((int *)i22 - 4) = i16->ctx2;
+      *((int *)i22 - 3) = i16->unit_free_head;
+      *((int *)i22 - 2) = i16->new_wanderer_head;
+      *((int *)i22 - 1) = i16->unit_node_pool;
     }
     for ( i17 = (AiController *)ai_->powerplant_head;
           i17 != (AiController *)&ai_->powerplant_head;
           i17 = i17->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 9);
-      *((_DWORD *)i22 - 1) = *((_DWORD *)i17->ctx1 + 76);
+      ++*((int *)v37 + 9);
+      *((int *)i22 - 1) = *((int *)i17->ctx1 + 76);
     }
     drillrig_head = ai_->drillrig_head;
     for ( i18 = &ai_->drillrig_head; drillrig_head != (AiDrillrigNode *)i18; drillrig_head = drillrig_head->next )
     {
-      v57 = *((_DWORD *)v37 + 7) + 1;
+      v57 = *((int *)v37 + 7) + 1;
       v58 = (char *)i22;
-      *((_DWORD *)v37 + 7) = v57;
+      *((int *)v37 + 7) = v57;
       if ( v89->preferred_drillrig == drillrig_head )
-        *((_DWORD *)v37 + 57) = v57;
-      *(_DWORD *)i22 = drillrig_head->unit->unit_id;
+        *((int *)v37 + 57) = v57;
+      *(int *)i22 = drillrig_head->unit->unit_id;
       nearest_powerplant = drillrig_head->nearest_powerplant;
       if ( nearest_powerplant )
       {
         unit = nearest_powerplant->unit;
         if ( unit )
-          *((_DWORD *)i22 + 11) = unit->unit_id;
+          *((int *)i22 + 11) = unit->unit_id;
         else
-          *((_DWORD *)i22 + 11) = -1;
+          *((int *)i22 + 11) = -1;
       }
       else
       {
-        *((_DWORD *)i22 + 11) = -1;
+        *((int *)i22 + 11) = -1;
       }
       local_threat = drillrig_head->local_threat;
-      *((_DWORD *)i22 + 13) = 0;
-      *((_DWORD *)i22 + 12) = local_threat;
+      *((int *)i22 + 13) = 0;
+      *((int *)i22 + 12) = local_threat;
       v62 = (char *)i22 + 52;
-      *((_DWORD *)i22 + 14) = drillrig_head->desired_tanker_count;
+      *((int *)i22 + 14) = drillrig_head->desired_tanker_count;
       guard_squad = drillrig_head->guard_squad;
       i22 = (char *)i22 + 60;
       v91 = v62;
@@ -31829,7 +31826,7 @@ LABEL_140:
           {
             i22 = (char *)i22 + 4;
             ++*v64;
-            *((_DWORD *)i22 - 1) = v66[3][19].next;
+            *((int *)i22 - 1) = v66[3][19].next;
             v66 = (AiAttackerNode **)*v66;
           }
           while ( v66 != &drillrig_head->guard_squad->attackers_head );
@@ -31837,45 +31834,45 @@ LABEL_140:
       }
       else
       {
-        *((_DWORD *)v58 + 1) = 0;
+        *((int *)v58 + 1) = 0;
       }
       for ( i19 = drillrig_head->tanker_next; i19 != (AiTankerNode *)&drillrig_head->tanker_next; i19 = i19->next )
       {
         i22 = (char *)i22 + 4;
         ++*v91;
-        *((_DWORD *)i22 - 1) = i19->unit->unit_id;
+        *((int *)i22 - 1) = i19->unit->unit_id;
       }
     }
     for ( i20 = v89->tanker_head; i20 != (AiTankerNode *)&v89->tanker_head; i20 = i20->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 8);
-      *((_DWORD *)i22 - 1) = i20->unit->unit_id;
+      ++*((int *)v37 + 8);
+      *((int *)i22 - 1) = i20->unit->unit_id;
     }
     for ( i21 = v89->attack_squad_head; i21 != (AiSquadNode *)&v89->attack_squad_head; i21 = i21->next )
     {
       v70 = i22;
-      ++*((_DWORD *)v37 + 11);
+      ++*((int *)v37 + 11);
       SAVE_pack_squad_node((AiSquadNodeSaveStruct *)i22, i21);
       v71 = i21->attackers_head;
       for ( i22 = (char *)i22 + 40; v71 != (AiAttackerNode *)&i21->attackers_head; v71 = v71->next )
       {
         i22 = (char *)i22 + 4;
         ++*v70;
-        *((_DWORD *)i22 - 1) = v71->unit->unit_id;
+        *((int *)i22 - 1) = v71->unit->unit_id;
       }
     }
     for ( i23 = v89->patrol_squad_head; i23 != (AiSquadNode *)&v89->patrol_squad_head; i23 = i23->next )
     {
       v73 = i22;
-      ++*((_DWORD *)v37 + 12);
+      ++*((int *)v37 + 12);
       SAVE_pack_squad_node((AiSquadNodeSaveStruct *)i22, i23);
       v74 = i23->attackers_head;
       for ( i22 = (char *)i22 + 40; v74 != (AiAttackerNode *)&i23->attackers_head; v74 = v74->next )
       {
         i22 = (char *)i22 + 4;
         ++*v73;
-        *((_DWORD *)i22 - 1) = v74->unit->unit_id;
+        *((int *)i22 - 1) = v74->unit->unit_id;
       }
     }
     v75 = v89->staging_squad;
@@ -31889,8 +31886,8 @@ LABEL_140:
         do
         {
           i22 = (char *)i22 + 4;
-          ++*((_DWORD *)v37 + 14);
-          *((_DWORD *)i22 - 1) = v77[3][19].next;
+          ++*((int *)v37 + 14);
+          *((int *)i22 - 1) = v77[3][19].next;
           v77 = (AiAttackerNode **)*v77;
         }
         while ( v77 != &v89->staging_squad->attackers_head );
@@ -31898,7 +31895,7 @@ LABEL_140:
     }
     else
     {
-      *((_DWORD *)v37 + 14) = 0;
+      *((int *)v37 + 14) = 0;
     }
     v78 = v89;
     retreat_squad_head = v89->retreat_squad_head;
@@ -31907,105 +31904,105 @@ LABEL_140:
       do
       {
         v80 = i22;
-        ++*((_DWORD *)v37 + 13);
+        ++*((int *)v37 + 13);
         SAVE_pack_squad_node((AiSquadNodeSaveStruct *)i22, retreat_squad_head);
         v81 = retreat_squad_head->attackers_head;
         for ( i22 = (char *)i22 + 40; v81 != (AiAttackerNode *)&retreat_squad_head->attackers_head; v81 = v81->next )
         {
           i22 = (char *)i22 + 4;
           ++*v80;
-          *((_DWORD *)i22 - 1) = v81->unit->unit_id;
+          *((int *)i22 - 1) = v81->unit->unit_id;
         }
         retreat_squad_head = retreat_squad_head->next;
       }
       while ( retreat_squad_head != (AiSquadNode *)&v89->retreat_squad_head );
       v78 = v89;
     }
-    *((_DWORD *)v37 + 24) = v78->base_area_min_x;
-    *((_DWORD *)v37 + 25) = v78->base_area_min_y;
-    *((_DWORD *)v37 + 26) = v78->base_area_max_x;
-    *((_DWORD *)v37 + 27) = v78->base_area_max_y;
-    *((_DWORD *)v37 + 28) = 0;
+    *((int *)v37 + 24) = v78->base_area_min_x;
+    *((int *)v37 + 25) = v78->base_area_min_y;
+    *((int *)v37 + 26) = v78->base_area_max_x;
+    *((int *)v37 + 27) = v78->base_area_max_y;
+    *((int *)v37 + 28) = 0;
     for ( i24 = v78->build_order_head; i24 != (AiBuildOrderNode *)&v78->build_order_head; i24 = i24->next )
     {
       i22 = (char *)i22 + 4;
-      ++*((_DWORD *)v37 + 28);
-      *((_DWORD *)i22 - 1) = i24->_ai_stru26C_node_8;
+      ++*((int *)v37 + 28);
+      *((int *)i22 - 1) = i24->_ai_stru26C_node_8;
       if ( v78->build_order_current == i24 )
-        *((_DWORD *)v37 + 29) = *((_DWORD *)v37 + 28);
+        *((int *)v37 + 29) = *((int *)v37 + 28);
     }
-    *((_DWORD *)v37 + 30) = v89->rally_x;
-    *((_DWORD *)v37 + 31) = v89->rally_y;
+    *((int *)v37 + 30) = v89->rally_x;
+    *((int *)v37 + 31) = v89->rally_y;
     qmemcpy((char *)v37 + 128, v89->patrol_waypoints, 0x28u);
-    *((_DWORD *)v37 + 42) = v89->attacker_count;
-    *((_DWORD *)v37 + 43) = v89->max_units;
-    *((_DWORD *)v37 + 44) = v89->squad_threshold;
-    *((_DWORD *)v37 + 45) = v89->attack_confidence;
-    *((_DWORD *)v37 + 46) = v89->base_threat;
-    *((_DWORD *)v37 + 47) = v89->max_squad_threat;
-    *((_DWORD *)v37 + 48) = v89->best_patrol_waypoint_idx;
+    *((int *)v37 + 42) = v89->attacker_count;
+    *((int *)v37 + 43) = v89->max_units;
+    *((int *)v37 + 44) = v89->squad_threshold;
+    *((int *)v37 + 45) = v89->attack_confidence;
+    *((int *)v37 + 46) = v89->base_threat;
+    *((int *)v37 + 47) = v89->max_squad_threat;
+    *((int *)v37 + 48) = v89->best_patrol_waypoint_idx;
     qmemcpy((char *)v37 + 196, v89->patrol_threat, 0x20u);
     for ( i25 = v89->building_replacement_head;
           i25 != (AiBuildingPlacementNode *)&v89->building_replacement_head;
           i25 = i25->next )
     {
       i22 = (char *)i22 + 28;
-      ++*((_DWORD *)v37 + 58);
-      *((_DWORD *)i22 - 6) = i25->unit_type;
-      *((_DWORD *)i22 - 5) = i25->unit_x;
-      *((_DWORD *)i22 - 4) = i25->unit_y;
-      *((_DWORD *)i22 - 3) = i25->grid_anchor_x;
-      *((_DWORD *)i22 - 2) = i25->grid_anchor_y;
-      *((_DWORD *)i22 - 1) = i25->strategic_value;
+      ++*((int *)v37 + 58);
+      *((int *)i22 - 6) = i25->unit_type;
+      *((int *)i22 - 5) = i25->unit_x;
+      *((int *)i22 - 4) = i25->unit_y;
+      *((int *)i22 - 3) = i25->grid_anchor_x;
+      *((int *)i22 - 2) = i25->grid_anchor_y;
+      *((int *)i22 - 1) = i25->strategic_value;
     }
     for ( i26 = v89->drillrig_replacement_head;
           i26 != (AiBuildingPlacementNode *)&v89->drillrig_replacement_head;
           i22 = (char *)i22 + 28 )
     {
-      ++*((_DWORD *)v37 + 59);
+      ++*((int *)v37 + 59);
       v85 = i26->unit;
       if ( v85 )
         unit_id = v85->unit_id;
       else
         unit_id = -1;
-      *(_DWORD *)i22 = unit_id;
-      *((_DWORD *)i22 + 1) = i26->unit_type;
-      *((_DWORD *)i22 + 2) = i26->unit_x;
-      *((_DWORD *)i22 + 3) = i26->unit_y;
-      *((_DWORD *)i22 + 4) = i26->grid_anchor_x;
-      *((_DWORD *)i22 + 5) = i26->grid_anchor_y;
-      *((_DWORD *)i22 + 6) = i26->strategic_value;
+      *(int *)i22 = unit_id;
+      *((int *)i22 + 1) = i26->unit_type;
+      *((int *)i22 + 2) = i26->unit_x;
+      *((int *)i22 + 3) = i26->unit_y;
+      *((int *)i22 + 4) = i26->grid_anchor_x;
+      *((int *)i22 + 5) = i26->grid_anchor_y;
+      *((int *)i22 + 6) = i26->strategic_value;
       i26 = i26->next;
     }
-    *((_DWORD *)v37 + 60) = v89->construction_state;
-    *((_DWORD *)v37 + 61) = v89->construction_base_cost;
-    *((_DWORD *)v37 + 62) = v89->construction_remaining_cost;
-    *((_DWORD *)v37 + 63) = v89->construction_countdown;
-    *((_DWORD *)v37 + 65) = v89->construction_cost_per_tick;
+    *((int *)v37 + 60) = v89->construction_state;
+    *((int *)v37 + 61) = v89->construction_base_cost;
+    *((int *)v37 + 62) = v89->construction_remaining_cost;
+    *((int *)v37 + 63) = v89->construction_countdown;
+    *((int *)v37 + 65) = v89->construction_cost_per_tick;
     construction_task = v89->construction_task;
     if ( construction_task )
     {
       ctx = construction_task->ctx;
       if ( ctx )
       {
-        *((_DWORD *)v37 + 64) = ctx[76];
+        *((int *)v37 + 64) = ctx[76];
       }
       else
       {
-        *((_DWORD *)v37 + 64) = -1;
+        *((int *)v37 + 64) = -1;
         v89->construction_task->entity->is_collidable = 1;
-        *((_DWORD *)v37 + 67) = v89->construction_task->entity->x;
-        *((_DWORD *)v37 + 68) = v89->construction_task->entity->y;
+        *((int *)v37 + 67) = v89->construction_task->entity->x;
+        *((int *)v37 + 68) = v89->construction_task->entity->y;
       }
     }
     else
     {
-      *((_DWORD *)v37 + 64) = -1;
-      *((_DWORD *)v37 + 66) = -1;
+      *((int *)v37 + 64) = -1;
+      *((int *)v37 + 66) = -1;
     }
-    *((_DWORD *)v37 + 69) = v89->airstrike_interval;
+    *((int *)v37 + 69) = v89->airstrike_interval;
     v33 = v90;
-    *((_DWORD *)v37 + 70) = v89->airstrike_count;
+    *((int *)v37 + 70) = v89->airstrike_count;
     goto LABEL_140;
   }
   g_save_last_error = "unknown mode";
@@ -32584,7 +32581,7 @@ LABEL_145:
         powerplant_head = (AiController *)ai->powerplant_head;
         if ( powerplant_head != (AiController *)&ai->powerplant_head )
         {
-          while ( *((_DWORD *)powerplant_head->ctx1 + 76) != ADJ(data_148_11C)->_ai_players_save_struct_174 )
+          while ( *((int *)powerplant_head->ctx1 + 76) != ADJ(data_148_11C)->_ai_players_save_struct_174 )
           {
             powerplant_head = powerplant_head->next;
             if ( powerplant_head == (AiController *)&ai->powerplant_head )
@@ -33582,12 +33579,12 @@ LABEL_13:
         v12 = g_script_handlers[aircraft_sidebar_task_message_handler - 1];
       else
         v12 = 0;
-      *(_DWORD *)(result + 52) = v12;
-      *(_DWORD *)(result + 32) = data->aircraft_sidebar_task_transient_events;
-      *(_DWORD *)(result + 20) = data->aircraft_sidebar_task_sleep;
-      *(_DWORD *)(result + 36) = data->aircraft_sidebar_task_global_events;
-      *(_DWORD *)(result + 40) = data->aircraft_sidebar_task_wait_flags;
-      *(_DWORD *)(result + 44) = data->aircraft_sidebar_task_field_2C;
+      *(int *)(result + 52) = v12;
+      *(int *)(result + 32) = data->aircraft_sidebar_task_transient_events;
+      *(int *)(result + 20) = data->aircraft_sidebar_task_sleep;
+      *(int *)(result + 36) = data->aircraft_sidebar_task_global_events;
+      *(int *)(result + 40) = data->aircraft_sidebar_task_wait_flags;
+      *(int *)(result + 44) = data->aircraft_sidebar_task_field_2C;
     }
   }
   else
@@ -33601,7 +33598,7 @@ LABEL_13:
     v13 = (AirstrikeSidebar *)result;
     if ( result )
     {
-      *(_DWORD *)(result + 16) = g_sidebar_airstrike_task;
+      *(int *)(result + 16) = g_sidebar_airstrike_task;
       aircraft_mode_id = data->aircraft_mode_id;
       if ( aircraft_mode_id && aircraft_mode_id <= g_script_handlers_num )
         result = g_script_handlers[aircraft_mode_id - 1];
@@ -33686,7 +33683,7 @@ BOOL GAME_save()
   int num_shroud_tiles; // [esp+44h] [ebp-14h] BYREF
   size_t data; // [esp+48h] [ebp-10h] BYREF
   int v36; // [esp+4Ch] [ebp-Ch] BYREF
-  _DWORD Buffer[2]; // [esp+50h] [ebp-8h] BYREF
+  int Buffer[2]; // [esp+50h] [ebp-8h] BYREF
 
   v23 = nullptr;
   v24 = nullptr;
@@ -33751,7 +33748,7 @@ BOOL GAME_save()
           case UnitType_Surv_ResearchLab:
           case UnitType_Surv_AlchemyHall:
             unit_save_size = 776;
-            if ( (type == UnitType_Surv_ResearchLab || type == UnitType_Surv_AlchemyHall) && *((_DWORD *)i->state + 2) )
+            if ( (type == UnitType_Surv_ResearchLab || type == UnitType_Surv_AlchemyHall) && *((int *)i->state + 2) )
               unit_save_size = 868;
             break;
           default:
@@ -33996,7 +33993,7 @@ BOOL GAME_load()
   size_t Size; // [esp+10h] [ebp-14h] BYREF
   int v27; // [esp+14h] [ebp-10h] BYREF
   BOOL v28; // [esp+18h] [ebp-Ch]
-  _DWORD Buffer[2]; // [esp+1Ch] [ebp-8h] BYREF
+  int Buffer[2]; // [esp+1Ch] [ebp-8h] BYREF
 
   v27 = -1;
   v28 = 0;
@@ -34648,7 +34645,7 @@ BOOL GAME_splash()
     strcpy(g_app_root, ".");
   else
     sprintf(g_app_root, "%c", g_game_path_drive_letter);
-  v1 = NETZ_init(NetzProtocol_Invalid, (int (__fastcall *)(_DWORD))TURRET_mode_null, NETZ_msg_loop);
+  v1 = NETZ_init(NetzProtocol_Invalid, (int (__fastcall *)(int))TURRET_mode_null, NETZ_msg_loop);
   v2 = v1;
   if ( v1 )
   {
@@ -35933,9 +35930,7 @@ void __fastcall GAME_read_campaign_progress(const char *filename)
 {
   FILE *v1; // edi
   int surv_checksum; // ecx
-  int *v3; // esi
   int mute_checksum; // ecx
-  int *v5; // esi
   int stored_surv; // [esp+8h] [ebp-10Ch] BYREF
   int val; // [esp+Ch] [ebp-108h] BYREF
   CHAR path[260]; // [esp+10h] [ebp-104h] BYREF
@@ -35950,15 +35945,15 @@ void __fastcall GAME_read_campaign_progress(const char *filename)
     stored_surv = 47 - stored_surv;
     if ( stored_surv )
     {
-      v3 = g_surv_xor_keys;
+      int i = 0;
       while ( 1 )
       {
         fscanf(v1, "%03d", &val);
         surv_checksum = stored_surv;
-        val ^= *v3;
+        val ^= g_surv_xor_keys[i];
         if ( val != stored_surv )
           break;
-        if ( (int)++v3 >= (int)g_mute_xor_keys )// BUG
+        if (++i >= NUM_XOR_KEYS)
           goto LABEL_8;
       }
       surv_checksum = 0;
@@ -35974,15 +35969,15 @@ LABEL_8:
     stored_surv = 69 - stored_surv;
     if ( stored_surv )
     {
-      v5 = g_mute_xor_keys;
+      int i = 0;
       while ( 1 )
       {
         fscanf(v1, "%03d", &val);
         mute_checksum = stored_surv;
-        val ^= *v5;
+        val ^= g_mute_xor_keys[i];
         if ( val != stored_surv )
           break;
-        if ( (int)++v5 >= (int)&xmmword_4630E8 )// BUG
+        if (++i >= NUM_XOR_KEYS)
           goto LABEL_17;
       }
       mute_checksum = 0;
@@ -36001,18 +35996,13 @@ LABEL_17:
     g_current_mute_level = 0;
   }
 }
-// 4630E8: using guessed type int dword_4630E8;
-// 47A2DC: using guessed type __int16 g_current_mute_level;
-// 47A2E0: using guessed type __int16 g_current_surv_level;
 
 //----- (00424270) --------------------------------------------------------
 void __fastcall GAME_load_campaign_progress(const char *filename, __int16 *out_surv_level, __int16 *out_mute_level)
 {
   FILE *v4; // edi
   int surv_checksum; // ecx
-  int *key; // esi
   int mute_checksum; // ecx
-  int *key_; // esi
   int stored_surv; // [esp+8h] [ebp-8h] BYREF
   int val; // [esp+Ch] [ebp-4h] BYREF
 
@@ -36024,15 +36014,15 @@ void __fastcall GAME_load_campaign_progress(const char *filename, __int16 *out_s
     stored_surv = 47 - stored_surv;
     if ( stored_surv )
     {
-      key = g_surv_xor_keys;
+      int i = 0;
       while ( 1 )
       {
         fscanf(v4, "%03d", &val);
         surv_checksum = stored_surv;
-        val ^= *key;
+        val ^= g_surv_xor_keys[i];
         if ( val != stored_surv )
           break;                                // tampered
-        if ( (int)++key >= (int)g_mute_xor_keys )// BUG
+        if (++i >= NUM_XOR_KEYS)
           goto LABEL_8;
       }
       surv_checksum = 0;
@@ -36048,15 +36038,15 @@ LABEL_8:
     stored_surv = 69 - stored_surv;
     if ( stored_surv )
     {
-      key_ = g_mute_xor_keys;
+      int i = 0;
       while ( 1 )
       {
         fscanf(v4, "%03d", &val);
         mute_checksum = stored_surv;
-        val ^= *key_;
+        val ^= g_mute_xor_keys[i];
         if ( val != stored_surv )
           break;
-        if ( (int)++key_ >= (int)&xmmword_4630E8 )// BUG
+        if (++i >= NUM_XOR_KEYS)
           goto LABEL_17;
       }
       mute_checksum = 0;
@@ -36082,9 +36072,7 @@ void __fastcall MISSION_save_campaign_progress(const char *filename)
 {
   FILE *v1; // edi
   int checksum; // ebx
-  int *v3; // esi
   int v4; // ebx
-  int *v5; // esi
   int max_mute_level; // [esp+8h] [ebp-108h] BYREF
   int max_surv_level; // [esp+Ch] [ebp-104h] BYREF
   char path[256]; // [esp+10h] [ebp-100h] BYREF
@@ -36108,10 +36096,10 @@ void __fastcall MISSION_save_campaign_progress(const char *filename)
       checksum = 47 - (unsigned __int16)g_current_surv_level;
       fprintf(v1, "%03d", (unsigned __int16)g_current_surv_level);
     }
-    v3 = g_surv_xor_keys;
+    int i = 0;
     do
-      fprintf(v1, "%03d", *v3++ ^ checksum);
-    while ( (int)v3 < (int)g_mute_xor_keys );   // BUG
+      fprintf(v1, "%03d", g_surv_xor_keys[i] ^ checksum);
+    while (++i < NUM_XOR_KEYS);
     if ( (unsigned __int16)g_current_mute_level <= (int)(unsigned __int16)max_mute_level )
     {
       v4 = 69 - (unsigned __int16)max_mute_level;
@@ -36123,16 +36111,13 @@ void __fastcall MISSION_save_campaign_progress(const char *filename)
       v4 = 69 - (unsigned __int16)g_current_mute_level;
       fprintf(v1, "%03d", (unsigned __int16)g_current_mute_level);
     }
-    v5 = g_mute_xor_keys;
+    i = 0;
     do
-      fprintf(v1, "%03d", *v5++ ^ v4);
-    while ( (int)v5 < (int)&xmmword_4630E8 );   // BUG
+      fprintf(v1, "%03d", g_mute_xor_keys[i] ^ v4);
+    while (++i < NUM_XOR_KEYS);
     fclose(v1);
   }
 }
-// 4630E8: using guessed type int dword_4630E8;
-// 47A2DC: using guessed type __int16 g_current_mute_level;
-// 47A2E0: using guessed type __int16 g_current_surv_level;
 
 //----- (00424560) --------------------------------------------------------
 BOOL __fastcall GAME_parse_stats_table(const char *filename)
@@ -37657,11 +37642,11 @@ void __cdecl MISSION_spawn_players_and_start(Task *task)
   int v27; // edx
   unsigned __int8 v28; // cl
   int *v29; // edi
-  _DWORD *v30; // esi
+  int *v30; // esi
   int player_side; // eax
   int v32; // ebp
   int *v33; // edi
-  _DWORD *v34; // esi
+  int *v34; // esi
   int v35; // eax
   Entity *v36; // ecx
   CplcEntity *cplc_meta; // eax
@@ -37670,7 +37655,7 @@ void __cdecl MISSION_spawn_players_and_start(Task *task)
   int player_num; // edi
   int v41; // ebp
   int v42; // eax
-  _DWORD *v43; // esi
+  int *v43; // esi
   unsigned __int8 v44; // si
   int k; // ecx
   int m; // eax
@@ -37706,7 +37691,7 @@ void __cdecl MISSION_spawn_players_and_start(Task *task)
   int v76; // [esp+18h] [ebp-D4h]
   int v77; // [esp+1Ch] [ebp-D0h] BYREF
   _WORD v78[10]; // [esp+20h] [ebp-CCh] BYREF
-  _DWORD v79[46]; // [esp+34h] [ebp-B8h] BYREF
+  int v79[46]; // [esp+34h] [ebp-B8h] BYREF
 
   g_mission_outcome_task = task;
   do
@@ -37967,10 +37952,10 @@ LABEL_85:
       {
         ENT_create_by_unit_type(
           v48,
-          g_multi_player_spawn_positions[v76].x + (*((_DWORD *)v49 + 1) << 8),
-          g_multi_player_spawn_positions[v76].y + (*((_DWORD *)v49 + 2) << 8),
+          g_multi_player_spawn_positions[v76].x + (*((int *)v49 + 1) << 8),
+          g_multi_player_spawn_positions[v76].y + (*((int *)v49 + 2) << 8),
           g_multi_player_spawn_positions[v76].player_side);
-        v48 = *((_DWORD *)v49 + 3);
+        v48 = *((int *)v49 + 3);
         v49 += 3;
       }
       while ( v48 != UnitType_Invalid );
@@ -38046,8 +38031,8 @@ LABEL_85:
           v60 = (UnitType *)&unk_468620;
         for ( n = *v60; n != UnitType_Invalid; v60 += 3 )
         {
-          ENT_create_by_unit_type(n, v58 + (*((_DWORD *)v60 + 1) << 8), v59 + (*((_DWORD *)v60 + 2) << 8), v55);
-          n = *((_DWORD *)v60 + 3);
+          ENT_create_by_unit_type(n, v58 + (*((int *)v60 + 1) << 8), v59 + (*((int *)v60 + 2) << 8), v55);
+          n = *((int *)v60 + 3);
         }
       }
       ++v55;
@@ -38104,7 +38089,7 @@ LABEL_85:
 // 468B50: using guessed type int g_num_multi_players;
 // 46E3F8: using guessed type int g_kaos_num_allied_slots;
 // 46E3FC: using guessed type int g_kaos_num_enemy_slots;
-// 47A3C0: using guessed type _DWORD dword_47A3C0[3];
+// 47A3C0: using guessed type int dword_47A3C0[3];
 // 47A3E4: using guessed type int g_multi_num_player_spawn_positions;
 // 47A3E8: using guessed type int g_multi_num_bunker_spawn_positions;
 
@@ -40445,7 +40430,7 @@ LABEL_165:
                     if ( CURSOR_select(&cursor) )
                     {
                       next = g_game_event_queue.next;// TODO should be in the function above
-                      *(_DWORD *)g_game_event_queue.evt.payload = ctx->unit_id;
+                      *(int *)g_game_event_queue.evt.payload = ctx->unit_id;
                       g_game_event_queue.evt.type = GameEvent_SelectedUnit;
                       v53 = g_game_event_free_head;
                       if ( g_game_event_free_head )
@@ -40522,16 +40507,16 @@ LABEL_165:
                   {
                     if ( !g_is_single_player )
                     {
-                      *(_DWORD *)g_game_event_queue.evt.payload = v46->player_num;
+                      *(int *)g_game_event_queue.evt.payload = v46->player_num;
                       v47 = g_game_event_queue.next;
                       g_game_event_queue.evt.type = GameEvent_SwearAllegiance;
                       v48 = g_game_event_free_head;
                       if ( g_game_event_free_head )
                       {
                         g_game_event_free_head = g_game_event_free_head->next;// INLINED (???) 429770 CURSOR_event_enqueue
-                        *(_DWORD *)&v48->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-                        *(_DWORD *)&v48->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-                        *(_DWORD *)&v48->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+                        *(int *)&v48->evt.type = *(int *)&g_game_event_queue.evt.type;
+                        *(int *)&v48->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+                        *(int *)&v48->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
                         v49 = g_game_event_queue.evt.payload[11];
                         v48->next = nullptr;
                         v48->evt.payload[11] = v49;
@@ -40659,14 +40644,14 @@ LABEL_165:
           {
             v33 = g_game_event_queue.next;
             g_game_event_queue.evt.type = GameEvent_BuildingSold;
-            *(_DWORD *)g_game_event_queue.evt.payload = v31->unit_id;
+            *(int *)g_game_event_queue.evt.payload = v31->unit_id;
             v34 = g_game_event_free_head;
             if ( !g_game_event_free_head )
               goto LABEL_110;
             g_game_event_free_head = g_game_event_free_head->next;// INLINED (???) 429770 CURSOR_event_enqueue
-            *(_DWORD *)&v34->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v34->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v34->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            *(int *)&v34->evt.type = *(int *)&g_game_event_queue.evt.type;
+            *(int *)&v34->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+            *(int *)&v34->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
             v35 = g_game_event_queue.evt.payload[11];
             v34->next = nullptr;
             v34->evt.payload[11] = v35;
@@ -40697,19 +40682,19 @@ LABEL_110:
         }
         if ( CURSOR_select(&cursor) )
         {
-          *(_DWORD *)g_game_event_queue.evt.payload = g_player_num;
+          *(int *)g_game_event_queue.evt.payload = g_player_num;
           cursor.cursor_hitbox_tester->is_collidable = 1;
-          *(_DWORD *)&g_game_event_queue.evt.payload[4] = cursor.cursor_hitbox_tester->x;
+          *(int *)&g_game_event_queue.evt.payload[4] = cursor.cursor_hitbox_tester->x;
           v27 = g_game_event_queue.next;
-          *(_DWORD *)&g_game_event_queue.evt.payload[8] = cursor.cursor_hitbox_tester->y;
+          *(int *)&g_game_event_queue.evt.payload[8] = cursor.cursor_hitbox_tester->y;
           g_game_event_queue.evt.type = GameEvent_AirstrikeCalled;
           v28 = g_game_event_free_head;
           if ( g_game_event_free_head )         // INLINED (???) 429770 CURSOR_event_enqueue
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v28->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v28->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v28->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            *(int *)&v28->evt.type = *(int *)&g_game_event_queue.evt.type;
+            *(int *)&v28->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+            *(int *)&v28->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
             v29 = g_game_event_queue.evt.payload[11];
             v28->next = nullptr;
             v28->evt.payload[11] = v29;
@@ -40856,10 +40841,10 @@ LABEL_110:
           *(_WORD *)g_game_event_queue.evt.payload = cursor.planner->type;
           v25 = v10->x;
           v10->is_collidable = 1;
-          *(_DWORD *)&g_game_event_queue.evt.payload[2] = v25;
+          *(int *)&g_game_event_queue.evt.payload[2] = v25;
           y = v10->y;
           g_game_event_queue.evt.type = GameEvent_BuildingPlaced;
-          *(_DWORD *)&g_game_event_queue.evt.payload[6] = y;
+          *(int *)&g_game_event_queue.evt.payload[6] = y;
           CURSOR_event_enqueue(&g_game_event_queue.evt);
         }
       }
@@ -40897,9 +40882,9 @@ void __fastcall CURSOR_event_enqueue(GameEvent *event)
   if ( g_game_event_free_head )
   {
     g_game_event_free_head = g_game_event_free_head->next;
-    *(_DWORD *)&v2->evt.type = *(_DWORD *)&event->type;
-    *(_DWORD *)&v2->evt.payload[3] = *(_DWORD *)&event->payload[3];
-    *(_DWORD *)&v2->evt.payload[7] = *(_DWORD *)&event->payload[7];
+    *(int *)&v2->evt.type = *(int *)&event->type;
+    *(int *)&v2->evt.payload[3] = *(int *)&event->payload[3];
+    *(int *)&v2->evt.payload[7] = *(int *)&event->payload[7];
     v3 = event->payload[11];
     v2->next = nullptr;
     v2->evt.payload[11] = v3;
@@ -40947,16 +40932,16 @@ void __fastcall CURSOR_select_control_group(CursorState *cursor, int group)
   if ( g_num_units_in_group[group] > 0 )
   {
     next = g_game_event_queue.next;
-    *(_DWORD *)g_game_event_queue.evt.payload = group;
+    *(int *)g_game_event_queue.evt.payload = group;
     v26 = 0;
     g_game_event_queue.evt.type = GameEvent_RecalledControlGroup;
     v4 = g_game_event_free_head;
     if ( g_game_event_free_head )
     {
       g_game_event_free_head = g_game_event_free_head->next;
-      *(_DWORD *)&v4->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-      *(_DWORD *)&v4->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-      *(_DWORD *)&v4->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+      *(int *)&v4->evt.type = *(int *)&g_game_event_queue.evt.type;
+      *(int *)&v4->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+      *(int *)&v4->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
       v5 = g_game_event_queue.evt.payload[11];
       v4->next = nullptr;
       v4->evt.payload[11] = v5;
@@ -41089,13 +41074,13 @@ LABEL_44:
       v16 = (CursorState *)cursor->selection_head;
       v17 = 0;
       v18 = 0;
-      for ( k = 0; v16 != cursor; k += *(_DWORD *)(v21 + 20) )
+      for ( k = 0; v16 != cursor; k += *(int *)(v21 + 20) )
       {
         cursor_state_task_8 = v16->_cursor_state_task_8;
         v16 = (CursorState *)v16->selection_head;
         ++v17;
-        v21 = *((_DWORD *)cursor_state_task_8->ctx + 23);
-        v18 += *(_DWORD *)(v21 + 16);
+        v21 = *((int *)cursor_state_task_8->ctx + 23);
+        v18 += *(int *)(v21 + 16);
       }
       if ( v17 )
       {
@@ -41417,9 +41402,9 @@ void __fastcall CURSOR_on_unit_selected(CursorState *cursor, Unit *unit)
 //
 // // 1. Fill scratch buffer:
 // g_game_event_queue.evt.type = GameEvent_XXX;
-// *(_DWORD*)g_game_event_queue.evt.payload = value1;       // bytes [0..3]
-// *(_DWORD*)&g_game_event_queue.evt.payload[4] = value2;   // bytes [4..7] (optional)
-// *(_DWORD*)&g_game_event_queue.evt.payload[8] = value3;   // bytes [8..11] (optional)
+// *(int*)g_game_event_queue.evt.payload = value1;       // bytes [0..3]
+// *(int*)&g_game_event_queue.evt.payload[4] = value2;   // bytes [4..7] (optional)
+// *(int*)&g_game_event_queue.evt.payload[8] = value3;   // bytes [8..11] (optional)
 //
 // // 2. Enqueue:
 // GAME_EVENT_ENQUEUE();
@@ -41429,9 +41414,9 @@ void __fastcall CURSOR_on_unit_selected(CursorState *cursor, Unit *unit)
 // MSVC 13-byte struct copy codegen:
 // The compiler emits this for _node->evt = g_game_event_queue.evt:
 //
-// *(_DWORD*)&node->evt.type       = *(_DWORD*)&src.type;        // bytes [0..3]
-// *(_DWORD*)&node->evt.payload[3] = *(_DWORD*)&src.payload[3];  // bytes [4..7]
-// *(_DWORD*)&node->evt.payload[7] = *(_DWORD*)&src.payload[7];  // bytes [8..11]
+// *(int*)&node->evt.type       = *(int*)&src.type;        // bytes [0..3]
+// *(int*)&node->evt.payload[3] = *(int*)&src.payload[3];  // bytes [4..7]
+// *(int*)&node->evt.payload[7] = *(int*)&src.payload[7];  // bytes [8..11]
 // node->evt.payload[11]           = src.payload[11];             // byte [12]
 //
 // 4 non-overlapping reads covering 13 bytes (3×DWORD + 1×BYTE). This is just MSVC's way of copying a 13-byte unaligned struct without calling memcpy.
@@ -41563,15 +41548,15 @@ void __fastcall CURSOR_unit_orders(CursorState *cursor)
       while ( selection_head != cursor );
     }
     next = g_game_event_queue.next;
-    *(_DWORD *)g_game_event_queue.evt.payload = last_key_scancode - 1;
+    *(int *)g_game_event_queue.evt.payload = last_key_scancode - 1;
     g_game_event_queue.evt.type = GameEvent_AssignedControlGroup;
     v8 = g_game_event_free_head;
     if ( g_game_event_free_head )
     {
       g_game_event_free_head = g_game_event_free_head->next;// INLINED
-      *(_DWORD *)&v8->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-      *(_DWORD *)&v8->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-      *(_DWORD *)&v8->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+      *(int *)&v8->evt.type = *(int *)&g_game_event_queue.evt.type;
+      *(int *)&v8->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+      *(int *)&v8->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
       v9 = g_game_event_queue.evt.payload[11];
       v8->next = nullptr;
       v8->evt.payload[11] = v9;
@@ -41697,16 +41682,16 @@ LABEL_234:
         else
           SOUND_play(SoundId_Mute_Specialist_Ack, 0, g_sfx_vol, 16, nullptr);
         g_game_event_queue.evt.type = GameEvent_InfiltratorAssigned;// INLINED
-        *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
-        *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
+        *(int *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
+        *(int *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
         v22 = g_game_event_queue.next;
         v23 = g_game_event_free_head;
         if ( g_game_event_free_head )
         {
           g_game_event_free_head = g_game_event_free_head->next;// INLINED
-          *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-          *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-          *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+          *(int *)&v23->evt.type = *(int *)&g_game_event_queue.evt.type;
+          *(int *)&v23->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+          *(int *)&v23->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
           v24 = g_game_event_queue.evt.payload[11];
           v23->next = nullptr;
           v23->evt.payload[11] = v24;
@@ -41747,16 +41732,16 @@ LABEL_175:
     }
     if ( !CURSOR_select(cursor) )
       return;
-    *(_DWORD *)g_game_event_queue.evt.payload = unit->unit_id;// INLINED
+    *(int *)g_game_event_queue.evt.payload = unit->unit_id;// INLINED
     v28 = g_game_event_queue.next;
     g_game_event_queue.evt.type = GameEvent_AttackCommand;
     v29 = g_game_event_free_head;
     if ( g_game_event_free_head )
     {
       g_game_event_free_head = g_game_event_free_head->next;// INLINED
-      *(_DWORD *)&v29->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-      *(_DWORD *)&v29->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-      *(_DWORD *)&v29->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+      *(int *)&v29->evt.type = *(int *)&g_game_event_queue.evt.type;
+      *(int *)&v29->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+      *(int *)&v29->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
       v30 = g_game_event_queue.evt.payload[11];
       v29->next = nullptr;
       v29->evt.payload[11] = v30;
@@ -41899,16 +41884,16 @@ LABEL_108:
     else
       SOUND_play(SoundId_Mute_Specialist_Ack, 0, g_sfx_vol, 16, nullptr);
     g_game_event_queue.evt.type = GameEvent_TechnicianAssigned;// INLINED
-    *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
-    *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
+    *(int *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
+    *(int *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
     v22 = g_game_event_queue.next;
     v23 = g_game_event_free_head;
     if ( !g_game_event_free_head )
       return;
     g_game_event_free_head = g_game_event_free_head->next;// INLINED
-    *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-    *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-    *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+    *(int *)&v23->evt.type = *(int *)&g_game_event_queue.evt.type;
+    *(int *)&v23->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+    *(int *)&v23->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
     v40 = g_game_event_queue.evt.payload[11];
     v23->next = nullptr;
     v23->evt.payload[11] = v40;
@@ -41945,16 +41930,16 @@ LABEL_108:
         if ( !cursor->selection_executing_representative )
           return;
         g_game_event_queue.evt.type = GameEvent_TankerAssignedToPowerPlant;// INLINED
-        *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
-        *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
+        *(int *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
+        *(int *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
         v22 = g_game_event_queue.next;
         v23 = g_game_event_free_head;
         if ( !g_game_event_free_head )
           return;
         g_game_event_free_head = g_game_event_free_head->next;// INLINED
-        *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-        *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-        *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+        *(int *)&v23->evt.type = *(int *)&g_game_event_queue.evt.type;
+        *(int *)&v23->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+        *(int *)&v23->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
         v44 = g_game_event_queue.evt.payload[11];
         v23->next = nullptr;
         v23->evt.payload[11] = v44;
@@ -41995,15 +41980,15 @@ LABEL_149:
           return;
         g_game_event_queue.evt.type = GameEvent_TankerAssignedToDrillrig;// INLINED
         v22 = g_game_event_queue.next;
-        *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
-        *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
+        *(int *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
+        *(int *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
         v23 = g_game_event_free_head;
         if ( !g_game_event_free_head )
           return;
         g_game_event_free_head = g_game_event_free_head->next;// INLINED
-        *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-        *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-        *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+        *(int *)&v23->evt.type = *(int *)&g_game_event_queue.evt.type;
+        *(int *)&v23->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+        *(int *)&v23->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
         v48 = g_game_event_queue.evt.payload[11];
         v23->next = nullptr;
         v23->evt.payload[11] = v48;
@@ -42050,14 +42035,14 @@ LABEL_161:
     {
       v22 = g_game_event_queue.next;
       g_game_event_queue.evt.type = GameEvent_MobileBaseDeployed;// INLINED
-      *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
+      *(int *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
       v23 = g_game_event_free_head;
       if ( g_game_event_free_head )
       {
         g_game_event_free_head = g_game_event_free_head->next;// INLINED
-        *(_DWORD *)&v23->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-        *(_DWORD *)&v23->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-        *(_DWORD *)&v23->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+        *(int *)&v23->evt.type = *(int *)&g_game_event_queue.evt.type;
+        *(int *)&v23->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+        *(int *)&v23->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
         v54 = g_game_event_queue.evt.payload[11];
         v23->next = nullptr;
         v23->evt.payload[11] = v54;
@@ -42133,15 +42118,15 @@ LABEL_161:
       else
       {
         v65 = g_game_event_queue.next;
-        *(_DWORD *)g_game_event_queue.evt.payload = unit->unit_id;
+        *(int *)g_game_event_queue.evt.payload = unit->unit_id;
         g_game_event_queue.evt.type = GameEvent_SelectedUnit;// INLINED
         v66 = g_game_event_free_head;
         if ( g_game_event_free_head )
         {
           g_game_event_free_head = g_game_event_free_head->next;
-          *(_DWORD *)&v66->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-          *(_DWORD *)&v66->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-          *(_DWORD *)&v66->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+          *(int *)&v66->evt.type = *(int *)&g_game_event_queue.evt.type;
+          *(int *)&v66->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+          *(int *)&v66->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
           v67 = g_game_event_queue.evt.payload[11];
           v66->next = nullptr;
           v66->evt.payload[11] = v67;
@@ -42213,7 +42198,7 @@ void __fastcall CURSOR_repair_bay_order(CursorState *cursor, Unit *unit)
   int v13; // [esp-Ch] [ebp-18h]
   int v14; // [esp-Ch] [ebp-18h]
 
-  if ( UNIT_building_is_under_construction(unit) || *((_DWORD *)unit->state + 2) )
+  if ( UNIT_building_is_under_construction(unit) || *((int *)unit->state + 2) )
   {
     if ( cursor->cursor_mobd_offset == MOBD_CURSOR_UNAVAILABLE )// INLINED
       return;
@@ -42240,16 +42225,16 @@ LABEL_27:
   if ( CURSOR_select(cursor) && cursor->selection_executing_representative )
   {
     g_game_event_queue.evt.type = GameEvent_RepairBayAssigned;// INLINED
-    *(_DWORD *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
+    *(int *)g_game_event_queue.evt.payload = cursor->selection_executing_representative->unit_id;
     next = g_game_event_queue.next;
-    *(_DWORD *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
+    *(int *)&g_game_event_queue.evt.payload[4] = unit->unit_id;
     v7 = g_game_event_free_head;
     if ( g_game_event_free_head )
     {
       g_game_event_free_head = g_game_event_free_head->next;
-      *(_DWORD *)&v7->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-      *(_DWORD *)&v7->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-      *(_DWORD *)&v7->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+      *(int *)&v7->evt.type = *(int *)&g_game_event_queue.evt.type;
+      *(int *)&v7->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+      *(int *)&v7->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
       v8 = g_game_event_queue.evt.payload[11];
       v7->next = nullptr;
       v7->evt.payload[11] = v8;
@@ -42329,17 +42314,17 @@ void __fastcall CURSOR_move_order(CursorState *cursor)
   int v26; // [esp-Ch] [ebp-1Ch]
 
   cursor->cursor_hitbox_tester->is_collidable = 1;// INLINED
-  *(_DWORD *)g_game_event_queue.evt.payload = cursor->cursor_hitbox_tester->x;
-  *(_DWORD *)&g_game_event_queue.evt.payload[4] = cursor->cursor_hitbox_tester->y;
+  *(int *)g_game_event_queue.evt.payload = cursor->cursor_hitbox_tester->x;
+  *(int *)&g_game_event_queue.evt.payload[4] = cursor->cursor_hitbox_tester->y;
   next = g_game_event_queue.next;
   g_game_event_queue.evt.type = GameEvent_MoveCommand;// INLINED
   v3 = g_game_event_free_head;
   if ( g_game_event_free_head )
   {
     g_game_event_free_head = g_game_event_free_head->next;
-    *(_DWORD *)&v3->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-    *(_DWORD *)&v3->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-    *(_DWORD *)&v3->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+    *(int *)&v3->evt.type = *(int *)&g_game_event_queue.evt.type;
+    *(int *)&v3->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+    *(int *)&v3->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
     v4 = g_game_event_queue.evt.payload[11];
     v3->next = nullptr;
     v3->evt.payload[11] = v4;
@@ -42647,17 +42632,17 @@ void __fastcall CURSOR_process_game_events(CursorState *cursor, BOOL process_ui_
       if ( remaining_cost <= 0 )
       {
         prev = v3->prev;
-        *(_DWORD *)g_game_event_queue.evt.payload = v3->unit_id;
+        *(int *)g_game_event_queue.evt.payload = v3->unit_id;
         next = g_game_event_queue.next;
-        *(_DWORD *)&g_game_event_queue.evt.payload[4] = 3;
+        *(int *)&g_game_event_queue.evt.payload[4] = 3;
         g_game_event_queue.evt.type = GameEvent_BuildingConstructionProgressed;// INLINED
         v7 = g_game_event_free_head;
         if ( g_game_event_free_head )
         {
           g_game_event_free_head = g_game_event_free_head->next;
-          *(_DWORD *)&v7->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-          *(_DWORD *)&v7->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-          *(_DWORD *)&v7->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+          *(int *)&v7->evt.type = *(int *)&g_game_event_queue.evt.type;
+          *(int *)&v7->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+          *(int *)&v7->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
           v8 = g_game_event_queue.evt.payload[11];
           v7->next = nullptr;
           v7->evt.payload[11] = v8;
@@ -42687,17 +42672,17 @@ void __fastcall CURSOR_process_game_events(CursorState *cursor, BOOL process_ui_
       {
         unit_id = v3->unit_id;
         v3->stage = BuildingConstructionStage_2;
-        *(_DWORD *)&g_game_event_queue.evt.payload[4] = 2;
-        *(_DWORD *)g_game_event_queue.evt.payload = unit_id;
+        *(int *)&g_game_event_queue.evt.payload[4] = 2;
+        *(int *)g_game_event_queue.evt.payload = unit_id;
         v12 = g_game_event_queue.next;
         g_game_event_queue.evt.type = GameEvent_BuildingConstructionProgressed;// INLINED
         v13 = g_game_event_free_head;
         if ( !g_game_event_free_head )
           goto LABEL_25;
         g_game_event_free_head = g_game_event_free_head->next;
-        *(_DWORD *)&v13->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-        *(_DWORD *)&v13->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-        *(_DWORD *)&v13->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+        *(int *)&v13->evt.type = *(int *)&g_game_event_queue.evt.type;
+        *(int *)&v13->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+        *(int *)&v13->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
         v14 = g_game_event_queue.evt.payload[11];
         v13->next = nullptr;
         v13->evt.payload[11] = v14;
@@ -42735,16 +42720,16 @@ LABEL_26:
     v17 = v3->unit_id;
     v3->stage = BuildingConstructionStage_1;
     v12 = g_game_event_queue.next;
-    *(_DWORD *)g_game_event_queue.evt.payload = v17;
-    *(_DWORD *)&g_game_event_queue.evt.payload[4] = 1;
+    *(int *)g_game_event_queue.evt.payload = v17;
+    *(int *)&g_game_event_queue.evt.payload[4] = 1;
     g_game_event_queue.evt.type = GameEvent_BuildingConstructionProgressed;// INLINED
     v13 = g_game_event_free_head;
     if ( !g_game_event_free_head )
       goto LABEL_25;
     g_game_event_free_head = g_game_event_free_head->next;
-    *(_DWORD *)&v13->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-    *(_DWORD *)&v13->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-    *(_DWORD *)&v13->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+    *(int *)&v13->evt.type = *(int *)&g_game_event_queue.evt.type;
+    *(int *)&v13->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+    *(int *)&v13->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
     v18 = g_game_event_queue.evt.payload[11];
     v13->next = nullptr;
     v13->evt.payload[11] = v18;
@@ -42943,9 +42928,9 @@ LABEL_82:
     if ( g_game_event_free_head )
     {
       g_game_event_free_head = g_game_event_free_head->next;
-      *(_DWORD *)&v32->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-      *(_DWORD *)&v32->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-      *(_DWORD *)&v32->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+      *(int *)&v32->evt.type = *(int *)&g_game_event_queue.evt.type;
+      *(int *)&v32->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+      *(int *)&v32->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
       v33 = g_game_event_queue.evt.payload[11];
       v32->next = nullptr;
       v32->evt.payload[11] = v33;
@@ -43142,9 +43127,9 @@ LABEL_169:
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            *(int *)&v46->evt.type = *(int *)&g_game_event_queue.evt.type;
+            *(int *)&v46->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+            *(int *)&v46->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
             v71 = g_game_event_queue.evt.payload[11];
             v46->next = nullptr;
             v46->evt.payload[11] = v71;
@@ -43169,9 +43154,9 @@ LABEL_169:
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            *(int *)&v46->evt.type = *(int *)&g_game_event_queue.evt.type;
+            *(int *)&v46->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+            *(int *)&v46->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
             v77 = g_game_event_queue.evt.payload[11];
             v46->next = nullptr;
             v46->evt.payload[11] = v77;
@@ -43191,15 +43176,15 @@ LABEL_169:
           break;
         case TaskMessage_1534:
           v45 = g_game_event_queue.next;
-          *(_DWORD *)g_game_event_queue.evt.payload = *(_DWORD *)msg->payload;
+          *(int *)g_game_event_queue.evt.payload = *(int *)msg->payload;
           g_game_event_queue.evt.type = GameEvent_18;// INLINED
           v46 = g_game_event_free_head;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            *(int *)&v46->evt.type = *(int *)&g_game_event_queue.evt.type;
+            *(int *)&v46->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+            *(int *)&v46->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
             v80 = g_game_event_queue.evt.payload[11];
             v46->next = nullptr;
             v46->evt.payload[11] = v80;
@@ -43212,17 +43197,17 @@ LABEL_169:
           break;
         case TaskMessage_UnitReady:
           v67 = (Unit *)msg->payload;
-          *(_DWORD *)g_game_event_queue.evt.payload = v67->locked_target->unit_id;
+          *(int *)g_game_event_queue.evt.payload = v67->locked_target->unit_id;
           v45 = g_game_event_queue.next;
-          *(_DWORD *)&g_game_event_queue.evt.payload[4] = v67->task;
+          *(int *)&g_game_event_queue.evt.payload[4] = v67->task;
           g_game_event_queue.evt.type = GameEvent_UnitProduced;// INLINED
           v46 = g_game_event_free_head;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            *(int *)&v46->evt.type = *(int *)&g_game_event_queue.evt.type;
+            *(int *)&v46->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+            *(int *)&v46->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
             v68 = g_game_event_queue.evt.payload[11];
             v46->next = nullptr;
             v46->evt.payload[11] = v68;
@@ -43243,14 +43228,14 @@ LABEL_169:
         case TaskMessage_UpgradeComplete:
           g_game_event_queue.evt.type = GameEvent_UpgradeCompleted;// INLINED
           v46 = g_game_event_free_head;
-          *(_DWORD *)g_game_event_queue.evt.payload = msg->payload;
+          *(int *)g_game_event_queue.evt.payload = msg->payload;
           v45 = g_game_event_queue.next;
           if ( g_game_event_free_head )
           {
             g_game_event_free_head = g_game_event_free_head->next;
-            *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-            *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-            *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+            *(int *)&v46->evt.type = *(int *)&g_game_event_queue.evt.type;
+            *(int *)&v46->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+            *(int *)&v46->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
             v74 = g_game_event_queue.evt.payload[11];
             v46->next = nullptr;
             v46->evt.payload[11] = v74;
@@ -43275,16 +43260,16 @@ LABEL_169:
     else if ( type == TaskMessage_RepairTick )
     {
       g_game_event_queue.evt.type = GameEvent_RepairBayHealTick;// INLINED
-      *(_DWORD *)g_game_event_queue.evt.payload = *((_DWORD *)msg->payload + 76);
+      *(int *)g_game_event_queue.evt.payload = *((int *)msg->payload + 76);
       v45 = g_game_event_queue.next;
-      *(_WORD *)&g_game_event_queue.evt.payload[4] = g_cash.cash[*((_DWORD *)msg->payload + 5)] != 0 ? 4 : 0;
+      *(_WORD *)&g_game_event_queue.evt.payload[4] = g_cash.cash[*((int *)msg->payload + 5)] != 0 ? 4 : 0;
       v46 = g_game_event_free_head;
       if ( g_game_event_free_head )
       {
         g_game_event_free_head = g_game_event_free_head->next;
-        *(_DWORD *)&v46->evt.type = *(_DWORD *)&g_game_event_queue.evt.type;
-        *(_DWORD *)&v46->evt.payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-        *(_DWORD *)&v46->evt.payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+        *(int *)&v46->evt.type = *(int *)&g_game_event_queue.evt.type;
+        *(int *)&v46->evt.payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+        *(int *)&v46->evt.payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
         v47 = g_game_event_queue.evt.payload[11];
         v46->next = nullptr;
         v46->evt.payload[11] = v47;
@@ -43337,9 +43322,9 @@ LABEL_210:
   v82 = g_game_event_queue.next;                // INLINED
   if ( g_game_event_queue.next )
   {
-    *(_DWORD *)&g_currently_processed_event.type = *(_DWORD *)&g_game_event_queue.next->evt.type;
-    *(_DWORD *)&g_currently_processed_event.payload[3] = *(_DWORD *)&g_game_event_queue.next->evt.payload[3];
-    *(_DWORD *)&g_currently_processed_event.payload[7] = *(_DWORD *)&g_game_event_queue.next->evt.payload[7];
+    *(int *)&g_currently_processed_event.type = *(int *)&g_game_event_queue.next->evt.type;
+    *(int *)&g_currently_processed_event.payload[3] = *(int *)&g_game_event_queue.next->evt.payload[3];
+    *(int *)&g_currently_processed_event.payload[7] = *(int *)&g_game_event_queue.next->evt.payload[7];
     g_currently_processed_event.payload[11] = g_game_event_queue.next->evt.payload[11];
     g_game_event_queue.next = g_game_event_queue.next->next;
     v82->next = g_game_event_free_head;
@@ -43349,13 +43334,13 @@ LABEL_210:
       v83 = g_game_events_write_idx;
       if ( g_game_events_write_idx >= 10 )
         v83 = 0;
-      v84 = *(_DWORD *)&g_currently_processed_event.type;
+      v84 = *(int *)&g_currently_processed_event.type;
       g_game_events[v83].ready_to_consume = 1;
       v85 = &g_game_events[v83];
       g_game_events_write_idx = v83 + 1;
-      *(_DWORD *)&v85->type = v84;
-      *(_DWORD *)&v85->payload[3] = *(_DWORD *)&g_currently_processed_event.payload[3];
-      *(_DWORD *)&v85->payload[7] = *(_DWORD *)&g_currently_processed_event.payload[7];
+      *(int *)&v85->type = v84;
+      *(int *)&v85->payload[3] = *(int *)&g_currently_processed_event.payload[3];
+      *(int *)&v85->payload[7] = *(int *)&g_currently_processed_event.payload[7];
       v85->payload[11] = g_currently_processed_event.payload[11];
     }
   }
@@ -43627,9 +43612,9 @@ void __fastcall CURSOR_box_select(CursorState *cursor, int x, int y)
   {
     p_evt = &g_game_event_free_head->evt;
     g_game_event_free_head = g_game_event_free_head->next;
-    *(_DWORD *)&p_evt->type = *(_DWORD *)&g_game_event_queue.evt.type;
-    *(_DWORD *)&p_evt->payload[3] = *(_DWORD *)&g_game_event_queue.evt.payload[3];
-    *(_DWORD *)&p_evt->payload[7] = *(_DWORD *)&g_game_event_queue.evt.payload[7];
+    *(int *)&p_evt->type = *(int *)&g_game_event_queue.evt.type;
+    *(int *)&p_evt->payload[3] = *(int *)&g_game_event_queue.evt.payload[3];
+    *(int *)&p_evt->payload[7] = *(int *)&g_game_event_queue.evt.payload[7];
     p_evt->payload[11] = g_game_event_queue.evt.payload[11];
     ya->next = nullptr;
     if ( g_game_event_queue.next )
@@ -44582,15 +44567,15 @@ void __cdecl __noreturn AI_controller_tick_mute08_smash_the_convoy_impl(Task *ta
         if ( !convoy_tanker->destroyed )
         {
           convoy_tanker->entity->is_collidable = 1;
-          v9 = *((_DWORD *)j->ctx1 + 23);
-          v10 = *(_DWORD *)(v9 + 16);
-          *(_DWORD *)(v9 + 136) = 1;
-          v11 = *((_DWORD *)j->ctx1 + 23);
+          v9 = *((int *)j->ctx1 + 23);
+          v10 = *(int *)(v9 + 16);
+          *(int *)(v9 + 136) = 1;
+          v11 = *((int *)j->ctx1 + 23);
           if ( v10 - x <= 0 )
-            v12 = x - *(_DWORD *)(v11 + 16);
+            v12 = x - *(int *)(v11 + 16);
           else
-            v12 = *(_DWORD *)(v11 + 16) - x;
-          v13 = *(_DWORD *)(v11 + 20);
+            v12 = *(int *)(v11 + 16) - x;
+          v13 = *(int *)(v11 + 20);
           v14 = v13 - y;
           if ( v13 - y <= 0 )
             v14 = y - v13;
@@ -44623,12 +44608,12 @@ void __cdecl __noreturn AI_controller_tick_mute08_smash_the_convoy_impl(Task *ta
           if ( v18 )
           {
             v18->next = ai->attack_squad_head;
-            *((_DWORD *)v4->ctx2 + 1) = &ai->attack_squad_head;
+            *((int *)v4->ctx2 + 1) = &ai->attack_squad_head;
             ai->attack_squad_head->prev = (AiSquadNode *)v4->ctx2;
             ai->attack_squad_head = (AiSquadNode *)v4->ctx2;
-            *((_DWORD *)v4->ctx2 + 3) = (char *)v4->ctx2 + 12;
-            *((_DWORD *)v4->ctx2 + 4) = (char *)v4->ctx2 + 12;
-            *((_DWORD *)v4->ctx2 + 7) = 0;
+            *((int *)v4->ctx2 + 3) = (char *)v4->ctx2 + 12;
+            *((int *)v4->ctx2 + 4) = (char *)v4->ctx2 + 12;
+            *((int *)v4->ctx2 + 7) = 0;
           }
         }
         convoy_escort_head->squad = ctx2;
@@ -44641,8 +44626,8 @@ void __cdecl __noreturn AI_controller_tick_mute08_smash_the_convoy_impl(Task *ta
         convoy_escort_head->prev->next = convoy_escort_head->next;
         convoy_escort_head->next = *((AiAttackerNode **)v4->ctx2 + 3);
         convoy_escort_head->prev = (AiAttackerNode *)((char *)v4->ctx2 + 12);
-        *(_DWORD *)(*((_DWORD *)v4->ctx2 + 3) + 4) = convoy_escort_head;
-        *((_DWORD *)v4->ctx2 + 3) = convoy_escort_head;
+        *(int *)(*((int *)v4->ctx2 + 3) + 4) = convoy_escort_head;
+        *((int *)v4->ctx2 + 3) = convoy_escort_head;
         convoy_escort_head = prev;
       }
     }
@@ -45274,7 +45259,7 @@ void __fastcall NETZ_send_roster(NetzPacketType pkt, bool wait_for_ack)
       v4 = g_num_multi_players - 1;
       for ( g_netz_num_pending_acks = g_num_multi_players - 1; g_netz_num_pending_acks > 0; v4 = g_netz_num_pending_acks )
       {
-        v4 = timeGetTime() - (_DWORD)name;
+        v4 = timeGetTime() - (int)name;
         if ( (unsigned int)v4 >= 10000 )
           break;
         NETZ_poll(0, 0);
@@ -45472,7 +45457,7 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
   NetzPlayer *__shifted(NetzPlayer,0x10) _player__; // eax
   int v26; // eax
   NetzPlayer *__shifted(NetzPlayer,0x18) __player_; // eax
-  _DWORD *v28; // eax
+  int *v28; // eax
   int v29; // edx
   int v30; // eax
   char *v31; // esi
@@ -45483,14 +45468,14 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
   NetzMessage *synced; // edx
   int v37; // ecx
   int v38; // eax
-  _DWORD *v39; // ecx
+  int *v39; // ecx
   NetzGameEvent *v40; // eax
   unsigned __int8 *v41; // eax
   int v42; // edx
   unsigned __int8 *v43; // eax
   NetzGameEvent *v44; // ecx
   unsigned __int8 *v45; // esi
-  _DWORD *v46; // ebp
+  int *v46; // ebp
   int v47; // edi
   char v48; // dl
   int v49; // esi
@@ -45504,7 +45489,7 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
   NetzPlayer *__shifted(NetzPlayer,0x10) player_1; // eax
   int v58; // eax
   NetzPlayer *__shifted(NetzPlayer,0x10) player_2; // esi
-  _DWORD *v60; // edx
+  int *v60; // edx
   int v61; // ecx
   int v62; // esi
   int v63; // edx
@@ -45518,7 +45503,7 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
   int v71; // [esp+14h] [ebp-48h]
   int *v72; // [esp+18h] [ebp-44h]
   char *name; // [esp+1Ch] [ebp-40h]
-  _DWORD v74[15]; // [esp+20h] [ebp-3Ch] BYREF
+  int v74[15]; // [esp+20h] [ebp-3Ch] BYREF
 
   g_netz_players[0].synced = (BOOL)msg;
   switch ( msg->type )
@@ -45607,7 +45592,7 @@ LABEL_14:
           else if ( g_netz_is_game_host )
           {
             NETZ_send(msg->player_slot, NETZ_PKT_REJECT, nullptr, 0, 1);
-            NETZ_player_release(*(_DWORD *)(g_netz_players[0].synced + 44));// BUG NetzMessage* here
+            NETZ_player_release(*(int *)(g_netz_players[0].synced + 44));// BUG NetzMessage* here
             if ( a3 != -1 )
             {
               v16 = a3;
@@ -45633,9 +45618,9 @@ LABEL_14:
               v45 = v43 + 1;
               v43 += 14;
               --v42;
-              *(_DWORD *)&v44->type = *(_DWORD *)v45;
-              *(_DWORD *)&v44->payload[3] = *((_DWORD *)v45 + 1);
-              *(_DWORD *)&v44->payload[7] = *((_DWORD *)v45 + 2);
+              *(int *)&v44->type = *(int *)v45;
+              *(int *)&v44->payload[3] = *((int *)v45 + 1);
+              *(int *)&v44->payload[7] = *((int *)v45 + 2);
               v44->payload[11] = v45[12];
             }
             while ( v42 );
@@ -45647,7 +45632,7 @@ LABEL_14:
           synced = (NetzMessage *)g_netz_players[0].synced;
           v37 = 0;
           while ( ADJ(_player_)->connection_status != NetzConnection_Joined
-               || ADJ(_player_)->slot != *(_DWORD *)(g_netz_players[0].synced + 44) )
+               || ADJ(_player_)->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++_player_;
             ++v37;
@@ -45667,9 +45652,9 @@ LABEL_90:
             if ( *(_BYTE *)v39 )
             {
               v40 = &g_netz_game_events[v38];
-              *(_DWORD *)&v40->type = *v39;
-              *(_DWORD *)&v40->payload[3] = v39[1];
-              *(_DWORD *)&v40->payload[7] = v39[2];
+              *(int *)&v40->type = *v39;
+              *(int *)&v40->payload[3] = v39[1];
+              *(int *)&v40->payload[7] = v39[2];
               v40->payload[11] = *((_BYTE *)v39 + 12);
             }
             else
@@ -45744,7 +45729,7 @@ LABEL_40:
           msg->player_slot = msg->player_slot;
           __player__ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
           while ( ADJ(__player__)->connection_status != NetzConnection_Joined
-               || ADJ(__player__)->slot != *(_DWORD *)(g_netz_players[0].synced + 44) )
+               || ADJ(__player__)->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++__player__;
             ++v52;
@@ -45799,7 +45784,7 @@ LABEL_123:
           v56 = g_netz_players[0].synced;
           player_1 = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
           while ( ADJ(player_1)->connection_status != NetzConnection_Joined
-               || ADJ(player_1)->slot != *(_DWORD *)(g_netz_players[0].synced + 44) )
+               || ADJ(player_1)->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++player_1;
             ++v55;
@@ -45815,7 +45800,7 @@ LABEL_123:
             v58 = v55;
             g_netz_players[v58 + 1].slot = -1;
             g_netz_players[v58 + 1].connection_status = NetzConnection_None;
-            NETZ_player_release(*(_DWORD *)(v56 + 44));
+            NETZ_player_release(*(int *)(v56 + 44));
             --g_num_multi_players;
             --g_netz_num_pending_packets;
             player_2 = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
@@ -45897,7 +45882,7 @@ LABEL_123:
           msg->player_slot = msg->player_slot;
           v21 = 0;
           while ( ADJ(player_4)->connection_status != NetzConnection_Joined
-               || ADJ(player_4)->slot != *(_DWORD *)(g_netz_players[0].synced + 44) )
+               || ADJ(player_4)->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++player_4;
             ++v21;
@@ -45933,7 +45918,7 @@ LABEL_100:
         case NETZ_PKT_LOBBY_READY_TO_START:
           goto LABEL_62;
         case NETZ_PKT_LOBBY_START_WITH_SEED:
-          g_rand_seed_synced = *(_DWORD *)msg->pkt_payload;
+          g_rand_seed_synced = *(int *)msg->pkt_payload;
 LABEL_62:
           NETZ_send(g_netz_remote_host_slot, NETZ_PKT_CLIENT_ACK, nullptr, 0, 1);
           GAME_fade_into_mission_async();
@@ -46008,7 +45993,7 @@ LABEL_108:
       if ( !g_netz_is_game_host || g_netz_is_game_started )
       {
         NETZ_send(msg->player_slot, NETZ_PKT_REJECT, nullptr, 0, 1);
-        NETZ_player_release(*(_DWORD *)(g_netz_players[0].synced + 44));
+        NETZ_player_release(*(int *)(g_netz_players[0].synced + 44));
         return;
       }
       v62 = 0;
@@ -46026,13 +46011,13 @@ LABEL_108:
       a3 = v63;
       if ( v63 == -1 )
       {
-        NETZ_send(*(_DWORD *)(g_netz_players[0].synced + 44), NETZ_PKT_REJECT, nullptr, 0, 1);
-        NETZ_player_release(*(_DWORD *)(g_netz_players[0].synced + 44));
+        NETZ_send(*(int *)(g_netz_players[0].synced + 44), NETZ_PKT_REJECT, nullptr, 0, 1);
+        NETZ_player_release(*(int *)(g_netz_players[0].synced + 44));
       }
       else
       {
         v64 = v63;
-        g_netz_players[v64 + 1].slot = *(_DWORD *)(g_netz_players[0].synced + 44);
+        g_netz_players[v64 + 1].slot = *(int *)(g_netz_players[0].synced + 44);
         g_netz_players[v64 + 1].connection_status = NetzConnection_Joined;
         g_netz_players[v64 + 1].synced = 0;
       }
@@ -46045,7 +46030,7 @@ LABEL_108:
         v66 = (NetzMessage *)g_netz_players[0].synced;
         v65 = 0;
         while ( ADJ(player_6)->connection_status != NetzConnection_Joined
-             || ADJ(player_6)->slot != *(_DWORD *)(g_netz_players[0].synced + 44) )
+             || ADJ(player_6)->slot != *(int *)(g_netz_players[0].synced + 44) )
         {
           ++player_6;
           ++v65;
@@ -46067,7 +46052,7 @@ LABEL_108:
         do
         {
           if ( ADJ(player_7)->connection_status == NetzConnection_Joined
-            && ADJ(player_7)->slot == *(_DWORD *)(g_netz_players[0].synced + 44) )
+            && ADJ(player_7)->slot == *(int *)(g_netz_players[0].synced + 44) )
           {
             goto LABEL_178;
           }
@@ -46146,7 +46131,7 @@ void __fastcall NETZ_join_locally()
   UINT v16; // eax
   Coroutine *v17; // et1
   int v18; // [esp+0h] [ebp-4Ch] BYREF
-  _DWORD v19[15]; // [esp+Ch] [ebp-40h] BYREF
+  int v19[15]; // [esp+Ch] [ebp-40h] BYREF
   char *name; // [esp+48h] [ebp-4h]
 
   g_coroutine_eax = v0;
@@ -46240,7 +46225,7 @@ int __stdcall sub_42F820(int a1, int a2)
 //----- (0042F830) --------------------------------------------------------
 NetzError __fastcall NETZ_init(
         NetzProtocol protocol,
-        int (__fastcall *a2)(_DWORD),
+        int (__fastcall *a2)(int),
         void (__fastcall *msg_loop)(NetzMessage *))
 {
   NetzError result; // eax
@@ -46622,7 +46607,7 @@ void __fastcall NETZ_process_messages(BOOL drain_recv)
   {
     v1 = g_dp_sessions;
     memset(&v15, 0, sizeof(v15));
-    v15.guidApplication = (GUID)xmmword_4630E8; // BUG - fill out KKND GUID
+    memcpy(&v15.guidApplication, &IID_KKnD, sizeof(GUID));
     g_netz_should_enum_sessions = 0;
     g_dp_sessions = nullptr;
     v15.dwSize = 80;
@@ -46702,7 +46687,6 @@ LABEL_25:
     }
   }
 }
-// 4630E8: using guessed type __int128 xmmword_4630E8;
 
 //----- (0042FF10) --------------------------------------------------------
 BOOL __fastcall NETZ_send_to(int player, NetzPacketType pkt, const void *data, size_t data_size, BOOL guaranteed)
@@ -47107,9 +47091,9 @@ int __fastcall DP_providers_init(int type)
         if ( DirectPlayCreate(&v3->guid, (IUnknown *)&v5, nullptr) )
         {
           v3->guid.Data1 = 0;
-          *(_DWORD *)&v3->guid.Data2 = 0;
-          *(_DWORD *)v3->guid.Data4 = 0;
-          *(_DWORD *)&v3->guid.Data4[4] = 0;
+          *(int *)&v3->guid.Data2 = 0;
+          *(int *)v3->guid.Data4 = 0;
+          *(int *)&v3->guid.Data4[4] = 0;
         }
         else
         {
@@ -47290,7 +47274,7 @@ BOOL __fastcall DP_session_open(BOOL is_server, GUID *guid_of_game_to_join)
   if ( !GetUserNameA(Buffer, &pcbBuffer) )
     strcpy(Buffer, "Unknown");
   memset(&g_dp_session_desc, 0, sizeof(g_dp_session_desc));
-  g_dp_session_desc.guidApplication = (GUID)xmmword_4630E8;// KKND GUID - INLINED in multiple places
+  memcpy(&g_dp_session_desc.guidApplication, &IID_KKnD, sizeof(GUID));// KKND GUID - INLINED in multiple places
   g_dp_session_desc.dwSize = 80;
   g_dp_session_desc.dwFlags = 0;
   if ( guid_of_game_to_join )                   // join
@@ -47325,7 +47309,6 @@ BOOL __fastcall DP_session_open(BOOL is_server, GUID *guid_of_game_to_join)
   }
   return 1;
 }
-// 4630E8: using guessed type __int128 xmmword_4630E8;
 
 //----- (00430CE0) --------------------------------------------------------
 void DP_player_slots_reset()
@@ -48355,7 +48338,7 @@ int PAL_restore_on_win32_activate()
 // 47C018: using guessed type int g_pal_47C018_unused;
 
 //----- (00431E60) --------------------------------------------------------
-void __cdecl __noreturn INPUT_keyboard_dispatcher_task(Task *task)
+void __cdecl INPUT_keyboard_dispatcher_task(Task *task)
 {
   int v1; // esi
   __int16 new_actions_mask; // bx
@@ -48777,7 +48760,7 @@ void __cdecl UI_save_slot_row_ingame_menu(Task *task)
   task = (Task *)task->ctx;
   entity->rn->transform = (RenderTransform)REND_transform_ui;
   ENT_anim_set(entity, 696);
-  g_ui_slot_controller_items[(_DWORD)task] = v1->entity;
+  g_ui_slot_controller_items[(int)task] = v1->entity;
   while ( 1 )
   {
     v3 = 0;
@@ -48817,7 +48800,7 @@ LABEL_10:
       break;
     TSK_send_message(v1, TaskMessage_UnitSelected_or_UiLeftClick, &task, g_ui_save_load_dialog_task);
   }
-  g_ui_slot_controller_items[(_DWORD)task] = nullptr;
+  g_ui_slot_controller_items[(int)task] = nullptr;
   ENT_remove(entity);
   TSK_schedule_self_destruct(v1);
 }
@@ -48839,7 +48822,7 @@ void __cdecl UI_save_slot_row_main_menu(Task *task)
   entity = v2;
   v2->rn->transform = (RenderTransform)REND_transform_ui;
   ENT_anim_set(v2, 696);
-  g_ui_slot_controller_items[(_DWORD)task] = v1->entity;
+  g_ui_slot_controller_items[(int)task] = v1->entity;
   while ( 1 )
   {
     v3 = 0;
@@ -48871,7 +48854,7 @@ void __cdecl UI_save_slot_row_main_menu(Task *task)
       break;
     TSK_send_message(v1, TaskMessage_UnitSelected_or_UiLeftClick, &task, g_ui_save_load_dialog_task);
   }
-  g_ui_slot_controller_items[(_DWORD)task] = nullptr;
+  g_ui_slot_controller_items[(int)task] = nullptr;
   ENT_remove(entity);
   TSK_schedule_self_destruct(v1);
 }
@@ -49044,7 +49027,7 @@ void __fastcall UI_save_load_dialog(Task *task, BOOL is_main_menu_mode, BOOL is_
           switch ( i->type )
           {
             case TaskMessage_UnitSelected_or_UiLeftClick:
-              just_clicked_cursor_row = *(_DWORD *)i->payload;
+              just_clicked_cursor_row = *(int *)i->payload;
               if ( just_clicked_cursor_row < 5 )
               {
                 if ( double_click_cooldown )
@@ -49055,12 +49038,12 @@ void __fastcall UI_save_load_dialog(Task *task, BOOL is_main_menu_mode, BOOL is_
                     if ( active_row == just_clicked_cursor_row )
                       is_double_click = 1;
                   }
-                  active_row = *(_DWORD *)i->payload;
+                  active_row = *(int *)i->payload;
                 }
                 else
                 {
                   double_click_cooldown = 100;
-                  active_row = *(_DWORD *)i->payload;
+                  active_row = *(int *)i->payload;
                 }
               }
               break;
@@ -50607,7 +50590,7 @@ void __fastcall REND_blt_opaque_impl(unsigned __int8 *pixels, int x, int y, int 
       return;
     v17 = height + y;
     v15 = &pixels[width * -y];
-    v19 = *(_DWORD *)&g_dd_stride * g_rend_clip_y;
+    v19 = *(int *)&g_dd_stride * g_rend_clip_y;
   }
   else
   {
@@ -50621,7 +50604,7 @@ void __fastcall REND_blt_opaque_impl(unsigned __int8 *pixels, int x, int y, int 
         return;
       v17 = g_rend_clip_w - y;
     }
-    v19 = *(_DWORD *)&g_dd_stride * (g_rend_clip_y + y);
+    v19 = *(int *)&g_dd_stride * (g_rend_clip_y + y);
   }
   if ( x < 0 )
   {
@@ -50649,7 +50632,7 @@ void __fastcall REND_blt_opaque_impl(unsigned __int8 *pixels, int x, int y, int 
 LABEL_14:
       v20 = g_rend_clip_x + x + v19;
 LABEL_17:
-      v21 = *(_DWORD *)&g_dd_stride - v16;
+      v21 = *(int *)&g_dd_stride - v16;
       v5 = (char *)v15;
       v6 = (char *)g_dd_pixels + v20;
       v7 = v17;
@@ -50715,7 +50698,7 @@ void __fastcall REND_blt_opaque_interlaced_impl(unsigned __int8 *pixels, int x, 
       return;
     v10 = height + y;
     v5 = &pixels[width * -y];
-    v12 = *(_DWORD *)&g_dd_stride * g_rend_clip_y;
+    v12 = *(int *)&g_dd_stride * g_rend_clip_y;
   }
   else
   {
@@ -50729,7 +50712,7 @@ void __fastcall REND_blt_opaque_interlaced_impl(unsigned __int8 *pixels, int x, 
         return;
       v10 = g_rend_clip_w - y;
     }
-    v12 = *(_DWORD *)&g_dd_stride * (g_rend_clip_y + y);
+    v12 = *(int *)&g_dd_stride * (g_rend_clip_y + y);
   }
   if ( x < 0 )
   {
@@ -50756,7 +50739,7 @@ void __fastcall REND_blt_opaque_interlaced_impl(unsigned __int8 *pixels, int x, 
     }
     v13 = g_rend_clip_x + x + v12;
   }
-  v14 = *(_DWORD *)&g_dd_stride - v7;
+  v14 = *(int *)&g_dd_stride - v7;
   v6 = v5;
   v8 = (unsigned __int8 *)g_dd_pixels + v13;
   while ( v10 )
@@ -50843,7 +50826,7 @@ void __fastcall REND_blt_colorkey_impl(unsigned __int8 *pixels, int x, int y, in
   if ( v14 > 0 && v13 > 0 )
   {
     v5 = v15;
-    v6 = (char *)g_dd_pixels + v12 + v11 * *(_DWORD *)&g_dd_stride;
+    v6 = (char *)g_dd_pixels + v12 + v11 * *(int *)&g_dd_stride;
     v7 = v13;
     do
     {
@@ -50857,7 +50840,7 @@ void __fastcall REND_blt_colorkey_impl(unsigned __int8 *pixels, int x, int y, in
       }
       while ( v8 );
       v5 += width;
-      v6 += *(_DWORD *)&g_dd_stride;
+      v6 += *(int *)&g_dd_stride;
       --v7;
     }
     while ( v7 );
@@ -50917,7 +50900,7 @@ void __fastcall REND_blt_colorkey_mirrored_impl(unsigned __int8 *pixels, int x, 
   if ( v15 > 0 && v14 > 0 )
   {
     v5 = v16;
-    v6 = (char *)g_dd_pixels + v13 + v12 * *(_DWORD *)&g_dd_stride;
+    v6 = (char *)g_dd_pixels + v13 + v12 * *(int *)&g_dd_stride;
     v7 = v14;
     do
     {
@@ -50933,7 +50916,7 @@ void __fastcall REND_blt_colorkey_mirrored_impl(unsigned __int8 *pixels, int x, 
       }
       while ( v8 );
       v5 += width;
-      v6 += *(_DWORD *)&g_dd_stride;
+      v6 += *(int *)&g_dd_stride;
       --v7;
     }
     while ( v7 );
@@ -50968,7 +50951,7 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
       return;
     v11 = height + y;
     v5 = &pixels[width * -y];
-    v14 = *(_DWORD *)&g_dd_stride * g_rend_clip_y;
+    v14 = *(int *)&g_dd_stride * g_rend_clip_y;
   }
   else
   {
@@ -50982,7 +50965,7 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
         return;
       v11 = g_rend_clip_w - y;
     }
-    v14 = *(_DWORD *)&g_dd_stride * (g_rend_clip_y + y);
+    v14 = *(int *)&g_dd_stride * (g_rend_clip_y + y);
   }
   if ( x < 0 )
   {
@@ -51009,7 +50992,7 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
     }
     v15 = g_rend_clip_x + x + v14;
   }
-  v16 = *(_DWORD *)&g_dd_stride - v9;
+  v16 = *(int *)&g_dd_stride - v9;
   v8 = v5;
   v10 = (unsigned __int8 *)g_dd_pixels + v15;
   while ( v11 )
@@ -51025,8 +51008,8 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
     }
     while ( v12 >= 4 )
     {
-      v6 = *(_DWORD *)v8;
-      if ( *(_DWORD *)v8 )
+      v6 = *(int *)v8;
+      if ( *(int *)v8 )
       {
         if ( (_BYTE)v6 )
         {
@@ -52737,7 +52720,7 @@ void __fastcall MSG_repair_bay(Task *receiver, Task *sender, TaskMessageType mes
   if ( message == TaskMessage_UpgradeComplete )
   {
     unit = (Unit *)receiver->ctx;
-    ++*((_DWORD *)unit->state + 1);             // BUG - it's BuildingState*
+    ++*((int *)unit->state + 1);             // BUG - it's BuildingState*
     UNIT_status_bar_update_tech(unit);
   }
   else
@@ -52779,7 +52762,7 @@ void __fastcall UNIT_mode_repair_bay_on_complete(Unit *unit)
   Turret *turret; // eax
   RenderNode *rn; // eax
 
-  *((_DWORD *)unit->state + 2) = 0;             // BUG - it's BuildingState*
+  *((int *)unit->state + 2) = 0;             // BUG - it's BuildingState*
   turret = unit->turret;
   if ( turret )
   {
@@ -52832,7 +52815,7 @@ void __fastcall UPG_mode_update_anim(UpgradeProcess *upg)
   int v4; // edx
 
   progress_bar = upg->progress_bar;
-  progress = *(_DWORD *)progress_bar->ctx1;     // BUG *(int*)
+  progress = *(int *)progress_bar->ctx1;     // BUG *(int*)
   if ( progress <= 0 )
   {
     upg->mode = UPG_mode_finalize;
@@ -53060,8 +53043,8 @@ void __cdecl UNIT_research_lab_tick(Task *task)
       unit->task->message_handler = MSG_building_generic;
       SHROUD_reveal(unit);
       UNIT_building_init(unit, 1, nullptr, nullptr);
-      *((_DWORD *)unit->state + 2) = 0;         // BUG BuildingState*
-      *(_DWORD *)unit->state = 0;
+      *((int *)unit->state + 2) = 0;         // BUG BuildingState*
+      *(int *)unit->state = 0;
       if ( !unit->entity->cplc_spawn_params )
       {
         UNIT_building_construction_start(unit, UNIT_mode_research_lab_on_complete);
@@ -53105,10 +53088,10 @@ void __fastcall UNIT_mode_research_lab_on_death(Unit *unit)
   void *v2; // esi
 
   v2 = (char *)unit->state + 8;                 // BUG BuildingState*
-  if ( *(_DWORD *)v2 )
+  if ( *(int *)v2 )
   {
     PROD_cancel_production((int *)unit->state + 2, 0);// BUG BuildingState*
-    *(_DWORD *)v2 = 0;
+    *(int *)v2 = 0;
   }
   UINT_mode_building_exploding(unit);
 }
@@ -53125,7 +53108,7 @@ void SAVE_read_save_list()
   int v6; // [esp+Ch] [ebp-18h] BYREF
   SaveSlot *v7; // [esp+10h] [ebp-14h]
   LevelId v8; // [esp+14h] [ebp-10h] BYREF
-  _DWORD v9[3]; // [esp+18h] [ebp-Ch] BYREF
+  int v9[3]; // [esp+18h] [ebp-Ch] BYREF
 
   sprintf(g_save_list_path, "%s\\save.lst", g_game_path);
   v0 = fopen(g_save_list_path, "r");            // BUG why not File* ?
@@ -53136,9 +53119,9 @@ void SAVE_read_save_list()
     do
     {
       v2 = v1++;
-      *(_DWORD *)v2->name = 0;                  // BUG
-      *(_DWORD *)&v2->name[4] = 0;
-      *(_DWORD *)&v2->name[8] = 0;
+      *(int *)v2->name = 0;                  // BUG
+      *(int *)&v2->name[4] = 0;
+      *(int *)&v2->name[8] = 0;
     }
     while ( (int)v1 < (int)g_save_list_path );  // BUG
     v3 = fscanf(v0, "ActiveSlot=%d\n", &g_save_slot_active);
@@ -53565,7 +53548,7 @@ void __cdecl SCHRAP_nuke_flak(Task *task)
 void __cdecl __noreturn SCHRAP_bomber_fire_trail(Task *task)
 {
   Entity *entity; // esi
-  _DWORD v2[9]; // [esp+Ch] [ebp-24h] BYREF
+  int v2[9]; // [esp+Ch] [ebp-24h] BYREF
 
   entity = task->entity;
   memset(v2, 0, sizeof(v2));
@@ -53882,11 +53865,11 @@ BOOL __fastcall SOUND_bank_load(const char *filename)
 {
   LevelHunk *v1; // eax
   LevelHunk v2; // eax
-  _DWORD *v3; // edx
+  int *v3; // edx
   void **p_ptr; // esi
   void *v5; // ecx
   int v6; // ecx
-  _DWORD *v7; // eax
+  int *v7; // eax
   int v8; // edx
 
   g_sound_bank_initialized = 0;
@@ -54067,7 +54050,7 @@ int __fastcall SOUND_play(SoundId sound_id, BOOL loop, int volume, int pan, Task
               v16 = v35;
               if ( v35 )
               {
-                qmemcpy(v34, (char *)task + (_DWORD)v36, v35);
+                qmemcpy(v34, (char *)task + (int)v36, v35);
                 v16 = v35;
               }
               v32->lpVtbl->Unlock(v32, v33, (DWORD)task, v34, v16);
@@ -54186,7 +54169,7 @@ int __fastcall SOUND_play_async(const char *filename, BOOL looping, int volume, 
 // 47C5C4: using guessed type int g_sound_next_id;
 
 //----- (00439C10) --------------------------------------------------------
-void __cdecl __noreturn SOUND_thread(SoundStream *snd)
+void __cdecl SOUND_thread(SoundStream *snd)
 {
   SoundStream *v1; // esi
   char *v2; // ebp
@@ -54385,9 +54368,9 @@ void __cdecl __noreturn SOUND_thread(SoundStream *snd)
         v1->flags = v19;
         v1->dsb->lpVtbl->GetCurrentPosition(v1->dsb, &v52, &v50);
         if ( v52 < (unsigned int)v2 )
-          v20 = v56.dwBufferBytes + v52 - (_DWORD)v2;
+          v20 = v56.dwBufferBytes + v52 - (int)v2;
         else
-          v20 = v52 - (_DWORD)v2;
+          v20 = v52 - (int)v2;
         v21 = v20;
         v22 = v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v20, &buffer, (LPDWORD)&snd, &v47, &size, 0);
         if ( v22 == -2005401450 )
@@ -54412,7 +54395,7 @@ void __cdecl __noreturn SOUND_thread(SoundStream *snd)
             if ( v28 )
               v2 += v26;
             else
-              v2 = &v2[(_DWORD)snd];
+              v2 = &v2[(int)snd];
             if ( (unsigned int)v2 >= v56.dwBufferBytes )
               v2 -= v56.dwBufferBytes;
             if ( v26 < (unsigned int)snd && !v28 )
@@ -54482,15 +54465,15 @@ void __cdecl __noreturn SOUND_thread(SoundStream *snd)
       v1->flags = v36;
       v1->dsb->lpVtbl->GetCurrentPosition(v1->dsb, &v52, &v50);
       if ( v52 < (unsigned int)v2 )
-        v37 = v56.dwBufferBytes + v52 - (_DWORD)v2;
+        v37 = v56.dwBufferBytes + v52 - (int)v2;
       else
-        v37 = v52 - (_DWORD)v2;
+        v37 = v52 - (int)v2;
       if ( !v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v37, &buffer, (LPDWORD)&snd, &v47, &size, 0) )
       {
         if ( snd )
         {
           memset(buffer, 0, (unsigned int)snd);
-          v2 = &v2[(_DWORD)snd];
+          v2 = &v2[(int)snd];
           if ( (unsigned int)v2 >= v56.dwBufferBytes )
             v2 -= v56.dwBufferBytes;
           v38 = (char *)v47;
@@ -54817,7 +54800,7 @@ BOOL __fastcall SOUND_wav_parse_in_memory(
         void **out_pcm_data,
         unsigned int *out_num_bytes)
 {
-  _DWORD *v4; // eax
+  int *v4; // eax
   unsigned int v5; // edi
   int v6; // ecx
   unsigned int v7; // esi
@@ -54830,9 +54813,9 @@ BOOL __fastcall SOUND_wav_parse_in_memory(
   if ( out_num_bytes )
     *out_num_bytes = 0;
   v4 = (char *)bank + 12;
-  if ( *(_DWORD *)bank == 'FFIR' && *((_DWORD *)bank + 2) == 'EVAW' )
+  if ( *(int *)bank == 'FFIR' && *((int *)bank + 2) == 'EVAW' )
   {
-    v5 = (unsigned int)v4 + *((_DWORD *)bank + 1) - 4;
+    v5 = (unsigned int)v4 + *((int *)bank + 1) - 4;
     if ( (unsigned int)v4 < v5 )
     {
       while ( 1 )
@@ -54860,7 +54843,7 @@ BOOL __fastcall SOUND_wav_parse_in_memory(
           if ( !out_format || *out_format )
             return 1;
         }
-        v4 = (_DWORD *)((char *)&v8->wFormatTag + ((v7 + 1) & 0xFFFFFFFE));
+        v4 = (int *)((char *)&v8->wFormatTag + ((v7 + 1) & 0xFFFFFFFE));
         if ( (unsigned int)v4 >= v5 )
           return 0;
       }
@@ -57843,7 +57826,7 @@ void __cdecl UI_main_menu_new_missions(Task *task)
   MenuWidget *v5; // eax
   MenuWidget *v6; // eax
   int i; // ecx
-  _DWORD *section; // eax
+  int *section; // eax
 
   task->entity->y = 0x16800;
   task->entity->z = 11;
@@ -58821,13 +58804,13 @@ LABEL_16:
         *((_BYTE *)&v19 + v12++) = *v11;        // BUG
       ++v11;
     }
-    while ( (int)&v11[-20 - (_DWORD)phonebook] < 12 );
+    while ( (int)&v11[-20 - (int)phonebook] < 12 );
     *((_BYTE *)&v19 + v12) = 0;
     v13 = v20;
-    *(_DWORD *)ADJ(phonebook_)->phone = v19;    // BUG memcpy inlined
+    *(int *)ADJ(phonebook_)->phone = v19;    // BUG memcpy inlined
     v14 = v21;
-    *(_DWORD *)&ADJ(phonebook_)->phone[4] = v13;
-    *(_DWORD *)&ADJ(phonebook_)->phone[8] = v14;
+    *(int *)&ADJ(phonebook_)->phone[4] = v13;
+    *(int *)&ADJ(phonebook_)->phone[8] = v14;
     v15 = g_current_menu_controller->entity;
     v16 = v15->y >> 8;
     v17 = v15->x >> 8;
@@ -58991,13 +58974,13 @@ void __cdecl NETZ_modem_list_update(Task *task)
   if ( v2 )
   {
     ++g_ui_cursor_pos;
-    *(_DWORD *)v2->name = 0;                    // BUG memset
-    *(_DWORD *)&v2->name[4] = 0;
-    *(_DWORD *)&v2->name[8] = 0;
+    *(int *)v2->name = 0;                    // BUG memset
+    *(int *)&v2->name[4] = 0;
+    *(int *)&v2->name[8] = 0;
     strcpy(v2->name, phonebook.name);
-    *(_DWORD *)v2->phone = 0;                   // BUG memset
-    *(_DWORD *)&v2->phone[4] = 0;
-    *(_DWORD *)&v2->phone[8] = 0;
+    *(int *)v2->phone = 0;                   // BUG memset
+    *(int *)&v2->phone[4] = 0;
+    *(int *)&v2->phone[8] = 0;
     v1 = task;
     strcpy(v2->phone, phonebook.phone);
     v2->baud_index = baud_index;
@@ -59078,20 +59061,20 @@ LABEL_4:
     }
     v3 = v1;
   }
-  *(_DWORD *)phonebook.name = *(_DWORD *)v3->name;
-  *(_DWORD *)&phonebook.name[4] = *(_DWORD *)&v3->name[4];
-  *(_DWORD *)&phonebook.name[8] = *(_DWORD *)&v3->name[8];
-  *(_DWORD *)phonebook.phone = *(_DWORD *)v3->phone;
-  *(_DWORD *)&phonebook.phone[4] = *(_DWORD *)&v3->phone[4];
-  *(_DWORD *)&phonebook.phone[8] = *(_DWORD *)&v3->phone[8];
+  *(int *)phonebook.name = *(int *)v3->name;
+  *(int *)&phonebook.name[4] = *(int *)&v3->name[4];
+  *(int *)&phonebook.name[8] = *(int *)&v3->name[8];
+  *(int *)phonebook.phone = *(int *)v3->phone;
+  *(int *)&phonebook.phone[4] = *(int *)&v3->phone[4];
+  *(int *)&phonebook.phone[8] = *(int *)&v3->phone[8];
   phonebook.baud_index = v3->baud_index;
   UI_main_menu_multi_modem_dialog(task, &phonebook, 1808);
-  *(_DWORD *)v3->name = *(_DWORD *)phonebook.name;
-  *(_DWORD *)&v3->name[4] = *(_DWORD *)&phonebook.name[4];
-  *(_DWORD *)&v3->name[8] = *(_DWORD *)&phonebook.name[8];
-  *(_DWORD *)v3->phone = *(_DWORD *)phonebook.phone;
-  *(_DWORD *)&v3->phone[4] = *(_DWORD *)&phonebook.phone[4];
-  *(_DWORD *)&v3->phone[8] = *(_DWORD *)&phonebook.phone[8];
+  *(int *)v3->name = *(int *)phonebook.name;
+  *(int *)&v3->name[4] = *(int *)&phonebook.name[4];
+  *(int *)&v3->name[8] = *(int *)&phonebook.name[8];
+  *(int *)v3->phone = *(int *)phonebook.phone;
+  *(int *)&v3->phone[4] = *(int *)&phonebook.phone[4];
+  *(int *)&v3->phone[8] = *(int *)&phonebook.phone[8];
   v3->baud_index = phonebook.baud_index;
   v4 = fopen("modem.lst", "w");                 // INLINED?
   if ( v4 )
@@ -59318,8 +59301,8 @@ LABEL_21:
       switch ( j->type )
       {
         case TaskMessage_UnitSelected_or_UiLeftClick:
-          if ( *(_DWORD *)j->payload < g_ui_cursor_pos )
-            v12 = *(_DWORD *)j->payload;
+          if ( *(int *)j->payload < g_ui_cursor_pos )
+            v12 = *(int *)j->payload;
           break;
         case TaskMessage_UnitDeselected_or_SaveLoadScrollDown_or_ShowNotificationBox:
           if ( v3 < g_ui_cursor_pos - 10 )
@@ -59485,7 +59468,7 @@ void __cdecl __noreturn UI_main_menu_multi_modem_list_select(Task *task)
   v1 = task;
   entity = task->entity;
   task = (Task *)task->ctx;
-  g_ui_slot_controller_items[(_DWORD)task] = entity;
+  g_ui_slot_controller_items[(int)task] = entity;
   v3 = v1->entity;
   v3->parent = nullptr;
   v1->channel = TaskChannel_16_Menu;
@@ -60069,7 +60052,7 @@ void __cdecl __noreturn UI_main_menu_multi_session_slot(Task *task)
   v1 = task;
   entity = task->entity;
   task = (Task *)task->ctx;               // BUG reused variable
-  g_ui_slot_controller_items[(_DWORD)task] = entity;
+  g_ui_slot_controller_items[(int)task] = entity;
   v3 = v1->entity;
   v3->parent = nullptr;
   v1->channel = TaskChannel_16_Menu;
@@ -60248,8 +60231,8 @@ void __cdecl __noreturn UI_main_menu_multi_session_list(Task *task)
             {
               if ( i->type == TaskMessage_UnitSelected_or_UiLeftClick )
               {
-                if ( *(_DWORD *)i->payload < g_session_count )
-                  g_session_selected = *(_DWORD *)i->payload;
+                if ( *(int *)i->payload < g_session_count )
+                  g_session_selected = *(int *)i->payload;
               }
               else if ( i->type == TaskMessage_SidebarRefreshOptions )
               {
@@ -61438,7 +61421,7 @@ void __cdecl __noreturn UI_main_menu_game_enemy_count_tech_level_str(Task *task)
     }
   }
   v5 = (FontMobd *)g_mobd[80].layers[0];
-  *(_DWORD *)Buffer = -1;
+  *(int *)Buffer = -1;
   v6 = UI_str_create(nullptr, v5, 500, 156, 10, 3, 9, 14, 16);
   v7 = task->entity;
   v8 = ENT_create(MobdId_Cursor, nullptr, v7);
@@ -61463,13 +61446,13 @@ void __cdecl __noreturn UI_main_menu_game_enemy_count_tech_level_str(Task *task)
   while ( 1 )
   {
 LABEL_13:
-    if ( *(_DWORD *)Buffer != SBYTE1(g_kaos_game_settings.settings) )
+    if ( *(int *)Buffer != SBYTE1(g_kaos_game_settings.settings) )
     {
       sprintf(text, "%d\n", SBYTE1(g_kaos_game_settings.settings));
       v6->cursor_col = 0;
       v6->cursor_row = 0;
       UISTR_append_text(v6, text, nullptr);
-      *(_DWORD *)Buffer = SBYTE1(g_kaos_game_settings.settings);
+      *(int *)Buffer = SBYTE1(g_kaos_game_settings.settings);
     }
     UI_button_tick(task, 2112, 0, 2);
   }
@@ -64396,7 +64379,7 @@ LABEL_63:
         if ( v20->powerplant == v20->current_destination )
           unit->mode = UNIT_mode_tanker_assign_new_powerplant;
         v20->powerplant = (Unit *)payload;
-        v20->powerplant_unit_id = *((_DWORD *)payload + 76);
+        v20->powerplant_unit_id = *((int *)payload + 76);
         if ( unit->player_num == g_player_num )
         {
           if ( unit->type == UnitType_Mute_Tanker )
@@ -64420,7 +64403,7 @@ LABEL_63:
         if ( v17->drillrig == v17->current_destination )
           unit->mode = UNIT_mode_tanker_assign_new_drillrig;
         v17->drillrig = (Unit *)payload;
-        v17->drillrig_unit_id = *((_DWORD *)payload + 76);
+        v17->drillrig_unit_id = *((int *)payload + 76);
         if ( unit->player_num == g_player_num )
         {
           if ( unit->type == UnitType_Mute_Tanker )
@@ -64457,7 +64440,7 @@ BOOL __fastcall TSK_init(int default_coroutine_stack_size)
     {
       for ( i = 0; i < 0x212FC; i += 68 )
       {
-        *(_DWORD *)(result + i) = result + i + 68;
+        *(int *)(result + i) = result + i + 68;
         result = (BOOL)g_tasks;
       }
       g_tasks[1999].next = nullptr;
@@ -68063,7 +68046,7 @@ void __cdecl UNIT_order_dispatcher(Task *task)
           selection_head->prev = &ctx->sentinel;
           ctx->sentinel.next->prev = selection_head;
           ctx->sentinel.next = selection_head;
-          if ( *((_DWORD *)next->ctx + 5) == ctx->player_num )
+          if ( *((int *)next->ctx + 5) == ctx->player_num )
             ctx->owns_selection = 1;
         }
         next = CURSOR_box_query_next();
@@ -68086,7 +68069,7 @@ void __cdecl UNIT_order_dispatcher(Task *task)
         v5 = nullptr;
       if ( !v5 )
         goto LABEL_95;
-      v6 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v6 = UINT_find_by_id(*(int *)event->payload);
       if ( !v6 )
         goto LABEL_95;
       v5->unit_task = v6->task;
@@ -68131,7 +68114,7 @@ void __cdecl UNIT_order_dispatcher(Task *task)
       event->type = GameEvent_None;
       return;
     case GameEvent_RecalledControlGroup:
-      v14 = *(_DWORD *)event->payload;
+      v14 = *(int *)event->payload;
       if ( (UnitOrderCtx *)ctx->sentinel.next != ctx )
       {
         ctx->sentinel.prev->next = ctx->selection_head;
@@ -68173,7 +68156,7 @@ void __cdecl UNIT_order_dispatcher(Task *task)
     case GameEvent_MoveCommand:
       v18 = (UnitOrderCtx *)ctx->sentinel.next;
       ctx->move_order.dst_x = *(DWORD *)event->payload;
-      ctx->move_order.dst_y = *(_DWORD *)&event->payload[4];
+      ctx->move_order.dst_y = *(int *)&event->payload[4];
       if ( v18 == ctx )
         goto LABEL_95;
       do
@@ -68190,7 +68173,7 @@ void __cdecl UNIT_order_dispatcher(Task *task)
       event->type = GameEvent_None;
       return;
     case GameEvent_AttackCommand:
-      v19 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v19 = UINT_find_by_id(*(int *)event->payload);
       ctx->attack_order.target = v19;
       if ( !v19 )
         goto LABEL_95;
@@ -68211,7 +68194,7 @@ void __cdecl UNIT_order_dispatcher(Task *task)
       event->type = GameEvent_None;
       return;
     case GameEvent_UnitProduced:
-      v21 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v21 = UINT_find_by_id(*(int *)event->payload);
       if ( !v21 )
         goto LABEL_95;
       TSK_send_message(task, TaskMessage_UnitReady, *(void **)&event->payload[4], v21->task);
@@ -68220,8 +68203,8 @@ void __cdecl UNIT_order_dispatcher(Task *task)
     case GameEvent_BuildingPlaced:
       if ( ENT_create_by_unit_type(
              (UnitType)*(__int16 *)event->payload,
-             *(_DWORD *)&event->payload[2],
-             *(_DWORD *)&event->payload[6],
+             *(int *)&event->payload[2],
+             *(int *)&event->payload[6],
              ctx->player_num)
         || ctx->player_num != g_player_num )
       {
@@ -68231,26 +68214,26 @@ void __cdecl UNIT_order_dispatcher(Task *task)
       event->type = GameEvent_None;
       return;
     case GameEvent_MobileBaseDeployed:
-      v22 = UINT_find_by_id(*(_DWORD *)&event->payload[4]);
+      v22 = UINT_find_by_id(*(int *)&event->payload[4]);
       TSK_send_message(task, TaskMessage_BuildingPlacementModeBegin_or_BackToMenu, nullptr, v22->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_BuildingConstructionProgressed:
-      v23 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v23 = UINT_find_by_id(*(int *)event->payload);
       if ( !v23 )
         goto LABEL_95;
       TSK_send_message(task, TaskMessage_AdvanceConstructionStage, *(void **)&event->payload[4], v23->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_UpgradeCompleted:
-      v24 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v24 = UINT_find_by_id(*(int *)event->payload);
       if ( !v24 )
         goto LABEL_95;
       TSK_send_message(task, TaskMessage_UpgradeComplete, nullptr, v24->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_RepairBayHealTick:
-      v25 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v25 = UINT_find_by_id(*(int *)event->payload);
       if ( !v25 )
         goto LABEL_95;
       v26 = *(__int16 *)&event->payload[4] + v25->hitpoints;
@@ -68302,67 +68285,67 @@ void __cdecl UNIT_order_dispatcher(Task *task)
       event->type = GameEvent_None;
       return;
     case GameEvent_TankerAssignedToDrillrig:
-      v33 = UINT_find_by_id(*(_DWORD *)&event->payload[4]);
-      v34 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v33 = UINT_find_by_id(*(int *)&event->payload[4]);
+      v34 = UINT_find_by_id(*(int *)event->payload);
       TSK_send_message(task, TaskMessage_TankerAssignedNewDrillrig, v33, v34->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_TankerAssignedToPowerPlant:
-      v35 = UINT_find_by_id(*(_DWORD *)&event->payload[4]);
-      v36 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v35 = UINT_find_by_id(*(int *)&event->payload[4]);
+      v36 = UINT_find_by_id(*(int *)event->payload);
       TSK_send_message(task, TaskMessage_TankerAssignedNewPowerPlant, v35, v36->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_RepairBayAssigned:
-      v41 = UINT_find_by_id(*(_DWORD *)&event->payload[4]);
-      v42 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v41 = UINT_find_by_id(*(int *)&event->payload[4]);
+      v42 = UINT_find_by_id(*(int *)event->payload);
       TSK_send_message(task, TaskMessage_RepairBayAssigned, v41, v42->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_TechnicianAssigned:
-      v39 = UINT_find_by_id(*(_DWORD *)&event->payload[4]);
-      v40 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v39 = UINT_find_by_id(*(int *)&event->payload[4]);
+      v40 = UINT_find_by_id(*(int *)event->payload);
       TSK_send_message(task, TaskMessage_TechnicianAssigned, v39, v40->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_InfiltratorAssigned:
-      v37 = UINT_find_by_id(*(_DWORD *)&event->payload[4]);
-      v38 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v37 = UINT_find_by_id(*(int *)&event->payload[4]);
+      v38 = UINT_find_by_id(*(int *)event->payload);
       TSK_send_message(task, TaskMessage_Infiltrate_or_ShowBriefing, v37, v38->task);
       event->type = GameEvent_None;
       return;
     case GameEvent_AirstrikeCalled:
-      v43 = *(_DWORD *)event->payload;
+      v43 = *(int *)event->payload;
       if ( g_is_single_player )
         ENT_create_by_unit_type(
           (UnitType)((v43 != 2) + UnitType_Mute_Wasp),
-          *(_DWORD *)&event->payload[4],
-          *(_DWORD *)&event->payload[8],
-          *(_DWORD *)event->payload);
+          *(int *)&event->payload[4],
+          *(int *)&event->payload[8],
+          *(int *)event->payload);
       else
         ENT_create_by_unit_type(
           (UnitType)(UnitType_Surv_Bomber - (g_netz_players[v43].faction != NetzFaction_Surv)),
-          *(_DWORD *)&event->payload[4],
-          *(_DWORD *)&event->payload[8],
-          *(_DWORD *)event->payload);
+          *(int *)&event->payload[4],
+          *(int *)&event->payload[8],
+          *(int *)event->payload);
       event->type = GameEvent_None;
       return;
     case GameEvent_BuildingSold:
-      v44 = UINT_find_by_id(*(_DWORD *)event->payload);
+      v44 = UINT_find_by_id(*(int *)event->payload);
       if ( v44 )
         TSK_send_message(task, TaskMessage_Destroy, nullptr, v44->task);
       goto LABEL_95;
     case GameEvent_SwearAllegiance:
       v31 = g_player_num;
-      g_diplomacy.is_ally[ctx->player_num][*(_DWORD *)event->payload] = 1;
+      g_diplomacy.is_ally[ctx->player_num][*(int *)event->payload] = 1;
       v32 = ctx->player_num;
-      if ( v31 != v32 && v31 != *(_DWORD *)event->payload )
+      if ( v31 != v32 && v31 != *(int *)event->payload )
         goto LABEL_95;
       sprintf(
         Buffer,
         "%s Swearing allegiance to %s",
         g_netz_players[v32].name,
-        g_netz_players[*(_DWORD *)event->payload].name);
+        g_netz_players[*(int *)event->payload].name);
       UI_show_notification_box(nullptr, Buffer);
       event->type = GameEvent_None;
       break;
@@ -68601,9 +68584,9 @@ LABEL_18:
           if ( v9 )
           {
             v11 = &g_netz_game_events[g_netz_local_player_slot];
-            *(_DWORD *)&v11->type = *(_DWORD *)&v9->type;
-            *(_DWORD *)&v11->payload[3] = *(_DWORD *)&v9->payload[3];
-            *(_DWORD *)&v11->payload[7] = *(_DWORD *)&v9->payload[7];
+            *(int *)&v11->type = *(int *)&v9->type;
+            *(int *)&v11->payload[3] = *(int *)&v9->payload[3];
+            *(int *)&v11->payload[7] = *(int *)&v9->payload[7];
             v11->payload[11] = v9->payload[11];
           }
           else
@@ -68627,9 +68610,9 @@ LABEL_18:
             *v12 = v37;
             v15 = v12 + 1;
             v12 += 14;
-            *(_DWORD *)v15 = *(_DWORD *)&v13->type;
-            *((_DWORD *)v15 + 1) = *(_DWORD *)&v13->payload[3];
-            *((_DWORD *)v15 + 2) = *(_DWORD *)&v13->payload[7];
+            *(int *)v15 = *(int *)&v13->type;
+            *((int *)v15 + 1) = *(int *)&v13->payload[3];
+            *((int *)v15 + 2) = *(int *)&v13->payload[7];
             v15[12] = v13->payload[11];
             ++v36;
             v10 = g_netz_local_player_slot;
@@ -68746,9 +68729,9 @@ LABEL_56:
           v28 = GAME_events_dequeue();
           if ( v28 )
           {
-            *(_DWORD *)&g_currently_processed_event.type = *(_DWORD *)&v28->type;
-            *(_DWORD *)&g_currently_processed_event.payload[3] = *(_DWORD *)&v28->payload[3];
-            *(_DWORD *)&g_currently_processed_event.payload[7] = *(_DWORD *)&v28->payload[7];
+            *(int *)&g_currently_processed_event.type = *(int *)&v28->type;
+            *(int *)&g_currently_processed_event.payload[3] = *(int *)&v28->payload[3];
+            *(int *)&g_currently_processed_event.payload[7] = *(int *)&v28->payload[7];
             g_currently_processed_event.payload[11] = v28->payload[11];
           }
           else
@@ -69349,7 +69332,7 @@ BOOL MINI_init()
   int *v35; // eax
   char v36; // dl
   unsigned __int8 *pixels; // [esp+10h] [ebp-24h]
-  _DWORD *v38; // [esp+14h] [ebp-20h]
+  int *v38; // [esp+14h] [ebp-20h]
   int v39; // [esp+18h] [ebp-1Ch]
   unsigned __int8 v40; // [esp+1Ch] [ebp-18h]
   _BYTE *v41; // [esp+20h] [ebp-14h]
@@ -69366,7 +69349,7 @@ BOOL MINI_init()
     g_fog_of_war = (MapdRenderNode *)result;
     if ( result )
     {
-      *(_DWORD *)(*(_DWORD *)(result + 8) + 16) = REND_transform_minimap;// BUG - heavy result reuse
+      *(int *)(*(int *)(result + 8) + 16) = REND_transform_minimap;// BUG - heavy result reuse
       g_shroud_backup = (MapdScrlImage *)g_fog_of_war->rn->cmd.image;
       g_fog_of_war_num_tiles_x = g_map_num_tiles_x + 4;
       g_fog_of_war_num_tiles_y = g_map_num_tiles_y + 4;
@@ -69374,7 +69357,7 @@ BOOL MINI_init()
       g_shroud = (MapdScrlImage *)result;
       if ( result )
       {
-        *(_DWORD *)result = g_shroud_backup->renderer;
+        *(int *)result = g_shroud_backup->renderer;
         g_shroud->tile_x_size = g_shroud_backup->tile_x_size;
         g_shroud->tile_y_size = g_shroud_backup->tile_y_size;
         g_shroud->num_x_tiles = g_fog_of_war_num_tiles_x;
@@ -69408,7 +69391,7 @@ BOOL MINI_init()
         v3 = 2 * g_map_num_tiles_x * 2 * g_map_num_tiles_y;
         g_minimap_height = 2 * g_map_num_tiles_y;
         v45 = v3;
-        v4 = *(_DWORD *)(*(_DWORD *)v1 + 4) + 20;
+        v4 = *(int *)(*(int *)v1 + 4) + 20;
         v5 = 4 * (2 * g_map_num_tiles_x + 2 * g_map_num_tiles_y) + 16;
         v39 = v4;
         result = (BOOL)malloc(v3);
@@ -69436,7 +69419,7 @@ BOOL MINI_init()
                 do
                 {
                   v9 = 0;
-                  v38 = (_DWORD *)v4;
+                  v38 = (int *)v4;
                   v10 = 16 * (v8 & 1);
                   v43 = v10;
                   if ( v6 > 0 )
@@ -69865,7 +69848,7 @@ void __fastcall SHROUD_reveal(Unit *unit)
   MapdScrlImageTile *v33; // eax
   MapdScrlImageTile *v34; // eax
   MapdScrlImageTile *v35; // edi
-  _DWORD *v36; // eax
+  int *v36; // eax
   MapdScrlImageTile *v37; // edi
   MapdScrlImageTile *v38; // edi
   MapdScrlImageTile *v39; // edi
@@ -70645,7 +70628,7 @@ void __cdecl __noreturn SCHRAP_explosion_medium_task(Task *task)
 {
   Entity *entity; // esi
   RenderNode *rn; // edx
-  _DWORD v3[9]; // [esp+Ch] [ebp-24h] BYREF BUG probably used as a safeguard in case it's used in an MSG - should be addressed properly
+  int v3[9]; // [esp+Ch] [ebp-24h] BYREF BUG probably used as a safeguard in case it's used in an MSG - should be addressed properly
 
   entity = task->entity;
   memset(v3, 0, sizeof(v3));
@@ -71030,7 +71013,7 @@ void GAME_update_anim_anchors_and_minimap()
           for ( j = id->id; j != -1; ++id )
           {
             if ( j < 6 )
-              *((_DWORD *)&i->mobd_anchors.turret + j) = id;// BUG
+              *((int *)&i->mobd_anchors.turret + j) = id;// BUG
             j = id[1].id;                       // BUG
           }
         }
@@ -71687,7 +71670,7 @@ int __fastcall BOXD_scan_walk_find_next_tile(Unit *unit)
   int v25; // [esp+10h] [ebp-2Ch]
   int v26; // [esp+14h] [ebp-28h]
   int v27; // [esp+18h] [ebp-24h]
-  _DWORD v28[8]; // [esp+1Ch] [ebp-20h]
+  int v28[8]; // [esp+1Ch] [ebp-20h]
 
   entity = unit->entity;
   v3 = entity->y >> 13;
@@ -71977,7 +71960,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
   {
     GetFileVersionInfoA("ddraw.dll", 0, dwLen, v5);
     VerQueryValueA(v6, "\\", &lpBuffer, &dwLen);
-    v4 = *((_DWORD *)lpBuffer + 2);
+    v4 = *((int *)lpBuffer + 2);
     free(v6);
   }
   if ( (VersionInformation.dwPlatformId & 1) != 0 )
@@ -72027,7 +72010,7 @@ Movie *__cdecl MOVIE_read_file(const char *filename)
   SIZE_T v6; // edi
   HLOCAL v7; // eax
   void *v8; // ecx
-  _BOOL2 v9; // bp
+  bool16_t v9; // bp
   int v10; // edi
   int v11; // eax
   int v12; // ebx
@@ -72172,9 +72155,9 @@ MovieFlags __cdecl VBC_parse_frame_chunks(Movie *movie, MovieFrame *frame)
   if ( (flags_ & Movie_HasAudio) != 0 )
   {
     movie->header.sound_bytes = read_ptr + 2;
-    movie->header.sound_bytes_num = *(_DWORD *)read_ptr - 4;
-    *(_DWORD *)&flags_ = *(_DWORD *)read_ptr;
-    read_ptr = (__int16 *)((char *)read_ptr + *(_DWORD *)read_ptr);
+    movie->header.sound_bytes_num = *(int *)read_ptr - 4;
+    *(int *)&flags_ = *(int *)read_ptr;
+    read_ptr = (__int16 *)((char *)read_ptr + *(int *)read_ptr);
   }
   v7 = frame->flags;
   if ( (v7 & Movie_HasVideo) != 0 )
@@ -72184,7 +72167,7 @@ MovieFlags __cdecl VBC_parse_frame_chunks(Movie *movie, MovieFrame *frame)
       v8 = 0;
       if ( (v7 & Movie_HasPalette) != 0 )
       {
-        qmemcpy(g_vbc16_palette, (char *)read_ptr + *(_DWORD *)read_ptr + 4, sizeof(g_vbc16_palette));
+        qmemcpy(g_vbc16_palette, (char *)read_ptr + *(int *)read_ptr + 4, sizeof(g_vbc16_palette));
         v9 = g_vbc16_palette_remap;
         if ( g_vbc16_palette_remap )
         {
@@ -72230,8 +72213,8 @@ MovieFlags __cdecl VBC_parse_frame_chunks(Movie *movie, MovieFrame *frame)
     v13 = movie->decode_buffers[active_decode_buffer];
     movie->active_decode_buffer = active_decode_buffer ^ 1;
     movie->header.curent_frame_pixels = v13;
-    *(_DWORD *)&flags_ = *(_DWORD *)read_ptr;
-    read_ptr = (__int16 *)((char *)read_ptr + *(_DWORD *)read_ptr);
+    *(int *)&flags_ = *(int *)read_ptr;
+    read_ptr = (__int16 *)((char *)read_ptr + *(int *)read_ptr);
   }
   if ( (v2->flags & Movie_HasPalette) != 0 )
   {
@@ -72242,14 +72225,14 @@ MovieFlags __cdecl VBC_parse_frame_chunks(Movie *movie, MovieFrame *frame)
       *(_WORD *)movie->_movie_2C = v14;
       if ( !v14 )
         *(_WORD *)movie->_movie_2C = 256;
-      *(_DWORD *)&flags_ = 3 * *(__int16 *)movie->_movie_2C;
+      *(int *)&flags_ = 3 * *(__int16 *)movie->_movie_2C;
       qmemcpy(
         &movie->_movie_2C[2 * *(__int16 *)&movie->_movie_2C[2] + 4 + *(__int16 *)&movie->_movie_2C[2]],
         read_ptr + 3,
         *(unsigned int *)&flags_);
       v2 = frame;
     }
-    read_ptr = (__int16 *)((char *)read_ptr + *(_DWORD *)read_ptr);
+    read_ptr = (__int16 *)((char *)read_ptr + *(int *)read_ptr);
   }
   if ( (v2->flags & Movie_HasTiming) != 0 )
   {
@@ -72258,7 +72241,7 @@ MovieFlags __cdecl VBC_parse_frame_chunks(Movie *movie, MovieFrame *frame)
   }
   if ( (v2->flags & Movie_HasSubtitles) != 0 )
   {
-    movie->header.subtitles_len = *(_DWORD *)read_ptr - 4;
+    movie->header.subtitles_len = *(int *)read_ptr - 4;
     movie->header.subtitles = (const char *)(read_ptr + 2);
   }
   return flags_;
@@ -72273,22 +72256,22 @@ FILE *__cdecl j_fopen(const char *filename)
 //----- (0045A3C4) --------------------------------------------------------
 // ASM
 // uses: ECX, ESI, EBC
-int __usercall VBC8_block_decoder_1@<eax>(int a1@<ecx>, _DWORD *a2@<esi>)
+int __usercall VBC8_block_decoder_1@<eax>(int a1@<ecx>, int *a2@<esi>)
 {
   int v2; // edi
-  _DWORD *v3; // esi
-  _DWORD *v4; // esi
-  _DWORD *v5; // esi
+  int *v3; // esi
+  int *v4; // esi
+  int *v5; // esi
   int result; // eax
 
   v2 = g_vbc8_prev_delta;
-  *a2 = *(_DWORD *)((char *)a2 + g_vbc8_prev_delta);
-  v3 = (_DWORD *)((char *)a2 + a1);
-  *v3 = *(_DWORD *)((char *)v3 + v2);
-  v4 = (_DWORD *)((char *)v3 + a1);
-  *v4 = *(_DWORD *)((char *)v4 + v2);
-  v5 = (_DWORD *)((char *)v4 + a1);
-  result = *(_DWORD *)((char *)v5 + v2);
+  *a2 = *(int *)((char *)a2 + g_vbc8_prev_delta);
+  v3 = (int *)((char *)a2 + a1);
+  *v3 = *(int *)((char *)v3 + v2);
+  v4 = (int *)((char *)v3 + a1);
+  *v4 = *(int *)((char *)v4 + v2);
+  v5 = (int *)((char *)v4 + a1);
+  result = *(int *)((char *)v5 + v2);
   *v5 = result;
   return result;
 }
@@ -72297,37 +72280,37 @@ int __usercall VBC8_block_decoder_1@<eax>(int a1@<ecx>, _DWORD *a2@<esi>)
 //----- (0045A3E7) --------------------------------------------------------
 // ASM
 // uses: ECX, ESI, EBC
-int __usercall VBC8_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD *a3@<esi>)
+int __usercall VBC8_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, int *a3@<esi>)
 {
   unsigned __int8 v3; // al
-  _DWORD *v4; // ebx
+  int *v4; // ebx
   int v5; // edi
-  _DWORD *v6; // esi
-  _DWORD *v7; // esi
-  _DWORD *v8; // esi
+  int *v6; // esi
+  int *v7; // esi
+  int *v8; // esi
   int result; // eax
 
   v3 = *a2;
   v4 = a2 + 1;
   if ( v3 )
   {
-    v5 = g_vbc8_prev_delta + *(_DWORD *)(g_vbc8_motion_lut + 4 * v3);
-    *a3 = *(_DWORD *)((char *)a3 + v5);
-    v6 = (_DWORD *)((char *)a3 + a1);
-    *v6 = *(_DWORD *)((char *)v6 + v5);
-    v7 = (_DWORD *)((char *)v6 + a1);
-    *v7 = *(_DWORD *)((char *)v7 + v5);
-    v8 = (_DWORD *)((char *)v7 + a1);
-    result = *(_DWORD *)((char *)v8 + v5);
+    v5 = g_vbc8_prev_delta + *(int *)(g_vbc8_motion_lut + 4 * v3);
+    *a3 = *(int *)((char *)a3 + v5);
+    v6 = (int *)((char *)a3 + a1);
+    *v6 = *(int *)((char *)v6 + v5);
+    v7 = (int *)((char *)v6 + a1);
+    *v7 = *(int *)((char *)v7 + v5);
+    v8 = (int *)((char *)v7 + a1);
+    result = *(int *)((char *)v8 + v5);
     *v8 = result;
   }
   else
   {
     *a3 = *v4;
-    *(_DWORD *)((char *)a3 + a1) = v4[1];
-    *(_DWORD *)((char *)a3 + 2 * a1) = v4[2];
+    *(int *)((char *)a3 + a1) = v4[1];
+    *(int *)((char *)a3 + 2 * a1) = v4[2];
     result = v4[3];
-    *(_DWORD *)((char *)a3 + 3 * a1) = result;
+    *(int *)((char *)a3 + 3 * a1) = result;
   }
   return result;
 }
@@ -72337,7 +72320,7 @@ int __usercall VBC8_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD 
 //----- (0045A43F) --------------------------------------------------------
 // ASM
 // uses: ECX, ESI, EBC
-__int16 __usercall VBC8_block_decoder_3@<ax>(int a1@<eax>, int a2@<ecx>, _BYTE *a3@<ebx>, _DWORD *a4@<esi>)
+__int16 __usercall VBC8_block_decoder_3@<ax>(int a1@<eax>, int a2@<ecx>, _BYTE *a3@<ebx>, int *a4@<esi>)
 {
   int v4; // eax
   int v5; // eax
@@ -72349,9 +72332,9 @@ __int16 __usercall VBC8_block_decoder_3@<ax>(int a1@<eax>, int a2@<ecx>, _BYTE *
   v5 = __ROR4__(v4, 8);
   BYTE1(v5) = v5;
   *a4 = v5;
-  *(_DWORD *)((char *)a4 + a2) = v5;
-  *(_DWORD *)((char *)a4 + 2 * a2) = v5;
-  *(_DWORD *)((char *)a4 + 3 * a2) = v5;
+  *(int *)((char *)a4 + a2) = v5;
+  *(int *)((char *)a4 + 2 * a2) = v5;
+  *(int *)((char *)a4 + 3 * a2) = v5;
   return v5;
 }
 
@@ -72362,8 +72345,8 @@ char __usercall VBC8_block_decoder_4@<al>(
         __int16 a1@<dx>,
         int a2@<ecx>,
         unsigned __int8 *a3@<ebx>,
-        _DWORD *a4@<edi>,
-        _DWORD *a5@<esi>)
+        int *a4@<edi>,
+        int *a5@<esi>)
 {
   int v5; // eax
   int v6; // eax
@@ -73015,7 +72998,7 @@ char __usercall VBC8_block_decoder_4@<al>(
         goto LABEL_131;
     }
   }
-  a4 = (_DWORD *)((char *)a5 + g_vbc8_prev_delta);
+  a4 = (int *)((char *)a5 + g_vbc8_prev_delta);
   LOBYTE(a1) = a3[1];
   switch ( *a3 )
   {
@@ -73031,18 +73014,18 @@ LABEL_4:
       BYTE1(v6) = a1;
       HIWORD(v6) = __ROR4__(v6, 16) >> 16;
       LOWORD(v6) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v6;
+      *(int *)((char *)a5 + a2) = v6;
       LOBYTE(v6) = HIBYTE(a1);
       BYTE1(v6) = a1;
       HIWORD(v6) = __ROR4__(v6, 16) >> 16;
       LOWORD(v6) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v6;
+      *(int *)((char *)a5 + 2 * a2) = v6;
       LOBYTE(v6) = a1;
       BYTE1(v6) = a1;
       HIWORD(v7) = __ROR4__(v6, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 1u:
 LABEL_5:
@@ -73057,19 +73040,19 @@ LABEL_5:
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
       LOBYTE(v8) = a1;
       BYTE1(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v8;
+      *(int *)((char *)a5 + a2) = v8;
       BYTE1(v8) = HIBYTE(a1);
       LOBYTE(v8) = HIBYTE(a1);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
       BYTE1(v8) = HIBYTE(a1);
       LOBYTE(v8) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       BYTE1(v8) = HIBYTE(a1);
       LOBYTE(v8) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v8, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 2u:
 LABEL_6:
@@ -73084,19 +73067,19 @@ LABEL_6:
       HIWORD(v9) = __ROR4__(v9, 16) >> 16;
       BYTE1(v9) = a1;
       LOBYTE(v9) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v9;
+      *(int *)((char *)a5 + a2) = v9;
       BYTE1(v9) = HIBYTE(a1);
       LOBYTE(v9) = HIBYTE(a1);
       HIWORD(v9) = __ROR4__(v9, 16) >> 16;
       BYTE1(v9) = a1;
       LOBYTE(v9) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v9;
+      *(int *)((char *)a5 + 2 * a2) = v9;
       BYTE1(v9) = HIBYTE(a1);
       LOBYTE(v9) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v9, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 3u:
 LABEL_7:
@@ -73111,19 +73094,19 @@ LABEL_7:
       HIWORD(v10) = __ROR4__(v10, 16) >> 16;
       LOBYTE(v10) = a1;
       BYTE1(v10) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v10;
+      *(int *)((char *)a5 + a2) = v10;
       LOBYTE(v10) = a1;
       BYTE1(v10) = a1;
       HIWORD(v10) = __ROR4__(v10, 16) >> 16;
       LOBYTE(v10) = a1;
       BYTE1(v10) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v10;
+      *(int *)((char *)a5 + 2 * a2) = v10;
       BYTE1(v10) = HIBYTE(a1);
       LOBYTE(v10) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v10, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 4u:
 LABEL_8:
@@ -73136,17 +73119,17 @@ LABEL_8:
       HIWORD(v11) = __ROR4__(v11, 16) >> 16;
       BYTE1(v11) = a1;
       LOBYTE(v11) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v11;
+      *(int *)((char *)a5 + a2) = v11;
       LOWORD(v11) = a1;
       HIWORD(v11) = __ROR4__(v11, 16) >> 16;
       BYTE1(v11) = a1;
       LOBYTE(v11) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v11;
+      *(int *)((char *)a5 + 2 * a2) = v11;
       LOWORD(v11) = a1;
       HIWORD(v7) = __ROR4__(v11, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 5u:
 LABEL_9:
@@ -73161,19 +73144,19 @@ LABEL_9:
       HIWORD(v12) = __ROR4__(v12, 16) >> 16;
       LOBYTE(v12) = a1;
       BYTE1(v12) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v12;
+      *(int *)((char *)a5 + a2) = v12;
       LOBYTE(v12) = a1;
       BYTE1(v12) = a1;
       HIWORD(v12) = __ROR4__(v12, 16) >> 16;
       LOBYTE(v12) = a1;
       BYTE1(v12) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v12;
+      *(int *)((char *)a5 + 2 * a2) = v12;
       LOBYTE(v12) = a1;
       BYTE1(v12) = a1;
       HIWORD(v7) = __ROR4__(v12, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 6u:
 LABEL_10:
@@ -73188,19 +73171,19 @@ LABEL_10:
       HIWORD(v13) = __ROR4__(v13, 16) >> 16;
       LOBYTE(v13) = HIBYTE(a1);
       BYTE1(v13) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v13;
+      *(int *)((char *)a5 + a2) = v13;
       BYTE1(v13) = a1;
       LOBYTE(v13) = a1;
       HIWORD(v13) = __ROR4__(v13, 16) >> 16;
       LOBYTE(v13) = HIBYTE(a1);
       BYTE1(v13) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v13;
+      *(int *)((char *)a5 + 2 * a2) = v13;
       BYTE1(v13) = a1;
       LOBYTE(v13) = a1;
       HIWORD(v7) = __ROR4__(v13, 16) >> 16;
       LOBYTE(v7) = HIBYTE(a1);
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 7u:
 LABEL_11:
@@ -73214,16 +73197,16 @@ LABEL_11:
       HIWORD(v14) = __ROR4__(v14, 16) >> 16;
       BYTE1(v14) = a1;
       LOBYTE(v14) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v14;
+      *(int *)((char *)a5 + a2) = v14;
       BYTE1(v14) = HIBYTE(a1);
       LOBYTE(v14) = HIBYTE(a1);
       HIWORD(v14) = __ROR4__(v14, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v7;
       LOBYTE(v7) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v7, 16) >> 16;
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 8u:
 LABEL_12:
@@ -73237,17 +73220,17 @@ LABEL_12:
       LOBYTE(v15) = HIBYTE(a1);
       HIWORD(v15) = __ROR4__(v15, 16) >> 16;
       LOWORD(v15) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v15;
+      *(int *)((char *)a5 + a2) = v15;
       LOBYTE(v15) = HIBYTE(a1);
       HIWORD(v15) = __ROR4__(v15, 16) >> 16;
       BYTE1(v15) = a1;
       LOBYTE(v15) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v15;
+      *(int *)((char *)a5 + 2 * a2) = v15;
       LOWORD(v15) = a1;
       HIWORD(v7) = __ROR4__(v15, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 9u:
 LABEL_13:
@@ -73262,19 +73245,19 @@ LABEL_13:
       HIWORD(v16) = __ROR4__(v16, 16) >> 16;
       BYTE1(v16) = HIBYTE(a1);
       LOBYTE(v16) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v16;
+      *(int *)((char *)a5 + a2) = v16;
       BYTE1(v16) = a1;
       LOBYTE(v16) = a1;
       HIWORD(v16) = __ROR4__(v16, 16) >> 16;
       BYTE1(v16) = HIBYTE(a1);
       LOBYTE(v16) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v16;
+      *(int *)((char *)a5 + 2 * a2) = v16;
       BYTE1(v16) = a1;
       LOBYTE(v16) = a1;
       HIWORD(v7) = __ROR4__(v16, 16) >> 16;
       LOBYTE(v7) = HIBYTE(a1);
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xAu:
 LABEL_14:
@@ -73289,19 +73272,19 @@ LABEL_14:
       HIWORD(v17) = __ROR4__(v17, 16) >> 16;
       BYTE1(v17) = HIBYTE(a1);
       LOBYTE(v17) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v17;
+      *(int *)((char *)a5 + a2) = v17;
       LOBYTE(v17) = HIBYTE(a1);
       BYTE1(v17) = a1;
       HIWORD(v17) = __ROR4__(v17, 16) >> 16;
       BYTE1(v17) = HIBYTE(a1);
       LOBYTE(v17) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v17;
+      *(int *)((char *)a5 + 2 * a2) = v17;
       BYTE1(v17) = HIBYTE(a1);
       LOBYTE(v17) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v17, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xBu:
 LABEL_15:
@@ -73316,18 +73299,18 @@ LABEL_15:
       HIWORD(v18) = __ROR4__(v18, 16) >> 16;
       LOBYTE(v18) = a1;
       BYTE1(v18) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v18;
+      *(int *)((char *)a5 + a2) = v18;
       LOWORD(v18) = a1;
       HIWORD(v18) = __ROR4__(v18, 16) >> 16;
       BYTE1(v18) = a1;
       LOBYTE(v18) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v18;
+      *(int *)((char *)a5 + 2 * a2) = v18;
       BYTE1(v18) = HIBYTE(a1);
       LOBYTE(v18) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v18, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xCu:
 LABEL_16:
@@ -73341,19 +73324,19 @@ LABEL_16:
       HIWORD(v19) = __ROR4__(v19, 16) >> 16;
       BYTE1(v19) = a1;
       LOBYTE(v19) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v19;
+      *(int *)((char *)a5 + a2) = v19;
       LOBYTE(v19) = a1;
       BYTE1(v19) = a1;
       HIWORD(v19) = __ROR4__(v19, 16) >> 16;
       LOBYTE(v19) = a1;
       BYTE1(v19) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v19;
+      *(int *)((char *)a5 + 2 * a2) = v19;
       LOBYTE(v19) = a1;
       BYTE1(v19) = a1;
       HIWORD(v7) = __ROR4__(v19, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xDu:
 LABEL_17:
@@ -73368,19 +73351,19 @@ LABEL_17:
       HIWORD(v20) = __ROR4__(v20, 16) >> 16;
       LOBYTE(v20) = HIBYTE(a1);
       BYTE1(v20) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v20;
+      *(int *)((char *)a5 + a2) = v20;
       LOBYTE(v20) = a1;
       BYTE1(v20) = a1;
       HIWORD(v20) = __ROR4__(v20, 16) >> 16;
       LOBYTE(v20) = a1;
       BYTE1(v20) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v20;
+      *(int *)((char *)a5 + 2 * a2) = v20;
       LOBYTE(v20) = a1;
       BYTE1(v20) = a1;
       HIWORD(v7) = __ROR4__(v20, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xEu:
 LABEL_18:
@@ -73395,19 +73378,19 @@ LABEL_18:
       HIWORD(v21) = __ROR4__(v21, 16) >> 16;
       LOBYTE(v21) = a1;
       BYTE1(v21) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v21;
+      *(int *)((char *)a5 + a2) = v21;
       BYTE1(v21) = a1;
       LOBYTE(v21) = a1;
       HIWORD(v21) = __ROR4__(v21, 16) >> 16;
       LOBYTE(v21) = HIBYTE(a1);
       BYTE1(v21) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v21;
+      *(int *)((char *)a5 + 2 * a2) = v21;
       BYTE1(v21) = a1;
       LOBYTE(v21) = a1;
       HIWORD(v7) = __ROR4__(v21, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xFu:
 LABEL_19:
@@ -73422,19 +73405,19 @@ LABEL_19:
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       LOBYTE(v22) = a1;
       BYTE1(v22) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v22;
+      *(int *)((char *)a5 + a2) = v22;
       BYTE1(v22) = HIBYTE(a1);
       LOBYTE(v22) = HIBYTE(a1);
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       BYTE1(v22) = a1;
       LOBYTE(v22) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v22;
+      *(int *)((char *)a5 + 2 * a2) = v22;
       BYTE1(v22) = HIBYTE(a1);
       LOBYTE(v22) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v22, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x10u:
 LABEL_20:
@@ -73449,19 +73432,19 @@ LABEL_20:
       HIWORD(v23) = __ROR4__(v23, 16) >> 16;
       BYTE1(v23) = a1;
       LOBYTE(v23) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v23;
+      *(int *)((char *)a5 + a2) = v23;
       LOBYTE(v23) = a1;
       BYTE1(v23) = a1;
       HIWORD(v23) = __ROR4__(v23, 16) >> 16;
       LOBYTE(v23) = a1;
       BYTE1(v23) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v23;
+      *(int *)((char *)a5 + 2 * a2) = v23;
       LOBYTE(v23) = a1;
       BYTE1(v23) = a1;
       HIWORD(v7) = __ROR4__(v23, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x11u:
 LABEL_21:
@@ -73476,19 +73459,19 @@ LABEL_21:
       HIWORD(v24) = __ROR4__(v24, 16) >> 16;
       BYTE1(v24) = HIBYTE(a1);
       LOBYTE(v24) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v24;
+      *(int *)((char *)a5 + a2) = v24;
       LOBYTE(v24) = a1;
       BYTE1(v24) = a1;
       HIWORD(v24) = __ROR4__(v24, 16) >> 16;
       LOBYTE(v24) = a1;
       BYTE1(v24) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v24;
+      *(int *)((char *)a5 + 2 * a2) = v24;
       LOBYTE(v24) = a1;
       BYTE1(v24) = a1;
       HIWORD(v7) = __ROR4__(v24, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x12u:
 LABEL_22:
@@ -73503,19 +73486,19 @@ LABEL_22:
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       LOBYTE(v25) = a1;
       BYTE1(v25) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v25;
+      *(int *)((char *)a5 + a2) = v25;
       BYTE1(v25) = a1;
       LOBYTE(v25) = a1;
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       BYTE1(v25) = HIBYTE(a1);
       LOBYTE(v25) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v25;
+      *(int *)((char *)a5 + 2 * a2) = v25;
       BYTE1(v25) = a1;
       LOBYTE(v25) = a1;
       HIWORD(v7) = __ROR4__(v25, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x13u:
 LABEL_23:
@@ -73530,19 +73513,19 @@ LABEL_23:
       HIWORD(v26) = __ROR4__(v26, 16) >> 16;
       BYTE1(v26) = HIBYTE(a1);
       LOBYTE(v26) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v26;
+      *(int *)((char *)a5 + a2) = v26;
       BYTE1(v26) = HIBYTE(a1);
       LOBYTE(v26) = HIBYTE(a1);
       HIWORD(v26) = __ROR4__(v26, 16) >> 16;
       BYTE1(v26) = HIBYTE(a1);
       LOBYTE(v26) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v26;
+      *(int *)((char *)a5 + 2 * a2) = v26;
       LOBYTE(v26) = a1;
       BYTE1(v26) = a1;
       HIWORD(v7) = __ROR4__(v26, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x14u:
 LABEL_24:
@@ -73555,17 +73538,17 @@ LABEL_24:
       BYTE1(v27) = a1;
       HIWORD(v27) = __ROR4__(v27, 16) >> 16;
       LOWORD(v27) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v27;
+      *(int *)((char *)a5 + a2) = v27;
       LOBYTE(v27) = HIBYTE(a1);
       BYTE1(v27) = a1;
       HIWORD(v27) = __ROR4__(v27, 16) >> 16;
       LOWORD(v27) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v27;
+      *(int *)((char *)a5 + 2 * a2) = v27;
       LOBYTE(v27) = HIBYTE(a1);
       BYTE1(v27) = a1;
       HIWORD(v7) = __ROR4__(v27, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x15u:
 LABEL_25:
@@ -73580,19 +73563,19 @@ LABEL_25:
       HIWORD(v28) = __ROR4__(v28, 16) >> 16;
       BYTE1(v28) = HIBYTE(a1);
       LOBYTE(v28) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v28;
+      *(int *)((char *)a5 + a2) = v28;
       LOBYTE(v28) = a1;
       BYTE1(v28) = a1;
       HIWORD(v28) = __ROR4__(v28, 16) >> 16;
       LOBYTE(v28) = a1;
       BYTE1(v28) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v28;
+      *(int *)((char *)a5 + 2 * a2) = v28;
       LOBYTE(v28) = a1;
       BYTE1(v28) = a1;
       HIWORD(v7) = __ROR4__(v28, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x16u:
 LABEL_26:
@@ -73607,19 +73590,19 @@ LABEL_26:
       HIWORD(v29) = __ROR4__(v29, 16) >> 16;
       LOBYTE(v29) = a1;
       BYTE1(v29) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v29;
+      *(int *)((char *)a5 + a2) = v29;
       BYTE1(v29) = HIBYTE(a1);
       LOBYTE(v29) = HIBYTE(a1);
       HIWORD(v29) = __ROR4__(v29, 16) >> 16;
       BYTE1(v29) = HIBYTE(a1);
       LOBYTE(v29) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v29;
+      *(int *)((char *)a5 + 2 * a2) = v29;
       LOBYTE(v29) = a1;
       BYTE1(v29) = a1;
       HIWORD(v7) = __ROR4__(v29, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x17u:
 LABEL_27:
@@ -73632,17 +73615,17 @@ LABEL_27:
       LOBYTE(v30) = a1;
       HIWORD(v30) = __ROR4__(v30, 16) >> 16;
       LOWORD(v30) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v30;
+      *(int *)((char *)a5 + a2) = v30;
       BYTE1(v30) = a1;
       LOBYTE(v30) = a1;
       HIWORD(v30) = __ROR4__(v30, 16) >> 16;
       LOWORD(v30) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v30;
+      *(int *)((char *)a5 + 2 * a2) = v30;
       BYTE1(v30) = a1;
       LOBYTE(v30) = a1;
       HIWORD(v7) = __ROR4__(v30, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x18u:
 LABEL_28:
@@ -73657,19 +73640,19 @@ LABEL_28:
       HIWORD(v31) = __ROR4__(v31, 16) >> 16;
       BYTE1(v31) = a1;
       LOBYTE(v31) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v31;
+      *(int *)((char *)a5 + a2) = v31;
       LOBYTE(v31) = HIBYTE(a1);
       BYTE1(v31) = a1;
       HIWORD(v31) = __ROR4__(v31, 16) >> 16;
       BYTE1(v31) = a1;
       LOBYTE(v31) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v31;
+      *(int *)((char *)a5 + 2 * a2) = v31;
       LOBYTE(v31) = HIBYTE(a1);
       BYTE1(v31) = a1;
       HIWORD(v7) = __ROR4__(v31, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x19u:
 LABEL_29:
@@ -73684,16 +73667,16 @@ LABEL_29:
       HIWORD(v32) = __ROR4__(v32, 16) >> 16;
       LOBYTE(v32) = a1;
       BYTE1(v32) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v32;
+      *(int *)((char *)a5 + a2) = v32;
       LOBYTE(v32) = HIBYTE(a1);
       BYTE1(v32) = a1;
       HIWORD(v32) = __ROR4__(v32, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v7;
       LOBYTE(v7) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v7, 16) >> 16;
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x1Au:
 LABEL_30:
@@ -73707,18 +73690,18 @@ LABEL_30:
       HIWORD(v33) = __ROR4__(v33, 16) >> 16;
       BYTE1(v33) = a1;
       LOBYTE(v33) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v33;
+      *(int *)((char *)a5 + a2) = v33;
       BYTE1(v33) = HIBYTE(a1);
       LOBYTE(v33) = HIBYTE(a1);
       HIWORD(v33) = __ROR4__(v33, 16) >> 16;
       BYTE1(v33) = a1;
       LOBYTE(v33) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v33;
+      *(int *)((char *)a5 + 2 * a2) = v33;
       LOWORD(v33) = a1;
       HIWORD(v7) = __ROR4__(v33, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x1Bu:
 LABEL_31:
@@ -73732,19 +73715,19 @@ LABEL_31:
       BYTE1(v34) = a1;
       HIWORD(v34) = __ROR4__(v34, 16) >> 16;
       LOWORD(v34) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v34;
+      *(int *)((char *)a5 + a2) = v34;
       LOBYTE(v34) = a1;
       BYTE1(v34) = a1;
       HIWORD(v34) = __ROR4__(v34, 16) >> 16;
       LOBYTE(v34) = a1;
       BYTE1(v34) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v34;
+      *(int *)((char *)a5 + 2 * a2) = v34;
       LOBYTE(v34) = a1;
       BYTE1(v34) = a1;
       HIWORD(v7) = __ROR4__(v34, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x1Cu:
 LABEL_32:
@@ -73759,19 +73742,19 @@ LABEL_32:
       HIWORD(v35) = __ROR4__(v35, 16) >> 16;
       BYTE1(v35) = HIBYTE(a1);
       LOBYTE(v35) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v35;
+      *(int *)((char *)a5 + a2) = v35;
       BYTE1(v35) = a1;
       LOBYTE(v35) = a1;
       HIWORD(v35) = __ROR4__(v35, 16) >> 16;
       BYTE1(v35) = HIBYTE(a1);
       LOBYTE(v35) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v35;
+      *(int *)((char *)a5 + 2 * a2) = v35;
       BYTE1(v35) = a1;
       LOBYTE(v35) = a1;
       HIWORD(v7) = __ROR4__(v35, 16) >> 16;
       LOBYTE(v7) = HIBYTE(a1);
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x1Du:
 LABEL_33:
@@ -73785,19 +73768,19 @@ LABEL_33:
       HIWORD(v36) = __ROR4__(v36, 16) >> 16;
       BYTE1(v36) = a1;
       LOBYTE(v36) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v36;
+      *(int *)((char *)a5 + a2) = v36;
       BYTE1(v36) = a1;
       LOBYTE(v36) = a1;
       HIWORD(v36) = __ROR4__(v36, 16) >> 16;
       LOBYTE(v36) = HIBYTE(a1);
       BYTE1(v36) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v36;
+      *(int *)((char *)a5 + 2 * a2) = v36;
       BYTE1(v36) = a1;
       LOBYTE(v36) = a1;
       HIWORD(v7) = __ROR4__(v36, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x1Eu:
 LABEL_34:
@@ -73812,18 +73795,18 @@ LABEL_34:
       HIWORD(v37) = __ROR4__(v37, 16) >> 16;
       LOBYTE(v37) = HIBYTE(a1);
       BYTE1(v37) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v37;
+      *(int *)((char *)a5 + a2) = v37;
       LOWORD(v37) = a1;
       HIWORD(v37) = __ROR4__(v37, 16) >> 16;
       BYTE1(v37) = a1;
       LOBYTE(v37) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v37;
+      *(int *)((char *)a5 + 2 * a2) = v37;
       BYTE1(v37) = HIBYTE(a1);
       LOBYTE(v37) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v37, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x1Fu:
 LABEL_35:
@@ -73838,19 +73821,19 @@ LABEL_35:
       HIWORD(v38) = __ROR4__(v38, 16) >> 16;
       BYTE1(v38) = a1;
       LOBYTE(v38) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v38;
+      *(int *)((char *)a5 + a2) = v38;
       BYTE1(v38) = a1;
       LOBYTE(v38) = a1;
       HIWORD(v38) = __ROR4__(v38, 16) >> 16;
       BYTE1(v38) = HIBYTE(a1);
       LOBYTE(v38) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v38;
+      *(int *)((char *)a5 + 2 * a2) = v38;
       BYTE1(v38) = a1;
       LOBYTE(v38) = a1;
       HIWORD(v7) = __ROR4__(v38, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x20u:
 LABEL_36:
@@ -73865,17 +73848,17 @@ LABEL_36:
       HIWORD(v39) = __ROR4__(v39, 16) >> 16;
       LOBYTE(v39) = a1;
       BYTE1(v39) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v39;
+      *(int *)((char *)a5 + a2) = v39;
       LOBYTE(v39) = HIBYTE(a1);
       BYTE1(v39) = a1;
       HIWORD(v39) = __ROR4__(v39, 16) >> 16;
       LOWORD(v39) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v39;
+      *(int *)((char *)a5 + 2 * a2) = v39;
       LOBYTE(v39) = HIBYTE(a1);
       BYTE1(v39) = a1;
       HIWORD(v7) = __ROR4__(v39, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x21u:
 LABEL_37:
@@ -73890,19 +73873,19 @@ LABEL_37:
       HIWORD(v40) = __ROR4__(v40, 16) >> 16;
       BYTE1(v40) = a1;
       LOBYTE(v40) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v40;
+      *(int *)((char *)a5 + a2) = v40;
       BYTE1(v40) = HIBYTE(a1);
       LOBYTE(v40) = HIBYTE(a1);
       HIWORD(v40) = __ROR4__(v40, 16) >> 16;
       BYTE1(v40) = a1;
       LOBYTE(v40) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v40;
+      *(int *)((char *)a5 + 2 * a2) = v40;
       LOBYTE(v40) = a1;
       BYTE1(v40) = a1;
       HIWORD(v7) = __ROR4__(v40, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x22u:
 LABEL_38:
@@ -73915,19 +73898,19 @@ LABEL_38:
       BYTE1(v41) = a1;
       HIWORD(v41) = __ROR4__(v41, 16) >> 16;
       LOWORD(v41) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v41;
+      *(int *)((char *)a5 + a2) = v41;
       LOBYTE(v41) = a1;
       BYTE1(v41) = a1;
       HIWORD(v41) = __ROR4__(v41, 16) >> 16;
       LOBYTE(v41) = a1;
       BYTE1(v41) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v41;
+      *(int *)((char *)a5 + 2 * a2) = v41;
       LOBYTE(v41) = a1;
       BYTE1(v41) = a1;
       HIWORD(v7) = __ROR4__(v41, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x23u:
 LABEL_39:
@@ -73942,19 +73925,19 @@ LABEL_39:
       HIWORD(v42) = __ROR4__(v42, 16) >> 16;
       BYTE1(v42) = HIBYTE(a1);
       LOBYTE(v42) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v42;
+      *(int *)((char *)a5 + a2) = v42;
       BYTE1(v42) = a1;
       LOBYTE(v42) = a1;
       HIWORD(v42) = __ROR4__(v42, 16) >> 16;
       BYTE1(v42) = HIBYTE(a1);
       LOBYTE(v42) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v42;
+      *(int *)((char *)a5 + 2 * a2) = v42;
       LOBYTE(v42) = a1;
       BYTE1(v42) = a1;
       HIWORD(v7) = __ROR4__(v42, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x24u:
 LABEL_40:
@@ -73969,18 +73952,18 @@ LABEL_40:
       HIWORD(v43) = __ROR4__(v43, 16) >> 16;
       LOBYTE(v43) = a1;
       BYTE1(v43) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v43;
+      *(int *)((char *)a5 + a2) = v43;
       LOWORD(v43) = a1;
       HIWORD(v43) = __ROR4__(v43, 16) >> 16;
       LOBYTE(v43) = HIBYTE(a1);
       BYTE1(v43) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v43;
+      *(int *)((char *)a5 + 2 * a2) = v43;
       BYTE1(v43) = HIBYTE(a1);
       LOBYTE(v43) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v43, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x25u:
 LABEL_41:
@@ -73994,18 +73977,18 @@ LABEL_41:
       HIWORD(v44) = __ROR4__(v44, 16) >> 16;
       BYTE1(v44) = a1;
       LOBYTE(v44) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v44;
+      *(int *)((char *)a5 + a2) = v44;
       LOWORD(v44) = a1;
       HIWORD(v44) = __ROR4__(v44, 16) >> 16;
       BYTE1(v44) = a1;
       LOBYTE(v44) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v44;
+      *(int *)((char *)a5 + 2 * a2) = v44;
       BYTE1(v44) = HIBYTE(a1);
       LOBYTE(v44) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v44, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x26u:
 LABEL_42:
@@ -74019,19 +74002,19 @@ LABEL_42:
       HIWORD(v45) = __ROR4__(v45, 16) >> 16;
       LOBYTE(v45) = HIBYTE(a1);
       BYTE1(v45) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v45;
+      *(int *)((char *)a5 + a2) = v45;
       LOBYTE(v45) = a1;
       BYTE1(v45) = a1;
       HIWORD(v45) = __ROR4__(v45, 16) >> 16;
       LOBYTE(v45) = a1;
       BYTE1(v45) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v45;
+      *(int *)((char *)a5 + 2 * a2) = v45;
       LOBYTE(v45) = a1;
       BYTE1(v45) = a1;
       HIWORD(v7) = __ROR4__(v45, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x27u:
 LABEL_43:
@@ -74046,19 +74029,19 @@ LABEL_43:
       HIWORD(v46) = __ROR4__(v46, 16) >> 16;
       LOBYTE(v46) = HIBYTE(a1);
       BYTE1(v46) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v46;
+      *(int *)((char *)a5 + a2) = v46;
       BYTE1(v46) = a1;
       LOBYTE(v46) = a1;
       HIWORD(v46) = __ROR4__(v46, 16) >> 16;
       LOBYTE(v46) = HIBYTE(a1);
       BYTE1(v46) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v46;
+      *(int *)((char *)a5 + 2 * a2) = v46;
       BYTE1(v46) = a1;
       LOBYTE(v46) = a1;
       HIWORD(v7) = __ROR4__(v46, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x28u:
 LABEL_44:
@@ -74073,18 +74056,18 @@ LABEL_44:
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOBYTE(v47) = a1;
       BYTE1(v47) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v47;
+      *(int *)((char *)a5 + a2) = v47;
       LOBYTE(v47) = a1;
       BYTE1(v47) = a1;
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOBYTE(v47) = a1;
       BYTE1(v47) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v47;
+      *(int *)((char *)a5 + 2 * a2) = v47;
       LOBYTE(v47) = HIBYTE(a1);
       BYTE1(v47) = a1;
       HIWORD(v7) = __ROR4__(v47, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x29u:
 LABEL_45:
@@ -74098,18 +74081,18 @@ LABEL_45:
       HIWORD(v48) = __ROR4__(v48, 16) >> 16;
       BYTE1(v48) = a1;
       LOBYTE(v48) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v48;
+      *(int *)((char *)a5 + a2) = v48;
       LOWORD(v48) = a1;
       HIWORD(v48) = __ROR4__(v48, 16) >> 16;
       BYTE1(v48) = a1;
       LOBYTE(v48) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v48;
+      *(int *)((char *)a5 + 2 * a2) = v48;
       LOBYTE(v48) = a1;
       BYTE1(v48) = a1;
       HIWORD(v7) = __ROR4__(v48, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x2Au:
 LABEL_46:
@@ -74123,19 +74106,19 @@ LABEL_46:
       HIWORD(v49) = __ROR4__(v49, 16) >> 16;
       LOBYTE(v49) = a1;
       BYTE1(v49) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v49;
+      *(int *)((char *)a5 + a2) = v49;
       LOBYTE(v49) = a1;
       BYTE1(v49) = a1;
       HIWORD(v49) = __ROR4__(v49, 16) >> 16;
       LOBYTE(v49) = a1;
       BYTE1(v49) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v49;
+      *(int *)((char *)a5 + 2 * a2) = v49;
       LOBYTE(v49) = a1;
       BYTE1(v49) = a1;
       HIWORD(v7) = __ROR4__(v49, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x2Bu:
 LABEL_47:
@@ -74150,19 +74133,19 @@ LABEL_47:
       HIWORD(v50) = __ROR4__(v50, 16) >> 16;
       LOBYTE(v50) = HIBYTE(a1);
       BYTE1(v50) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v50;
+      *(int *)((char *)a5 + a2) = v50;
       BYTE1(v50) = a1;
       LOBYTE(v50) = a1;
       HIWORD(v50) = __ROR4__(v50, 16) >> 16;
       LOBYTE(v50) = HIBYTE(a1);
       BYTE1(v50) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v50;
+      *(int *)((char *)a5 + 2 * a2) = v50;
       LOBYTE(v50) = a1;
       BYTE1(v50) = a1;
       HIWORD(v7) = __ROR4__(v50, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x2Cu:
 LABEL_48:
@@ -74175,19 +74158,19 @@ LABEL_48:
       HIWORD(v51) = __ROR4__(v51, 16) >> 16;
       BYTE1(v51) = a1;
       LOBYTE(v51) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v51;
+      *(int *)((char *)a5 + a2) = v51;
       BYTE1(v51) = HIBYTE(a1);
       LOBYTE(v51) = HIBYTE(a1);
       HIWORD(v51) = __ROR4__(v51, 16) >> 16;
       BYTE1(v51) = a1;
       LOBYTE(v51) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v51;
+      *(int *)((char *)a5 + 2 * a2) = v51;
       BYTE1(v51) = HIBYTE(a1);
       LOBYTE(v51) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v51, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x2Du:
 LABEL_49:
@@ -74202,19 +74185,19 @@ LABEL_49:
       HIWORD(v52) = __ROR4__(v52, 16) >> 16;
       LOBYTE(v52) = a1;
       BYTE1(v52) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v52;
+      *(int *)((char *)a5 + a2) = v52;
       BYTE1(v52) = HIBYTE(a1);
       LOBYTE(v52) = HIBYTE(a1);
       HIWORD(v52) = __ROR4__(v52, 16) >> 16;
       BYTE1(v52) = a1;
       LOBYTE(v52) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v52;
+      *(int *)((char *)a5 + 2 * a2) = v52;
       BYTE1(v52) = HIBYTE(a1);
       LOBYTE(v52) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v52, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x2Eu:
 LABEL_50:
@@ -74229,19 +74212,19 @@ LABEL_50:
       HIWORD(v53) = __ROR4__(v53, 16) >> 16;
       BYTE1(v53) = a1;
       LOBYTE(v53) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v53;
+      *(int *)((char *)a5 + a2) = v53;
       LOBYTE(v53) = a1;
       BYTE1(v53) = a1;
       HIWORD(v53) = __ROR4__(v53, 16) >> 16;
       LOBYTE(v53) = a1;
       BYTE1(v53) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v53;
+      *(int *)((char *)a5 + 2 * a2) = v53;
       LOBYTE(v53) = a1;
       BYTE1(v53) = a1;
       HIWORD(v7) = __ROR4__(v53, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x2Fu:
 LABEL_51:
@@ -74256,17 +74239,17 @@ LABEL_51:
       HIWORD(v54) = __ROR4__(v54, 16) >> 16;
       BYTE1(v54) = a1;
       LOBYTE(v54) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v54;
+      *(int *)((char *)a5 + a2) = v54;
       LOWORD(v54) = a1;
       HIWORD(v54) = __ROR4__(v54, 16) >> 16;
       BYTE1(v54) = a1;
       LOBYTE(v54) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v54;
+      *(int *)((char *)a5 + 2 * a2) = v54;
       LOWORD(v54) = a1;
       HIWORD(v7) = __ROR4__(v54, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x30u:
 LABEL_52:
@@ -74281,19 +74264,19 @@ LABEL_52:
       HIWORD(v55) = __ROR4__(v55, 16) >> 16;
       BYTE1(v55) = HIBYTE(a1);
       LOBYTE(v55) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v55;
+      *(int *)((char *)a5 + a2) = v55;
       LOBYTE(v55) = a1;
       BYTE1(v55) = a1;
       HIWORD(v55) = __ROR4__(v55, 16) >> 16;
       LOBYTE(v55) = a1;
       BYTE1(v55) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v55;
+      *(int *)((char *)a5 + 2 * a2) = v55;
       LOBYTE(v55) = a1;
       BYTE1(v55) = a1;
       HIWORD(v7) = __ROR4__(v55, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x31u:
 LABEL_53:
@@ -74308,19 +74291,19 @@ LABEL_53:
       HIWORD(v56) = __ROR4__(v56, 16) >> 16;
       BYTE1(v56) = HIBYTE(a1);
       LOBYTE(v56) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v56;
+      *(int *)((char *)a5 + a2) = v56;
       BYTE1(v56) = a1;
       LOBYTE(v56) = a1;
       HIWORD(v56) = __ROR4__(v56, 16) >> 16;
       LOBYTE(v56) = HIBYTE(a1);
       BYTE1(v56) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v56;
+      *(int *)((char *)a5 + 2 * a2) = v56;
       BYTE1(v56) = a1;
       LOBYTE(v56) = a1;
       HIWORD(v7) = __ROR4__(v56, 16) >> 16;
       LOBYTE(v7) = HIBYTE(a1);
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x32u:
 LABEL_54:
@@ -74335,19 +74318,19 @@ LABEL_54:
       HIWORD(v57) = __ROR4__(v57, 16) >> 16;
       LOBYTE(v57) = HIBYTE(a1);
       BYTE1(v57) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v57;
+      *(int *)((char *)a5 + a2) = v57;
       BYTE1(v57) = a1;
       LOBYTE(v57) = a1;
       HIWORD(v57) = __ROR4__(v57, 16) >> 16;
       BYTE1(v57) = HIBYTE(a1);
       LOBYTE(v57) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v57;
+      *(int *)((char *)a5 + 2 * a2) = v57;
       BYTE1(v57) = a1;
       LOBYTE(v57) = a1;
       HIWORD(v7) = __ROR4__(v57, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x33u:
 LABEL_55:
@@ -74362,19 +74345,19 @@ LABEL_55:
       HIWORD(v58) = __ROR4__(v58, 16) >> 16;
       LOBYTE(v58) = a1;
       BYTE1(v58) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v58;
+      *(int *)((char *)a5 + a2) = v58;
       BYTE1(v58) = a1;
       LOBYTE(v58) = a1;
       HIWORD(v58) = __ROR4__(v58, 16) >> 16;
       BYTE1(v58) = HIBYTE(a1);
       LOBYTE(v58) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v58;
+      *(int *)((char *)a5 + 2 * a2) = v58;
       BYTE1(v58) = HIBYTE(a1);
       LOBYTE(v58) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v58, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x34u:
 LABEL_56:
@@ -74386,16 +74369,16 @@ LABEL_56:
       LOBYTE(v59) = HIBYTE(a1);
       HIWORD(v59) = __ROR4__(v59, 16) >> 16;
       LOBYTE(v59) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v59;
+      *(int *)((char *)a5 + a2) = v59;
       LOBYTE(v59) = HIBYTE(a1);
       HIWORD(v59) = __ROR4__(v59, 16) >> 16;
       LOBYTE(v59) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v59;
+      *(int *)((char *)a5 + 2 * a2) = v59;
       LOBYTE(v59) = HIBYTE(a1);
       BYTE1(v59) = a1;
       HIWORD(v7) = __ROR4__(v59, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x35u:
 LABEL_57:
@@ -74410,18 +74393,18 @@ LABEL_57:
       HIWORD(v60) = __ROR4__(v60, 16) >> 16;
       LOBYTE(v60) = a1;
       BYTE1(v60) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v60;
+      *(int *)((char *)a5 + a2) = v60;
       LOBYTE(v60) = HIBYTE(a1);
       BYTE1(v60) = a1;
       HIWORD(v60) = __ROR4__(v60, 16) >> 16;
       LOWORD(v60) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v60;
+      *(int *)((char *)a5 + 2 * a2) = v60;
       LOBYTE(v60) = a1;
       BYTE1(v60) = a1;
       HIWORD(v7) = __ROR4__(v60, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x36u:
 LABEL_58:
@@ -74434,18 +74417,18 @@ LABEL_58:
       HIWORD(v61) = __ROR4__(v61, 16) >> 16;
       BYTE1(v61) = a1;
       LOBYTE(v61) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v61;
+      *(int *)((char *)a5 + a2) = v61;
       LOWORD(v61) = a1;
       HIWORD(v61) = __ROR4__(v61, 16) >> 16;
       BYTE1(v61) = a1;
       LOBYTE(v61) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v61;
+      *(int *)((char *)a5 + 2 * a2) = v61;
       LOBYTE(v61) = a1;
       BYTE1(v61) = a1;
       HIWORD(v7) = __ROR4__(v61, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x37u:
 LABEL_59:
@@ -74459,17 +74442,17 @@ LABEL_59:
       BYTE1(v62) = a1;
       HIWORD(v62) = __ROR4__(v62, 16) >> 16;
       LOWORD(v62) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v62;
+      *(int *)((char *)a5 + a2) = v62;
       LOBYTE(v62) = HIBYTE(a1);
       HIWORD(v62) = __ROR4__(v62, 16) >> 16;
       BYTE1(v62) = a1;
       LOBYTE(v62) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v62;
+      *(int *)((char *)a5 + 2 * a2) = v62;
       LOWORD(v62) = a1;
       HIWORD(v7) = __ROR4__(v62, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x38u:
 LABEL_60:
@@ -74484,17 +74467,17 @@ LABEL_60:
       HIWORD(v63) = __ROR4__(v63, 16) >> 16;
       BYTE1(v63) = HIBYTE(a1);
       LOBYTE(v63) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v63;
+      *(int *)((char *)a5 + a2) = v63;
       LOBYTE(v63) = HIBYTE(a1);
       BYTE1(v63) = a1;
       HIWORD(v63) = __ROR4__(v63, 16) >> 16;
       LOWORD(v63) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v63;
+      *(int *)((char *)a5 + 2 * a2) = v63;
       LOBYTE(v63) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v63, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x39u:
 LABEL_61:
@@ -74509,18 +74492,18 @@ LABEL_61:
       HIWORD(v64) = __ROR4__(v64, 16) >> 16;
       LOBYTE(v64) = HIBYTE(a1);
       BYTE1(v64) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v64;
+      *(int *)((char *)a5 + a2) = v64;
       BYTE1(v64) = a1;
       LOBYTE(v64) = a1;
       HIWORD(v64) = __ROR4__(v64, 16) >> 16;
       BYTE1(v64) = HIBYTE(a1);
       LOBYTE(v64) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v64;
+      *(int *)((char *)a5 + 2 * a2) = v64;
       LOBYTE(v64) = HIBYTE(a1);
       BYTE1(v64) = a1;
       HIWORD(v7) = __ROR4__(v64, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x3Au:
 LABEL_62:
@@ -74534,19 +74517,19 @@ LABEL_62:
       BYTE1(v65) = a1;
       HIWORD(v65) = __ROR4__(v65, 16) >> 16;
       LOWORD(v65) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v65;
+      *(int *)((char *)a5 + a2) = v65;
       LOBYTE(v65) = a1;
       BYTE1(v65) = a1;
       HIWORD(v65) = __ROR4__(v65, 16) >> 16;
       LOBYTE(v65) = a1;
       BYTE1(v65) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v65;
+      *(int *)((char *)a5 + 2 * a2) = v65;
       BYTE1(v65) = HIBYTE(a1);
       LOBYTE(v65) = HIBYTE(a1);
       HIWORD(v7) = __ROR4__(v65, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x3Bu:
 LABEL_63:
@@ -74560,19 +74543,19 @@ LABEL_63:
       HIWORD(v66) = __ROR4__(v66, 16) >> 16;
       BYTE1(v66) = HIBYTE(a1);
       LOBYTE(v66) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + a2) = v66;
+      *(int *)((char *)a5 + a2) = v66;
       BYTE1(v66) = a1;
       LOBYTE(v66) = a1;
       HIWORD(v66) = __ROR4__(v66, 16) >> 16;
       LOBYTE(v66) = HIBYTE(a1);
       BYTE1(v66) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v66;
+      *(int *)((char *)a5 + 2 * a2) = v66;
       LOBYTE(v66) = a1;
       BYTE1(v66) = a1;
       HIWORD(v7) = __ROR4__(v66, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x3Cu:
 LABEL_64:
@@ -74586,19 +74569,19 @@ LABEL_64:
       BYTE1(v67) = a1;
       HIWORD(v67) = __ROR4__(v67, 16) >> 16;
       LOWORD(v67) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v67;
+      *(int *)((char *)a5 + a2) = v67;
       BYTE1(v67) = a1;
       LOBYTE(v67) = a1;
       HIWORD(v67) = __ROR4__(v67, 16) >> 16;
       BYTE1(v67) = HIBYTE(a1);
       LOBYTE(v67) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v67;
+      *(int *)((char *)a5 + 2 * a2) = v67;
       BYTE1(v67) = a1;
       LOBYTE(v67) = a1;
       HIWORD(v7) = __ROR4__(v67, 16) >> 16;
       LOBYTE(v7) = HIBYTE(a1);
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x3Du:
 LABEL_65:
@@ -74612,18 +74595,18 @@ LABEL_65:
       HIWORD(v68) = __ROR4__(v68, 16) >> 16;
       BYTE1(v68) = a1;
       LOBYTE(v68) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v68;
+      *(int *)((char *)a5 + a2) = v68;
       LOBYTE(v68) = HIBYTE(a1);
       BYTE1(v68) = a1;
       HIWORD(v68) = __ROR4__(v68, 16) >> 16;
       LOWORD(v68) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v68;
+      *(int *)((char *)a5 + 2 * a2) = v68;
       BYTE1(v68) = a1;
       LOBYTE(v68) = a1;
       HIWORD(v7) = __ROR4__(v68, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x3Eu:
 LABEL_66:
@@ -74637,18 +74620,18 @@ LABEL_66:
       HIWORD(v69) = __ROR4__(v69, 16) >> 16;
       BYTE1(v69) = a1;
       LOBYTE(v69) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v69;
+      *(int *)((char *)a5 + a2) = v69;
       BYTE1(v69) = HIBYTE(a1);
       LOBYTE(v69) = HIBYTE(a1);
       HIWORD(v69) = __ROR4__(v69, 16) >> 16;
       BYTE1(v69) = a1;
       LOBYTE(v69) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v69;
+      *(int *)((char *)a5 + 2 * a2) = v69;
       LOBYTE(v69) = HIBYTE(a1);
       BYTE1(v69) = a1;
       HIWORD(v7) = __ROR4__(v69, 16) >> 16;
       LOWORD(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x3Fu:
 LABEL_67:
@@ -74663,18 +74646,18 @@ LABEL_67:
       HIWORD(v70) = __ROR4__(v70, 16) >> 16;
       BYTE1(v70) = a1;
       LOBYTE(v70) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v70;
+      *(int *)((char *)a5 + a2) = v70;
       BYTE1(v70) = a1;
       LOBYTE(v70) = a1;
       HIWORD(v70) = __ROR4__(v70, 16) >> 16;
       LOWORD(v70) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v70;
+      *(int *)((char *)a5 + 2 * a2) = v70;
       BYTE1(v70) = a1;
       LOBYTE(v70) = a1;
       HIWORD(v7) = __ROR4__(v70, 16) >> 16;
       BYTE1(v7) = HIBYTE(a1);
       LOBYTE(v7) = HIBYTE(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x40u:
 LABEL_132:
@@ -74685,33 +74668,33 @@ LABEL_132:
       HIWORD(v148) = __ROR4__(v148, 16) >> 16;
       BYTE1(v148) = a1;
       LOBYTE(v148) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v148;
+      *(int *)((char *)a5 + a2) = v148;
       BYTE1(v148) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v148) = a1;
       HIWORD(v148) = __ROR4__(v148, 16) >> 16;
       BYTE1(v148) = a1;
       LOBYTE(v148) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v148;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v148;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x41u:
 LABEL_133:
       *a5 = *a4;
-      v149 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v149;
+      v149 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v149;
       LOBYTE(v149) = a1;
       BYTE1(v149) = a1;
       HIWORD(v149) = __ROR4__(v149, 16) >> 16;
       LOBYTE(v149) = a1;
       BYTE1(v149) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v149;
+      *(int *)((char *)a5 + 2 * a2) = v149;
       LOBYTE(v149) = a1;
       BYTE1(v149) = a1;
       HIWORD(v7) = __ROR4__(v149, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x42u:
 LABEL_134:
@@ -74724,46 +74707,46 @@ LABEL_134:
       LOBYTE(v150) = a1;
       HIWORD(v150) = __ROR4__(v150, 16) >> 16;
       LOWORD(v150) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v150;
+      *(int *)((char *)a5 + a2) = v150;
       BYTE1(v150) = a1;
       LOBYTE(v150) = a1;
       HIWORD(v150) = __ROR4__(v150, 16) >> 16;
       LOWORD(v150) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v150;
+      *(int *)((char *)a5 + 2 * a2) = v150;
       BYTE1(v150) = a1;
       LOBYTE(v150) = a1;
       HIWORD(v7) = __ROR4__(v150, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x43u:
 LABEL_135:
       *a5 = *a4;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      v151 = *(_DWORD *)((char *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v151;
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      v151 = *(int *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + 2 * a2) = v151;
       LOBYTE(v151) = a1;
       BYTE1(v151) = a1;
       HIWORD(v7) = __ROR4__(v151, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x44u:
 LABEL_136:
       v152 = __ROR4__(*a4, 16);
       BYTE1(v152) = a1;
       *a5 = __ROR4__(v152, 16);
-      v153 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v153 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v153) = a1;
-      *(_DWORD *)((char *)a5 + a2) = __ROR4__(v153, 16);
-      v154 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = __ROR4__(v153, 16);
+      v154 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v154) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROR4__(v154, 16);
-      v155 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2 + a2), 16);
+      *(int *)((char *)a5 + 2 * a2) = __ROR4__(v154, 16);
+      v155 = __ROR4__(*(int *)((char *)a4 + 2 * a2 + a2), 16);
       BYTE1(v155) = a1;
       v7 = __ROR4__(v155, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x45u:
 LABEL_137:
@@ -74773,25 +74756,25 @@ LABEL_137:
       LOBYTE(v156) = a1;
       BYTE1(v156) = a1;
       *a5 = v156;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x46u:
 LABEL_138:
       v157 = *a4;
       LOBYTE(v157) = a1;
       *a5 = v157;
-      v158 = *(_DWORD *)((char *)a4 + a2);
+      v158 = *(int *)((char *)a4 + a2);
       LOBYTE(v158) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v158;
-      v159 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = v158;
+      v159 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v159) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v159;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2) = v159;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x47u:
 LABEL_139:
@@ -74803,19 +74786,19 @@ LABEL_139:
       LOBYTE(v161) = a1;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       LOWORD(v161) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v161;
+      *(int *)((char *)a5 + a2) = v161;
       BYTE1(v161) = a1;
       LOBYTE(v161) = a1;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       BYTE1(v161) = a1;
       LOBYTE(v161) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v161;
+      *(int *)((char *)a5 + 2 * a2) = v161;
       LOBYTE(v161) = a1;
       BYTE1(v161) = a1;
       HIWORD(v7) = __ROR4__(v161, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x48u:
 LABEL_140:
@@ -74830,16 +74813,16 @@ LABEL_140:
       HIWORD(v162) = __ROR4__(v162, 16) >> 16;
       BYTE1(v162) = a1;
       LOBYTE(v162) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v162;
+      *(int *)((char *)a5 + a2) = v162;
       BYTE1(v162) = a1;
       LOBYTE(v162) = a1;
       HIWORD(v162) = __ROR4__(v162, 16) >> 16;
       LOWORD(v162) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v162;
-      v163 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2 + a2), 16);
+      *(int *)((char *)a5 + 2 * a2) = v162;
+      v163 = __ROR4__(*(int *)((char *)a4 + 2 * a2 + a2), 16);
       BYTE1(v163) = a1;
       v7 = __ROR4__(v163, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x49u:
 LABEL_141:
@@ -74854,15 +74837,15 @@ LABEL_141:
       HIWORD(v164) = __ROR4__(v164, 16) >> 16;
       BYTE1(v164) = a1;
       LOBYTE(v164) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v164;
+      *(int *)((char *)a5 + a2) = v164;
       LOWORD(v164) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v164) = __ROR4__(v164, 16) >> 16;
       BYTE1(v164) = a1;
       LOBYTE(v164) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v164;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2) = v164;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x4Au:
 LABEL_142:
@@ -74873,33 +74856,33 @@ LABEL_142:
       HIWORD(v165) = __ROR4__(v165, 16) >> 16;
       BYTE1(v165) = a1;
       LOBYTE(v165) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v165;
+      *(int *)((char *)a5 + a2) = v165;
       BYTE1(v165) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v165) = a1;
       HIWORD(v165) = __ROR4__(v165, 16) >> 16;
       BYTE1(v165) = a1;
       LOBYTE(v165) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v165;
+      *(int *)((char *)a5 + 2 * a2) = v165;
       LOBYTE(v165) = a1;
       BYTE1(v165) = a1;
       HIWORD(v7) = __ROR4__(v165, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x4Bu:
 LABEL_143:
       *a5 = *a4;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      v166 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      v166 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v166) = a1;
       v167 = __ROR4__(v166, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v167;
+      *(int *)((char *)a5 + 2 * a2) = v167;
       BYTE1(v167) = a1;
       LOBYTE(v167) = a1;
       HIWORD(v7) = __ROR4__(v167, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x4Cu:
 LABEL_144:
@@ -74908,12 +74891,12 @@ LABEL_144:
       HIWORD(v168) = __ROR4__(v5, 16) >> 16;
       LOWORD(v168) = *(_WORD *)a4;
       *a5 = v168;
-      v169 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v169 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v169) = a1;
-      *(_DWORD *)((char *)a5 + a2) = __ROR4__(v169, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = __ROR4__(v169, 16);
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x4Du:
 LABEL_145:
@@ -74922,41 +74905,41 @@ LABEL_145:
       BYTE1(v170) = a1;
       LOBYTE(v170) = a1;
       *a5 = v170;
-      v171 = *(_DWORD *)((char *)a4 + a2);
+      v171 = *(int *)((char *)a4 + a2);
       LOBYTE(v171) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v171;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v171;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x4Eu:
 LABEL_146:
       *a5 = *a4;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      v172 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      v172 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v172) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v172;
+      *(int *)((char *)a5 + 2 * a2) = v172;
       LOWORD(v172) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v172, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x4Fu:
 LABEL_147:
       *a5 = *a4;
-      v173 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v173;
+      v173 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v173;
       BYTE1(v173) = a1;
       LOBYTE(v173) = a1;
       HIWORD(v173) = __ROR4__(v173, 16) >> 16;
       LOWORD(v173) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v173;
+      *(int *)((char *)a5 + 2 * a2) = v173;
       BYTE1(v173) = a1;
       LOBYTE(v173) = a1;
       HIWORD(v7) = __ROR4__(v173, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x50u:
 LABEL_148:
@@ -74969,10 +74952,10 @@ LABEL_148:
       LOBYTE(v174) = a1;
       HIWORD(v174) = __ROR4__(v174, 16) >> 16;
       LOWORD(v174) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v174;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v174;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x51u:
 LABEL_149:
@@ -74985,26 +74968,26 @@ LABEL_149:
       HIWORD(v175) = __ROR4__(v175, 16) >> 16;
       BYTE1(v175) = a1;
       LOBYTE(v175) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v175;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v175;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x52u:
 LABEL_150:
       *a5 = *a4;
-      v176 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v176;
+      v176 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v176;
       LOWORD(v176) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v176) = __ROR4__(v176, 16) >> 16;
       BYTE1(v176) = a1;
       LOBYTE(v176) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v176;
+      *(int *)((char *)a5 + 2 * a2) = v176;
       LOWORD(v176) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v176, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x53u:
 LABEL_151:
@@ -75015,15 +74998,15 @@ LABEL_151:
       HIWORD(v177) = __ROR4__(v177, 16) >> 16;
       LOBYTE(v177) = a1;
       BYTE1(v177) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v177;
+      *(int *)((char *)a5 + a2) = v177;
       LOBYTE(v177) = a1;
       BYTE1(v177) = a1;
       HIWORD(v177) = __ROR4__(v177, 16) >> 16;
       LOBYTE(v177) = a1;
       BYTE1(v177) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v177;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v177;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x54u:
 LABEL_152:
@@ -75038,20 +75021,20 @@ LABEL_152:
       HIWORD(v178) = __ROR4__(v178, 16) >> 16;
       BYTE1(v178) = a1;
       LOBYTE(v178) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v178;
+      *(int *)((char *)a5 + a2) = v178;
       BYTE1(v178) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v178) = a1;
       HIWORD(v178) = __ROR4__(v178, 16) >> 16;
       BYTE1(v178) = a1;
       LOBYTE(v178) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v178;
+      *(int *)((char *)a5 + 2 * a2) = v178;
       v179 = (char *)a4 + a2;
       BYTE1(v178) = v179[2 * a2 + 3];
       LOBYTE(v178) = a1;
       HIWORD(v7) = __ROR4__(v178, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = v179[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x55u:
 LABEL_153:
@@ -75062,73 +75045,73 @@ LABEL_153:
       HIWORD(v180) = __ROR4__(v180, 16) >> 16;
       LOBYTE(v180) = a1;
       BYTE1(v180) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v180;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v180;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x56u:
 LABEL_154:
       *a5 = *a4;
-      v181 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v181;
+      v181 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v181;
       LOBYTE(v181) = a1;
       BYTE1(v181) = a1;
       HIWORD(v181) = __ROR4__(v181, 16) >> 16;
       LOBYTE(v181) = a1;
       BYTE1(v181) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v181;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v181;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x57u:
 LABEL_155:
       v182 = *a4;
       BYTE1(v182) = a1;
       *a5 = v182;
-      v183 = *(_DWORD *)((char *)a4 + a2);
+      v183 = *(int *)((char *)a4 + a2);
       BYTE1(v183) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v183;
-      v184 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = v183;
+      v184 = *(int *)((char *)a4 + 2 * a2);
       BYTE1(v184) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v184;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2) = v184;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x58u:
 LABEL_156:
       v185 = __ROR4__(*a4, 16);
       LOBYTE(v185) = a1;
       *a5 = __ROR4__(v185, 16);
-      v186 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v186 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       LOBYTE(v186) = a1;
-      *(_DWORD *)((char *)a5 + a2) = __ROR4__(v186, 16);
-      v187 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = __ROR4__(v186, 16);
+      v187 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       LOBYTE(v187) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROR4__(v187, 16);
-      v188 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2 + a2), 16);
+      *(int *)((char *)a5 + 2 * a2) = __ROR4__(v187, 16);
+      v188 = __ROR4__(*(int *)((char *)a4 + 2 * a2 + a2), 16);
       LOBYTE(v188) = a1;
       v7 = __ROR4__(v188, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x59u:
 LABEL_157:
       *a5 = *a4;
-      v189 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v189;
+      v189 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v189;
       BYTE1(v189) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v189) = a1;
       HIWORD(v189) = __ROR4__(v189, 16) >> 16;
       BYTE1(v189) = a1;
       LOBYTE(v189) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v189;
+      *(int *)((char *)a5 + 2 * a2) = v189;
       LOBYTE(v189) = a1;
       BYTE1(v189) = a1;
       HIWORD(v7) = __ROR4__(v189, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x5Au:
 LABEL_158:
@@ -75140,16 +75123,16 @@ LABEL_158:
       LOBYTE(v191) = a1;
       HIWORD(v191) = __ROR4__(v191, 16) >> 16;
       LOWORD(v191) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v191;
+      *(int *)((char *)a5 + a2) = v191;
       BYTE1(v191) = a1;
       LOBYTE(v191) = a1;
       HIWORD(v191) = __ROR4__(v191, 16) >> 16;
       LOWORD(v191) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v191;
-      v192 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2 + a2), 16);
+      *(int *)((char *)a5 + 2 * a2) = v191;
+      v192 = __ROR4__(*(int *)((char *)a4 + 2 * a2 + a2), 16);
       BYTE1(v192) = a1;
       v7 = __ROR4__(v192, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x5Bu:
 LABEL_159:
@@ -75164,10 +75147,10 @@ LABEL_159:
       HIWORD(v193) = __ROR4__(v193, 16) >> 16;
       BYTE1(v193) = a1;
       LOBYTE(v193) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v193;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v193;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x5Cu:
 LABEL_160:
@@ -75178,15 +75161,15 @@ LABEL_160:
       HIWORD(v194) = __ROR4__(v194, 16) >> 16;
       BYTE1(v194) = a1;
       LOBYTE(v194) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v194;
+      *(int *)((char *)a5 + a2) = v194;
       LOWORD(v194) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v194) = __ROR4__(v194, 16) >> 16;
       BYTE1(v194) = a1;
       LOBYTE(v194) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v194;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2) = v194;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x5Du:
 LABEL_161:
@@ -75195,17 +75178,17 @@ LABEL_161:
       HIWORD(v195) = __ROR4__(v5, 16) >> 16;
       LOWORD(v195) = *(_WORD *)a4;
       *a5 = v195;
-      v196 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v196 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v196) = a1;
-      *(_DWORD *)((char *)a5 + a2) = __ROR4__(v196, 16);
-      v197 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = __ROR4__(v196, 16);
+      v197 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v197) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v197;
+      *(int *)((char *)a5 + 2 * a2) = v197;
       LOWORD(v197) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v197, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x5Eu:
 LABEL_162:
@@ -75214,18 +75197,18 @@ LABEL_162:
       BYTE1(v198) = a1;
       LOBYTE(v198) = a1;
       *a5 = v198;
-      v199 = *(_DWORD *)((char *)a4 + a2);
+      v199 = *(int *)((char *)a4 + a2);
       LOBYTE(v199) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v199;
-      v200 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = v199;
+      v200 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v200) = a1;
       v201 = __ROR4__(v200, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v201;
+      *(int *)((char *)a5 + 2 * a2) = v201;
       BYTE1(v201) = a1;
       LOBYTE(v201) = a1;
       HIWORD(v7) = __ROR4__(v201, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x5Fu:
 LABEL_163:
@@ -75238,36 +75221,36 @@ LABEL_163:
       LOBYTE(v202) = a1;
       HIWORD(v202) = __ROR4__(v202, 16) >> 16;
       LOWORD(v202) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v202;
+      *(int *)((char *)a5 + a2) = v202;
       LOWORD(v202) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v202) = __ROR4__(v202, 16) >> 16;
       BYTE1(v202) = a1;
       LOBYTE(v202) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v202;
+      *(int *)((char *)a5 + 2 * a2) = v202;
       LOWORD(v202) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v202, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x60u:
 LABEL_164:
       *a5 = *a4;
-      v203 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v203;
+      v203 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v203;
       BYTE1(v203) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v203) = a1;
       HIWORD(v203) = __ROR4__(v203, 16) >> 16;
       BYTE1(v203) = a1;
       LOBYTE(v203) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v203;
+      *(int *)((char *)a5 + 2 * a2) = v203;
       v204 = (char *)a4 + a2;
       BYTE1(v203) = v204[2 * a2 + 3];
       LOBYTE(v203) = a1;
       HIWORD(v7) = __ROR4__(v203, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = v204[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x61u:
 LABEL_165:
@@ -75277,14 +75260,14 @@ LABEL_165:
       LOBYTE(v205) = a1;
       HIWORD(v205) = __ROR4__(v205, 16) >> 16;
       LOWORD(v205) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v205;
+      *(int *)((char *)a5 + a2) = v205;
       BYTE1(v205) = a1;
       LOBYTE(v205) = a1;
       HIWORD(v205) = __ROR4__(v205, 16) >> 16;
       LOWORD(v205) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v205;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v205;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x62u:
 LABEL_166:
@@ -75299,10 +75282,10 @@ LABEL_166:
       HIWORD(v206) = __ROR4__(v206, 16) >> 16;
       BYTE1(v206) = a1;
       LOBYTE(v206) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v206;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v206;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x63u:
 LABEL_167:
@@ -75312,32 +75295,32 @@ LABEL_167:
       HIWORD(v207) = __ROR4__(v207, 16) >> 16;
       BYTE1(v207) = a1;
       LOBYTE(v207) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v207;
+      *(int *)((char *)a5 + a2) = v207;
       LOWORD(v207) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v207) = __ROR4__(v207, 16) >> 16;
       BYTE1(v207) = a1;
       LOBYTE(v207) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v207;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v207;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x64u:
 LABEL_168:
       *a5 = *a4;
-      v208 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v208;
+      v208 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v208;
       BYTE1(v208) = a1;
       LOBYTE(v208) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v208) = __ROR4__(v208, 16) >> 16;
       BYTE1(v208) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v208) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v208;
+      *(int *)((char *)a5 + 2 * a2) = v208;
       LOBYTE(v208) = a1;
       BYTE1(v208) = a1;
       HIWORD(v7) = __ROR4__(v208, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x65u:
 LABEL_169:
@@ -75346,18 +75329,18 @@ LABEL_169:
       HIWORD(v209) = __ROR4__(v5, 16) >> 16;
       LOWORD(v209) = *(_WORD *)a4;
       *a5 = v209;
-      v210 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v210 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v210) = a1;
-      *(_DWORD *)((char *)a5 + a2) = __ROR4__(v210, 16);
-      v211 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = __ROR4__(v210, 16);
+      v211 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v211) = a1;
       v212 = __ROR4__(v211, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v212;
+      *(int *)((char *)a5 + 2 * a2) = v212;
       BYTE1(v212) = a1;
       LOBYTE(v212) = a1;
       HIWORD(v7) = __ROR4__(v212, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x66u:
 LABEL_170:
@@ -75372,10 +75355,10 @@ LABEL_170:
       HIWORD(v213) = __ROR4__(v213, 16) >> 16;
       BYTE1(v213) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v213) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v213;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v213;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x67u:
 LABEL_171:
@@ -75384,43 +75367,43 @@ LABEL_171:
       BYTE1(v214) = a1;
       LOBYTE(v214) = a1;
       *a5 = v214;
-      v215 = *(_DWORD *)((char *)a4 + a2);
+      v215 = *(int *)((char *)a4 + a2);
       LOBYTE(v215) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v215;
-      v216 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = v215;
+      v216 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v216) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v216;
+      *(int *)((char *)a5 + 2 * a2) = v216;
       LOWORD(v216) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v216, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x68u:
 LABEL_172:
       *a5 = *a4;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      v217 = *(_DWORD *)((char *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v217;
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      v217 = *(int *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + 2 * a2) = v217;
       v218 = (char *)a4 + a2;
       BYTE1(v217) = v218[2 * a2 + 3];
       LOBYTE(v217) = a1;
       HIWORD(v7) = __ROR4__(v217, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = v218[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x69u:
 LABEL_173:
       *a5 = *a4;
-      v219 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v219 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v219) = a1;
-      *(_DWORD *)((char *)a5 + a2) = __ROR4__(v219, 16);
-      v220 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = __ROR4__(v219, 16);
+      v220 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v220) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROR4__(v220, 16);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = __ROR4__(v220, 16);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x6Au:
 LABEL_174:
@@ -75430,59 +75413,59 @@ LABEL_174:
       BYTE1(v221) = a1;
       LOBYTE(v221) = *(_BYTE *)a4;
       *a5 = v221;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x6Bu:
 LABEL_175:
       *a5 = *a4;
-      v222 = *(_DWORD *)((char *)a4 + a2);
+      v222 = *(int *)((char *)a4 + a2);
       LOBYTE(v222) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v222;
-      v223 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = v222;
+      v223 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v223) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v223;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v223;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x6Cu:
 LABEL_176:
       v224 = __ROR4__(*a4, 16);
       BYTE1(v224) = a1;
       *a5 = __ROR4__(v224, 16);
-      v225 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v225 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v225) = a1;
       v226 = __ROR4__(v225, 16);
-      *(_DWORD *)((char *)a5 + a2) = v226;
+      *(int *)((char *)a5 + a2) = v226;
       BYTE1(v226) = a1;
       LOBYTE(v226) = a1;
       HIWORD(v226) = __ROR4__(v226, 16) >> 16;
       LOWORD(v226) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v226;
+      *(int *)((char *)a5 + 2 * a2) = v226;
       BYTE1(v226) = a1;
       LOBYTE(v226) = a1;
       HIWORD(v7) = __ROR4__(v226, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x6Du:
 LABEL_177:
       *a5 = *a4;
-      v227 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v227;
+      v227 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v227;
       BYTE1(v227) = a1;
       LOBYTE(v227) = a1;
       HIWORD(v227) = __ROR4__(v227, 16) >> 16;
       LOWORD(v227) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v227;
+      *(int *)((char *)a5 + 2 * a2) = v227;
       LOBYTE(v227) = a1;
       BYTE1(v227) = a1;
       HIWORD(v7) = __ROR4__(v227, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x6Eu:
 LABEL_178:
@@ -75496,10 +75479,10 @@ LABEL_178:
       LOBYTE(v228) = a1;
       HIWORD(v228) = __ROR4__(v228, 16) >> 16;
       LOWORD(v228) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v228;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v228;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x6Fu:
 LABEL_179:
@@ -75512,14 +75495,14 @@ LABEL_179:
       LOBYTE(v229) = a1;
       HIWORD(v229) = __ROR4__(v229, 16) >> 16;
       LOWORD(v229) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v229;
-      v230 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = v229;
+      v230 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v230) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROR4__(v230, 16);
-      v231 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2 + a2), 16);
+      *(int *)((char *)a5 + 2 * a2) = __ROR4__(v230, 16);
+      v231 = __ROR4__(*(int *)((char *)a4 + 2 * a2 + a2), 16);
       BYTE1(v231) = a1;
       v7 = __ROR4__(v231, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x70u:
 LABEL_180:
@@ -75533,10 +75516,10 @@ LABEL_180:
       HIWORD(v232) = __ROR4__(v232, 16) >> 16;
       BYTE1(v232) = a1;
       LOBYTE(v232) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v232;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v232;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x71u:
 LABEL_181:
@@ -75549,49 +75532,49 @@ LABEL_181:
       HIWORD(v233) = __ROR4__(v233, 16) >> 16;
       BYTE1(v233) = a1;
       LOBYTE(v233) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v233;
-      v234 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = v233;
+      v234 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v234) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v234;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2) = v234;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x72u:
 LABEL_182:
       v235 = *a4;
       LOBYTE(v235) = a1;
       *a5 = v235;
-      v236 = *(_DWORD *)((char *)a4 + a2);
+      v236 = *(int *)((char *)a4 + a2);
       LOBYTE(v236) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v236;
+      *(int *)((char *)a5 + a2) = v236;
       LOWORD(v236) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v236) = __ROR4__(v236, 16) >> 16;
       BYTE1(v236) = a1;
       LOBYTE(v236) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v236;
+      *(int *)((char *)a5 + 2 * a2) = v236;
       LOWORD(v236) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v236, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x73u:
 LABEL_183:
       *a5 = *a4;
-      v237 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v237;
+      v237 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v237;
       LOWORD(v237) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v237) = __ROR4__(v237, 16) >> 16;
       BYTE1(v237) = a1;
       LOBYTE(v237) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v237;
+      *(int *)((char *)a5 + 2 * a2) = v237;
       LOBYTE(v237) = a1;
       BYTE1(v237) = a1;
       HIWORD(v7) = __ROR4__(v237, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x74u:
 LABEL_184:
@@ -75606,20 +75589,20 @@ LABEL_184:
       HIWORD(v238) = __ROR4__(v238, 16) >> 16;
       LOBYTE(v238) = a1;
       BYTE1(v238) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v238;
+      *(int *)((char *)a5 + a2) = v238;
       LOBYTE(v238) = a1;
       BYTE1(v238) = a1;
       HIWORD(v238) = __ROR4__(v238, 16) >> 16;
       LOBYTE(v238) = a1;
       BYTE1(v238) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v238;
+      *(int *)((char *)a5 + 2 * a2) = v238;
       v239 = (char *)a4 + a2;
       BYTE1(v238) = v239[2 * a2 + 3];
       LOBYTE(v238) = a1;
       HIWORD(v7) = __ROR4__(v238, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = v239[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x75u:
 LABEL_185:
@@ -75628,16 +75611,16 @@ LABEL_185:
       BYTE1(v240) = a1;
       LOBYTE(v240) = a1;
       *a5 = v240;
-      v241 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v241;
+      v241 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v241;
       BYTE1(v241) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v241) = a1;
       HIWORD(v241) = __ROR4__(v241, 16) >> 16;
       BYTE1(v241) = a1;
       LOBYTE(v241) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v241;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v241;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x76u:
 LABEL_186:
@@ -75651,12 +75634,12 @@ LABEL_186:
       LOBYTE(v242) = a1;
       HIWORD(v242) = __ROR4__(v242, 16) >> 16;
       LOWORD(v242) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v242;
-      v243 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = v242;
+      v243 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v243) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROR4__(v243, 16);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = __ROR4__(v243, 16);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x77u:
 LABEL_187:
@@ -75670,16 +75653,16 @@ LABEL_187:
       HIWORD(v244) = __ROR4__(v244, 16) >> 16;
       BYTE1(v244) = a1;
       LOBYTE(v244) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v244;
+      *(int *)((char *)a5 + a2) = v244;
       BYTE1(v244) = a1;
       LOBYTE(v244) = a1;
       HIWORD(v244) = __ROR4__(v244, 16) >> 16;
       LOWORD(v244) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v244;
-      v245 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2 + a2), 16);
+      *(int *)((char *)a5 + 2 * a2) = v244;
+      v245 = __ROR4__(*(int *)((char *)a4 + 2 * a2 + a2), 16);
       BYTE1(v245) = a1;
       v7 = __ROR4__(v245, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x78u:
 LABEL_188:
@@ -75690,37 +75673,37 @@ LABEL_188:
       HIWORD(v246) = __ROR4__(v246, 16) >> 16;
       BYTE1(v246) = a1;
       LOBYTE(v246) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v246;
+      *(int *)((char *)a5 + a2) = v246;
       BYTE1(v246) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v246) = a1;
       HIWORD(v246) = __ROR4__(v246, 16) >> 16;
       BYTE1(v246) = a1;
       LOBYTE(v246) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v246;
+      *(int *)((char *)a5 + 2 * a2) = v246;
       BYTE1(v246) = a1;
       LOBYTE(v246) = a1;
       HIWORD(v7) = __ROR4__(v246, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x79u:
 LABEL_189:
       *a5 = *a4;
-      v247 = *(_DWORD *)((char *)a4 + a2);
+      v247 = *(int *)((char *)a4 + a2);
       LOBYTE(v247) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v247;
+      *(int *)((char *)a5 + a2) = v247;
       LOWORD(v247) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v247) = __ROR4__(v247, 16) >> 16;
       BYTE1(v247) = a1;
       LOBYTE(v247) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v247;
+      *(int *)((char *)a5 + 2 * a2) = v247;
       v248 = (char *)a4 + a2;
       BYTE1(v247) = v248[2 * a2 + 3];
       LOBYTE(v247) = a1;
       HIWORD(v7) = __ROR4__(v247, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = v248[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x7Au:
 LABEL_190:
@@ -75731,14 +75714,14 @@ LABEL_190:
       HIWORD(v249) = __ROR4__(v249, 16) >> 16;
       BYTE1(v249) = a1;
       LOBYTE(v249) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v249;
-      v250 = *(_DWORD *)((char *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v250;
+      *(int *)((char *)a5 + a2) = v249;
+      v250 = *(int *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + 2 * a2) = v250;
       BYTE1(v250) = a1;
       LOBYTE(v250) = a1;
       HIWORD(v7) = __ROR4__(v250, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x7Bu:
 LABEL_191:
@@ -75752,12 +75735,12 @@ LABEL_191:
       HIWORD(v251) = __ROR4__(v251, 16) >> 16;
       BYTE1(v251) = a1;
       LOBYTE(v251) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v251;
-      v252 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = v251;
+      v252 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v252) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v252;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v252;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x7Cu:
 LABEL_192:
@@ -75771,15 +75754,15 @@ LABEL_192:
       HIWORD(v253) = __ROR4__(v253, 16) >> 16;
       BYTE1(v253) = a1;
       LOBYTE(v253) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v253;
+      *(int *)((char *)a5 + a2) = v253;
       LOWORD(v253) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v253) = __ROR4__(v253, 16) >> 16;
       BYTE1(v253) = a1;
       LOBYTE(v253) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v253;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2) = v253;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x7Du:
 LABEL_193:
@@ -75791,38 +75774,38 @@ LABEL_193:
       LOBYTE(v255) = a1;
       HIWORD(v255) = __ROR4__(v255, 16) >> 16;
       LOWORD(v255) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v255;
+      *(int *)((char *)a5 + a2) = v255;
       BYTE1(v255) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v255) = a1;
       HIWORD(v255) = __ROR4__(v255, 16) >> 16;
       BYTE1(v255) = a1;
       LOBYTE(v255) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v255;
+      *(int *)((char *)a5 + 2 * a2) = v255;
       LOWORD(v255) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v255, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x7Eu:
 LABEL_194:
       *a5 = *a4;
-      v256 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v256 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v256) = a1;
       v257 = __ROR4__(v256, 16);
-      *(_DWORD *)((char *)a5 + a2) = v257;
+      *(int *)((char *)a5 + a2) = v257;
       BYTE1(v257) = a1;
       LOBYTE(v257) = a1;
       HIWORD(v257) = __ROR4__(v257, 16) >> 16;
       LOWORD(v257) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v257;
+      *(int *)((char *)a5 + 2 * a2) = v257;
       v258 = (char *)a4 + a2;
       BYTE1(v257) = v258[2 * a2 + 3];
       LOBYTE(v257) = a1;
       HIWORD(v7) = __ROR4__(v257, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = v258[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x7Fu:
 LABEL_195:
@@ -75831,17 +75814,17 @@ LABEL_195:
       HIWORD(v259) = __ROR4__(v5, 16) >> 16;
       LOWORD(v259) = *(_WORD *)a4;
       *a5 = v259;
-      v260 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v260 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       LOBYTE(v260) = a1;
-      *(_DWORD *)((char *)a5 + a2) = __ROR4__(v260, 16);
-      v261 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = __ROR4__(v260, 16);
+      v261 = *(int *)((char *)a4 + 2 * a2);
       BYTE1(v261) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v261;
+      *(int *)((char *)a5 + 2 * a2) = v261;
       LOWORD(v261) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v261, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x80u:
 LABEL_68:
@@ -75856,19 +75839,19 @@ LABEL_68:
       HIWORD(v71) = __ROR4__(v71, 16) >> 16;
       BYTE1(v71) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v71) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v71;
+      *(int *)((char *)a5 + a2) = v71;
       BYTE1(v71) = a1;
       LOBYTE(v71) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v71) = __ROR4__(v71, 16) >> 16;
       BYTE1(v71) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v71) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v71;
+      *(int *)((char *)a5 + 2 * a2) = v71;
       LOBYTE(v71) = a1;
       BYTE1(v71) = a1;
       HIWORD(v7) = __ROR4__(v71, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x81u:
 LABEL_69:
@@ -75883,10 +75866,10 @@ LABEL_69:
       HIWORD(v72) = __ROR4__(v72, 16) >> 16;
       LOBYTE(v72) = a1;
       BYTE1(v72) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v72;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)((char *)a4 + 2 * a2);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + a2) = v72;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)((char *)a4 + 2 * a2);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x82u:
 LABEL_70:
@@ -75899,17 +75882,17 @@ LABEL_70:
       HIWORD(v73) = __ROR4__(v73, 16) >> 16;
       BYTE1(v73) = a1;
       LOBYTE(v73) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v73;
+      *(int *)((char *)a5 + a2) = v73;
       LOWORD(v73) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v73) = __ROR4__(v73, 16) >> 16;
       BYTE1(v73) = a1;
       LOBYTE(v73) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v73;
+      *(int *)((char *)a5 + 2 * a2) = v73;
       LOWORD(v73) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v73, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x83u:
 LABEL_71:
@@ -75924,15 +75907,15 @@ LABEL_71:
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOBYTE(v74) = a1;
       BYTE1(v74) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v74;
+      *(int *)((char *)a5 + a2) = v74;
       LOBYTE(v74) = a1;
       BYTE1(v74) = a1;
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOBYTE(v74) = a1;
       BYTE1(v74) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v74;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v74;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x84u:
 LABEL_72:
@@ -75947,19 +75930,19 @@ LABEL_72:
       HIWORD(v75) = __ROR4__(v75, 16) >> 16;
       BYTE1(v75) = a1;
       LOBYTE(v75) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v75;
+      *(int *)((char *)a5 + a2) = v75;
       BYTE1(v75) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v75) = a1;
       HIWORD(v75) = __ROR4__(v75, 16) >> 16;
       BYTE1(v75) = a1;
       LOBYTE(v75) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v75;
+      *(int *)((char *)a5 + 2 * a2) = v75;
       BYTE1(v75) = *((_BYTE *)a4 + 2 * a2 + a2 + 3);
       LOBYTE(v75) = a1;
       HIWORD(v7) = __ROR4__(v75, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x85u:
 LABEL_73:
@@ -75970,19 +75953,19 @@ LABEL_73:
       HIWORD(v76) = __ROR4__(v76, 16) >> 16;
       LOBYTE(v76) = a1;
       BYTE1(v76) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v76;
+      *(int *)((char *)a5 + a2) = v76;
       LOBYTE(v76) = a1;
       BYTE1(v76) = a1;
       HIWORD(v76) = __ROR4__(v76, 16) >> 16;
       LOBYTE(v76) = a1;
       BYTE1(v76) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v76;
+      *(int *)((char *)a5 + 2 * a2) = v76;
       LOBYTE(v76) = a1;
       BYTE1(v76) = a1;
       HIWORD(v7) = __ROR4__(v76, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x86u:
 LABEL_74:
@@ -75997,19 +75980,19 @@ LABEL_74:
       HIWORD(v77) = __ROR4__(v77, 16) >> 16;
       BYTE1(v77) = a1;
       LOBYTE(v77) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v77;
+      *(int *)((char *)a5 + a2) = v77;
       BYTE1(v77) = a1;
       LOBYTE(v77) = a1;
       HIWORD(v77) = __ROR4__(v77, 16) >> 16;
       BYTE1(v77) = a1;
       LOBYTE(v77) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v77;
+      *(int *)((char *)a5 + 2 * a2) = v77;
       BYTE1(v77) = a1;
       LOBYTE(v77) = a1;
       HIWORD(v7) = __ROR4__(v77, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = *((_BYTE *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x87u:
 LABEL_75:
@@ -76023,49 +76006,49 @@ LABEL_75:
       HIWORD(v78) = __ROR4__(v78, 16) >> 16;
       BYTE1(v78) = a1;
       LOBYTE(v78) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v78;
-      v79 = *(_DWORD *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + a2) = v78;
+      v79 = *(int *)((char *)a4 + 2 * a2);
       LOBYTE(v79) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v79;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v79;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x88u:
 LABEL_76:
       *a5 = *a4;
-      v80 = *(_DWORD *)((char *)a4 + a2);
+      v80 = *(int *)((char *)a4 + a2);
       LOBYTE(v80) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v80;
+      *(int *)((char *)a5 + a2) = v80;
       LOWORD(v80) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v80) = __ROR4__(v80, 16) >> 16;
       BYTE1(v80) = a1;
       LOBYTE(v80) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v80;
+      *(int *)((char *)a5 + 2 * a2) = v80;
       BYTE1(v80) = *((_BYTE *)a4 + 2 * a2 + a2 + 3);
       LOBYTE(v80) = a1;
       HIWORD(v7) = __ROR4__(v80, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x89u:
 LABEL_77:
       *a5 = *a4;
-      v81 = __ROR4__(*(_DWORD *)((char *)a4 + a2), 16);
+      v81 = __ROR4__(*(int *)((char *)a4 + a2), 16);
       BYTE1(v81) = a1;
       v82 = __ROR4__(v81, 16);
-      *(_DWORD *)((char *)a5 + a2) = v82;
+      *(int *)((char *)a5 + a2) = v82;
       BYTE1(v82) = a1;
       LOBYTE(v82) = a1;
       HIWORD(v82) = __ROR4__(v82, 16) >> 16;
       LOWORD(v82) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v82;
+      *(int *)((char *)a5 + 2 * a2) = v82;
       BYTE1(v82) = a1;
       LOBYTE(v82) = a1;
       HIWORD(v7) = __ROR4__(v82, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = *((_BYTE *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x8Au:
 LABEL_78:
@@ -76079,12 +76062,12 @@ LABEL_78:
       LOBYTE(v83) = a1;
       HIWORD(v83) = __ROR4__(v83, 16) >> 16;
       LOWORD(v83) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v83;
-      v84 = __ROR4__(*(_DWORD *)((char *)a4 + 2 * a2), 16);
+      *(int *)((char *)a5 + a2) = v83;
+      v84 = __ROR4__(*(int *)((char *)a4 + 2 * a2), 16);
       BYTE1(v84) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROR4__(v84, 16);
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = __ROR4__(v84, 16);
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x8Bu:
 LABEL_79:
@@ -76099,18 +76082,18 @@ LABEL_79:
       HIWORD(v85) = __ROR4__(v85, 16) >> 16;
       LOBYTE(v85) = a1;
       BYTE1(v85) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v85;
+      *(int *)((char *)a5 + a2) = v85;
       BYTE1(v85) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v85) = a1;
       HIWORD(v85) = __ROR4__(v85, 16) >> 16;
       BYTE1(v85) = a1;
       LOBYTE(v85) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v85;
+      *(int *)((char *)a5 + 2 * a2) = v85;
       LOWORD(v85) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v85, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x8Cu:
 LABEL_80:
@@ -76124,19 +76107,19 @@ LABEL_80:
       HIWORD(v86) = __ROR4__(v86, 16) >> 16;
       BYTE1(v86) = a1;
       LOBYTE(v86) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v86;
+      *(int *)((char *)a5 + a2) = v86;
       LOBYTE(v86) = a1;
       BYTE1(v86) = a1;
       HIWORD(v86) = __ROR4__(v86, 16) >> 16;
       LOBYTE(v86) = a1;
       BYTE1(v86) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v86;
+      *(int *)((char *)a5 + 2 * a2) = v86;
       LOBYTE(v86) = a1;
       BYTE1(v86) = a1;
       HIWORD(v7) = __ROR4__(v86, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x8Du:
 LABEL_81:
@@ -76150,19 +76133,19 @@ LABEL_81:
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       BYTE1(v87) = a1;
       LOBYTE(v87) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v87;
+      *(int *)((char *)a5 + a2) = v87;
       LOBYTE(v87) = a1;
       BYTE1(v87) = a1;
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       LOBYTE(v87) = a1;
       BYTE1(v87) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v87;
+      *(int *)((char *)a5 + 2 * a2) = v87;
       LOBYTE(v87) = a1;
       BYTE1(v87) = a1;
       HIWORD(v7) = __ROR4__(v87, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x8Eu:
 LABEL_82:
@@ -76177,18 +76160,18 @@ LABEL_82:
       HIWORD(v88) = __ROR4__(v88, 16) >> 16;
       LOBYTE(v88) = a1;
       BYTE1(v88) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v88;
+      *(int *)((char *)a5 + a2) = v88;
       BYTE1(v88) = a1;
       LOBYTE(v88) = a1;
       HIWORD(v88) = __ROR4__(v88, 16) >> 16;
       BYTE1(v88) = a1;
       LOBYTE(v88) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v88;
+      *(int *)((char *)a5 + 2 * a2) = v88;
       BYTE1(v88) = a1;
       LOBYTE(v88) = a1;
       HIWORD(v7) = __ROR4__(v88, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x8Fu:
 LABEL_83:
@@ -76203,17 +76186,17 @@ LABEL_83:
       HIWORD(v89) = __ROR4__(v89, 16) >> 16;
       LOBYTE(v89) = a1;
       BYTE1(v89) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v89;
+      *(int *)((char *)a5 + a2) = v89;
       LOWORD(v89) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v89) = __ROR4__(v89, 16) >> 16;
       BYTE1(v89) = a1;
       LOBYTE(v89) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v89;
+      *(int *)((char *)a5 + 2 * a2) = v89;
       LOWORD(v89) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v89, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x90u:
 LABEL_84:
@@ -76226,19 +76209,19 @@ LABEL_84:
       HIWORD(v90) = __ROR4__(v90, 16) >> 16;
       BYTE1(v90) = a1;
       LOBYTE(v90) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v90;
+      *(int *)((char *)a5 + a2) = v90;
       LOBYTE(v90) = a1;
       BYTE1(v90) = a1;
       HIWORD(v90) = __ROR4__(v90, 16) >> 16;
       LOBYTE(v90) = a1;
       BYTE1(v90) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v90;
+      *(int *)((char *)a5 + 2 * a2) = v90;
       LOBYTE(v90) = a1;
       BYTE1(v90) = a1;
       HIWORD(v7) = __ROR4__(v90, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x91u:
 LABEL_85:
@@ -76251,19 +76234,19 @@ LABEL_85:
       LOBYTE(v91) = a1;
       HIWORD(v91) = __ROR4__(v91, 16) >> 16;
       LOWORD(v91) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v91;
+      *(int *)((char *)a5 + a2) = v91;
       LOBYTE(v91) = a1;
       BYTE1(v91) = a1;
       HIWORD(v91) = __ROR4__(v91, 16) >> 16;
       LOBYTE(v91) = a1;
       BYTE1(v91) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v91;
+      *(int *)((char *)a5 + 2 * a2) = v91;
       LOBYTE(v91) = a1;
       BYTE1(v91) = a1;
       HIWORD(v7) = __ROR4__(v91, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x92u:
 LABEL_86:
@@ -76278,17 +76261,17 @@ LABEL_86:
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOBYTE(v92) = a1;
       BYTE1(v92) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v92;
+      *(int *)((char *)a5 + a2) = v92;
       BYTE1(v92) = a1;
       LOBYTE(v92) = a1;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v92;
+      *(int *)((char *)a5 + 2 * a2) = v92;
       BYTE1(v92) = a1;
       LOBYTE(v92) = a1;
       HIWORD(v7) = __ROR4__(v92, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x93u:
 LABEL_87:
@@ -76298,15 +76281,15 @@ LABEL_87:
       LOBYTE(v93) = a1;
       BYTE1(v93) = a1;
       *a5 = v93;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      v94 = *(_DWORD *)((char *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v94;
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      v94 = *(int *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + 2 * a2) = v94;
       LOBYTE(v94) = a1;
       BYTE1(v94) = a1;
       HIWORD(v7) = __ROR4__(v94, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x94u:
 LABEL_88:
@@ -76321,20 +76304,20 @@ LABEL_88:
       HIWORD(v95) = __ROR4__(v95, 16) >> 16;
       BYTE1(v95) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v95) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v95;
+      *(int *)((char *)a5 + a2) = v95;
       BYTE1(v95) = a1;
       LOBYTE(v95) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v95) = __ROR4__(v95, 16) >> 16;
       BYTE1(v95) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v95) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v95;
+      *(int *)((char *)a5 + 2 * a2) = v95;
       v96 = (char *)a4 + a2;
       BYTE1(v95) = a1;
       LOBYTE(v95) = v96[2 * a2 + 2];
       HIWORD(v7) = __ROR4__(v95, 16) >> 16;
       BYTE1(v7) = v96[2 * a2 + 1];
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x95u:
 LABEL_89:
@@ -76344,20 +76327,20 @@ LABEL_89:
       LOBYTE(v97) = a1;
       BYTE1(v97) = a1;
       *a5 = v97;
-      v98 = *(_DWORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v98;
+      v98 = *(int *)((char *)a4 + a2);
+      *(int *)((char *)a5 + a2) = v98;
       LOBYTE(v98) = a1;
       BYTE1(v98) = a1;
       HIWORD(v98) = __ROR4__(v98, 16) >> 16;
       LOBYTE(v98) = a1;
       BYTE1(v98) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v98;
+      *(int *)((char *)a5 + 2 * a2) = v98;
       LOBYTE(v98) = a1;
       BYTE1(v98) = a1;
       HIWORD(v7) = __ROR4__(v98, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x96u:
 LABEL_90:
@@ -76372,15 +76355,15 @@ LABEL_90:
       HIWORD(v99) = __ROR4__(v99, 16) >> 16;
       LOBYTE(v99) = a1;
       BYTE1(v99) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v99;
-      v100 = *(_DWORD *)((char *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v100;
+      *(int *)((char *)a5 + a2) = v99;
+      v100 = *(int *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + 2 * a2) = v100;
       LOBYTE(v100) = a1;
       BYTE1(v100) = a1;
       HIWORD(v7) = __ROR4__(v100, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x97u:
 LABEL_91:
@@ -76395,19 +76378,19 @@ LABEL_91:
       HIWORD(v101) = __ROR4__(v101, 16) >> 16;
       BYTE1(v101) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v101) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v101;
+      *(int *)((char *)a5 + a2) = v101;
       BYTE1(v101) = a1;
       LOBYTE(v101) = a1;
       HIWORD(v101) = __ROR4__(v101, 16) >> 16;
       BYTE1(v101) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v101) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v101;
+      *(int *)((char *)a5 + 2 * a2) = v101;
       BYTE1(v101) = a1;
       LOBYTE(v101) = a1;
       HIWORD(v7) = __ROR4__(v101, 16) >> 16;
       BYTE1(v7) = *((_BYTE *)a4 + 2 * a2 + a2 + 1);
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x98u:
 LABEL_92:
@@ -76422,19 +76405,19 @@ LABEL_92:
       HIWORD(v102) = __ROR4__(v102, 16) >> 16;
       BYTE1(v102) = a1;
       LOBYTE(v102) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v102;
+      *(int *)((char *)a5 + a2) = v102;
       BYTE1(v102) = a1;
       LOBYTE(v102) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v102) = __ROR4__(v102, 16) >> 16;
       BYTE1(v102) = a1;
       LOBYTE(v102) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v102;
+      *(int *)((char *)a5 + 2 * a2) = v102;
       BYTE1(v102) = a1;
       LOBYTE(v102) = *((_BYTE *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v102, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x99u:
 LABEL_93:
@@ -76449,15 +76432,15 @@ LABEL_93:
       HIWORD(v103) = __ROR4__(v103, 16) >> 16;
       LOBYTE(v103) = a1;
       BYTE1(v103) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v103;
+      *(int *)((char *)a5 + a2) = v103;
       BYTE1(v103) = a1;
       LOBYTE(v103) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v103) = __ROR4__(v103, 16) >> 16;
       BYTE1(v103) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v103) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v103;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v103;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x9Au:
 LABEL_94:
@@ -76471,18 +76454,18 @@ LABEL_94:
       HIWORD(v104) = __ROR4__(v104, 16) >> 16;
       BYTE1(v104) = a1;
       LOBYTE(v104) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v104;
+      *(int *)((char *)a5 + a2) = v104;
       LOWORD(v104) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v104) = __ROR4__(v104, 16) >> 16;
       BYTE1(v104) = a1;
       LOBYTE(v104) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v104;
+      *(int *)((char *)a5 + 2 * a2) = v104;
       BYTE1(v104) = *((_BYTE *)a4 + 2 * a2 + a2 + 3);
       LOBYTE(v104) = a1;
       HIWORD(v7) = __ROR4__(v104, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x9Bu:
 LABEL_95:
@@ -76493,19 +76476,19 @@ LABEL_95:
       HIWORD(v105) = __ROR4__(v105, 16) >> 16;
       BYTE1(v105) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v105) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v105;
+      *(int *)((char *)a5 + a2) = v105;
       LOBYTE(v105) = a1;
       BYTE1(v105) = a1;
       HIWORD(v105) = __ROR4__(v105, 16) >> 16;
       LOBYTE(v105) = a1;
       BYTE1(v105) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v105;
+      *(int *)((char *)a5 + 2 * a2) = v105;
       LOBYTE(v105) = a1;
       BYTE1(v105) = a1;
       HIWORD(v7) = __ROR4__(v105, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x9Cu:
 LABEL_96:
@@ -76519,18 +76502,18 @@ LABEL_96:
       LOBYTE(v106) = a1;
       HIWORD(v106) = __ROR4__(v106, 16) >> 16;
       LOWORD(v106) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v106;
+      *(int *)((char *)a5 + a2) = v106;
       BYTE1(v106) = a1;
       LOBYTE(v106) = a1;
       HIWORD(v106) = __ROR4__(v106, 16) >> 16;
       LOWORD(v106) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v106;
+      *(int *)((char *)a5 + 2 * a2) = v106;
       BYTE1(v106) = a1;
       LOBYTE(v106) = a1;
       HIWORD(v7) = __ROR4__(v106, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = *((_BYTE *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x9Du:
 LABEL_97:
@@ -76544,18 +76527,18 @@ LABEL_97:
       HIWORD(v107) = __ROR4__(v107, 16) >> 16;
       BYTE1(v107) = a1;
       LOBYTE(v107) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v107;
+      *(int *)((char *)a5 + a2) = v107;
       BYTE1(v107) = a1;
       LOBYTE(v107) = a1;
       HIWORD(v107) = __ROR4__(v107, 16) >> 16;
       BYTE1(v107) = a1;
       LOBYTE(v107) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v107;
+      *(int *)((char *)a5 + 2 * a2) = v107;
       BYTE1(v107) = a1;
       LOBYTE(v107) = a1;
       HIWORD(v7) = __ROR4__(v107, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x9Eu:
 LABEL_98:
@@ -76569,18 +76552,18 @@ LABEL_98:
       HIWORD(v108) = __ROR4__(v108, 16) >> 16;
       BYTE1(v108) = a1;
       LOBYTE(v108) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v108;
+      *(int *)((char *)a5 + a2) = v108;
       BYTE1(v108) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v108) = a1;
       HIWORD(v108) = __ROR4__(v108, 16) >> 16;
       BYTE1(v108) = a1;
       LOBYTE(v108) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v108;
+      *(int *)((char *)a5 + 2 * a2) = v108;
       LOWORD(v108) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v108, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0x9Fu:
 LABEL_99:
@@ -76593,17 +76576,17 @@ LABEL_99:
       HIWORD(v109) = __ROR4__(v109, 16) >> 16;
       BYTE1(v109) = a1;
       LOBYTE(v109) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v109;
+      *(int *)((char *)a5 + a2) = v109;
       BYTE1(v109) = a1;
       LOBYTE(v109) = a1;
       HIWORD(v109) = __ROR4__(v109, 16) >> 16;
       LOWORD(v109) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v109;
+      *(int *)((char *)a5 + 2 * a2) = v109;
       BYTE1(v109) = a1;
       LOBYTE(v109) = a1;
       HIWORD(v7) = __ROR4__(v109, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA0u:
 LABEL_100:
@@ -76618,20 +76601,20 @@ LABEL_100:
       HIWORD(v110) = __ROR4__(v110, 16) >> 16;
       LOBYTE(v110) = a1;
       BYTE1(v110) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v110;
+      *(int *)((char *)a5 + a2) = v110;
       BYTE1(v110) = a1;
       LOBYTE(v110) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v110) = __ROR4__(v110, 16) >> 16;
       BYTE1(v110) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v110) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v110;
+      *(int *)((char *)a5 + 2 * a2) = v110;
       v111 = (char *)a4 + a2;
       BYTE1(v110) = a1;
       LOBYTE(v110) = v111[2 * a2 + 2];
       HIWORD(v7) = __ROR4__(v110, 16) >> 16;
       BYTE1(v7) = v111[2 * a2 + 1];
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA1u:
 LABEL_101:
@@ -76645,18 +76628,18 @@ LABEL_101:
       HIWORD(v112) = __ROR4__(v112, 16) >> 16;
       BYTE1(v112) = a1;
       LOBYTE(v112) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v112;
+      *(int *)((char *)a5 + a2) = v112;
       LOWORD(v112) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v112) = __ROR4__(v112, 16) >> 16;
       BYTE1(v112) = a1;
       LOBYTE(v112) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v112;
+      *(int *)((char *)a5 + 2 * a2) = v112;
       LOBYTE(v112) = a1;
       BYTE1(v112) = a1;
       HIWORD(v7) = __ROR4__(v112, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA2u:
 LABEL_102:
@@ -76671,19 +76654,19 @@ LABEL_102:
       HIWORD(v113) = __ROR4__(v113, 16) >> 16;
       BYTE1(v113) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v113) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v113;
+      *(int *)((char *)a5 + a2) = v113;
       LOBYTE(v113) = a1;
       BYTE1(v113) = a1;
       HIWORD(v113) = __ROR4__(v113, 16) >> 16;
       LOBYTE(v113) = a1;
       BYTE1(v113) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v113;
+      *(int *)((char *)a5 + 2 * a2) = v113;
       LOBYTE(v113) = a1;
       BYTE1(v113) = a1;
       HIWORD(v7) = __ROR4__(v113, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA3u:
 LABEL_103:
@@ -76697,18 +76680,18 @@ LABEL_103:
       LOBYTE(v114) = a1;
       HIWORD(v114) = __ROR4__(v114, 16) >> 16;
       LOWORD(v114) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v114;
+      *(int *)((char *)a5 + a2) = v114;
       BYTE1(v114) = a1;
       LOBYTE(v114) = a1;
       HIWORD(v114) = __ROR4__(v114, 16) >> 16;
       LOWORD(v114) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v114;
+      *(int *)((char *)a5 + 2 * a2) = v114;
       LOBYTE(v114) = a1;
       BYTE1(v114) = a1;
       HIWORD(v7) = __ROR4__(v114, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA4u:
 LABEL_104:
@@ -76723,15 +76706,15 @@ LABEL_104:
       HIWORD(v115) = __ROR4__(v115, 16) >> 16;
       LOBYTE(v115) = a1;
       BYTE1(v115) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v115;
+      *(int *)((char *)a5 + a2) = v115;
       BYTE1(v115) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v115) = a1;
       HIWORD(v115) = __ROR4__(v115, 16) >> 16;
       BYTE1(v115) = a1;
       LOBYTE(v115) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v115;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v115;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA5u:
 LABEL_105:
@@ -76745,18 +76728,18 @@ LABEL_105:
       HIWORD(v116) = __ROR4__(v116, 16) >> 16;
       BYTE1(v116) = a1;
       LOBYTE(v116) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v116;
+      *(int *)((char *)a5 + a2) = v116;
       BYTE1(v116) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v116) = a1;
       HIWORD(v116) = __ROR4__(v116, 16) >> 16;
       BYTE1(v116) = a1;
       LOBYTE(v116) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v116;
+      *(int *)((char *)a5 + 2 * a2) = v116;
       LOWORD(v116) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v116, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA6u:
 LABEL_106:
@@ -76767,19 +76750,19 @@ LABEL_106:
       HIWORD(v117) = __ROR4__(v117, 16) >> 16;
       BYTE1(v117) = a1;
       LOBYTE(v117) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v117;
+      *(int *)((char *)a5 + a2) = v117;
       LOBYTE(v117) = a1;
       BYTE1(v117) = a1;
       HIWORD(v117) = __ROR4__(v117, 16) >> 16;
       LOBYTE(v117) = a1;
       BYTE1(v117) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v117;
+      *(int *)((char *)a5 + 2 * a2) = v117;
       LOBYTE(v117) = a1;
       BYTE1(v117) = a1;
       HIWORD(v7) = __ROR4__(v117, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA7u:
 LABEL_107:
@@ -76793,18 +76776,18 @@ LABEL_107:
       HIWORD(v118) = __ROR4__(v118, 16) >> 16;
       BYTE1(v118) = a1;
       LOBYTE(v118) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v118;
+      *(int *)((char *)a5 + a2) = v118;
       BYTE1(v118) = a1;
       LOBYTE(v118) = a1;
       HIWORD(v118) = __ROR4__(v118, 16) >> 16;
       BYTE1(v118) = a1;
       LOBYTE(v118) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v118;
+      *(int *)((char *)a5 + 2 * a2) = v118;
       BYTE1(v118) = a1;
       LOBYTE(v118) = a1;
       HIWORD(v7) = __ROR4__(v118, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA8u:
 LABEL_108:
@@ -76819,20 +76802,20 @@ LABEL_108:
       HIWORD(v119) = __ROR4__(v119, 16) >> 16;
       LOBYTE(v119) = a1;
       BYTE1(v119) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v119;
+      *(int *)((char *)a5 + a2) = v119;
       LOBYTE(v119) = a1;
       BYTE1(v119) = a1;
       HIWORD(v119) = __ROR4__(v119, 16) >> 16;
       LOBYTE(v119) = a1;
       BYTE1(v119) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v119;
+      *(int *)((char *)a5 + 2 * a2) = v119;
       v120 = (char *)a4 + a2;
       BYTE1(v119) = a1;
       LOBYTE(v119) = v120[2 * a2 + 2];
       HIWORD(v7) = __ROR4__(v119, 16) >> 16;
       BYTE1(v7) = v120[2 * a2 + 1];
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xA9u:
 LABEL_109:
@@ -76847,19 +76830,19 @@ LABEL_109:
       HIWORD(v121) = __ROR4__(v121, 16) >> 16;
       BYTE1(v121) = a1;
       LOBYTE(v121) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v121;
+      *(int *)((char *)a5 + a2) = v121;
       BYTE1(v121) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v121) = a1;
       HIWORD(v121) = __ROR4__(v121, 16) >> 16;
       BYTE1(v121) = a1;
       LOBYTE(v121) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v121;
+      *(int *)((char *)a5 + 2 * a2) = v121;
       LOBYTE(v121) = a1;
       BYTE1(v121) = a1;
       HIWORD(v7) = __ROR4__(v121, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xAAu:
 LABEL_110:
@@ -76874,19 +76857,19 @@ LABEL_110:
       HIWORD(v122) = __ROR4__(v122, 16) >> 16;
       LOBYTE(v122) = a1;
       BYTE1(v122) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v122;
+      *(int *)((char *)a5 + a2) = v122;
       LOBYTE(v122) = a1;
       BYTE1(v122) = a1;
       HIWORD(v122) = __ROR4__(v122, 16) >> 16;
       LOBYTE(v122) = a1;
       BYTE1(v122) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v122;
+      *(int *)((char *)a5 + 2 * a2) = v122;
       LOBYTE(v122) = a1;
       BYTE1(v122) = a1;
       HIWORD(v7) = __ROR4__(v122, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xABu:
 LABEL_111:
@@ -76901,19 +76884,19 @@ LABEL_111:
       HIWORD(v123) = __ROR4__(v123, 16) >> 16;
       BYTE1(v123) = a1;
       LOBYTE(v123) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v123;
+      *(int *)((char *)a5 + a2) = v123;
       BYTE1(v123) = a1;
       LOBYTE(v123) = a1;
       HIWORD(v123) = __ROR4__(v123, 16) >> 16;
       BYTE1(v123) = a1;
       LOBYTE(v123) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v123;
+      *(int *)((char *)a5 + 2 * a2) = v123;
       LOBYTE(v123) = a1;
       BYTE1(v123) = a1;
       HIWORD(v7) = __ROR4__(v123, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xACu:
 LABEL_112:
@@ -76928,17 +76911,17 @@ LABEL_112:
       HIWORD(v124) = __ROR4__(v124, 16) >> 16;
       BYTE1(v124) = a1;
       LOBYTE(v124) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v124;
+      *(int *)((char *)a5 + a2) = v124;
       LOWORD(v124) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v124) = __ROR4__(v124, 16) >> 16;
       BYTE1(v124) = a1;
       LOBYTE(v124) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v124;
+      *(int *)((char *)a5 + 2 * a2) = v124;
       LOWORD(v124) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v124, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xADu:
 LABEL_113:
@@ -76953,14 +76936,14 @@ LABEL_113:
       HIWORD(v125) = __ROR4__(v125, 16) >> 16;
       LOBYTE(v125) = a1;
       BYTE1(v125) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v125;
+      *(int *)((char *)a5 + a2) = v125;
       LOWORD(v125) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v125) = __ROR4__(v125, 16) >> 16;
       BYTE1(v125) = a1;
       LOBYTE(v125) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v125;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v125;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xAEu:
 LABEL_114:
@@ -76970,19 +76953,19 @@ LABEL_114:
       HIWORD(v126) = __ROR4__(v126, 16) >> 16;
       BYTE1(v126) = a1;
       LOBYTE(v126) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v126;
+      *(int *)((char *)a5 + a2) = v126;
       LOBYTE(v126) = a1;
       BYTE1(v126) = a1;
       HIWORD(v126) = __ROR4__(v126, 16) >> 16;
       LOBYTE(v126) = a1;
       BYTE1(v126) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v126;
+      *(int *)((char *)a5 + 2 * a2) = v126;
       LOBYTE(v126) = a1;
       BYTE1(v126) = a1;
       HIWORD(v7) = __ROR4__(v126, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xAFu:
 LABEL_115:
@@ -76995,19 +76978,19 @@ LABEL_115:
       HIWORD(v127) = __ROR4__(v127, 16) >> 16;
       BYTE1(v127) = a1;
       LOBYTE(v127) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v127;
+      *(int *)((char *)a5 + a2) = v127;
       BYTE1(v127) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v127) = a1;
       HIWORD(v127) = __ROR4__(v127, 16) >> 16;
       BYTE1(v127) = a1;
       LOBYTE(v127) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v127;
+      *(int *)((char *)a5 + 2 * a2) = v127;
       BYTE1(v127) = *((_BYTE *)a4 + 2 * a2 + a2 + 3);
       LOBYTE(v127) = a1;
       HIWORD(v7) = __ROR4__(v127, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB0u:
 LABEL_116:
@@ -77017,19 +77000,19 @@ LABEL_116:
       LOBYTE(v128) = a1;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v128;
+      *(int *)((char *)a5 + a2) = v128;
       LOBYTE(v128) = a1;
       BYTE1(v128) = a1;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOBYTE(v128) = a1;
       BYTE1(v128) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v128;
+      *(int *)((char *)a5 + 2 * a2) = v128;
       LOBYTE(v128) = a1;
       BYTE1(v128) = a1;
       HIWORD(v7) = __ROR4__(v128, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB1u:
 LABEL_117:
@@ -77042,19 +77025,19 @@ LABEL_117:
       LOBYTE(v129) = a1;
       HIWORD(v129) = __ROR4__(v129, 16) >> 16;
       LOWORD(v129) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v129;
+      *(int *)((char *)a5 + a2) = v129;
       BYTE1(v129) = a1;
       LOBYTE(v129) = a1;
       HIWORD(v129) = __ROR4__(v129, 16) >> 16;
       BYTE1(v129) = a1;
       LOBYTE(v129) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v129;
+      *(int *)((char *)a5 + 2 * a2) = v129;
       BYTE1(v129) = a1;
       LOBYTE(v129) = a1;
       HIWORD(v7) = __ROR4__(v129, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = *((_BYTE *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB2u:
 LABEL_118:
@@ -77069,17 +77052,17 @@ LABEL_118:
       HIWORD(v130) = __ROR4__(v130, 16) >> 16;
       BYTE1(v130) = a1;
       LOBYTE(v130) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v130;
+      *(int *)((char *)a5 + a2) = v130;
       BYTE1(v130) = a1;
       LOBYTE(v130) = a1;
       HIWORD(v130) = __ROR4__(v130, 16) >> 16;
       LOWORD(v130) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v130;
+      *(int *)((char *)a5 + 2 * a2) = v130;
       BYTE1(v130) = a1;
       LOBYTE(v130) = a1;
       HIWORD(v7) = __ROR4__(v130, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB3u:
 LABEL_119:
@@ -77094,14 +77077,14 @@ LABEL_119:
       HIWORD(v131) = __ROR4__(v131, 16) >> 16;
       LOBYTE(v131) = a1;
       BYTE1(v131) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v131;
+      *(int *)((char *)a5 + a2) = v131;
       BYTE1(v131) = a1;
       LOBYTE(v131) = a1;
       HIWORD(v131) = __ROR4__(v131, 16) >> 16;
       LOWORD(v131) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v131;
-      v7 = *(_DWORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2) = v131;
+      v7 = *(int *)((char *)a4 + 2 * a2 + a2);
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB4u:
 LABEL_120:
@@ -77111,16 +77094,16 @@ LABEL_120:
       BYTE1(v132) = *((_BYTE *)a4 + 1);
       LOBYTE(v132) = a1;
       *a5 = v132;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)((char *)a4 + a2);
-      v133 = *(_DWORD *)((char *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v133;
+      *(int *)((char *)a5 + a2) = *(int *)((char *)a4 + a2);
+      v133 = *(int *)((char *)a4 + 2 * a2);
+      *(int *)((char *)a5 + 2 * a2) = v133;
       v134 = (char *)a4 + a2;
       BYTE1(v133) = a1;
       LOBYTE(v133) = v134[2 * a2 + 2];
       HIWORD(v7) = __ROR4__(v133, 16) >> 16;
       BYTE1(v7) = v134[2 * a2 + 1];
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB5u:
 LABEL_121:
@@ -77134,19 +77117,19 @@ LABEL_121:
       HIWORD(v135) = __ROR4__(v135, 16) >> 16;
       LOBYTE(v135) = a1;
       BYTE1(v135) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v135;
+      *(int *)((char *)a5 + a2) = v135;
       BYTE1(v135) = a1;
       LOBYTE(v135) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v135) = __ROR4__(v135, 16) >> 16;
       BYTE1(v135) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v135) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v135;
+      *(int *)((char *)a5 + 2 * a2) = v135;
       LOBYTE(v135) = a1;
       BYTE1(v135) = a1;
       HIWORD(v7) = __ROR4__(v135, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB6u:
 LABEL_122:
@@ -77160,19 +77143,19 @@ LABEL_122:
       HIWORD(v136) = __ROR4__(v136, 16) >> 16;
       BYTE1(v136) = a1;
       LOBYTE(v136) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v136;
+      *(int *)((char *)a5 + a2) = v136;
       BYTE1(v136) = *((_BYTE *)a4 + 2 * a2 + 3);
       LOBYTE(v136) = a1;
       HIWORD(v136) = __ROR4__(v136, 16) >> 16;
       BYTE1(v136) = a1;
       LOBYTE(v136) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v136;
+      *(int *)((char *)a5 + 2 * a2) = v136;
       LOBYTE(v136) = a1;
       BYTE1(v136) = a1;
       HIWORD(v7) = __ROR4__(v136, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB7u:
 LABEL_123:
@@ -77186,18 +77169,18 @@ LABEL_123:
       HIWORD(v137) = __ROR4__(v137, 16) >> 16;
       BYTE1(v137) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v137) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v137;
+      *(int *)((char *)a5 + a2) = v137;
       LOWORD(v137) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v137) = __ROR4__(v137, 16) >> 16;
       BYTE1(v137) = a1;
       LOBYTE(v137) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v137;
+      *(int *)((char *)a5 + 2 * a2) = v137;
       BYTE1(v137) = *((_BYTE *)a4 + 2 * a2 + a2 + 3);
       LOBYTE(v137) = a1;
       HIWORD(v7) = __ROR4__(v137, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB8u:
 LABEL_124:
@@ -77211,18 +77194,18 @@ LABEL_124:
       LOBYTE(v138) = a1;
       HIWORD(v138) = __ROR4__(v138, 16) >> 16;
       LOWORD(v138) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v138;
+      *(int *)((char *)a5 + a2) = v138;
       BYTE1(v138) = a1;
       LOBYTE(v138) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v138) = __ROR4__(v138, 16) >> 16;
       BYTE1(v138) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v138) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v138;
+      *(int *)((char *)a5 + 2 * a2) = v138;
       LOWORD(v138) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v138, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xB9u:
 LABEL_125:
@@ -77237,19 +77220,19 @@ LABEL_125:
       HIWORD(v139) = __ROR4__(v139, 16) >> 16;
       BYTE1(v139) = a1;
       LOBYTE(v139) = *((_BYTE *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v139;
+      *(int *)((char *)a5 + a2) = v139;
       BYTE1(v139) = a1;
       LOBYTE(v139) = a1;
       HIWORD(v139) = __ROR4__(v139, 16) >> 16;
       LOWORD(v139) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v139;
+      *(int *)((char *)a5 + 2 * a2) = v139;
       v140 = (char *)a4 + a2;
       BYTE1(v139) = a1;
       LOBYTE(v139) = v140[2 * a2 + 2];
       HIWORD(v7) = __ROR4__(v139, 16) >> 16;
       BYTE1(v7) = v140[2 * a2 + 1];
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xBAu:
 LABEL_126:
@@ -77264,18 +77247,18 @@ LABEL_126:
       HIWORD(v141) = __ROR4__(v141, 16) >> 16;
       BYTE1(v141) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v141) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v141;
+      *(int *)((char *)a5 + a2) = v141;
       LOBYTE(v141) = a1;
       BYTE1(v141) = a1;
       HIWORD(v141) = __ROR4__(v141, 16) >> 16;
       LOBYTE(v141) = a1;
       BYTE1(v141) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v141;
+      *(int *)((char *)a5 + 2 * a2) = v141;
       LOWORD(v141) = *(_WORD *)((char *)a4 + 2 * a2 + a2 + 2);
       HIWORD(v7) = __ROR4__(v141, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xBBu:
 LABEL_127:
@@ -77289,19 +77272,19 @@ LABEL_127:
       LOBYTE(v142) = a1;
       HIWORD(v142) = __ROR4__(v142, 16) >> 16;
       LOWORD(v142) = *(_WORD *)((char *)a4 + a2);
-      *(_DWORD *)((char *)a5 + a2) = v142;
+      *(int *)((char *)a5 + a2) = v142;
       BYTE1(v142) = a1;
       LOBYTE(v142) = a1;
       HIWORD(v142) = __ROR4__(v142, 16) >> 16;
       BYTE1(v142) = a1;
       LOBYTE(v142) = *((_BYTE *)a4 + 2 * a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v142;
+      *(int *)((char *)a5 + 2 * a2) = v142;
       LOBYTE(v142) = a1;
       BYTE1(v142) = a1;
       HIWORD(v7) = __ROR4__(v142, 16) >> 16;
       LOBYTE(v7) = a1;
       BYTE1(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xBCu:
 LABEL_128:
@@ -77315,18 +77298,18 @@ LABEL_128:
       HIWORD(v143) = __ROR4__(v143, 16) >> 16;
       BYTE1(v143) = *((_BYTE *)a4 + a2 + 1);
       LOBYTE(v143) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v143;
+      *(int *)((char *)a5 + a2) = v143;
       BYTE1(v143) = a1;
       LOBYTE(v143) = a1;
       HIWORD(v143) = __ROR4__(v143, 16) >> 16;
       LOWORD(v143) = *((_WORD *)a4 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v143;
+      *(int *)((char *)a5 + 2 * a2) = v143;
       BYTE1(v143) = a1;
       LOBYTE(v143) = a1;
       HIWORD(v7) = __ROR4__(v143, 16) >> 16;
       BYTE1(v7) = a1;
       LOBYTE(v7) = *((_BYTE *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xBDu:
 LABEL_129:
@@ -77340,18 +77323,18 @@ LABEL_129:
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       BYTE1(v144) = a1;
       LOBYTE(v144) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v144;
+      *(int *)((char *)a5 + a2) = v144;
       BYTE1(v144) = a1;
       LOBYTE(v144) = *((_BYTE *)a4 + 2 * a2 + 2);
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       BYTE1(v144) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v144) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v144;
+      *(int *)((char *)a5 + 2 * a2) = v144;
       BYTE1(v144) = a1;
       LOBYTE(v144) = a1;
       HIWORD(v7) = __ROR4__(v144, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xBEu:
 LABEL_130:
@@ -77366,19 +77349,19 @@ LABEL_130:
       HIWORD(v145) = __ROR4__(v145, 16) >> 16;
       BYTE1(v145) = a1;
       LOBYTE(v145) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v145;
+      *(int *)((char *)a5 + a2) = v145;
       LOWORD(v145) = *((_WORD *)a4 + a2 + 1);
       HIWORD(v145) = __ROR4__(v145, 16) >> 16;
       BYTE1(v145) = a1;
       LOBYTE(v145) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v145;
+      *(int *)((char *)a5 + 2 * a2) = v145;
       v146 = (char *)a4 + a2;
       BYTE1(v145) = a1;
       LOBYTE(v145) = v146[2 * a2 + 2];
       HIWORD(v7) = __ROR4__(v145, 16) >> 16;
       BYTE1(v7) = v146[2 * a2 + 1];
       LOBYTE(v7) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
     case 0xBFu:
 LABEL_131:
@@ -77392,18 +77375,18 @@ LABEL_131:
       HIWORD(v147) = __ROR4__(v147, 16) >> 16;
       BYTE1(v147) = a1;
       LOBYTE(v147) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v147;
+      *(int *)((char *)a5 + a2) = v147;
       BYTE1(v147) = a1;
       LOBYTE(v147) = a1;
       HIWORD(v147) = __ROR4__(v147, 16) >> 16;
       BYTE1(v147) = *((_BYTE *)a4 + 2 * a2 + 1);
       LOBYTE(v147) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v147;
+      *(int *)((char *)a5 + 2 * a2) = v147;
       BYTE1(v147) = a1;
       LOBYTE(v147) = a1;
       HIWORD(v7) = __ROR4__(v147, 16) >> 16;
       LOWORD(v7) = *(_WORD *)((char *)a4 + 2 * a2 + a2);
-      *(_DWORD *)((char *)a5 + 2 * a2 + a2) = v7;
+      *(int *)((char *)a5 + 2 * a2 + a2) = v7;
       break;
   }
   return v7;
@@ -77427,7 +77410,7 @@ unsigned __int8 *__cdecl VBC_decode_8bpp(
   int v12; // eax
   int v13; // esi
   int v14; // eax
-  _DWORD *v15; // esi
+  int *v15; // esi
   int v16; // eax
   int v17; // ecx
   int v19; // [esp+Ch] [ebp-Ch]
@@ -77463,10 +77446,10 @@ LABEL_2:
     v14 = v19;
     LOBYTE(v14) = v19 & 0xC;
     (*(int (**)())((char *)g_vbc8_block_decoders + v14))();
-    v15 = (_DWORD *)(v13 + 4);
+    v15 = (int *)(v13 + 4);
     v16 = v19;
     LOBYTE(v16) = v19 & 3;
-    ((void (__usercall *)(int@<ecx>, _DWORD *@<esi>))g_vbc8_block_decoders[v16])(v17, v15);
+    ((void (__usercall *)(int@<ecx>, int *@<esi>))g_vbc8_block_decoders[v16])(v17, v15);
     v8 = (int)(v15 + 1);
     v21 = v22 - 1;
     if ( !v21 )
@@ -77487,26 +77470,26 @@ LABEL_2:
 //----- (0045D108) --------------------------------------------------------
 // ASM
 // uses: ECX, ESI, EBC
-int __usercall VBC16_block_decoder_1@<eax>(int a1@<ecx>, _DWORD *a2@<esi>)
+int __usercall VBC16_block_decoder_1@<eax>(int a1@<ecx>, int *a2@<esi>)
 {
   int v2; // edi
-  _DWORD *v3; // esi
-  _DWORD *v4; // esi
-  _DWORD *v5; // esi
+  int *v3; // esi
+  int *v4; // esi
+  int *v5; // esi
   int result; // eax
 
   v2 = g_vbc16_prev_delta;
-  *a2 = *(_DWORD *)((char *)a2 + g_vbc16_prev_delta);
-  a2[1] = *(_DWORD *)((char *)a2 + v2 + 4);
-  v3 = (_DWORD *)((char *)a2 + a1);
-  *v3 = *(_DWORD *)((char *)v3 + v2);
-  v3[1] = *(_DWORD *)((char *)v3 + v2 + 4);
-  v4 = (_DWORD *)((char *)v3 + a1);
-  *v4 = *(_DWORD *)((char *)v4 + v2);
-  v4[1] = *(_DWORD *)((char *)v4 + v2 + 4);
-  v5 = (_DWORD *)((char *)v4 + a1);
-  *v5 = *(_DWORD *)((char *)v5 + v2);
-  result = *(_DWORD *)((char *)v5 + v2 + 4);
+  *a2 = *(int *)((char *)a2 + g_vbc16_prev_delta);
+  a2[1] = *(int *)((char *)a2 + v2 + 4);
+  v3 = (int *)((char *)a2 + a1);
+  *v3 = *(int *)((char *)v3 + v2);
+  v3[1] = *(int *)((char *)v3 + v2 + 4);
+  v4 = (int *)((char *)v3 + a1);
+  *v4 = *(int *)((char *)v4 + v2);
+  v4[1] = *(int *)((char *)v4 + v2 + 4);
+  v5 = (int *)((char *)v4 + a1);
+  *v5 = *(int *)((char *)v5 + v2);
+  result = *(int *)((char *)v5 + v2 + 4);
   v5[1] = result;
   return result;
 }
@@ -77515,14 +77498,14 @@ int __usercall VBC16_block_decoder_1@<eax>(int a1@<ecx>, _DWORD *a2@<esi>)
 //----- (0045D147) --------------------------------------------------------
 // ASM
 // uses: ECX, ESI, EBC
-int __usercall VBC16_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD *a3@<esi>)
+int __usercall VBC16_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, int *a3@<esi>)
 {
   unsigned __int8 v3; // al
-  _DWORD *v4; // ebx
+  int *v4; // ebx
   int v5; // edi
-  _DWORD *v6; // esi
-  _DWORD *v7; // esi
-  _DWORD *v8; // esi
+  int *v6; // esi
+  int *v7; // esi
+  int *v8; // esi
   int result; // eax
   int v10; // edi
 
@@ -77530,18 +77513,18 @@ int __usercall VBC16_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD
   v4 = a2 + 1;
   if ( v3 )
   {
-    v5 = g_vbc16_prev_delta + *(_DWORD *)(g_vbc16_motion_lut + 4 * v3);
-    *a3 = *(_DWORD *)((char *)a3 + v5);
-    a3[1] = *(_DWORD *)((char *)a3 + v5 + 4);
-    v6 = (_DWORD *)((char *)a3 + a1);
-    *v6 = *(_DWORD *)((char *)v6 + v5);
-    v6[1] = *(_DWORD *)((char *)v6 + v5 + 4);
-    v7 = (_DWORD *)((char *)v6 + a1);
-    *v7 = *(_DWORD *)((char *)v7 + v5);
-    v7[1] = *(_DWORD *)((char *)v7 + v5 + 4);
-    v8 = (_DWORD *)((char *)v7 + a1);
-    *v8 = *(_DWORD *)((char *)v8 + v5);
-    result = *(_DWORD *)((char *)v8 + v5 + 4);
+    v5 = g_vbc16_prev_delta + *(int *)(g_vbc16_motion_lut + 4 * v3);
+    *a3 = *(int *)((char *)a3 + v5);
+    a3[1] = *(int *)((char *)a3 + v5 + 4);
+    v6 = (int *)((char *)a3 + a1);
+    *v6 = *(int *)((char *)v6 + v5);
+    v6[1] = *(int *)((char *)v6 + v5 + 4);
+    v7 = (int *)((char *)v6 + a1);
+    *v7 = *(int *)((char *)v7 + v5);
+    v7[1] = *(int *)((char *)v7 + v5 + 4);
+    v8 = (int *)((char *)v7 + a1);
+    *v8 = *(int *)((char *)v8 + v5);
+    result = *(int *)((char *)v8 + v5 + 4);
     v8[1] = result;
   }
   else
@@ -77552,7 +77535,7 @@ int __usercall VBC16_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD
       *a3 = *v4;
       result = v4[1];
       a3[1] = result;
-      a3 = (_DWORD *)((char *)a3 + a1);
+      a3 = (int *)((char *)a3 + a1);
       v4 += 2;
       --v10;
     }
@@ -77566,7 +77549,7 @@ int __usercall VBC16_block_decoder_2@<eax>(int a1@<ecx>, _BYTE *a2@<ebx>, _DWORD
 //----- (0045D25B) --------------------------------------------------------
 // ASM
 // uses: ECX, ESI, EBC
-__int16 __usercall VBC16_block_decoder_3@<ax>(int a1@<eax>, int a2@<ecx>, _WORD *a3@<ebx>, _DWORD *a4@<esi>)
+__int16 __usercall VBC16_block_decoder_3@<ax>(int a1@<eax>, int a2@<ecx>, _WORD *a3@<ebx>, int *a4@<esi>)
 {
   int v4; // eax
   int v5; // edi
@@ -77577,14 +77560,14 @@ __int16 __usercall VBC16_block_decoder_3@<ax>(int a1@<eax>, int a2@<ecx>, _WORD 
   LOWORD(v4) = *a3;
   *a4 = v4;
   a4[1] = v4;
-  *(_DWORD *)((char *)a4 + a2) = v4;
-  *(_DWORD *)((char *)a4 + a2 + 4) = v4;
+  *(int *)((char *)a4 + a2) = v4;
+  *(int *)((char *)a4 + a2 + 4) = v4;
   v5 = 2 * a2;
-  *(_DWORD *)((char *)a4 + v5) = v4;
-  *(_DWORD *)((char *)a4 + v5 + 4) = v4;
+  *(int *)((char *)a4 + v5) = v4;
+  *(int *)((char *)a4 + v5 + 4) = v4;
   v6 = 3 * a2;
-  *(_DWORD *)((char *)a4 + v6) = v4;
-  *(_DWORD *)((char *)a4 + v6 + 4) = v4;
+  *(int *)((char *)a4 + v6) = v4;
+  *(int *)((char *)a4 + v6 + 4) = v4;
   return v4;
 }
 
@@ -77614,7 +77597,7 @@ __int16 __usercall VBC16_block_decoder_4@<ax>(
         int a2@<ecx>,
         unsigned __int8 *a3@<ebx>,
         char *a4@<edi>,
-        _DWORD *a5@<esi>)
+        int *a5@<esi>)
 {
   int v5; // eax
   int v6; // eax
@@ -78763,15 +78746,15 @@ LABEL_4:
       LOWORD(v6) = a1;
       *a5 = v6;
       a5[1] = v6;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v7 = (char *)a5 + a2;
       HIWORD(v8) = __ROR4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v7[2 * a2] = v8;
-      *(_DWORD *)&v7[2 * a2 + 4] = v8;
+      *(int *)&v7[2 * a2] = v8;
+      *(int *)&v7[2 * a2 + 4] = v8;
       break;
     case 1u:
 LABEL_5:
@@ -78783,19 +78766,19 @@ LABEL_5:
       LOWORD(v9) = a1;
       HIWORD(v9) = __ROR4__(v9, 16) >> 16;
       LOWORD(v9) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v9;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v9;
+      *(int *)((char *)a5 + a2) = v9;
+      *(int *)((char *)a5 + a2 + 4) = v9;
       HIWORD(v9) = HIWORD(a1);
       v10 = __ROL4__(a1, 16);
       LOWORD(v9) = v10;
       v11 = __ROL4__(v10, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v9;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v9;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v9;
+      *(int *)((char *)a5 + 2 * a2) = v9;
       v12 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v11);
       LOWORD(v8) = __ROL4__(v11, 16);
-      *(_DWORD *)&v12[2 * a2 + 4] = v8;
-      *(_DWORD *)&v12[2 * a2] = v8;
+      *(int *)&v12[2 * a2 + 4] = v8;
+      *(int *)&v12[2 * a2] = v8;
       break;
     case 2u:
 LABEL_6:
@@ -78812,28 +78795,28 @@ LABEL_6:
       v16 = __ROL4__(v15, 16);
       LOWORD(v13) = v16;
       v17 = __ROL4__(v16, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v13;
+      *(int *)((char *)a5 + a2 + 4) = v13;
       LOWORD(v13) = v17;
       HIWORD(v13) = __ROL4__(v13, 16) >> 16;
       LOWORD(v13) = v17;
-      *(_DWORD *)((char *)a5 + a2) = v13;
+      *(int *)((char *)a5 + a2) = v13;
       HIWORD(v13) = HIWORD(v17);
       v18 = __ROL4__(v17, 16);
       LOWORD(v13) = v18;
       v19 = __ROL4__(v18, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v13;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v13;
       LOWORD(v13) = v19;
       HIWORD(v13) = __ROL4__(v13, 16) >> 16;
       LOWORD(v13) = v19;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v13;
+      *(int *)((char *)a5 + 2 * a2) = v13;
       v20 = (char *)a5 + a2;
       HIWORD(v13) = HIWORD(v19);
       v21 = __ROL4__(v19, 16);
       LOWORD(v13) = v21;
-      *(_DWORD *)&v20[2 * a2 + 4] = v13;
+      *(int *)&v20[2 * a2 + 4] = v13;
       LOWORD(v8) = __ROL4__(v21, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v20[2 * a2] = v8;
+      *(int *)&v20[2 * a2] = v8;
       break;
     case 3u:
 LABEL_7:
@@ -78845,18 +78828,18 @@ LABEL_7:
       LOWORD(v22) = a1;
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       LOWORD(v22) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v22;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v22;
+      *(int *)((char *)a5 + a2) = v22;
+      *(int *)((char *)a5 + a2 + 4) = v22;
       LOWORD(v22) = a1;
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       LOWORD(v22) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v22;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v22;
+      *(int *)((char *)a5 + 2 * a2) = v22;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v22;
       v23 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v23[2 * a2 + 4] = v8;
-      *(_DWORD *)&v23[2 * a2] = v8;
+      *(int *)&v23[2 * a2 + 4] = v8;
+      *(int *)&v23[2 * a2] = v8;
       break;
     case 4u:
 LABEL_8:
@@ -78864,16 +78847,16 @@ LABEL_8:
       HIWORD(v8) = __ROL4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
       *a5 = v8;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v24 = (char *)a5 + a2;
-      *(_DWORD *)&v24[2 * a2 + 4] = a1;
+      *(int *)&v24[2 * a2 + 4] = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v24[2 * a2] = v8;
+      *(int *)&v24[2 * a2] = v8;
       break;
     case 5u:
 LABEL_9:
@@ -78886,19 +78869,19 @@ LABEL_9:
       LOWORD(v25) = v26;
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       LOWORD(v25) = v26;
-      *(_DWORD *)((char *)a5 + a2) = v25;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v25;
+      *(int *)((char *)a5 + a2) = v25;
+      *(int *)((char *)a5 + a2 + 4) = v25;
       LOWORD(v25) = v26;
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       LOWORD(v25) = v26;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v25;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v25;
+      *(int *)((char *)a5 + 2 * a2) = v25;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v25;
       v27 = (char *)a5 + a2;
       LOWORD(v25) = v26;
       HIWORD(v8) = __ROR4__(v25, 16) >> 16;
       LOWORD(v8) = v26;
-      *(_DWORD *)&v27[2 * a2] = v8;
-      *(_DWORD *)&v27[2 * a2 + 4] = v8;
+      *(int *)&v27[2 * a2] = v8;
+      *(int *)&v27[2 * a2 + 4] = v8;
       break;
     case 6u:
 LABEL_10:
@@ -78911,22 +78894,22 @@ LABEL_10:
       LOWORD(v29) = a1;
       HIWORD(v29) = __ROR4__(v29, 16) >> 16;
       LOWORD(v29) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v29;
+      *(int *)((char *)a5 + a2 + 4) = v29;
       v30 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v30;
+      *(int *)((char *)a5 + a2) = v30;
       LOWORD(v30) = a1;
       HIWORD(v30) = __ROR4__(v30, 16) >> 16;
       LOWORD(v30) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v30;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v30;
       v31 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v31;
+      *(int *)((char *)a5 + 2 * a2) = v31;
       v32 = (char *)a5 + a2;
       LOWORD(v31) = a1;
       HIWORD(v31) = __ROR4__(v31, 16) >> 16;
       LOWORD(v31) = a1;
-      *(_DWORD *)&v32[2 * a2 + 4] = v31;
+      *(int *)&v32[2 * a2 + 4] = v31;
       v8 = __ROL4__(a1, 16);
-      *(_DWORD *)&v32[2 * a2] = v8;
+      *(int *)&v32[2 * a2] = v8;
       break;
     case 7u:
 LABEL_11:
@@ -78938,22 +78921,22 @@ LABEL_11:
       v34 = __ROL4__(a1, 16);
       LOWORD(v33) = v34;
       v35 = __ROL4__(v34, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v33;
+      *(int *)((char *)a5 + a2 + 4) = v33;
       LOWORD(v33) = v35;
       HIWORD(v33) = __ROL4__(v33, 16) >> 16;
       LOWORD(v33) = v35;
-      *(_DWORD *)((char *)a5 + a2) = v33;
+      *(int *)((char *)a5 + a2) = v33;
       HIWORD(v33) = HIWORD(v35);
       v36 = __ROL4__(v35, 16);
       LOWORD(v33) = v36;
       v37 = __ROL4__(v36, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v33;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v33;
       HIWORD(v8) = HIWORD(v37);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v37;
+      *(int *)((char *)a5 + 2 * a2) = v37;
       v38 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v37, 16);
-      *(_DWORD *)&v38[2 * a2 + 4] = v8;
-      *(_DWORD *)&v38[2 * a2] = v8;
+      *(int *)&v38[2 * a2 + 4] = v8;
+      *(int *)&v38[2 * a2] = v8;
       break;
     case 8u:
 LABEL_12:
@@ -78967,22 +78950,22 @@ LABEL_12:
       v42 = __ROL4__(v41, 16);
       LOWORD(v39) = v42;
       v43 = __ROL4__(v42, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v39;
+      *(int *)((char *)a5 + a2 + 4) = v39;
       HIWORD(v39) = HIWORD(v43);
-      *(_DWORD *)((char *)a5 + a2) = v43;
+      *(int *)((char *)a5 + a2) = v43;
       v44 = __ROL4__(v43, 16);
       LOWORD(v39) = v44;
       v45 = __ROL4__(v44, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v39;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v39;
       LOWORD(v39) = v45;
       HIWORD(v39) = __ROL4__(v39, 16) >> 16;
       LOWORD(v39) = v45;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v39;
+      *(int *)((char *)a5 + 2 * a2) = v39;
       v46 = (char *)a5 + a2;
-      *(_DWORD *)&v46[2 * a2 + 4] = v45;
+      *(int *)&v46[2 * a2 + 4] = v45;
       HIWORD(v8) = __ROL4__(v45, 16) >> 16;
       LOWORD(v8) = v45;
-      *(_DWORD *)&v46[2 * a2] = v8;
+      *(int *)&v46[2 * a2] = v8;
       break;
     case 9u:
 LABEL_13:
@@ -78992,28 +78975,28 @@ LABEL_13:
       v49 = __ROL4__(v48, 16);
       a5[1] = v47;
       *a5 = v47;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v49, 16);
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v49, 16);
       HIWORD(v47) = HIWORD(v49);
       v50 = __ROL4__(v49, 16);
       LOWORD(v47) = v50;
       v51 = __ROL4__(v50, 16);
-      *(_DWORD *)((char *)a5 + a2) = v47;
+      *(int *)((char *)a5 + a2) = v47;
       LOWORD(v47) = v51;
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOWORD(v47) = v51;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v47;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v47;
       HIWORD(v47) = HIWORD(v51);
       v52 = __ROL4__(v51, 16);
       LOWORD(v47) = v52;
       v53 = __ROL4__(v52, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v47;
+      *(int *)((char *)a5 + 2 * a2) = v47;
       v54 = (char *)a5 + a2;
       LOWORD(v47) = v53;
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOWORD(v47) = v53;
-      *(_DWORD *)&v54[2 * a2 + 4] = v47;
+      *(int *)&v54[2 * a2 + 4] = v47;
       v8 = __ROL4__(v53, 16);
-      *(_DWORD *)&v54[2 * a2] = v8;
+      *(int *)&v54[2 * a2] = v8;
       break;
     case 0xAu:
 LABEL_14:
@@ -79026,23 +79009,23 @@ LABEL_14:
       LOWORD(v56) = a1;
       HIWORD(v56) = __ROR4__(v56, 16) >> 16;
       LOWORD(v56) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v56;
+      *(int *)((char *)a5 + a2 + 4) = v56;
       HIWORD(v56) = HIWORD(a1);
       v57 = __ROL4__(a1, 16);
       LOWORD(v56) = v57;
       v58 = __ROL4__(v57, 16);
-      *(_DWORD *)((char *)a5 + a2) = v56;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v58, 16);
+      *(int *)((char *)a5 + a2) = v56;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v58, 16);
       HIWORD(v56) = HIWORD(v58);
       v59 = __ROL4__(v58, 16);
       LOWORD(v56) = v59;
       v60 = __ROL4__(v59, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v56;
+      *(int *)((char *)a5 + 2 * a2) = v56;
       v61 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v60);
       LOWORD(v8) = __ROL4__(v60, 16);
-      *(_DWORD *)&v61[2 * a2 + 4] = v8;
-      *(_DWORD *)&v61[2 * a2] = v8;
+      *(int *)&v61[2 * a2 + 4] = v8;
+      *(int *)&v61[2 * a2] = v8;
       break;
     case 0xBu:
 LABEL_15:
@@ -79054,20 +79037,20 @@ LABEL_15:
       LOWORD(v62) = a1;
       HIWORD(v62) = __ROR4__(v62, 16) >> 16;
       LOWORD(v62) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v62;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v62;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v62;
+      *(int *)((char *)a5 + a2 + 4) = v62;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       HIWORD(v62) = __ROL4__(a1, 16) >> 16;
       LOWORD(v62) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v62;
+      *(int *)((char *)a5 + 2 * a2) = v62;
       v63 = (char *)a5 + a2;
       HIWORD(v62) = HIWORD(a1);
       v64 = __ROL4__(a1, 16);
       LOWORD(v62) = v64;
-      *(_DWORD *)&v63[2 * a2 + 4] = v62;
+      *(int *)&v63[2 * a2 + 4] = v62;
       LOWORD(v8) = __ROL4__(v64, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v63[2 * a2] = v8;
+      *(int *)&v63[2 * a2] = v8;
       break;
     case 0xCu:
 LABEL_16:
@@ -79080,21 +79063,21 @@ LABEL_16:
       HIWORD(v65) = __ROL4__(v65, 16) >> 16;
       LOWORD(v65) = v67;
       *a5 = v65;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v67;
+      *(int *)((char *)a5 + a2 + 4) = v67;
       HIWORD(v65) = __ROL4__(v67, 16) >> 16;
       LOWORD(v65) = v67;
-      *(_DWORD *)((char *)a5 + a2) = v65;
+      *(int *)((char *)a5 + a2) = v65;
       LOWORD(v65) = v67;
       HIWORD(v65) = __ROR4__(v65, 16) >> 16;
       LOWORD(v65) = v67;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v65;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v65;
+      *(int *)((char *)a5 + 2 * a2) = v65;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v65;
       v68 = (char *)a5 + a2;
       LOWORD(v65) = v67;
       HIWORD(v8) = __ROR4__(v65, 16) >> 16;
       LOWORD(v8) = v67;
-      *(_DWORD *)&v68[2 * a2] = v8;
-      *(_DWORD *)&v68[2 * a2 + 4] = v8;
+      *(int *)&v68[2 * a2] = v8;
+      *(int *)&v68[2 * a2 + 4] = v8;
       break;
     case 0xDu:
 LABEL_17:
@@ -79110,20 +79093,20 @@ LABEL_17:
       LOWORD(v69) = v71;
       HIWORD(v69) = __ROR4__(v69, 16) >> 16;
       LOWORD(v69) = v71;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v69;
+      *(int *)((char *)a5 + a2 + 4) = v69;
       v72 = __ROL4__(v71, 16);
-      *(_DWORD *)((char *)a5 + a2) = v72;
+      *(int *)((char *)a5 + a2) = v72;
       LOWORD(v72) = v71;
       HIWORD(v72) = __ROR4__(v72, 16) >> 16;
       LOWORD(v72) = v71;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v72;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v72;
+      *(int *)((char *)a5 + 2 * a2) = v72;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v72;
       v73 = (char *)a5 + a2;
       LOWORD(v72) = v71;
       HIWORD(v8) = __ROR4__(v72, 16) >> 16;
       LOWORD(v8) = v71;
-      *(_DWORD *)&v73[2 * a2] = v8;
-      *(_DWORD *)&v73[2 * a2 + 4] = v8;
+      *(int *)&v73[2 * a2] = v8;
+      *(int *)&v73[2 * a2 + 4] = v8;
       break;
     case 0xEu:
 LABEL_18:
@@ -79135,22 +79118,22 @@ LABEL_18:
       LOWORD(v74) = a1;
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOWORD(v74) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v74;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v74;
+      *(int *)((char *)a5 + a2) = v74;
+      *(int *)((char *)a5 + a2 + 4) = v74;
       LOWORD(v74) = a1;
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOWORD(v74) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v74;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v74;
       v75 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v75;
+      *(int *)((char *)a5 + 2 * a2) = v75;
       v76 = (char *)a5 + a2;
       LOWORD(v75) = a1;
       HIWORD(v75) = __ROR4__(v75, 16) >> 16;
       LOWORD(v75) = a1;
-      *(_DWORD *)&v76[2 * a2 + 4] = v75;
+      *(int *)&v76[2 * a2 + 4] = v75;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v76[2 * a2] = v8;
+      *(int *)&v76[2 * a2] = v8;
       break;
     case 0xFu:
 LABEL_19:
@@ -79162,25 +79145,25 @@ LABEL_19:
       LOWORD(v77) = a1;
       HIWORD(v77) = __ROR4__(v77, 16) >> 16;
       LOWORD(v77) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v77;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v77;
+      *(int *)((char *)a5 + a2) = v77;
+      *(int *)((char *)a5 + a2 + 4) = v77;
       HIWORD(v77) = HIWORD(a1);
       v78 = __ROL4__(a1, 16);
       LOWORD(v77) = v78;
       v79 = __ROL4__(v78, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v77;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v77;
       LOWORD(v77) = v79;
       HIWORD(v77) = __ROL4__(v77, 16) >> 16;
       LOWORD(v77) = v79;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v77;
+      *(int *)((char *)a5 + 2 * a2) = v77;
       v80 = (char *)a5 + a2;
       HIWORD(v77) = HIWORD(v79);
       v81 = __ROL4__(v79, 16);
       LOWORD(v77) = v81;
-      *(_DWORD *)&v80[2 * a2 + 4] = v77;
+      *(int *)&v80[2 * a2 + 4] = v77;
       LOWORD(v8) = __ROL4__(v81, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v80[2 * a2] = v8;
+      *(int *)&v80[2 * a2] = v8;
       break;
     case 0x10u:
 LABEL_20:
@@ -79197,22 +79180,22 @@ LABEL_20:
       v85 = __ROL4__(v84, 16);
       LOWORD(v82) = v85;
       LOWORD(v85) = __ROL4__(v85, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v82;
+      *(int *)((char *)a5 + a2 + 4) = v82;
       LOWORD(v82) = v85;
       HIWORD(v82) = __ROL4__(v82, 16) >> 16;
       LOWORD(v82) = v85;
-      *(_DWORD *)((char *)a5 + a2) = v82;
+      *(int *)((char *)a5 + a2) = v82;
       LOWORD(v82) = v85;
       HIWORD(v82) = __ROR4__(v82, 16) >> 16;
       LOWORD(v82) = v85;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v82;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v82;
+      *(int *)((char *)a5 + 2 * a2) = v82;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v82;
       v86 = (char *)a5 + a2;
       LOWORD(v82) = v85;
       HIWORD(v8) = __ROR4__(v82, 16) >> 16;
       LOWORD(v8) = v85;
-      *(_DWORD *)&v86[2 * a2] = v8;
-      *(_DWORD *)&v86[2 * a2 + 4] = v8;
+      *(int *)&v86[2 * a2] = v8;
+      *(int *)&v86[2 * a2 + 4] = v8;
       break;
     case 0x11u:
 LABEL_21:
@@ -79228,23 +79211,23 @@ LABEL_21:
       LOWORD(v87) = v89;
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       LOWORD(v87) = v89;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v87;
+      *(int *)((char *)a5 + a2 + 4) = v87;
       HIWORD(v87) = HIWORD(v89);
       v90 = __ROL4__(v89, 16);
       LOWORD(v87) = v90;
       LOWORD(v90) = __ROL4__(v90, 16);
-      *(_DWORD *)((char *)a5 + a2) = v87;
+      *(int *)((char *)a5 + a2) = v87;
       LOWORD(v87) = v90;
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       LOWORD(v87) = v90;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v87;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v87;
+      *(int *)((char *)a5 + 2 * a2) = v87;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v87;
       v91 = (char *)a5 + a2;
       LOWORD(v87) = v90;
       HIWORD(v8) = __ROR4__(v87, 16) >> 16;
       LOWORD(v8) = v90;
-      *(_DWORD *)&v91[2 * a2] = v8;
-      *(_DWORD *)&v91[2 * a2 + 4] = v8;
+      *(int *)&v91[2 * a2] = v8;
+      *(int *)&v91[2 * a2 + 4] = v8;
       break;
     case 0x12u:
 LABEL_22:
@@ -79256,25 +79239,25 @@ LABEL_22:
       LOWORD(v92) = a1;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v92;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v92;
+      *(int *)((char *)a5 + a2) = v92;
+      *(int *)((char *)a5 + a2 + 4) = v92;
       LOWORD(v92) = a1;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v92;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v92;
       HIWORD(v92) = HIWORD(a1);
       v93 = __ROL4__(a1, 16);
       LOWORD(v92) = v93;
       v94 = __ROL4__(v93, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v92;
+      *(int *)((char *)a5 + 2 * a2) = v92;
       v95 = (char *)a5 + a2;
       LOWORD(v92) = v94;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = v94;
-      *(_DWORD *)&v95[2 * a2 + 4] = v92;
+      *(int *)&v95[2 * a2 + 4] = v92;
       HIWORD(v8) = HIWORD(v94);
       LOWORD(v8) = __ROL4__(v94, 16);
-      *(_DWORD *)&v95[2 * a2] = v8;
+      *(int *)&v95[2 * a2] = v8;
       break;
     case 0x13u:
 LABEL_23:
@@ -79287,30 +79270,30 @@ LABEL_23:
       v97 = __ROL4__(a1, 16);
       LOWORD(v96) = v97;
       v98 = __ROL4__(v97, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v96;
-      *(_DWORD *)((char *)a5 + a2) = v96;
+      *(int *)((char *)a5 + a2 + 4) = v96;
+      *(int *)((char *)a5 + a2) = v96;
       HIWORD(v96) = HIWORD(v98);
       v99 = __ROL4__(v98, 16);
       LOWORD(v96) = v99;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v96;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v96;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v96;
+      *(int *)((char *)a5 + 2 * a2) = v96;
       v100 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v99, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v100[2 * a2] = v8;
-      *(_DWORD *)&v100[2 * a2 + 4] = v8;
+      *(int *)&v100[2 * a2] = v8;
+      *(int *)&v100[2 * a2 + 4] = v8;
       break;
     case 0x14u:
 LABEL_24:
       a5[1] = __ROL4__(a1, 16);
       *a5 = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v101 = (char *)a5 + a2;
-      *(_DWORD *)&v101[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v101[2 * a2] = a1;
+      *(int *)&v101[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v101[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x15u:
@@ -79324,19 +79307,19 @@ LABEL_25:
       v103 = __ROL4__(a1, 16);
       LOWORD(v102) = v103;
       LOWORD(v103) = __ROL4__(v103, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v102;
-      *(_DWORD *)((char *)a5 + a2) = v102;
+      *(int *)((char *)a5 + a2 + 4) = v102;
+      *(int *)((char *)a5 + a2) = v102;
       LOWORD(v102) = v103;
       HIWORD(v102) = __ROR4__(v102, 16) >> 16;
       LOWORD(v102) = v103;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v102;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v102;
+      *(int *)((char *)a5 + 2 * a2) = v102;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v102;
       v104 = (char *)a5 + a2;
       LOWORD(v102) = v103;
       HIWORD(v8) = __ROR4__(v102, 16) >> 16;
       LOWORD(v8) = v103;
-      *(_DWORD *)&v104[2 * a2] = v8;
-      *(_DWORD *)&v104[2 * a2 + 4] = v8;
+      *(int *)&v104[2 * a2] = v8;
+      *(int *)&v104[2 * a2 + 4] = v8;
       break;
     case 0x16u:
 LABEL_26:
@@ -79348,18 +79331,18 @@ LABEL_26:
       LOWORD(v105) = a1;
       HIWORD(v105) = __ROR4__(v105, 16) >> 16;
       LOWORD(v105) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v105;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v105;
+      *(int *)((char *)a5 + a2) = v105;
+      *(int *)((char *)a5 + a2 + 4) = v105;
       HIWORD(v105) = HIWORD(a1);
       v106 = __ROL4__(a1, 16);
       LOWORD(v105) = v106;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v105;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v105;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v105;
+      *(int *)((char *)a5 + 2 * a2) = v105;
       v107 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v106, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v107[2 * a2] = v8;
-      *(_DWORD *)&v107[2 * a2 + 4] = v8;
+      *(int *)&v107[2 * a2] = v8;
+      *(int *)&v107[2 * a2 + 4] = v8;
       break;
     case 0x17u:
 LABEL_27:
@@ -79370,15 +79353,15 @@ LABEL_27:
       *a5 = a1;
       HIWORD(v8) = __ROR4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = v8;
+      *(int *)((char *)a5 + a2) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v109 = (char *)a5 + a2;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v109[2 * a2 + 4] = v8;
-      *(_DWORD *)&v109[2 * a2] = a1;
+      *(int *)&v109[2 * a2 + 4] = v8;
+      *(int *)&v109[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x18u:
@@ -79390,24 +79373,24 @@ LABEL_28:
       LOWORD(v110) = a1;
       *a5 = v110;
       v111 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v111;
+      *(int *)((char *)a5 + a2 + 4) = v111;
       LOWORD(v111) = a1;
       HIWORD(v111) = __ROL4__(v111, 16) >> 16;
       LOWORD(v111) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v111;
+      *(int *)((char *)a5 + a2) = v111;
       v112 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v112;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v112;
       LOWORD(v112) = a1;
       HIWORD(v112) = __ROL4__(v112, 16) >> 16;
       LOWORD(v112) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v112;
+      *(int *)((char *)a5 + 2 * a2) = v112;
       v113 = (char *)a5 + a2;
       v114 = __ROL4__(a1, 16);
-      *(_DWORD *)&v113[2 * a2 + 4] = v114;
+      *(int *)&v113[2 * a2 + 4] = v114;
       LOWORD(v114) = a1;
       HIWORD(v8) = __ROL4__(v114, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v113[2 * a2] = v8;
+      *(int *)&v113[2 * a2] = v8;
       break;
     case 0x19u:
 LABEL_29:
@@ -79419,15 +79402,15 @@ LABEL_29:
       LOWORD(v115) = a1;
       HIWORD(v115) = __ROR4__(v115, 16) >> 16;
       LOWORD(v115) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v115;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v115;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = v115;
+      *(int *)((char *)a5 + a2 + 4) = v115;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
       HIWORD(v8) = HIWORD(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v116 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v116[2 * a2 + 4] = v8;
-      *(_DWORD *)&v116[2 * a2] = v8;
+      *(int *)&v116[2 * a2 + 4] = v8;
+      *(int *)&v116[2 * a2] = v8;
       break;
     case 0x1Au:
 LABEL_30:
@@ -79439,25 +79422,25 @@ LABEL_30:
       v118 = __ROL4__(a1, 16);
       LOWORD(v117) = v118;
       v119 = __ROL4__(v118, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v117;
+      *(int *)((char *)a5 + a2 + 4) = v117;
       LOWORD(v117) = v119;
       HIWORD(v117) = __ROL4__(v117, 16) >> 16;
       LOWORD(v117) = v119;
-      *(_DWORD *)((char *)a5 + a2) = v117;
+      *(int *)((char *)a5 + a2) = v117;
       HIWORD(v117) = HIWORD(v119);
       v120 = __ROL4__(v119, 16);
       LOWORD(v117) = v120;
       v121 = __ROL4__(v120, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v117;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v117;
       LOWORD(v117) = v121;
       HIWORD(v117) = __ROL4__(v117, 16) >> 16;
       LOWORD(v117) = v121;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v117;
+      *(int *)((char *)a5 + 2 * a2) = v117;
       v122 = (char *)a5 + a2;
-      *(_DWORD *)&v122[2 * a2 + 4] = v121;
+      *(int *)&v122[2 * a2 + 4] = v121;
       HIWORD(v8) = __ROL4__(v121, 16) >> 16;
       LOWORD(v8) = v121;
-      *(_DWORD *)&v122[2 * a2] = v8;
+      *(int *)&v122[2 * a2] = v8;
       break;
     case 0x1Bu:
 LABEL_31:
@@ -79467,18 +79450,18 @@ LABEL_31:
       v125 = __ROL4__(v124, 16);
       a5[1] = v123;
       *a5 = v123;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v125, 16);
-      *(_DWORD *)((char *)a5 + a2) = v125;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v125, 16);
+      *(int *)((char *)a5 + a2) = v125;
       HIWORD(v123) = __ROR4__(v125, 16) >> 16;
       LOWORD(v123) = v125;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v123;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v123;
+      *(int *)((char *)a5 + 2 * a2) = v123;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v123;
       v126 = (char *)a5 + a2;
       LOWORD(v123) = v125;
       HIWORD(v8) = __ROR4__(v123, 16) >> 16;
       LOWORD(v8) = v125;
-      *(_DWORD *)&v126[2 * a2] = v8;
-      *(_DWORD *)&v126[2 * a2 + 4] = v8;
+      *(int *)&v126[2 * a2] = v8;
+      *(int *)&v126[2 * a2 + 4] = v8;
       break;
     case 0x1Cu:
 LABEL_32:
@@ -79491,28 +79474,28 @@ LABEL_32:
       LOWORD(v128) = a1;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v128;
+      *(int *)((char *)a5 + a2 + 4) = v128;
       HIWORD(v128) = HIWORD(a1);
       v129 = __ROL4__(a1, 16);
       LOWORD(v128) = v129;
       v130 = __ROL4__(v129, 16);
-      *(_DWORD *)((char *)a5 + a2) = v128;
+      *(int *)((char *)a5 + a2) = v128;
       LOWORD(v128) = v130;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = v130;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v128;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v128;
       HIWORD(v128) = HIWORD(v130);
       v131 = __ROL4__(v130, 16);
       LOWORD(v128) = v131;
       v132 = __ROL4__(v131, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v128;
+      *(int *)((char *)a5 + 2 * a2) = v128;
       v133 = (char *)a5 + a2;
       LOWORD(v128) = v132;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = v132;
-      *(_DWORD *)&v133[2 * a2 + 4] = v128;
+      *(int *)&v133[2 * a2 + 4] = v128;
       v8 = __ROL4__(v132, 16);
-      *(_DWORD *)&v133[2 * a2] = v8;
+      *(int *)&v133[2 * a2] = v8;
       break;
     case 0x1Du:
 LABEL_33:
@@ -79525,24 +79508,24 @@ LABEL_33:
       HIWORD(v134) = __ROL4__(v134, 16) >> 16;
       LOWORD(v134) = v136;
       *a5 = v134;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v136;
+      *(int *)((char *)a5 + a2 + 4) = v136;
       HIWORD(v134) = __ROL4__(v136, 16) >> 16;
       LOWORD(v134) = v136;
-      *(_DWORD *)((char *)a5 + a2) = v134;
+      *(int *)((char *)a5 + a2) = v134;
       LOWORD(v134) = v136;
       HIWORD(v134) = __ROR4__(v134, 16) >> 16;
       LOWORD(v134) = v136;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v134;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v134;
       v137 = __ROL4__(v136, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v137;
+      *(int *)((char *)a5 + 2 * a2) = v137;
       v138 = (char *)a5 + a2;
       LOWORD(v137) = v136;
       HIWORD(v137) = __ROR4__(v137, 16) >> 16;
       LOWORD(v137) = v136;
-      *(_DWORD *)&v138[2 * a2 + 4] = v137;
+      *(int *)&v138[2 * a2 + 4] = v137;
       HIWORD(v8) = HIWORD(v136);
       LOWORD(v8) = __ROL4__(v136, 16);
-      *(_DWORD *)&v138[2 * a2] = v8;
+      *(int *)&v138[2 * a2] = v8;
       break;
     case 0x1Eu:
 LABEL_34:
@@ -79558,20 +79541,20 @@ LABEL_34:
       LOWORD(v139) = v141;
       HIWORD(v139) = __ROR4__(v139, 16) >> 16;
       LOWORD(v139) = v141;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v139;
-      *(_DWORD *)((char *)a5 + a2) = __ROL4__(v141, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v141;
+      *(int *)((char *)a5 + a2 + 4) = v139;
+      *(int *)((char *)a5 + a2) = __ROL4__(v141, 16);
+      *(int *)((char *)a5 + 2 * a2 + 4) = v141;
       HIWORD(v139) = __ROL4__(v141, 16) >> 16;
       LOWORD(v139) = v141;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v139;
+      *(int *)((char *)a5 + 2 * a2) = v139;
       v142 = (char *)a5 + a2;
       HIWORD(v139) = HIWORD(v141);
       v143 = __ROL4__(v141, 16);
       LOWORD(v139) = v143;
-      *(_DWORD *)&v142[2 * a2 + 4] = v139;
+      *(int *)&v142[2 * a2 + 4] = v139;
       LOWORD(v8) = __ROL4__(v143, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v142[2 * a2] = v8;
+      *(int *)&v142[2 * a2] = v8;
       break;
     case 0x1Fu:
 LABEL_35:
@@ -79588,28 +79571,28 @@ LABEL_35:
       v147 = __ROL4__(v146, 16);
       LOWORD(v144) = v147;
       v148 = __ROL4__(v147, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v144;
+      *(int *)((char *)a5 + a2 + 4) = v144;
       LOWORD(v144) = v148;
       HIWORD(v144) = __ROL4__(v144, 16) >> 16;
       LOWORD(v144) = v148;
-      *(_DWORD *)((char *)a5 + a2) = v144;
+      *(int *)((char *)a5 + a2) = v144;
       LOWORD(v144) = v148;
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       LOWORD(v144) = v148;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v144;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v144;
       HIWORD(v144) = HIWORD(v148);
       v149 = __ROL4__(v148, 16);
       LOWORD(v144) = v149;
       v150 = __ROL4__(v149, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v144;
+      *(int *)((char *)a5 + 2 * a2) = v144;
       v151 = (char *)a5 + a2;
       LOWORD(v144) = v150;
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       LOWORD(v144) = v150;
-      *(_DWORD *)&v151[2 * a2 + 4] = v144;
+      *(int *)&v151[2 * a2 + 4] = v144;
       HIWORD(v8) = HIWORD(v150);
       LOWORD(v8) = __ROL4__(v150, 16);
-      *(_DWORD *)&v151[2 * a2] = v8;
+      *(int *)&v151[2 * a2] = v8;
       break;
     case 0x20u:
 LABEL_36:
@@ -79621,13 +79604,13 @@ LABEL_36:
       LOWORD(v152) = a1;
       HIWORD(v8) = __ROR4__(v152, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v8;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2) = v8;
+      *(int *)((char *)a5 + a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v153 = (char *)a5 + a2;
-      *(_DWORD *)&v153[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v153[2 * a2] = a1;
+      *(int *)&v153[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v153[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x21u:
@@ -79641,43 +79624,43 @@ LABEL_37:
       v155 = __ROL4__(a1, 16);
       LOWORD(v154) = v155;
       v156 = __ROL4__(v155, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v154;
+      *(int *)((char *)a5 + a2 + 4) = v154;
       LOWORD(v154) = v156;
       HIWORD(v154) = __ROL4__(v154, 16) >> 16;
       LOWORD(v154) = v156;
-      *(_DWORD *)((char *)a5 + a2) = v154;
+      *(int *)((char *)a5 + a2) = v154;
       HIWORD(v154) = HIWORD(v156);
       v157 = __ROL4__(v156, 16);
       LOWORD(v154) = v157;
       LOWORD(v157) = __ROL4__(v157, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v154;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v154;
       LOWORD(v154) = v157;
       HIWORD(v154) = __ROL4__(v154, 16) >> 16;
       LOWORD(v154) = v157;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v154;
+      *(int *)((char *)a5 + 2 * a2) = v154;
       v158 = (char *)a5 + a2;
       LOWORD(v154) = v157;
       HIWORD(v8) = __ROR4__(v154, 16) >> 16;
       LOWORD(v8) = v157;
-      *(_DWORD *)&v158[2 * a2] = v8;
-      *(_DWORD *)&v158[2 * a2 + 4] = v8;
+      *(int *)&v158[2 * a2] = v8;
+      *(int *)&v158[2 * a2 + 4] = v8;
       break;
     case 0x22u:
 LABEL_38:
       a5[1] = __ROL4__(a1, 16);
       *a5 = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
       HIWORD(v159) = __ROR4__(a1, 16) >> 16;
       LOWORD(v159) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v159;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v159;
+      *(int *)((char *)a5 + 2 * a2) = v159;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v159;
       v160 = (char *)a5 + a2;
       LOWORD(v159) = a1;
       HIWORD(v8) = __ROR4__(v159, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v160[2 * a2] = v8;
-      *(_DWORD *)&v160[2 * a2 + 4] = v8;
+      *(int *)&v160[2 * a2] = v8;
+      *(int *)&v160[2 * a2 + 4] = v8;
       break;
     case 0x23u:
 LABEL_39:
@@ -79689,25 +79672,25 @@ LABEL_39:
       LOWORD(v161) = a1;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       LOWORD(v161) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v161;
+      *(int *)((char *)a5 + a2 + 4) = v161;
       HIWORD(v161) = HIWORD(a1);
       v162 = __ROL4__(a1, 16);
       LOWORD(v161) = v162;
       v163 = __ROL4__(v162, 16);
-      *(_DWORD *)((char *)a5 + a2) = v161;
+      *(int *)((char *)a5 + a2) = v161;
       LOWORD(v161) = v163;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       LOWORD(v161) = v163;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v161;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v161;
       HIWORD(v161) = HIWORD(v163);
       v164 = __ROL4__(v163, 16);
       LOWORD(v161) = v164;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v161;
+      *(int *)((char *)a5 + 2 * a2) = v161;
       v165 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v164, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v165[2 * a2] = v8;
-      *(_DWORD *)&v165[2 * a2 + 4] = v8;
+      *(int *)&v165[2 * a2] = v8;
+      *(int *)&v165[2 * a2 + 4] = v8;
       break;
     case 0x24u:
 LABEL_40:
@@ -79719,15 +79702,15 @@ LABEL_40:
       LOWORD(v166) = a1;
       HIWORD(v166) = __ROR4__(v166, 16) >> 16;
       LOWORD(v166) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v166;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v166;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = v166;
+      *(int *)((char *)a5 + a2 + 4) = v166;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + 2 * a2) = __ROL4__(a1, 16);
       v167 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v167[2 * a2 + 4] = v8;
-      *(_DWORD *)&v167[2 * a2] = v8;
+      *(int *)&v167[2 * a2 + 4] = v8;
+      *(int *)&v167[2 * a2] = v8;
       break;
     case 0x25u:
 LABEL_41:
@@ -79740,21 +79723,21 @@ LABEL_41:
       HIWORD(v168) = __ROL4__(v168, 16) >> 16;
       LOWORD(v168) = v170;
       *a5 = v168;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v170;
+      *(int *)((char *)a5 + a2 + 4) = v170;
       HIWORD(v168) = __ROL4__(v170, 16) >> 16;
       LOWORD(v168) = v170;
-      *(_DWORD *)((char *)a5 + a2) = v168;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v170;
+      *(int *)((char *)a5 + a2) = v168;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v170;
       LOWORD(v168) = v170;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v168;
+      *(int *)((char *)a5 + 2 * a2) = v168;
       v171 = (char *)a5 + a2;
       HIWORD(v168) = HIWORD(v170);
       v172 = __ROL4__(v170, 16);
       LOWORD(v168) = v172;
-      *(_DWORD *)&v171[2 * a2 + 4] = v168;
+      *(int *)&v171[2 * a2 + 4] = v168;
       LOWORD(v8) = __ROL4__(v172, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v171[2 * a2] = v8;
+      *(int *)&v171[2 * a2] = v8;
       break;
     case 0x26u:
 LABEL_42:
@@ -79764,20 +79747,20 @@ LABEL_42:
       v175 = __ROL4__(v174, 16);
       a5[1] = v173;
       *a5 = v173;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v175;
+      *(int *)((char *)a5 + a2 + 4) = v175;
       v176 = __ROL4__(v175, 16);
-      *(_DWORD *)((char *)a5 + a2) = v176;
+      *(int *)((char *)a5 + a2) = v176;
       LOWORD(v176) = v175;
       HIWORD(v176) = __ROR4__(v176, 16) >> 16;
       LOWORD(v176) = v175;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v176;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v176;
+      *(int *)((char *)a5 + 2 * a2) = v176;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v176;
       v177 = (char *)a5 + a2;
       LOWORD(v176) = v175;
       HIWORD(v8) = __ROR4__(v176, 16) >> 16;
       LOWORD(v8) = v175;
-      *(_DWORD *)&v177[2 * a2] = v8;
-      *(_DWORD *)&v177[2 * a2 + 4] = v8;
+      *(int *)&v177[2 * a2] = v8;
+      *(int *)&v177[2 * a2 + 4] = v8;
       break;
     case 0x27u:
 LABEL_43:
@@ -79793,23 +79776,23 @@ LABEL_43:
       LOWORD(v178) = v180;
       HIWORD(v178) = __ROR4__(v178, 16) >> 16;
       LOWORD(v178) = v180;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v178;
+      *(int *)((char *)a5 + a2 + 4) = v178;
       v181 = __ROL4__(v180, 16);
-      *(_DWORD *)((char *)a5 + a2) = v181;
+      *(int *)((char *)a5 + a2) = v181;
       LOWORD(v181) = v180;
       HIWORD(v181) = __ROR4__(v181, 16) >> 16;
       LOWORD(v181) = v180;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v181;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v181;
       v182 = __ROL4__(v180, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v182;
+      *(int *)((char *)a5 + 2 * a2) = v182;
       v183 = (char *)a5 + a2;
       LOWORD(v182) = v180;
       HIWORD(v182) = __ROR4__(v182, 16) >> 16;
       LOWORD(v182) = v180;
-      *(_DWORD *)&v183[2 * a2 + 4] = v182;
+      *(int *)&v183[2 * a2 + 4] = v182;
       HIWORD(v8) = HIWORD(v180);
       LOWORD(v8) = __ROL4__(v180, 16);
-      *(_DWORD *)&v183[2 * a2] = v8;
+      *(int *)&v183[2 * a2] = v8;
       break;
     case 0x28u:
 LABEL_44:
@@ -79821,16 +79804,16 @@ LABEL_44:
       LOWORD(v184) = a1;
       HIWORD(v184) = __ROR4__(v184, 16) >> 16;
       LOWORD(v184) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v184;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v184;
+      *(int *)((char *)a5 + a2) = v184;
+      *(int *)((char *)a5 + a2 + 4) = v184;
       LOWORD(v184) = a1;
       HIWORD(v8) = __ROR4__(v184, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
       v185 = (char *)a5 + a2;
-      *(_DWORD *)&v185[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v185[2 * a2] = a1;
+      *(int *)&v185[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v185[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x29u:
@@ -79840,19 +79823,19 @@ LABEL_45:
       LOWORD(v186) = a1;
       *a5 = v186;
       a5[1] = v186;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       HIWORD(v186) = __ROL4__(a1, 16) >> 16;
       LOWORD(v186) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v186;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v186;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       LOWORD(v186) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v186;
+      *(int *)((char *)a5 + 2 * a2) = v186;
       v187 = (char *)a5 + a2;
       LOWORD(v186) = a1;
       HIWORD(v8) = __ROR4__(v186, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v187[2 * a2] = v8;
-      *(_DWORD *)&v187[2 * a2 + 4] = v8;
+      *(int *)&v187[2 * a2] = v8;
+      *(int *)&v187[2 * a2 + 4] = v8;
       break;
     case 0x2Au:
 LABEL_46:
@@ -79860,19 +79843,19 @@ LABEL_46:
       *a5 = a1;
       HIWORD(v188) = __ROR4__(a1, 16) >> 16;
       LOWORD(v188) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v188;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v188;
+      *(int *)((char *)a5 + a2) = v188;
+      *(int *)((char *)a5 + a2 + 4) = v188;
       LOWORD(v188) = a1;
       HIWORD(v188) = __ROR4__(v188, 16) >> 16;
       LOWORD(v188) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v188;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v188;
+      *(int *)((char *)a5 + 2 * a2) = v188;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v188;
       v189 = (char *)a5 + a2;
       LOWORD(v188) = a1;
       HIWORD(v8) = __ROR4__(v188, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v189[2 * a2] = v8;
-      *(_DWORD *)&v189[2 * a2 + 4] = v8;
+      *(int *)&v189[2 * a2] = v8;
+      *(int *)&v189[2 * a2 + 4] = v8;
       break;
     case 0x2Bu:
 LABEL_47:
@@ -79884,21 +79867,21 @@ LABEL_47:
       LOWORD(v190) = a1;
       HIWORD(v190) = __ROR4__(v190, 16) >> 16;
       LOWORD(v190) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v190;
+      *(int *)((char *)a5 + a2 + 4) = v190;
       v191 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v191;
+      *(int *)((char *)a5 + a2) = v191;
       LOWORD(v191) = a1;
       HIWORD(v191) = __ROR4__(v191, 16) >> 16;
       LOWORD(v191) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v191;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v191;
       v192 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v192;
+      *(int *)((char *)a5 + 2 * a2) = v192;
       v193 = (char *)a5 + a2;
       LOWORD(v192) = a1;
       HIWORD(v8) = __ROR4__(v192, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v193[2 * a2] = v8;
-      *(_DWORD *)&v193[2 * a2 + 4] = v8;
+      *(int *)&v193[2 * a2] = v8;
+      *(int *)&v193[2 * a2 + 4] = v8;
       break;
     case 0x2Cu:
 LABEL_48:
@@ -79906,26 +79889,26 @@ LABEL_48:
       HIWORD(v194) = __ROL4__(a1, 16) >> 16;
       LOWORD(v194) = a1;
       *a5 = v194;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       LOWORD(v194) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v194;
+      *(int *)((char *)a5 + a2) = v194;
       HIWORD(v194) = HIWORD(a1);
       v195 = __ROL4__(a1, 16);
       LOWORD(v194) = v195;
       v196 = __ROL4__(v195, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v194;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v194;
       LOWORD(v194) = v196;
       HIWORD(v194) = __ROL4__(v194, 16) >> 16;
       LOWORD(v194) = v196;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v194;
+      *(int *)((char *)a5 + 2 * a2) = v194;
       v197 = (char *)a5 + a2;
       HIWORD(v194) = HIWORD(v196);
       v198 = __ROL4__(v196, 16);
       LOWORD(v194) = v198;
-      *(_DWORD *)&v197[2 * a2 + 4] = v194;
+      *(int *)&v197[2 * a2 + 4] = v194;
       LOWORD(v8) = __ROL4__(v198, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v197[2 * a2] = v8;
+      *(int *)&v197[2 * a2] = v8;
       break;
     case 0x2Du:
 LABEL_49:
@@ -79937,22 +79920,22 @@ LABEL_49:
       LOWORD(v199) = a1;
       HIWORD(v199) = __ROR4__(v199, 16) >> 16;
       LOWORD(v199) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v199;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v199;
+      *(int *)((char *)a5 + a2) = v199;
+      *(int *)((char *)a5 + a2 + 4) = v199;
       HIWORD(v199) = HIWORD(a1);
       v200 = __ROL4__(a1, 16);
       LOWORD(v199) = v200;
       v201 = __ROL4__(v200, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v199;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v199;
       LOWORD(v199) = v201;
       HIWORD(v199) = __ROL4__(v199, 16) >> 16;
       LOWORD(v199) = v201;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v199;
+      *(int *)((char *)a5 + 2 * a2) = v199;
       v202 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v201);
       LOWORD(v8) = __ROL4__(v201, 16);
-      *(_DWORD *)&v202[2 * a2 + 4] = v8;
-      *(_DWORD *)&v202[2 * a2] = v8;
+      *(int *)&v202[2 * a2 + 4] = v8;
+      *(int *)&v202[2 * a2] = v8;
       break;
     case 0x2Eu:
 LABEL_50:
@@ -79966,22 +79949,22 @@ LABEL_50:
       v206 = __ROL4__(v205, 16);
       LOWORD(v203) = v206;
       LOWORD(v206) = __ROL4__(v206, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v203;
+      *(int *)((char *)a5 + a2 + 4) = v203;
       LOWORD(v203) = v206;
       HIWORD(v203) = __ROL4__(v203, 16) >> 16;
       LOWORD(v203) = v206;
-      *(_DWORD *)((char *)a5 + a2) = v203;
+      *(int *)((char *)a5 + a2) = v203;
       LOWORD(v203) = v206;
       HIWORD(v203) = __ROR4__(v203, 16) >> 16;
       LOWORD(v203) = v206;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v203;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v203;
+      *(int *)((char *)a5 + 2 * a2) = v203;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v203;
       v207 = (char *)a5 + a2;
       LOWORD(v203) = v206;
       HIWORD(v8) = __ROR4__(v203, 16) >> 16;
       LOWORD(v8) = v206;
-      *(_DWORD *)&v207[2 * a2] = v8;
-      *(_DWORD *)&v207[2 * a2 + 4] = v8;
+      *(int *)&v207[2 * a2] = v8;
+      *(int *)&v207[2 * a2 + 4] = v8;
       break;
     case 0x2Fu:
 LABEL_51:
@@ -79998,19 +79981,19 @@ LABEL_51:
       v211 = __ROL4__(v210, 16);
       LOWORD(v208) = v211;
       v212 = __ROL4__(v211, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v208;
+      *(int *)((char *)a5 + a2 + 4) = v208;
       LOWORD(v208) = v212;
       HIWORD(v208) = __ROL4__(v208, 16) >> 16;
       LOWORD(v208) = v212;
-      *(_DWORD *)((char *)a5 + a2) = v208;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v212;
+      *(int *)((char *)a5 + a2) = v208;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v212;
       HIWORD(v8) = __ROL4__(v212, 16) >> 16;
       LOWORD(v8) = v212;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v213 = (char *)a5 + a2;
-      *(_DWORD *)&v213[2 * a2 + 4] = v212;
+      *(int *)&v213[2 * a2 + 4] = v212;
       LOWORD(v8) = v212;
-      *(_DWORD *)&v213[2 * a2] = v8;
+      *(int *)&v213[2 * a2] = v8;
       break;
     case 0x30u:
 LABEL_52:
@@ -80023,23 +80006,23 @@ LABEL_52:
       LOWORD(v214) = v216;
       HIWORD(v214) = __ROR4__(v214, 16) >> 16;
       LOWORD(v214) = v216;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v214;
+      *(int *)((char *)a5 + a2 + 4) = v214;
       HIWORD(v214) = HIWORD(v216);
       v217 = __ROL4__(v216, 16);
       LOWORD(v214) = v217;
       LOWORD(v217) = __ROL4__(v217, 16);
-      *(_DWORD *)((char *)a5 + a2) = v214;
+      *(int *)((char *)a5 + a2) = v214;
       LOWORD(v214) = v217;
       HIWORD(v214) = __ROR4__(v214, 16) >> 16;
       LOWORD(v214) = v217;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v214;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v214;
+      *(int *)((char *)a5 + 2 * a2) = v214;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v214;
       v218 = (char *)a5 + a2;
       LOWORD(v214) = v217;
       HIWORD(v8) = __ROR4__(v214, 16) >> 16;
       LOWORD(v8) = v217;
-      *(_DWORD *)&v218[2 * a2] = v8;
-      *(_DWORD *)&v218[2 * a2 + 4] = v8;
+      *(int *)&v218[2 * a2] = v8;
+      *(int *)&v218[2 * a2 + 4] = v8;
       break;
     case 0x31u:
 LABEL_53:
@@ -80055,25 +80038,25 @@ LABEL_53:
       LOWORD(v219) = v221;
       HIWORD(v219) = __ROR4__(v219, 16) >> 16;
       LOWORD(v219) = v221;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v219;
+      *(int *)((char *)a5 + a2 + 4) = v219;
       HIWORD(v219) = HIWORD(v221);
       v222 = __ROL4__(v221, 16);
       LOWORD(v219) = v222;
       v223 = __ROL4__(v222, 16);
-      *(_DWORD *)((char *)a5 + a2) = v219;
+      *(int *)((char *)a5 + a2) = v219;
       LOWORD(v219) = v223;
       HIWORD(v219) = __ROR4__(v219, 16) >> 16;
       LOWORD(v219) = v223;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v219;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v219;
       v224 = __ROL4__(v223, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v224;
+      *(int *)((char *)a5 + 2 * a2) = v224;
       v225 = (char *)a5 + a2;
       LOWORD(v224) = v223;
       HIWORD(v224) = __ROR4__(v224, 16) >> 16;
       LOWORD(v224) = v223;
-      *(_DWORD *)&v225[2 * a2 + 4] = v224;
+      *(int *)&v225[2 * a2 + 4] = v224;
       v8 = __ROL4__(v223, 16);
-      *(_DWORD *)&v225[2 * a2] = v8;
+      *(int *)&v225[2 * a2] = v8;
       break;
     case 0x32u:
 LABEL_54:
@@ -80086,26 +80069,26 @@ LABEL_54:
       LOWORD(v227) = a1;
       HIWORD(v227) = __ROR4__(v227, 16) >> 16;
       LOWORD(v227) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v227;
+      *(int *)((char *)a5 + a2 + 4) = v227;
       v228 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v228;
+      *(int *)((char *)a5 + a2) = v228;
       LOWORD(v228) = a1;
       HIWORD(v228) = __ROR4__(v228, 16) >> 16;
       LOWORD(v228) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v228;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v228;
       HIWORD(v228) = HIWORD(a1);
       v229 = __ROL4__(a1, 16);
       LOWORD(v228) = v229;
       v230 = __ROL4__(v229, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v228;
+      *(int *)((char *)a5 + 2 * a2) = v228;
       v231 = (char *)a5 + a2;
       LOWORD(v228) = v230;
       HIWORD(v228) = __ROR4__(v228, 16) >> 16;
       LOWORD(v228) = v230;
-      *(_DWORD *)&v231[2 * a2 + 4] = v228;
+      *(int *)&v231[2 * a2 + 4] = v228;
       HIWORD(v8) = HIWORD(v230);
       LOWORD(v8) = __ROL4__(v230, 16);
-      *(_DWORD *)&v231[2 * a2] = v8;
+      *(int *)&v231[2 * a2] = v8;
       break;
     case 0x33u:
 LABEL_55:
@@ -80117,22 +80100,22 @@ LABEL_55:
       LOWORD(v232) = a1;
       HIWORD(v232) = __ROR4__(v232, 16) >> 16;
       LOWORD(v232) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v232;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v232;
+      *(int *)((char *)a5 + a2) = v232;
+      *(int *)((char *)a5 + a2 + 4) = v232;
       LOWORD(v232) = a1;
       HIWORD(v232) = __ROR4__(v232, 16) >> 16;
       LOWORD(v232) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v232;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v232;
       HIWORD(v232) = HIWORD(a1);
       v233 = __ROL4__(a1, 16);
       LOWORD(v232) = v233;
       v234 = __ROL4__(v233, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v232;
+      *(int *)((char *)a5 + 2 * a2) = v232;
       v235 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v234);
       LOWORD(v8) = __ROL4__(v234, 16);
-      *(_DWORD *)&v235[2 * a2 + 4] = v8;
-      *(_DWORD *)&v235[2 * a2] = v8;
+      *(int *)&v235[2 * a2 + 4] = v8;
+      *(int *)&v235[2 * a2] = v8;
       break;
     case 0x34u:
 LABEL_56:
@@ -80142,17 +80125,17 @@ LABEL_56:
       v237 = __ROL4__(a1, 16);
       LOWORD(v236) = v237;
       v238 = __ROL4__(v237, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v236;
-      *(_DWORD *)((char *)a5 + a2) = v236;
+      *(int *)((char *)a5 + a2 + 4) = v236;
+      *(int *)((char *)a5 + a2) = v236;
       HIWORD(v8) = HIWORD(v238);
       v239 = __ROL4__(v238, 16);
       LOWORD(v8) = v239;
       v240 = __ROL4__(v239, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v241 = (char *)a5 + a2;
-      *(_DWORD *)&v241[2 * a2 + 4] = __ROL4__(v240, 16);
-      *(_DWORD *)&v241[2 * a2] = v240;
+      *(int *)&v241[2 * a2 + 4] = __ROL4__(v240, 16);
+      *(int *)&v241[2 * a2] = v240;
       LOWORD(v8) = v240;
       break;
     case 0x35u:
@@ -80169,15 +80152,15 @@ LABEL_57:
       LOWORD(v242) = v244;
       HIWORD(v242) = __ROR4__(v242, 16) >> 16;
       LOWORD(v242) = v244;
-      *(_DWORD *)((char *)a5 + a2) = v242;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v242;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v244, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v244;
+      *(int *)((char *)a5 + a2) = v242;
+      *(int *)((char *)a5 + a2 + 4) = v242;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v244, 16);
+      *(int *)((char *)a5 + 2 * a2) = v244;
       v245 = (char *)a5 + a2;
       HIWORD(v8) = __ROR4__(v244, 16) >> 16;
       LOWORD(v8) = v244;
-      *(_DWORD *)&v245[2 * a2] = v8;
-      *(_DWORD *)&v245[2 * a2 + 4] = v8;
+      *(int *)&v245[2 * a2] = v8;
+      *(int *)&v245[2 * a2 + 4] = v8;
       break;
     case 0x36u:
 LABEL_58:
@@ -80187,21 +80170,21 @@ LABEL_58:
       v247 = __ROL4__(a1, 16);
       LOWORD(v246) = v247;
       v248 = __ROL4__(v247, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v246;
+      *(int *)((char *)a5 + a2 + 4) = v246;
       LOWORD(v246) = v248;
       HIWORD(v246) = __ROL4__(v246, 16) >> 16;
       LOWORD(v246) = v248;
-      *(_DWORD *)((char *)a5 + a2) = v246;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v248;
+      *(int *)((char *)a5 + a2) = v246;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v248;
       HIWORD(v246) = __ROL4__(v248, 16) >> 16;
       LOWORD(v246) = v248;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v246;
+      *(int *)((char *)a5 + 2 * a2) = v246;
       v249 = (char *)a5 + a2;
       LOWORD(v246) = v248;
       HIWORD(v8) = __ROR4__(v246, 16) >> 16;
       LOWORD(v8) = v248;
-      *(_DWORD *)&v249[2 * a2] = v8;
-      *(_DWORD *)&v249[2 * a2 + 4] = v8;
+      *(int *)&v249[2 * a2] = v8;
+      *(int *)&v249[2 * a2 + 4] = v8;
       break;
     case 0x37u:
 LABEL_59:
@@ -80214,22 +80197,22 @@ LABEL_59:
       LOWORD(v250) = v251;
       v252 = __ROL4__(v251, 16);
       *a5 = v250;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v252, 16);
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v252, 16);
       HIWORD(v250) = HIWORD(v252);
-      *(_DWORD *)((char *)a5 + a2) = v252;
+      *(int *)((char *)a5 + a2) = v252;
       v253 = __ROL4__(v252, 16);
       LOWORD(v250) = v253;
       v254 = __ROL4__(v253, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v250;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v250;
       LOWORD(v250) = v254;
       HIWORD(v250) = __ROL4__(v250, 16) >> 16;
       LOWORD(v250) = v254;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v250;
+      *(int *)((char *)a5 + 2 * a2) = v250;
       v255 = (char *)a5 + a2;
-      *(_DWORD *)&v255[2 * a2 + 4] = v254;
+      *(int *)&v255[2 * a2 + 4] = v254;
       HIWORD(v8) = __ROL4__(v254, 16) >> 16;
       LOWORD(v8) = v254;
-      *(_DWORD *)&v255[2 * a2] = v8;
+      *(int *)&v255[2 * a2] = v8;
       break;
     case 0x38u:
 LABEL_60:
@@ -80242,22 +80225,22 @@ LABEL_60:
       LOWORD(v257) = a1;
       HIWORD(v257) = __ROR4__(v257, 16) >> 16;
       LOWORD(v257) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v257;
+      *(int *)((char *)a5 + a2 + 4) = v257;
       HIWORD(v257) = HIWORD(a1);
       v258 = __ROL4__(a1, 16);
       LOWORD(v257) = v258;
       v259 = __ROL4__(v258, 16);
-      *(_DWORD *)((char *)a5 + a2) = v257;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v259, 16);
+      *(int *)((char *)a5 + a2) = v257;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v259, 16);
       HIWORD(v257) = HIWORD(v259);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v259;
+      *(int *)((char *)a5 + 2 * a2) = v259;
       v260 = (char *)a5 + a2;
       v261 = __ROL4__(v259, 16);
       LOWORD(v257) = v261;
-      *(_DWORD *)&v260[2 * a2 + 4] = v257;
+      *(int *)&v260[2 * a2 + 4] = v257;
       LOWORD(v8) = __ROL4__(v261, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v260[2 * a2] = v8;
+      *(int *)&v260[2 * a2] = v8;
       break;
     case 0x39u:
 LABEL_61:
@@ -80269,21 +80252,21 @@ LABEL_61:
       LOWORD(v262) = a1;
       HIWORD(v262) = __ROR4__(v262, 16) >> 16;
       LOWORD(v262) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v262;
+      *(int *)((char *)a5 + a2 + 4) = v262;
       v263 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v263;
+      *(int *)((char *)a5 + a2) = v263;
       LOWORD(v263) = a1;
       HIWORD(v263) = __ROR4__(v263, 16) >> 16;
       LOWORD(v263) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v263;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v263;
       HIWORD(v8) = HIWORD(a1);
       v264 = __ROL4__(a1, 16);
       LOWORD(v8) = v264;
       v265 = __ROL4__(v264, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v266 = (char *)a5 + a2;
-      *(_DWORD *)&v266[2 * a2 + 4] = __ROL4__(v265, 16);
-      *(_DWORD *)&v266[2 * a2] = v265;
+      *(int *)&v266[2 * a2 + 4] = __ROL4__(v265, 16);
+      *(int *)&v266[2 * a2] = v265;
       LOWORD(v8) = v265;
       break;
     case 0x3Au:
@@ -80293,20 +80276,20 @@ LABEL_62:
       LOWORD(v267) = a1;
       *a5 = v267;
       a5[1] = v267;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
       HIWORD(v267) = __ROR4__(a1, 16) >> 16;
       LOWORD(v267) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v267;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v267;
+      *(int *)((char *)a5 + 2 * a2) = v267;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v267;
       v268 = (char *)a5 + a2;
       HIWORD(v267) = HIWORD(a1);
       v269 = __ROL4__(a1, 16);
       LOWORD(v267) = v269;
-      *(_DWORD *)&v268[2 * a2 + 4] = v267;
+      *(int *)&v268[2 * a2 + 4] = v267;
       LOWORD(v8) = __ROL4__(v269, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v268[2 * a2] = v8;
+      *(int *)&v268[2 * a2] = v8;
       break;
     case 0x3Bu:
 LABEL_63:
@@ -80314,24 +80297,24 @@ LABEL_63:
       *a5 = a1;
       HIWORD(v270) = __ROR4__(a1, 16) >> 16;
       LOWORD(v270) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v270;
+      *(int *)((char *)a5 + a2 + 4) = v270;
       HIWORD(v270) = HIWORD(a1);
       v271 = __ROL4__(a1, 16);
       LOWORD(v270) = v271;
       v272 = __ROL4__(v271, 16);
-      *(_DWORD *)((char *)a5 + a2) = v270;
+      *(int *)((char *)a5 + a2) = v270;
       LOWORD(v270) = v272;
       HIWORD(v270) = __ROR4__(v270, 16) >> 16;
       LOWORD(v270) = v272;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v270;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v270;
       v273 = __ROL4__(v272, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v273;
+      *(int *)((char *)a5 + 2 * a2) = v273;
       v274 = (char *)a5 + a2;
       LOWORD(v273) = v272;
       HIWORD(v8) = __ROR4__(v273, 16) >> 16;
       LOWORD(v8) = v272;
-      *(_DWORD *)&v274[2 * a2] = v8;
-      *(_DWORD *)&v274[2 * a2 + 4] = v8;
+      *(int *)&v274[2 * a2] = v8;
+      *(int *)&v274[2 * a2 + 4] = v8;
       break;
     case 0x3Cu:
 LABEL_64:
@@ -80344,23 +80327,23 @@ LABEL_64:
       HIWORD(v275) = __ROL4__(v275, 16) >> 16;
       LOWORD(v275) = v277;
       *a5 = v275;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v277, 16);
-      *(_DWORD *)((char *)a5 + a2) = v277;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v277, 16);
+      *(int *)((char *)a5 + a2) = v277;
       HIWORD(v275) = __ROR4__(v277, 16) >> 16;
       LOWORD(v275) = v277;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v275;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v275;
       HIWORD(v275) = HIWORD(v277);
       v278 = __ROL4__(v277, 16);
       LOWORD(v275) = v278;
       v279 = __ROL4__(v278, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v275;
+      *(int *)((char *)a5 + 2 * a2) = v275;
       v280 = (char *)a5 + a2;
       LOWORD(v275) = v279;
       HIWORD(v275) = __ROR4__(v275, 16) >> 16;
       LOWORD(v275) = v279;
-      *(_DWORD *)&v280[2 * a2 + 4] = v275;
+      *(int *)&v280[2 * a2 + 4] = v275;
       v8 = __ROL4__(v279, 16);
-      *(_DWORD *)&v280[2 * a2] = v8;
+      *(int *)&v280[2 * a2] = v8;
       break;
     case 0x3Du:
 LABEL_65:
@@ -80372,20 +80355,20 @@ LABEL_65:
       v282 = __ROL4__(a1, 16);
       LOWORD(v281) = v282;
       v283 = __ROL4__(v282, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v281;
+      *(int *)((char *)a5 + a2 + 4) = v281;
       LOWORD(v281) = v283;
       HIWORD(v281) = __ROL4__(v281, 16) >> 16;
       LOWORD(v281) = v283;
-      *(_DWORD *)((char *)a5 + a2) = v281;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v283, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v283;
+      *(int *)((char *)a5 + a2) = v281;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v283, 16);
+      *(int *)((char *)a5 + 2 * a2) = v283;
       v284 = (char *)a5 + a2;
       HIWORD(v281) = __ROR4__(v283, 16) >> 16;
       LOWORD(v281) = v283;
-      *(_DWORD *)&v284[2 * a2 + 4] = v281;
+      *(int *)&v284[2 * a2 + 4] = v281;
       HIWORD(v8) = HIWORD(v283);
       LOWORD(v8) = __ROL4__(v283, 16);
-      *(_DWORD *)&v284[2 * a2] = v8;
+      *(int *)&v284[2 * a2] = v8;
       break;
     case 0x3Eu:
 LABEL_66:
@@ -80394,22 +80377,22 @@ LABEL_66:
       LOWORD(v285) = a1;
       *a5 = v285;
       a5[1] = v285;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       HIWORD(v285) = __ROL4__(a1, 16) >> 16;
       LOWORD(v285) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v285;
+      *(int *)((char *)a5 + a2) = v285;
       HIWORD(v285) = HIWORD(a1);
       v286 = __ROL4__(a1, 16);
       LOWORD(v285) = v286;
       v287 = __ROL4__(v286, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v285;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v285;
       LOWORD(v285) = v287;
       HIWORD(v8) = __ROL4__(v285, 16) >> 16;
       LOWORD(v8) = v287;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v288 = (char *)a5 + a2;
-      *(_DWORD *)&v288[2 * a2 + 4] = __ROL4__(v287, 16);
-      *(_DWORD *)&v288[2 * a2] = v287;
+      *(int *)&v288[2 * a2 + 4] = __ROL4__(v287, 16);
+      *(int *)&v288[2 * a2] = v287;
       LOWORD(v8) = v287;
       break;
     case 0x3Fu:
@@ -80424,69 +80407,69 @@ LABEL_67:
       LOWORD(v289) = v291;
       *a5 = v289;
       v292 = __ROL4__(v291, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v292;
+      *(int *)((char *)a5 + a2 + 4) = v292;
       LOWORD(v292) = v291;
       HIWORD(v292) = __ROL4__(v292, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)((char *)a5 + a2) = v292;
+      *(int *)((char *)a5 + a2) = v292;
       LOWORD(v292) = v291;
       HIWORD(v292) = __ROR4__(v292, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v292;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v291;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v292;
+      *(int *)((char *)a5 + 2 * a2) = v291;
       v293 = (char *)a5 + a2;
       HIWORD(v292) = __ROR4__(v291, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)&v293[2 * a2 + 4] = v292;
+      *(int *)&v293[2 * a2 + 4] = v292;
       HIWORD(v8) = HIWORD(v291);
       LOWORD(v8) = __ROL4__(v291, 16);
-      *(_DWORD *)&v293[2 * a2] = v8;
+      *(int *)&v293[2 * a2] = v8;
       break;
     case 0x40u:
 LABEL_132:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v491 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v491 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v491) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v491;
+      *(int *)((char *)a5 + a2 + 4) = v491;
       LOWORD(v491) = a1;
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v491;
+      *(int *)((char *)a5 + a2) = v491;
       LOWORD(v491) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v491;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v491;
       LOWORD(v491) = a1;
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v491;
+      *(int *)((char *)a5 + 2 * a2) = v491;
       v492 = (char *)a5 + a2;
       v493 = &a4[a2];
-      *(_DWORD *)&v492[2 * a2 + 4] = *(_DWORD *)&v493[2 * a2 + 4];
-      v8 = *(_DWORD *)&v493[2 * a2];
-      *(_DWORD *)&v492[2 * a2] = v8;
+      *(int *)&v492[2 * a2 + 4] = *(int *)&v493[2 * a2 + 4];
+      v8 = *(int *)&v493[2 * a2];
+      *(int *)&v492[2 * a2] = v8;
       break;
     case 0x41u:
 LABEL_133:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v494 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v494;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v494 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v494;
       LOWORD(v494) = a1;
       HIWORD(v494) = __ROR4__(v494, 16) >> 16;
       LOWORD(v494) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v494;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v494;
+      *(int *)((char *)a5 + 2 * a2) = v494;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v494;
       v495 = (char *)a5 + a2;
       LOWORD(v494) = a1;
       HIWORD(v8) = __ROR4__(v494, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v495[2 * a2] = v8;
-      *(_DWORD *)&v495[2 * a2 + 4] = v8;
+      *(int *)&v495[2 * a2] = v8;
+      *(int *)&v495[2 * a2 + 4] = v8;
       break;
     case 0x42u:
 LABEL_134:
@@ -80494,43 +80477,43 @@ LABEL_134:
       HIWORD(v496) = __ROR4__(v5, 16) >> 16;
       LOWORD(v496) = a1;
       a5[1] = v496;
-      v497 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v497 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v497) = a1;
       HIWORD(v497) = __ROR4__(v497, 16) >> 16;
       LOWORD(v497) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v497;
-      v498 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v498;
+      *(int *)((char *)a5 + a2 + 4) = v497;
+      v498 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v498;
       LOWORD(v498) = a1;
       HIWORD(v498) = __ROR4__(v498, 16) >> 16;
       LOWORD(v498) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v498;
-      v499 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v499;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v498;
+      v499 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v499;
       v500 = (char *)a5 + a2;
       LOWORD(v499) = a1;
       HIWORD(v499) = __ROR4__(v499, 16) >> 16;
       LOWORD(v499) = a1;
-      *(_DWORD *)&v500[2 * a2 + 4] = v499;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v500[2 * a2] = v8;
+      *(int *)&v500[2 * a2 + 4] = v499;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v500[2 * a2] = v8;
       break;
     case 0x43u:
 LABEL_135:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v501 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v501;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v501 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v501;
       v502 = (char *)a5 + a2;
       LOWORD(v501) = a1;
       HIWORD(v8) = __ROR4__(v501, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v502[2 * a2] = v8;
-      *(_DWORD *)&v502[2 * a2 + 4] = v8;
+      *(int *)&v502[2 * a2] = v8;
+      *(int *)&v502[2 * a2 + 4] = v8;
       break;
     case 0x44u:
 LABEL_136:
@@ -80538,28 +80521,28 @@ LABEL_136:
       HIWORD(v503) = __ROL4__(v5, 16) >> 16;
       LOWORD(v503) = *((_WORD *)a4 + 2);
       a5[1] = v503;
-      v504 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v504 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v504) = a1;
       HIWORD(v504) = __ROL4__(v504, 16) >> 16;
       LOWORD(v504) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v504;
-      v505 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v505;
+      *(int *)((char *)a5 + a2 + 4) = v504;
+      v505 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v505;
       LOWORD(v505) = a1;
       HIWORD(v505) = __ROL4__(v505, 16) >> 16;
       LOWORD(v505) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v505;
-      v506 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v506;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v505;
+      v506 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v506;
       v507 = (char *)a5 + a2;
       v508 = &a4[a2];
       LOWORD(v506) = a1;
       HIWORD(v506) = __ROL4__(v506, 16) >> 16;
       LOWORD(v506) = *(_WORD *)&v508[2 * a2 + 4];
-      *(_DWORD *)&v507[2 * a2 + 4] = v506;
-      v8 = *(_DWORD *)&v508[2 * a2];
-      *(_DWORD *)&v507[2 * a2] = v8;
+      *(int *)&v507[2 * a2 + 4] = v506;
+      v8 = *(int *)&v508[2 * a2];
+      *(int *)&v507[2 * a2] = v8;
       break;
     case 0x45u:
 LABEL_137:
@@ -80568,44 +80551,44 @@ LABEL_137:
       LOWORD(v509) = a1;
       *a5 = v509;
       a5[1] = v509;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v510 = (char *)a5 + a2;
       v511 = &a4[a2];
-      *(_DWORD *)&v510[2 * a2 + 4] = *(_DWORD *)&v511[2 * a2 + 4];
-      v8 = *(_DWORD *)&v511[2 * a2];
-      *(_DWORD *)&v510[2 * a2] = v8;
+      *(int *)&v510[2 * a2 + 4] = *(int *)&v511[2 * a2 + 4];
+      v8 = *(int *)&v511[2 * a2];
+      *(int *)&v510[2 * a2] = v8;
       break;
     case 0x46u:
 LABEL_138:
-      v512 = *((_DWORD *)a4 + 1);
+      v512 = *((int *)a4 + 1);
       a5[1] = v512;
       LOWORD(v512) = *((_WORD *)a4 + 1);
       HIWORD(v512) = __ROL4__(v512, 16) >> 16;
       LOWORD(v512) = a1;
       *a5 = v512;
-      v513 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v513;
+      v513 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v513;
       LOWORD(v513) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v513) = __ROL4__(v513, 16) >> 16;
       LOWORD(v513) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v513;
-      v514 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v514;
+      *(int *)((char *)a5 + a2) = v513;
+      v514 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v514;
       LOWORD(v514) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v514) = __ROL4__(v514, 16) >> 16;
       LOWORD(v514) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v514;
+      *(int *)((char *)a5 + 2 * a2) = v514;
       v515 = (char *)a5 + a2;
       v516 = &a4[a2];
-      v517 = *(_DWORD *)&v516[2 * a2 + 4];
-      *(_DWORD *)&v515[2 * a2 + 4] = v517;
+      v517 = *(int *)&v516[2 * a2 + 4];
+      *(int *)&v515[2 * a2 + 4] = v517;
       LOWORD(v517) = *(_WORD *)&v516[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v517, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v515[2 * a2] = v8;
+      *(int *)&v515[2 * a2] = v8;
       break;
     case 0x47u:
 LABEL_139:
@@ -80613,28 +80596,28 @@ LABEL_139:
       HIWORD(v518) = __ROL4__(v5, 16) >> 16;
       LOWORD(v518) = *((_WORD *)a4 + 2);
       a5[1] = v518;
-      v519 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v519 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v519) = a1;
       HIWORD(v519) = __ROR4__(v519, 16) >> 16;
       LOWORD(v519) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v519;
-      v520 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v520;
+      *(int *)((char *)a5 + a2 + 4) = v519;
+      v520 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v520;
       LOWORD(v520) = a1;
       HIWORD(v520) = __ROR4__(v520, 16) >> 16;
       LOWORD(v520) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v520;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v520;
       LOWORD(v520) = a1;
       HIWORD(v520) = __ROL4__(v520, 16) >> 16;
       LOWORD(v520) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v520;
+      *(int *)((char *)a5 + 2 * a2) = v520;
       v521 = (char *)a5 + a2;
       LOWORD(v520) = a1;
       HIWORD(v8) = __ROR4__(v520, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v521[2 * a2] = v8;
-      *(_DWORD *)&v521[2 * a2 + 4] = v8;
+      *(int *)&v521[2 * a2] = v8;
+      *(int *)&v521[2 * a2 + 4] = v8;
       break;
     case 0x48u:
 LABEL_140:
@@ -80646,25 +80629,25 @@ LABEL_140:
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROR4__(v522, 16) >> 16;
       LOWORD(v522) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v522;
+      *(int *)((char *)a5 + a2 + 4) = v522;
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROL4__(v522, 16) >> 16;
       LOWORD(v522) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v522;
+      *(int *)((char *)a5 + a2) = v522;
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROR4__(v522, 16) >> 16;
       LOWORD(v522) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v522;
-      v523 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v523;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v522;
+      v523 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v523;
       v524 = (char *)a5 + a2;
       v525 = &a4[a2];
       LOWORD(v523) = a1;
       HIWORD(v523) = __ROL4__(v523, 16) >> 16;
       LOWORD(v523) = *(_WORD *)&v525[2 * a2 + 4];
-      *(_DWORD *)&v524[2 * a2 + 4] = v523;
-      v8 = *(_DWORD *)&v525[2 * a2];
-      *(_DWORD *)&v524[2 * a2] = v8;
+      *(int *)&v524[2 * a2 + 4] = v523;
+      v8 = *(int *)&v525[2 * a2];
+      *(int *)&v524[2 * a2] = v8;
       break;
     case 0x49u:
 LABEL_141:
@@ -80676,75 +80659,75 @@ LABEL_141:
       LOWORD(v526) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v526) = __ROL4__(v526, 16) >> 16;
       LOWORD(v526) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v526;
+      *(int *)((char *)a5 + a2 + 4) = v526;
       LOWORD(v526) = a1;
       HIWORD(v526) = __ROL4__(v526, 16) >> 16;
       LOWORD(v526) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v526;
-      v527 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v527;
+      *(int *)((char *)a5 + a2) = v526;
+      v527 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v527;
       LOWORD(v527) = a1;
       HIWORD(v527) = __ROL4__(v527, 16) >> 16;
       LOWORD(v527) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v527;
+      *(int *)((char *)a5 + 2 * a2) = v527;
       v528 = (char *)a5 + a2;
       v529 = &a4[a2];
-      v530 = *(_DWORD *)&v529[2 * a2 + 4];
-      *(_DWORD *)&v528[2 * a2 + 4] = v530;
+      v530 = *(int *)&v529[2 * a2 + 4];
+      *(int *)&v528[2 * a2 + 4] = v530;
       LOWORD(v530) = *(_WORD *)&v529[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v530, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v528[2 * a2] = v8;
+      *(int *)&v528[2 * a2] = v8;
       break;
     case 0x4Au:
 LABEL_142:
-      v531 = *((_DWORD *)a4 + 1);
+      v531 = *((int *)a4 + 1);
       a5[1] = v531;
       LOWORD(v531) = *((_WORD *)a4 + 1);
       HIWORD(v531) = __ROL4__(v531, 16) >> 16;
       LOWORD(v531) = a1;
       *a5 = v531;
-      v532 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v532;
+      v532 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v532;
       LOWORD(v532) = a1;
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v532;
+      *(int *)((char *)a5 + a2) = v532;
       LOWORD(v532) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v532;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v532;
       LOWORD(v532) = a1;
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v532;
+      *(int *)((char *)a5 + 2 * a2) = v532;
       v533 = (char *)a5 + a2;
       LOWORD(v532) = a1;
       HIWORD(v8) = __ROR4__(v532, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v533[2 * a2] = v8;
-      *(_DWORD *)&v533[2 * a2 + 4] = v8;
+      *(int *)&v533[2 * a2] = v8;
+      *(int *)&v533[2 * a2 + 4] = v8;
       break;
     case 0x4Bu:
 LABEL_143:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v534 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v534;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v534 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v534;
       LOWORD(v534) = a1;
       HIWORD(v534) = __ROL4__(v534, 16) >> 16;
       LOWORD(v534) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v534;
-      v535 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v535;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v534;
+      v535 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v535;
       v536 = (char *)a5 + a2;
       LOWORD(v535) = a1;
       HIWORD(v535) = __ROR4__(v535, 16) >> 16;
       LOWORD(v535) = a1;
-      *(_DWORD *)&v536[2 * a2 + 4] = v535;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v536[2 * a2] = v8;
+      *(int *)&v536[2 * a2 + 4] = v535;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v536[2 * a2] = v8;
       break;
     case 0x4Cu:
 LABEL_144:
@@ -80752,83 +80735,83 @@ LABEL_144:
       HIWORD(v537) = __ROR4__(v5, 16) >> 16;
       LOWORD(v537) = a1;
       a5[1] = v537;
-      v538 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v538 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v538) = a1;
       HIWORD(v538) = __ROL4__(v538, 16) >> 16;
       LOWORD(v538) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v538;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v538;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v539 = (char *)a5 + a2;
       v540 = &a4[a2];
-      *(_DWORD *)&v539[2 * a2 + 4] = *(_DWORD *)&v540[2 * a2 + 4];
-      v8 = *(_DWORD *)&v540[2 * a2];
-      *(_DWORD *)&v539[2 * a2] = v8;
+      *(int *)&v539[2 * a2 + 4] = *(int *)&v540[2 * a2 + 4];
+      v8 = *(int *)&v540[2 * a2];
+      *(int *)&v539[2 * a2] = v8;
       break;
     case 0x4Du:
 LABEL_145:
-      v541 = *((_DWORD *)a4 + 1);
+      v541 = *((int *)a4 + 1);
       a5[1] = v541;
       LOWORD(v541) = a1;
       HIWORD(v541) = __ROL4__(v541, 16) >> 16;
       LOWORD(v541) = a1;
       *a5 = v541;
-      v542 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v542;
+      v542 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v542;
       LOWORD(v542) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v542) = __ROL4__(v542, 16) >> 16;
       LOWORD(v542) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v542;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v542;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v543 = (char *)a5 + a2;
       v544 = &a4[a2];
-      *(_DWORD *)&v543[2 * a2 + 4] = *(_DWORD *)&v544[2 * a2 + 4];
-      v8 = *(_DWORD *)&v544[2 * a2];
-      *(_DWORD *)&v543[2 * a2] = v8;
+      *(int *)&v543[2 * a2 + 4] = *(int *)&v544[2 * a2 + 4];
+      v8 = *(int *)&v544[2 * a2];
+      *(int *)&v543[2 * a2] = v8;
       break;
     case 0x4Eu:
 LABEL_146:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v545 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v545;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v545 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v545;
       LOWORD(v545) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v545) = __ROL4__(v545, 16) >> 16;
       LOWORD(v545) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v545;
+      *(int *)((char *)a5 + 2 * a2) = v545;
       v546 = (char *)a5 + a2;
-      v547 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v546[2 * a2 + 4] = v547;
+      v547 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v546[2 * a2 + 4] = v547;
       LOWORD(v547) = a1;
       HIWORD(v8) = __ROL4__(v547, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v546[2 * a2] = v8;
+      *(int *)&v546[2 * a2] = v8;
       break;
     case 0x4Fu:
 LABEL_147:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v548 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v548;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v548 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v548;
       LOWORD(v548) = a1;
       HIWORD(v548) = __ROR4__(v548, 16) >> 16;
       LOWORD(v548) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v548;
-      v549 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v549;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v548;
+      v549 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v549;
       v550 = (char *)a5 + a2;
       LOWORD(v549) = a1;
       HIWORD(v549) = __ROR4__(v549, 16) >> 16;
       LOWORD(v549) = a1;
-      *(_DWORD *)&v550[2 * a2 + 4] = v549;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v550[2 * a2] = v8;
+      *(int *)&v550[2 * a2 + 4] = v549;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v550[2 * a2] = v8;
       break;
     case 0x50u:
 LABEL_148:
@@ -80836,83 +80819,83 @@ LABEL_148:
       HIWORD(v551) = __ROR4__(v5, 16) >> 16;
       LOWORD(v551) = a1;
       a5[1] = v551;
-      v552 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v552 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v552) = a1;
       HIWORD(v552) = __ROR4__(v552, 16) >> 16;
       LOWORD(v552) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v552;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v552;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v553 = (char *)a5 + a2;
       v554 = &a4[a2];
-      *(_DWORD *)&v553[2 * a2 + 4] = *(_DWORD *)&v554[2 * a2 + 4];
-      v8 = *(_DWORD *)&v554[2 * a2];
-      *(_DWORD *)&v553[2 * a2] = v8;
+      *(int *)&v553[2 * a2 + 4] = *(int *)&v554[2 * a2 + 4];
+      v8 = *(int *)&v554[2 * a2];
+      *(int *)&v553[2 * a2] = v8;
       break;
     case 0x51u:
 LABEL_149:
-      v555 = *((_DWORD *)a4 + 1);
+      v555 = *((int *)a4 + 1);
       a5[1] = v555;
       LOWORD(v555) = a1;
       HIWORD(v555) = __ROL4__(v555, 16) >> 16;
       LOWORD(v555) = a1;
       *a5 = v555;
-      v556 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v556;
+      v556 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v556;
       LOWORD(v556) = a1;
       HIWORD(v556) = __ROL4__(v556, 16) >> 16;
       LOWORD(v556) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v556;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v556;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v557 = (char *)a5 + a2;
       v558 = &a4[a2];
-      *(_DWORD *)&v557[2 * a2 + 4] = *(_DWORD *)&v558[2 * a2 + 4];
-      v8 = *(_DWORD *)&v558[2 * a2];
-      *(_DWORD *)&v557[2 * a2] = v8;
+      *(int *)&v557[2 * a2 + 4] = *(int *)&v558[2 * a2 + 4];
+      v8 = *(int *)&v558[2 * a2];
+      *(int *)&v557[2 * a2] = v8;
       break;
     case 0x52u:
 LABEL_150:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v559 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v559;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v559 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v559;
       LOWORD(v559) = a1;
       HIWORD(v559) = __ROL4__(v559, 16) >> 16;
       LOWORD(v559) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v559;
+      *(int *)((char *)a5 + 2 * a2) = v559;
       v560 = (char *)a5 + a2;
-      v561 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v560[2 * a2 + 4] = v561;
+      v561 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v560[2 * a2 + 4] = v561;
       LOWORD(v561) = a1;
       HIWORD(v8) = __ROL4__(v561, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v560[2 * a2] = v8;
+      *(int *)&v560[2 * a2] = v8;
       break;
     case 0x53u:
 LABEL_151:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v562 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v562 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v562) = a1;
       HIWORD(v562) = __ROR4__(v562, 16) >> 16;
       LOWORD(v562) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v562;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v562;
+      *(int *)((char *)a5 + a2) = v562;
+      *(int *)((char *)a5 + a2 + 4) = v562;
       LOWORD(v562) = a1;
       HIWORD(v562) = __ROR4__(v562, 16) >> 16;
       LOWORD(v562) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v562;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v562;
+      *(int *)((char *)a5 + 2 * a2) = v562;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v562;
       v563 = (char *)a5 + a2;
       v564 = &a4[a2];
-      *(_DWORD *)&v563[2 * a2 + 4] = *(_DWORD *)&v564[2 * a2 + 4];
-      v8 = *(_DWORD *)&v564[2 * a2];
-      *(_DWORD *)&v563[2 * a2] = v8;
+      *(int *)&v563[2 * a2 + 4] = *(int *)&v564[2 * a2 + 4];
+      v8 = *(int *)&v564[2 * a2];
+      *(int *)&v563[2 * a2] = v8;
       break;
     case 0x54u:
 LABEL_152:
@@ -80927,94 +80910,94 @@ LABEL_152:
       LOWORD(v565) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v565;
+      *(int *)((char *)a5 + a2 + 4) = v565;
       LOWORD(v565) = a1;
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v565;
+      *(int *)((char *)a5 + a2) = v565;
       LOWORD(v565) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v565;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v565;
       LOWORD(v565) = a1;
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v565;
+      *(int *)((char *)a5 + 2 * a2) = v565;
       v566 = (char *)a5 + a2;
       v567 = &a4[a2];
       LOWORD(v565) = *(_WORD *)&v567[2 * a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)&v566[2 * a2 + 4] = v565;
+      *(int *)&v566[2 * a2 + 4] = v565;
       LOWORD(v565) = a1;
       HIWORD(v8) = __ROL4__(v565, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v567[2 * a2];
-      *(_DWORD *)&v566[2 * a2] = v8;
+      *(int *)&v566[2 * a2] = v8;
       break;
     case 0x55u:
 LABEL_153:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v568 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v568 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v568) = a1;
       HIWORD(v568) = __ROR4__(v568, 16) >> 16;
       LOWORD(v568) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v568;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v568;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v568;
+      *(int *)((char *)a5 + a2 + 4) = v568;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v569 = (char *)a5 + a2;
       v570 = &a4[a2];
-      *(_DWORD *)&v569[2 * a2 + 4] = *(_DWORD *)&v570[2 * a2 + 4];
-      v8 = *(_DWORD *)&v570[2 * a2];
-      *(_DWORD *)&v569[2 * a2] = v8;
+      *(int *)&v569[2 * a2 + 4] = *(int *)&v570[2 * a2 + 4];
+      v8 = *(int *)&v570[2 * a2];
+      *(int *)&v569[2 * a2] = v8;
       break;
     case 0x56u:
 LABEL_154:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v571 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v571;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v571 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v571;
       LOWORD(v571) = a1;
       HIWORD(v571) = __ROR4__(v571, 16) >> 16;
       LOWORD(v571) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v571;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v571;
+      *(int *)((char *)a5 + 2 * a2) = v571;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v571;
       v572 = (char *)a5 + a2;
       v573 = &a4[a2];
-      *(_DWORD *)&v572[2 * a2 + 4] = *(_DWORD *)&v573[2 * a2 + 4];
-      v8 = *(_DWORD *)&v573[2 * a2];
-      *(_DWORD *)&v572[2 * a2] = v8;
+      *(int *)&v572[2 * a2 + 4] = *(int *)&v573[2 * a2 + 4];
+      v8 = *(int *)&v573[2 * a2];
+      *(int *)&v572[2 * a2] = v8;
       break;
     case 0x57u:
 LABEL_155:
-      v574 = *((_DWORD *)a4 + 1);
+      v574 = *((int *)a4 + 1);
       a5[1] = v574;
       LOWORD(v574) = a1;
       HIWORD(v574) = __ROL4__(v574, 16) >> 16;
       LOWORD(v574) = *(_WORD *)a4;
       *a5 = v574;
-      v575 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v575;
+      v575 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v575;
       LOWORD(v575) = a1;
       HIWORD(v575) = __ROL4__(v575, 16) >> 16;
       LOWORD(v575) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v575;
-      v576 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v576;
+      *(int *)((char *)a5 + a2) = v575;
+      v576 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v576;
       LOWORD(v576) = a1;
       HIWORD(v576) = __ROL4__(v576, 16) >> 16;
       LOWORD(v576) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v576;
+      *(int *)((char *)a5 + 2 * a2) = v576;
       v577 = (char *)a5 + a2;
       v578 = &a4[a2];
-      v579 = *(_DWORD *)&v578[2 * a2 + 4];
-      *(_DWORD *)&v577[2 * a2 + 4] = v579;
+      v579 = *(int *)&v578[2 * a2 + 4];
+      *(int *)&v577[2 * a2 + 4] = v579;
       LOWORD(v579) = a1;
       HIWORD(v8) = __ROL4__(v579, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v578[2 * a2];
-      *(_DWORD *)&v577[2 * a2] = v8;
+      *(int *)&v577[2 * a2] = v8;
       break;
     case 0x58u:
 LABEL_156:
@@ -81022,50 +81005,50 @@ LABEL_156:
       HIWORD(v580) = __ROL4__(v5, 16) >> 16;
       LOWORD(v580) = a1;
       a5[1] = v580;
-      v581 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v581 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v581) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v581) = __ROL4__(v581, 16) >> 16;
       LOWORD(v581) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v581;
-      v582 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v582;
+      *(int *)((char *)a5 + a2 + 4) = v581;
+      v582 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v582;
       LOWORD(v582) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v582) = __ROL4__(v582, 16) >> 16;
       LOWORD(v582) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v582;
-      v583 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v583;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v582;
+      v583 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v583;
       v584 = (char *)a5 + a2;
       v585 = &a4[a2];
       LOWORD(v583) = *(_WORD *)&v585[2 * a2 + 6];
       HIWORD(v583) = __ROL4__(v583, 16) >> 16;
       LOWORD(v583) = a1;
-      *(_DWORD *)&v584[2 * a2 + 4] = v583;
-      v8 = *(_DWORD *)&v585[2 * a2];
-      *(_DWORD *)&v584[2 * a2] = v8;
+      *(int *)&v584[2 * a2 + 4] = v583;
+      v8 = *(int *)&v585[2 * a2];
+      *(int *)&v584[2 * a2] = v8;
       break;
     case 0x59u:
 LABEL_157:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v586 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v586;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v586 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v586;
       LOWORD(v586) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v586) = __ROL4__(v586, 16) >> 16;
       LOWORD(v586) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v586;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v586;
       LOWORD(v586) = a1;
       HIWORD(v586) = __ROL4__(v586, 16) >> 16;
       LOWORD(v586) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v586;
+      *(int *)((char *)a5 + 2 * a2) = v586;
       v587 = (char *)a5 + a2;
       LOWORD(v586) = a1;
       HIWORD(v8) = __ROR4__(v586, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v587[2 * a2] = v8;
-      *(_DWORD *)&v587[2 * a2 + 4] = v8;
+      *(int *)&v587[2 * a2] = v8;
+      *(int *)&v587[2 * a2 + 4] = v8;
       break;
     case 0x5Au:
 LABEL_158:
@@ -81073,28 +81056,28 @@ LABEL_158:
       HIWORD(v588) = __ROL4__(v5, 16) >> 16;
       LOWORD(v588) = *((_WORD *)a4 + 2);
       a5[1] = v588;
-      v589 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v589 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v589) = a1;
       HIWORD(v589) = __ROR4__(v589, 16) >> 16;
       LOWORD(v589) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v589;
-      v590 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v590;
+      *(int *)((char *)a5 + a2 + 4) = v589;
+      v590 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v590;
       LOWORD(v590) = a1;
       HIWORD(v590) = __ROR4__(v590, 16) >> 16;
       LOWORD(v590) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v590;
-      v591 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v591;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v590;
+      v591 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v591;
       v592 = (char *)a5 + a2;
       v593 = &a4[a2];
       LOWORD(v591) = a1;
       HIWORD(v591) = __ROL4__(v591, 16) >> 16;
       LOWORD(v591) = *(_WORD *)&v593[2 * a2 + 4];
-      *(_DWORD *)&v592[2 * a2 + 4] = v591;
-      v8 = *(_DWORD *)&v593[2 * a2];
-      *(_DWORD *)&v592[2 * a2] = v8;
+      *(int *)&v592[2 * a2 + 4] = v591;
+      v8 = *(int *)&v593[2 * a2];
+      *(int *)&v592[2 * a2] = v8;
       break;
     case 0x5Bu:
 LABEL_159:
@@ -81106,47 +81089,47 @@ LABEL_159:
       LOWORD(v594) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v594) = __ROL4__(v594, 16) >> 16;
       LOWORD(v594) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v594;
+      *(int *)((char *)a5 + a2 + 4) = v594;
       LOWORD(v594) = a1;
       HIWORD(v594) = __ROL4__(v594, 16) >> 16;
       LOWORD(v594) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v594;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v594;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v595 = (char *)a5 + a2;
       v596 = &a4[a2];
-      *(_DWORD *)&v595[2 * a2 + 4] = *(_DWORD *)&v596[2 * a2 + 4];
-      v8 = *(_DWORD *)&v596[2 * a2];
-      *(_DWORD *)&v595[2 * a2] = v8;
+      *(int *)&v595[2 * a2 + 4] = *(int *)&v596[2 * a2 + 4];
+      v8 = *(int *)&v596[2 * a2];
+      *(int *)&v595[2 * a2] = v8;
       break;
     case 0x5Cu:
 LABEL_160:
-      v597 = *((_DWORD *)a4 + 1);
+      v597 = *((int *)a4 + 1);
       a5[1] = v597;
       LOWORD(v597) = *((_WORD *)a4 + 1);
       HIWORD(v597) = __ROL4__(v597, 16) >> 16;
       LOWORD(v597) = a1;
       *a5 = v597;
-      v598 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v598;
+      v598 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v598;
       LOWORD(v598) = a1;
       HIWORD(v598) = __ROL4__(v598, 16) >> 16;
       LOWORD(v598) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v598;
-      v599 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v599;
+      *(int *)((char *)a5 + a2) = v598;
+      v599 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v599;
       LOWORD(v599) = a1;
       HIWORD(v599) = __ROL4__(v599, 16) >> 16;
       LOWORD(v599) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v599;
+      *(int *)((char *)a5 + 2 * a2) = v599;
       v600 = (char *)a5 + a2;
       v601 = &a4[a2];
-      v602 = *(_DWORD *)&v601[2 * a2 + 4];
-      *(_DWORD *)&v600[2 * a2 + 4] = v602;
+      v602 = *(int *)&v601[2 * a2 + 4];
+      *(int *)&v600[2 * a2 + 4] = v602;
       LOWORD(v602) = *(_WORD *)&v601[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v602, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v600[2 * a2] = v8;
+      *(int *)&v600[2 * a2] = v8;
       break;
     case 0x5Du:
 LABEL_161:
@@ -81154,54 +81137,54 @@ LABEL_161:
       HIWORD(v603) = __ROR4__(v5, 16) >> 16;
       LOWORD(v603) = a1;
       a5[1] = v603;
-      v604 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v604 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v604) = a1;
       HIWORD(v604) = __ROL4__(v604, 16) >> 16;
       LOWORD(v604) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v604;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v605 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v605;
+      *(int *)((char *)a5 + a2 + 4) = v604;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v605 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v605;
       LOWORD(v605) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v605) = __ROL4__(v605, 16) >> 16;
       LOWORD(v605) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v605;
+      *(int *)((char *)a5 + 2 * a2) = v605;
       v606 = (char *)a5 + a2;
-      v607 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v606[2 * a2 + 4] = v607;
+      v607 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v606[2 * a2 + 4] = v607;
       LOWORD(v607) = a1;
       HIWORD(v8) = __ROL4__(v607, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v606[2 * a2] = v8;
+      *(int *)&v606[2 * a2] = v8;
       break;
     case 0x5Eu:
 LABEL_162:
-      v608 = *((_DWORD *)a4 + 1);
+      v608 = *((int *)a4 + 1);
       a5[1] = v608;
       LOWORD(v608) = a1;
       HIWORD(v608) = __ROL4__(v608, 16) >> 16;
       LOWORD(v608) = a1;
       *a5 = v608;
-      v609 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v609;
+      v609 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v609;
       LOWORD(v609) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v609) = __ROL4__(v609, 16) >> 16;
       LOWORD(v609) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v609;
+      *(int *)((char *)a5 + a2) = v609;
       LOWORD(v609) = a1;
       HIWORD(v609) = __ROL4__(v609, 16) >> 16;
       LOWORD(v609) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v609;
-      v610 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v610;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v609;
+      v610 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v610;
       v611 = (char *)a5 + a2;
       LOWORD(v610) = a1;
       HIWORD(v610) = __ROR4__(v610, 16) >> 16;
       LOWORD(v610) = a1;
-      *(_DWORD *)&v611[2 * a2 + 4] = v610;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v611[2 * a2] = v8;
+      *(int *)&v611[2 * a2 + 4] = v610;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v611[2 * a2] = v8;
       break;
     case 0x5Fu:
 LABEL_163:
@@ -81209,74 +81192,74 @@ LABEL_163:
       HIWORD(v612) = __ROR4__(v5, 16) >> 16;
       LOWORD(v612) = a1;
       a5[1] = v612;
-      v613 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v613 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v613) = a1;
       HIWORD(v613) = __ROR4__(v613, 16) >> 16;
       LOWORD(v613) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v613;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v614 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v614;
+      *(int *)((char *)a5 + a2 + 4) = v613;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v614 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v614;
       LOWORD(v614) = a1;
       HIWORD(v614) = __ROL4__(v614, 16) >> 16;
       LOWORD(v614) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v614;
+      *(int *)((char *)a5 + 2 * a2) = v614;
       v615 = (char *)a5 + a2;
-      v616 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v615[2 * a2 + 4] = v616;
+      v616 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v615[2 * a2 + 4] = v616;
       LOWORD(v616) = a1;
       HIWORD(v8) = __ROL4__(v616, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v615[2 * a2] = v8;
+      *(int *)&v615[2 * a2] = v8;
       break;
     case 0x60u:
 LABEL_164:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v617 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v617;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v617 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v617;
       LOWORD(v617) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v617;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v617;
       LOWORD(v617) = a1;
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v617;
+      *(int *)((char *)a5 + 2 * a2) = v617;
       v618 = (char *)a5 + a2;
       v619 = &a4[a2];
       LOWORD(v617) = *(_WORD *)&v619[2 * a2 + 6];
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = a1;
-      *(_DWORD *)&v618[2 * a2 + 4] = v617;
+      *(int *)&v618[2 * a2 + 4] = v617;
       LOWORD(v617) = a1;
       HIWORD(v8) = __ROL4__(v617, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v619[2 * a2];
-      *(_DWORD *)&v618[2 * a2] = v8;
+      *(int *)&v618[2 * a2] = v8;
       break;
     case 0x61u:
 LABEL_165:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v620 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v620 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v620) = a1;
       HIWORD(v620) = __ROR4__(v620, 16) >> 16;
       LOWORD(v620) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v620;
-      v621 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v621;
+      *(int *)((char *)a5 + a2 + 4) = v620;
+      v621 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v621;
       LOWORD(v621) = a1;
       HIWORD(v621) = __ROR4__(v621, 16) >> 16;
       LOWORD(v621) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v621;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v621;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v622 = (char *)a5 + a2;
       v623 = &a4[a2];
-      *(_DWORD *)&v622[2 * a2 + 4] = *(_DWORD *)&v623[2 * a2 + 4];
-      v8 = *(_DWORD *)&v623[2 * a2];
-      *(_DWORD *)&v622[2 * a2] = v8;
+      *(int *)&v622[2 * a2 + 4] = *(int *)&v623[2 * a2 + 4];
+      v8 = *(int *)&v623[2 * a2];
+      *(int *)&v622[2 * a2] = v8;
       break;
     case 0x62u:
 LABEL_166:
@@ -81291,62 +81274,62 @@ LABEL_166:
       LOWORD(v624) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v624) = __ROL4__(v624, 16) >> 16;
       LOWORD(v624) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v624;
+      *(int *)((char *)a5 + a2 + 4) = v624;
       LOWORD(v624) = a1;
       HIWORD(v624) = __ROL4__(v624, 16) >> 16;
       LOWORD(v624) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v624;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v624;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v625 = (char *)a5 + a2;
       v626 = &a4[a2];
-      *(_DWORD *)&v625[2 * a2 + 4] = *(_DWORD *)&v626[2 * a2 + 4];
-      v8 = *(_DWORD *)&v626[2 * a2];
-      *(_DWORD *)&v625[2 * a2] = v8;
+      *(int *)&v625[2 * a2 + 4] = *(int *)&v626[2 * a2 + 4];
+      v8 = *(int *)&v626[2 * a2];
+      *(int *)&v625[2 * a2] = v8;
       break;
     case 0x63u:
 LABEL_167:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v627 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v627;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v627 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v627;
       LOWORD(v627) = a1;
       HIWORD(v627) = __ROL4__(v627, 16) >> 16;
       LOWORD(v627) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v627;
-      v628 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v628;
+      *(int *)((char *)a5 + a2) = v627;
+      v628 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v628;
       LOWORD(v628) = a1;
       HIWORD(v628) = __ROL4__(v628, 16) >> 16;
       LOWORD(v628) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v628;
+      *(int *)((char *)a5 + 2 * a2) = v628;
       v629 = (char *)a5 + a2;
       v630 = &a4[a2];
-      *(_DWORD *)&v629[2 * a2 + 4] = *(_DWORD *)&v630[2 * a2 + 4];
-      v8 = *(_DWORD *)&v630[2 * a2];
-      *(_DWORD *)&v629[2 * a2] = v8;
+      *(int *)&v629[2 * a2 + 4] = *(int *)&v630[2 * a2 + 4];
+      v8 = *(int *)&v630[2 * a2];
+      *(int *)&v629[2 * a2] = v8;
       break;
     case 0x64u:
 LABEL_168:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v631 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v631;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v631 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v631;
       LOWORD(v631) = a1;
       HIWORD(v631) = __ROL4__(v631, 16) >> 16;
       LOWORD(v631) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v631;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v631;
       LOWORD(v631) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v631) = __ROL4__(v631, 16) >> 16;
       LOWORD(v631) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v631;
+      *(int *)((char *)a5 + 2 * a2) = v631;
       v632 = (char *)a5 + a2;
       LOWORD(v631) = a1;
       HIWORD(v8) = __ROR4__(v631, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v632[2 * a2] = v8;
-      *(_DWORD *)&v632[2 * a2 + 4] = v8;
+      *(int *)&v632[2 * a2] = v8;
+      *(int *)&v632[2 * a2 + 4] = v8;
       break;
     case 0x65u:
 LABEL_169:
@@ -81354,27 +81337,27 @@ LABEL_169:
       HIWORD(v633) = __ROR4__(v5, 16) >> 16;
       LOWORD(v633) = a1;
       a5[1] = v633;
-      v634 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v634 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v634) = a1;
       HIWORD(v634) = __ROL4__(v634, 16) >> 16;
       LOWORD(v634) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v634;
-      v635 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v635;
+      *(int *)((char *)a5 + a2 + 4) = v634;
+      v635 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v635;
       LOWORD(v635) = a1;
       HIWORD(v635) = __ROL4__(v635, 16) >> 16;
       LOWORD(v635) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v635;
-      v636 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v636;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v635;
+      v636 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v636;
       v637 = (char *)a5 + a2;
       LOWORD(v636) = a1;
       HIWORD(v636) = __ROR4__(v636, 16) >> 16;
       LOWORD(v636) = a1;
-      *(_DWORD *)&v637[2 * a2 + 4] = v636;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v637[2 * a2] = v8;
+      *(int *)&v637[2 * a2 + 4] = v636;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v637[2 * a2] = v8;
       break;
     case 0x66u:
 LABEL_170:
@@ -81386,88 +81369,88 @@ LABEL_170:
       LOWORD(v638) = a1;
       HIWORD(v638) = __ROL4__(v638, 16) >> 16;
       LOWORD(v638) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v638;
+      *(int *)((char *)a5 + a2 + 4) = v638;
       LOWORD(v638) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v638) = __ROL4__(v638, 16) >> 16;
       LOWORD(v638) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v638;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v638;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v639 = (char *)a5 + a2;
       v640 = &a4[a2];
-      *(_DWORD *)&v639[2 * a2 + 4] = *(_DWORD *)&v640[2 * a2 + 4];
-      v8 = *(_DWORD *)&v640[2 * a2];
-      *(_DWORD *)&v639[2 * a2] = v8;
+      *(int *)&v639[2 * a2 + 4] = *(int *)&v640[2 * a2 + 4];
+      v8 = *(int *)&v640[2 * a2];
+      *(int *)&v639[2 * a2] = v8;
       break;
     case 0x67u:
 LABEL_171:
-      v641 = *((_DWORD *)a4 + 1);
+      v641 = *((int *)a4 + 1);
       a5[1] = v641;
       LOWORD(v641) = a1;
       HIWORD(v641) = __ROL4__(v641, 16) >> 16;
       LOWORD(v641) = a1;
       *a5 = v641;
-      v642 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v642;
+      v642 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v642;
       LOWORD(v642) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v642) = __ROL4__(v642, 16) >> 16;
       LOWORD(v642) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v642;
-      v643 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v643;
+      *(int *)((char *)a5 + a2) = v642;
+      v643 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v643;
       LOWORD(v643) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v643) = __ROL4__(v643, 16) >> 16;
       LOWORD(v643) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v643;
+      *(int *)((char *)a5 + 2 * a2) = v643;
       v644 = (char *)a5 + a2;
-      v645 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v644[2 * a2 + 4] = v645;
+      v645 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v644[2 * a2 + 4] = v645;
       LOWORD(v645) = a1;
       HIWORD(v8) = __ROL4__(v645, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v644[2 * a2] = v8;
+      *(int *)&v644[2 * a2] = v8;
       break;
     case 0x68u:
 LABEL_172:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v646 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v646;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v646 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v646;
       v647 = (char *)a5 + a2;
       v648 = &a4[a2];
       LOWORD(v646) = *(_WORD *)&v648[2 * a2 + 6];
       HIWORD(v646) = __ROL4__(v646, 16) >> 16;
       LOWORD(v646) = a1;
-      *(_DWORD *)&v647[2 * a2 + 4] = v646;
+      *(int *)&v647[2 * a2 + 4] = v646;
       LOWORD(v646) = a1;
       HIWORD(v8) = __ROL4__(v646, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v648[2 * a2];
-      *(_DWORD *)&v647[2 * a2] = v8;
+      *(int *)&v647[2 * a2] = v8;
       break;
     case 0x69u:
 LABEL_173:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v649 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v649 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v649) = a1;
       HIWORD(v649) = __ROL4__(v649, 16) >> 16;
       LOWORD(v649) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v649;
-      v650 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v650;
+      *(int *)((char *)a5 + a2 + 4) = v649;
+      v650 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v650;
       LOWORD(v650) = a1;
       HIWORD(v650) = __ROL4__(v650, 16) >> 16;
       LOWORD(v650) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v650;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v650;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v651 = (char *)a5 + a2;
       v652 = &a4[a2];
-      *(_DWORD *)&v651[2 * a2 + 4] = *(_DWORD *)&v652[2 * a2 + 4];
-      v8 = *(_DWORD *)&v652[2 * a2];
-      *(_DWORD *)&v651[2 * a2] = v8;
+      *(int *)&v651[2 * a2 + 4] = *(int *)&v652[2 * a2 + 4];
+      v8 = *(int *)&v652[2 * a2];
+      *(int *)&v651[2 * a2] = v8;
       break;
     case 0x6Au:
 LABEL_174:
@@ -81479,37 +81462,37 @@ LABEL_174:
       HIWORD(v653) = __ROL4__(v653, 16) >> 16;
       LOWORD(v653) = *(_WORD *)a4;
       *a5 = v653;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v654 = (char *)a5 + a2;
       v655 = &a4[a2];
-      *(_DWORD *)&v654[2 * a2 + 4] = *(_DWORD *)&v655[2 * a2 + 4];
-      v8 = *(_DWORD *)&v655[2 * a2];
-      *(_DWORD *)&v654[2 * a2] = v8;
+      *(int *)&v654[2 * a2 + 4] = *(int *)&v655[2 * a2 + 4];
+      v8 = *(int *)&v655[2 * a2];
+      *(int *)&v654[2 * a2] = v8;
       break;
     case 0x6Bu:
 LABEL_175:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v656 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v656;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v656 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v656;
       LOWORD(v656) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v656) = __ROL4__(v656, 16) >> 16;
       LOWORD(v656) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v656;
-      v657 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v657;
+      *(int *)((char *)a5 + a2) = v656;
+      v657 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v657;
       LOWORD(v657) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v657) = __ROL4__(v657, 16) >> 16;
       LOWORD(v657) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v657;
+      *(int *)((char *)a5 + 2 * a2) = v657;
       v658 = (char *)a5 + a2;
       v659 = &a4[a2];
-      *(_DWORD *)&v658[2 * a2 + 4] = *(_DWORD *)&v659[2 * a2 + 4];
-      v8 = *(_DWORD *)&v659[2 * a2];
-      *(_DWORD *)&v658[2 * a2] = v8;
+      *(int *)&v658[2 * a2 + 4] = *(int *)&v659[2 * a2 + 4];
+      v8 = *(int *)&v659[2 * a2];
+      *(int *)&v658[2 * a2] = v8;
       break;
     case 0x6Cu:
 LABEL_176:
@@ -81517,47 +81500,47 @@ LABEL_176:
       HIWORD(v660) = __ROL4__(v5, 16) >> 16;
       LOWORD(v660) = *((_WORD *)a4 + 2);
       a5[1] = v660;
-      v661 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v661 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v661) = a1;
       HIWORD(v661) = __ROL4__(v661, 16) >> 16;
       LOWORD(v661) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v661;
-      v662 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v662;
+      *(int *)((char *)a5 + a2 + 4) = v661;
+      v662 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v662;
       LOWORD(v662) = a1;
       HIWORD(v662) = __ROR4__(v662, 16) >> 16;
       LOWORD(v662) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v662;
-      v663 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v663;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v662;
+      v663 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v663;
       v664 = (char *)a5 + a2;
       LOWORD(v663) = a1;
       HIWORD(v663) = __ROR4__(v663, 16) >> 16;
       LOWORD(v663) = a1;
-      *(_DWORD *)&v664[2 * a2 + 4] = v663;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v664[2 * a2] = v8;
+      *(int *)&v664[2 * a2 + 4] = v663;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v664[2 * a2] = v8;
       break;
     case 0x6Du:
 LABEL_177:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v665 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v665;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v665 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v665;
       LOWORD(v665) = a1;
       HIWORD(v665) = __ROR4__(v665, 16) >> 16;
       LOWORD(v665) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v665;
-      v666 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v666;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v665;
+      v666 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v666;
       v667 = (char *)a5 + a2;
       LOWORD(v666) = a1;
       HIWORD(v8) = __ROR4__(v666, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v667[2 * a2] = v8;
-      *(_DWORD *)&v667[2 * a2 + 4] = v8;
+      *(int *)&v667[2 * a2] = v8;
+      *(int *)&v667[2 * a2 + 4] = v8;
       break;
     case 0x6Eu:
 LABEL_178:
@@ -81569,15 +81552,15 @@ LABEL_178:
       LOWORD(v668) = a1;
       HIWORD(v668) = __ROR4__(v668, 16) >> 16;
       LOWORD(v668) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v668;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v668;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v669 = (char *)a5 + a2;
       v670 = &a4[a2];
-      *(_DWORD *)&v669[2 * a2 + 4] = *(_DWORD *)&v670[2 * a2 + 4];
-      v8 = *(_DWORD *)&v670[2 * a2];
-      *(_DWORD *)&v669[2 * a2] = v8;
+      *(int *)&v669[2 * a2 + 4] = *(int *)&v670[2 * a2 + 4];
+      v8 = *(int *)&v670[2 * a2];
+      *(int *)&v669[2 * a2] = v8;
       break;
     case 0x6Fu:
 LABEL_179:
@@ -81585,28 +81568,28 @@ LABEL_179:
       HIWORD(v671) = __ROR4__(v5, 16) >> 16;
       LOWORD(v671) = a1;
       a5[1] = v671;
-      v672 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v672 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v672) = a1;
       HIWORD(v672) = __ROR4__(v672, 16) >> 16;
       LOWORD(v672) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v672;
-      v673 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v673;
+      *(int *)((char *)a5 + a2 + 4) = v672;
+      v673 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v673;
       LOWORD(v673) = a1;
       HIWORD(v673) = __ROL4__(v673, 16) >> 16;
       LOWORD(v673) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v673;
-      v674 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v674;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v673;
+      v674 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v674;
       v675 = (char *)a5 + a2;
       v676 = &a4[a2];
       LOWORD(v674) = a1;
       HIWORD(v674) = __ROL4__(v674, 16) >> 16;
       LOWORD(v674) = *(_WORD *)&v676[2 * a2 + 4];
-      *(_DWORD *)&v675[2 * a2 + 4] = v674;
-      v8 = *(_DWORD *)&v676[2 * a2];
-      *(_DWORD *)&v675[2 * a2] = v8;
+      *(int *)&v675[2 * a2 + 4] = v674;
+      v8 = *(int *)&v676[2 * a2];
+      *(int *)&v675[2 * a2] = v8;
       break;
     case 0x70u:
 LABEL_180:
@@ -81615,95 +81598,95 @@ LABEL_180:
       LOWORD(v677) = a1;
       *a5 = v677;
       a5[1] = v677;
-      v678 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v678;
+      v678 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v678;
       LOWORD(v678) = a1;
       HIWORD(v678) = __ROL4__(v678, 16) >> 16;
       LOWORD(v678) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v678;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v678;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v679 = (char *)a5 + a2;
       v680 = &a4[a2];
-      *(_DWORD *)&v679[2 * a2 + 4] = *(_DWORD *)&v680[2 * a2 + 4];
-      v8 = *(_DWORD *)&v680[2 * a2];
-      *(_DWORD *)&v679[2 * a2] = v8;
+      *(int *)&v679[2 * a2 + 4] = *(int *)&v680[2 * a2 + 4];
+      v8 = *(int *)&v680[2 * a2];
+      *(int *)&v679[2 * a2] = v8;
       break;
     case 0x71u:
 LABEL_181:
-      v681 = *((_DWORD *)a4 + 1);
+      v681 = *((int *)a4 + 1);
       a5[1] = v681;
       LOWORD(v681) = a1;
       HIWORD(v681) = __ROL4__(v681, 16) >> 16;
       LOWORD(v681) = a1;
       *a5 = v681;
-      v682 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v682;
+      v682 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v682;
       LOWORD(v682) = a1;
       HIWORD(v682) = __ROL4__(v682, 16) >> 16;
       LOWORD(v682) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v682;
-      v683 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v683;
+      *(int *)((char *)a5 + a2) = v682;
+      v683 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v683;
       LOWORD(v683) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v683) = __ROL4__(v683, 16) >> 16;
       LOWORD(v683) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v683;
+      *(int *)((char *)a5 + 2 * a2) = v683;
       v684 = (char *)a5 + a2;
       v685 = &a4[a2];
-      v686 = *(_DWORD *)&v685[2 * a2 + 4];
-      *(_DWORD *)&v684[2 * a2 + 4] = v686;
+      v686 = *(int *)&v685[2 * a2 + 4];
+      *(int *)&v684[2 * a2 + 4] = v686;
       LOWORD(v686) = *(_WORD *)&v685[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v686, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v684[2 * a2] = v8;
+      *(int *)&v684[2 * a2] = v8;
       break;
     case 0x72u:
 LABEL_182:
-      v687 = *((_DWORD *)a4 + 1);
+      v687 = *((int *)a4 + 1);
       a5[1] = v687;
       LOWORD(v687) = *((_WORD *)a4 + 1);
       HIWORD(v687) = __ROL4__(v687, 16) >> 16;
       LOWORD(v687) = a1;
       *a5 = v687;
-      v688 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v688;
+      v688 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v688;
       LOWORD(v688) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v688) = __ROL4__(v688, 16) >> 16;
       LOWORD(v688) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v688;
-      v689 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v689;
+      *(int *)((char *)a5 + a2) = v688;
+      v689 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v689;
       LOWORD(v689) = a1;
       HIWORD(v689) = __ROL4__(v689, 16) >> 16;
       LOWORD(v689) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v689;
+      *(int *)((char *)a5 + 2 * a2) = v689;
       v690 = (char *)a5 + a2;
-      v691 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v690[2 * a2 + 4] = v691;
+      v691 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v690[2 * a2 + 4] = v691;
       LOWORD(v691) = a1;
       HIWORD(v8) = __ROL4__(v691, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v690[2 * a2] = v8;
+      *(int *)&v690[2 * a2] = v8;
       break;
     case 0x73u:
 LABEL_183:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v692 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v692;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v692 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v692;
       LOWORD(v692) = a1;
       HIWORD(v692) = __ROL4__(v692, 16) >> 16;
       LOWORD(v692) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v692;
+      *(int *)((char *)a5 + 2 * a2) = v692;
       v693 = (char *)a5 + a2;
       LOWORD(v692) = a1;
       HIWORD(v8) = __ROR4__(v692, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v693[2 * a2] = v8;
-      *(_DWORD *)&v693[2 * a2 + 4] = v8;
+      *(int *)&v693[2 * a2] = v8;
+      *(int *)&v693[2 * a2 + 4] = v8;
       break;
     case 0x74u:
 LABEL_184:
@@ -81718,48 +81701,48 @@ LABEL_184:
       LOWORD(v694) = a1;
       HIWORD(v694) = __ROR4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v694;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v694;
+      *(int *)((char *)a5 + a2) = v694;
+      *(int *)((char *)a5 + a2 + 4) = v694;
       LOWORD(v694) = a1;
       HIWORD(v694) = __ROR4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v694;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v694;
+      *(int *)((char *)a5 + 2 * a2) = v694;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v694;
       v695 = (char *)a5 + a2;
       v696 = &a4[a2];
       LOWORD(v694) = *(_WORD *)&v696[2 * a2 + 6];
       HIWORD(v694) = __ROL4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)&v695[2 * a2 + 4] = v694;
+      *(int *)&v695[2 * a2 + 4] = v694;
       LOWORD(v694) = a1;
       HIWORD(v8) = __ROL4__(v694, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v696[2 * a2];
-      *(_DWORD *)&v695[2 * a2] = v8;
+      *(int *)&v695[2 * a2] = v8;
       break;
     case 0x75u:
 LABEL_185:
-      v697 = *((_DWORD *)a4 + 1);
+      v697 = *((int *)a4 + 1);
       a5[1] = v697;
       LOWORD(v697) = a1;
       HIWORD(v697) = __ROL4__(v697, 16) >> 16;
       LOWORD(v697) = a1;
       *a5 = v697;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v698 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v698;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v698 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v698;
       LOWORD(v698) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v698) = __ROL4__(v698, 16) >> 16;
       LOWORD(v698) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v698;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v698;
       LOWORD(v698) = a1;
       HIWORD(v698) = __ROL4__(v698, 16) >> 16;
       LOWORD(v698) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v698;
+      *(int *)((char *)a5 + 2 * a2) = v698;
       v699 = (char *)a5 + a2;
       v700 = &a4[a2];
-      *(_DWORD *)&v699[2 * a2 + 4] = *(_DWORD *)&v700[2 * a2 + 4];
-      v8 = *(_DWORD *)&v700[2 * a2];
-      *(_DWORD *)&v699[2 * a2] = v8;
+      *(int *)&v699[2 * a2 + 4] = *(int *)&v700[2 * a2 + 4];
+      v8 = *(int *)&v700[2 * a2];
+      *(int *)&v699[2 * a2] = v8;
       break;
     case 0x76u:
 LABEL_186:
@@ -81774,23 +81757,23 @@ LABEL_186:
       LOWORD(v701) = a1;
       HIWORD(v701) = __ROR4__(v701, 16) >> 16;
       LOWORD(v701) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v701;
-      v702 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v702;
+      *(int *)((char *)a5 + a2 + 4) = v701;
+      v702 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v702;
       LOWORD(v702) = a1;
       HIWORD(v702) = __ROL4__(v702, 16) >> 16;
       LOWORD(v702) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v702;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v702;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v703 = (char *)a5 + a2;
       v704 = &a4[a2];
-      *(_DWORD *)&v703[2 * a2 + 4] = *(_DWORD *)&v704[2 * a2 + 4];
-      v8 = *(_DWORD *)&v704[2 * a2];
-      *(_DWORD *)&v703[2 * a2] = v8;
+      *(int *)&v703[2 * a2 + 4] = *(int *)&v704[2 * a2 + 4];
+      v8 = *(int *)&v704[2 * a2];
+      *(int *)&v703[2 * a2] = v8;
       break;
     case 0x77u:
 LABEL_187:
-      v705 = *((_DWORD *)a4 + 1);
+      v705 = *((int *)a4 + 1);
       a5[1] = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
@@ -81799,106 +81782,106 @@ LABEL_187:
       LOWORD(v705) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
       LOWORD(v705) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v705;
+      *(int *)((char *)a5 + a2 + 4) = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
       LOWORD(v705) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v705;
+      *(int *)((char *)a5 + a2) = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROR4__(v705, 16) >> 16;
       LOWORD(v705) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v705;
-      v706 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v706;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v705;
+      v706 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v706;
       v707 = (char *)a5 + a2;
       v708 = &a4[a2];
       LOWORD(v706) = a1;
       HIWORD(v706) = __ROL4__(v706, 16) >> 16;
       LOWORD(v706) = *(_WORD *)&v708[2 * a2 + 4];
-      *(_DWORD *)&v707[2 * a2 + 4] = v706;
-      v8 = *(_DWORD *)&v708[2 * a2];
-      *(_DWORD *)&v707[2 * a2] = v8;
+      *(int *)&v707[2 * a2 + 4] = v706;
+      v8 = *(int *)&v708[2 * a2];
+      *(int *)&v707[2 * a2] = v8;
       break;
     case 0x78u:
 LABEL_188:
-      v709 = *((_DWORD *)a4 + 1);
+      v709 = *((int *)a4 + 1);
       a5[1] = v709;
       LOWORD(v709) = *((_WORD *)a4 + 1);
       HIWORD(v709) = __ROL4__(v709, 16) >> 16;
       LOWORD(v709) = a1;
       *a5 = v709;
-      v710 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v710;
+      v710 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v710;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v710;
+      *(int *)((char *)a5 + a2) = v710;
       LOWORD(v710) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v710;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v710;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v710;
+      *(int *)((char *)a5 + 2 * a2) = v710;
       v711 = (char *)a5 + a2;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROR4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)&v711[2 * a2 + 4] = v710;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v711[2 * a2] = v8;
+      *(int *)&v711[2 * a2 + 4] = v710;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v711[2 * a2] = v8;
       break;
     case 0x79u:
 LABEL_189:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v712 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v712;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v712 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v712;
       LOWORD(v712) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v712) = __ROL4__(v712, 16) >> 16;
       LOWORD(v712) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v712;
-      v713 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v713;
+      *(int *)((char *)a5 + a2) = v712;
+      v713 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v713;
       LOWORD(v713) = a1;
       HIWORD(v713) = __ROL4__(v713, 16) >> 16;
       LOWORD(v713) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v713;
+      *(int *)((char *)a5 + 2 * a2) = v713;
       v714 = (char *)a5 + a2;
       v715 = &a4[a2];
       LOWORD(v713) = *(_WORD *)&v715[2 * a2 + 6];
       HIWORD(v713) = __ROL4__(v713, 16) >> 16;
       LOWORD(v713) = a1;
-      *(_DWORD *)&v714[2 * a2 + 4] = v713;
+      *(int *)&v714[2 * a2 + 4] = v713;
       LOWORD(v713) = a1;
       HIWORD(v8) = __ROL4__(v713, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v715[2 * a2];
-      *(_DWORD *)&v714[2 * a2] = v8;
+      *(int *)&v714[2 * a2] = v8;
       break;
     case 0x7Au:
 LABEL_190:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v716 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v716 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v716) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v716) = __ROL4__(v716, 16) >> 16;
       LOWORD(v716) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v716;
+      *(int *)((char *)a5 + a2 + 4) = v716;
       LOWORD(v716) = a1;
       HIWORD(v716) = __ROL4__(v716, 16) >> 16;
       LOWORD(v716) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v716;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v717 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v717;
+      *(int *)((char *)a5 + a2) = v716;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v717 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v717;
       v718 = (char *)a5 + a2;
       LOWORD(v717) = a1;
       HIWORD(v717) = __ROR4__(v717, 16) >> 16;
       LOWORD(v717) = a1;
-      *(_DWORD *)&v718[2 * a2 + 4] = v717;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v718[2 * a2] = v8;
+      *(int *)&v718[2 * a2 + 4] = v717;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v718[2 * a2] = v8;
       break;
     case 0x7Bu:
 LABEL_191:
@@ -81910,23 +81893,23 @@ LABEL_191:
       HIWORD(v719) = __ROL4__(v719, 16) >> 16;
       LOWORD(v719) = *(_WORD *)a4;
       *a5 = v719;
-      v720 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v720;
+      v720 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v720;
       LOWORD(v720) = a1;
       HIWORD(v720) = __ROL4__(v720, 16) >> 16;
       LOWORD(v720) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v720;
-      v721 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v721;
+      *(int *)((char *)a5 + a2) = v720;
+      v721 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v721;
       LOWORD(v721) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v721) = __ROL4__(v721, 16) >> 16;
       LOWORD(v721) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v721;
+      *(int *)((char *)a5 + 2 * a2) = v721;
       v722 = (char *)a5 + a2;
       v723 = &a4[a2];
-      *(_DWORD *)&v722[2 * a2 + 4] = *(_DWORD *)&v723[2 * a2 + 4];
-      v8 = *(_DWORD *)&v723[2 * a2];
-      *(_DWORD *)&v722[2 * a2] = v8;
+      *(int *)&v722[2 * a2 + 4] = *(int *)&v723[2 * a2 + 4];
+      v8 = *(int *)&v723[2 * a2];
+      *(int *)&v722[2 * a2] = v8;
       break;
     case 0x7Cu:
 LABEL_192:
@@ -81934,30 +81917,30 @@ LABEL_192:
       HIWORD(v724) = __ROR4__(v5, 16) >> 16;
       LOWORD(v724) = a1;
       a5[1] = v724;
-      v725 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v725 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v725) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v725) = __ROL4__(v725, 16) >> 16;
       LOWORD(v725) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v725;
+      *(int *)((char *)a5 + a2 + 4) = v725;
       LOWORD(v725) = a1;
       HIWORD(v725) = __ROL4__(v725, 16) >> 16;
       LOWORD(v725) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v725;
-      v726 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v726;
+      *(int *)((char *)a5 + a2) = v725;
+      v726 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v726;
       LOWORD(v726) = a1;
       HIWORD(v726) = __ROL4__(v726, 16) >> 16;
       LOWORD(v726) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v726;
+      *(int *)((char *)a5 + 2 * a2) = v726;
       v727 = (char *)a5 + a2;
       v728 = &a4[a2];
-      v729 = *(_DWORD *)&v728[2 * a2 + 4];
-      *(_DWORD *)&v727[2 * a2 + 4] = v729;
+      v729 = *(int *)&v728[2 * a2 + 4];
+      *(int *)&v727[2 * a2 + 4] = v729;
       LOWORD(v729) = *(_WORD *)&v728[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v729, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v727[2 * a2] = v8;
+      *(int *)&v727[2 * a2] = v8;
       break;
     case 0x7Du:
 LABEL_193:
@@ -81965,57 +81948,57 @@ LABEL_193:
       HIWORD(v730) = __ROL4__(v5, 16) >> 16;
       LOWORD(v730) = *((_WORD *)a4 + 2);
       a5[1] = v730;
-      v731 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v731 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v731) = a1;
       HIWORD(v731) = __ROR4__(v731, 16) >> 16;
       LOWORD(v731) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v731;
-      v732 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v732;
+      *(int *)((char *)a5 + a2 + 4) = v731;
+      v732 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v732;
       LOWORD(v732) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v732) = __ROL4__(v732, 16) >> 16;
       LOWORD(v732) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v732;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v732;
       LOWORD(v732) = a1;
       HIWORD(v732) = __ROL4__(v732, 16) >> 16;
       LOWORD(v732) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v732;
+      *(int *)((char *)a5 + 2 * a2) = v732;
       v733 = (char *)a5 + a2;
-      v734 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v733[2 * a2 + 4] = v734;
+      v734 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v733[2 * a2 + 4] = v734;
       LOWORD(v734) = a1;
       HIWORD(v8) = __ROL4__(v734, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v733[2 * a2] = v8;
+      *(int *)&v733[2 * a2] = v8;
       break;
     case 0x7Eu:
 LABEL_194:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v735 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v735 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v735) = a1;
       HIWORD(v735) = __ROL4__(v735, 16) >> 16;
       LOWORD(v735) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v735;
-      v736 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v736;
+      *(int *)((char *)a5 + a2 + 4) = v735;
+      v736 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v736;
       LOWORD(v736) = a1;
       HIWORD(v736) = __ROR4__(v736, 16) >> 16;
       LOWORD(v736) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v736;
-      v737 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v737;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v736;
+      v737 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v737;
       v738 = (char *)a5 + a2;
       v739 = &a4[a2];
       LOWORD(v737) = *(_WORD *)&v739[2 * a2 + 6];
       HIWORD(v737) = __ROL4__(v737, 16) >> 16;
       LOWORD(v737) = a1;
-      *(_DWORD *)&v738[2 * a2 + 4] = v737;
+      *(int *)&v738[2 * a2 + 4] = v737;
       LOWORD(v737) = a1;
       HIWORD(v8) = __ROL4__(v737, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v739[2 * a2];
-      *(_DWORD *)&v738[2 * a2] = v8;
+      *(int *)&v738[2 * a2] = v8;
       break;
     case 0x7Fu:
 LABEL_195:
@@ -82023,26 +82006,26 @@ LABEL_195:
       HIWORD(v740) = __ROR4__(v5, 16) >> 16;
       LOWORD(v740) = a1;
       a5[1] = v740;
-      v741 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v741 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v741) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v741) = __ROL4__(v741, 16) >> 16;
       LOWORD(v741) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v741;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v742 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v742;
+      *(int *)((char *)a5 + a2 + 4) = v741;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v742 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v742;
       LOWORD(v742) = a1;
       HIWORD(v742) = __ROL4__(v742, 16) >> 16;
       LOWORD(v742) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v742;
+      *(int *)((char *)a5 + 2 * a2) = v742;
       v743 = (char *)a5 + a2;
-      v744 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v743[2 * a2 + 4] = v744;
+      v744 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v743[2 * a2 + 4] = v744;
       LOWORD(v744) = a1;
       HIWORD(v8) = __ROL4__(v744, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v743[2 * a2] = v8;
+      *(int *)&v743[2 * a2] = v8;
       break;
     case 0x80u:
 LABEL_68:
@@ -82054,25 +82037,25 @@ LABEL_68:
       LOWORD(v294) = a1;
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v294;
+      *(int *)((char *)a5 + a2 + 4) = v294;
       LOWORD(v294) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v294;
+      *(int *)((char *)a5 + a2) = v294;
       LOWORD(v294) = a1;
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v294;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v294;
       LOWORD(v294) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v294;
+      *(int *)((char *)a5 + 2 * a2) = v294;
       v295 = (char *)a5 + a2;
       LOWORD(v294) = a1;
       HIWORD(v8) = __ROR4__(v294, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v295[2 * a2] = v8;
-      *(_DWORD *)&v295[2 * a2 + 4] = v8;
+      *(int *)&v295[2 * a2] = v8;
+      *(int *)&v295[2 * a2 + 4] = v8;
       break;
     case 0x81u:
 LABEL_69:
@@ -82084,43 +82067,43 @@ LABEL_69:
       LOWORD(v296) = a1;
       HIWORD(v296) = __ROR4__(v296, 16) >> 16;
       LOWORD(v296) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v296;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v296;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v296;
+      *(int *)((char *)a5 + a2 + 4) = v296;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v297 = (char *)a5 + a2;
       v298 = &a4[a2];
-      *(_DWORD *)&v297[2 * a2 + 4] = *(_DWORD *)&v298[2 * a2 + 4];
-      v8 = *(_DWORD *)&v298[2 * a2];
-      *(_DWORD *)&v297[2 * a2] = v8;
+      *(int *)&v297[2 * a2 + 4] = *(int *)&v298[2 * a2 + 4];
+      v8 = *(int *)&v298[2 * a2];
+      *(int *)&v297[2 * a2] = v8;
       break;
     case 0x82u:
 LABEL_70:
-      v299 = *((_DWORD *)a4 + 1);
+      v299 = *((int *)a4 + 1);
       a5[1] = v299;
       LOWORD(v299) = a1;
       HIWORD(v299) = __ROL4__(v299, 16) >> 16;
       LOWORD(v299) = a1;
       *a5 = v299;
-      v300 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v300;
+      v300 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v300;
       LOWORD(v300) = a1;
       HIWORD(v300) = __ROL4__(v300, 16) >> 16;
       LOWORD(v300) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v300;
-      v301 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v301;
+      *(int *)((char *)a5 + a2) = v300;
+      v301 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v301;
       LOWORD(v301) = a1;
       HIWORD(v301) = __ROL4__(v301, 16) >> 16;
       LOWORD(v301) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v301;
+      *(int *)((char *)a5 + 2 * a2) = v301;
       v302 = (char *)a5 + a2;
-      v303 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v302[2 * a2 + 4] = v303;
+      v303 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v302[2 * a2 + 4] = v303;
       LOWORD(v303) = a1;
       HIWORD(v8) = __ROL4__(v303, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v302[2 * a2] = v8;
+      *(int *)&v302[2 * a2] = v8;
       break;
     case 0x83u:
 LABEL_71:
@@ -82132,18 +82115,18 @@ LABEL_71:
       LOWORD(v304) = a1;
       HIWORD(v304) = __ROR4__(v304, 16) >> 16;
       LOWORD(v304) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v304;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v304;
+      *(int *)((char *)a5 + a2) = v304;
+      *(int *)((char *)a5 + a2 + 4) = v304;
       LOWORD(v304) = a1;
       HIWORD(v304) = __ROR4__(v304, 16) >> 16;
       LOWORD(v304) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v304;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v304;
+      *(int *)((char *)a5 + 2 * a2) = v304;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v304;
       v305 = (char *)a5 + a2;
       v306 = &a4[a2];
-      *(_DWORD *)&v305[2 * a2 + 4] = *(_DWORD *)&v306[2 * a2 + 4];
-      v8 = *(_DWORD *)&v306[2 * a2];
-      *(_DWORD *)&v305[2 * a2] = v8;
+      *(int *)&v305[2 * a2 + 4] = *(int *)&v306[2 * a2 + 4];
+      v8 = *(int *)&v306[2 * a2];
+      *(int *)&v305[2 * a2] = v8;
       break;
     case 0x84u:
 LABEL_72:
@@ -82158,50 +82141,50 @@ LABEL_72:
       LOWORD(v307) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v307;
+      *(int *)((char *)a5 + a2 + 4) = v307;
       LOWORD(v307) = a1;
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v307;
+      *(int *)((char *)a5 + a2) = v307;
       LOWORD(v307) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v307;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v307;
       LOWORD(v307) = a1;
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v307;
+      *(int *)((char *)a5 + 2 * a2) = v307;
       v308 = (char *)a5 + a2;
       LOWORD(v307) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)&v308[2 * a2 + 4] = v307;
+      *(int *)&v308[2 * a2 + 4] = v307;
       LOWORD(v307) = a1;
       HIWORD(v8) = __ROL4__(v307, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v308[2 * a2] = v8;
+      *(int *)&v308[2 * a2] = v8;
       break;
     case 0x85u:
 LABEL_73:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v309 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v309 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v309) = a1;
       HIWORD(v309) = __ROR4__(v309, 16) >> 16;
       LOWORD(v309) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v309;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v309;
+      *(int *)((char *)a5 + a2) = v309;
+      *(int *)((char *)a5 + a2 + 4) = v309;
       LOWORD(v309) = a1;
       HIWORD(v309) = __ROR4__(v309, 16) >> 16;
       LOWORD(v309) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v309;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v309;
+      *(int *)((char *)a5 + 2 * a2) = v309;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v309;
       v310 = (char *)a5 + a2;
       LOWORD(v309) = a1;
       HIWORD(v8) = __ROR4__(v309, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v310[2 * a2] = v8;
-      *(_DWORD *)&v310[2 * a2 + 4] = v8;
+      *(int *)&v310[2 * a2] = v8;
+      *(int *)&v310[2 * a2 + 4] = v8;
       break;
     case 0x86u:
 LABEL_74:
@@ -82216,28 +82199,28 @@ LABEL_74:
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v311;
+      *(int *)((char *)a5 + a2 + 4) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROL4__(v311, 16) >> 16;
       LOWORD(v311) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v311;
+      *(int *)((char *)a5 + a2) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v311;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROL4__(v311, 16) >> 16;
       LOWORD(v311) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v311;
+      *(int *)((char *)a5 + 2 * a2) = v311;
       v312 = (char *)a5 + a2;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)&v312[2 * a2 + 4] = v311;
+      *(int *)&v312[2 * a2 + 4] = v311;
       LOWORD(v311) = a1;
       HIWORD(v8) = __ROL4__(v311, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v312[2 * a2] = v8;
+      *(int *)&v312[2 * a2] = v8;
       break;
     case 0x87u:
 LABEL_75:
@@ -82249,76 +82232,76 @@ LABEL_75:
       HIWORD(v313) = __ROL4__(v313, 16) >> 16;
       LOWORD(v313) = a1;
       *a5 = v313;
-      v314 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v314;
+      v314 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v314;
       LOWORD(v314) = a1;
       HIWORD(v314) = __ROL4__(v314, 16) >> 16;
       LOWORD(v314) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v314;
-      v315 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v315;
+      *(int *)((char *)a5 + a2) = v314;
+      v315 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v315;
       LOWORD(v315) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v315) = __ROL4__(v315, 16) >> 16;
       LOWORD(v315) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v315;
+      *(int *)((char *)a5 + 2 * a2) = v315;
       v316 = (char *)a5 + a2;
       v317 = &a4[a2];
-      *(_DWORD *)&v316[2 * a2 + 4] = *(_DWORD *)&v317[2 * a2 + 4];
-      v8 = *(_DWORD *)&v317[2 * a2];
-      *(_DWORD *)&v316[2 * a2] = v8;
+      *(int *)&v316[2 * a2 + 4] = *(int *)&v317[2 * a2 + 4];
+      v8 = *(int *)&v317[2 * a2];
+      *(int *)&v316[2 * a2] = v8;
       break;
     case 0x88u:
 LABEL_76:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v318 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v318;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v318 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v318;
       LOWORD(v318) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v318) = __ROL4__(v318, 16) >> 16;
       LOWORD(v318) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v318;
-      v319 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v319;
+      *(int *)((char *)a5 + a2) = v318;
+      v319 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v319;
       LOWORD(v319) = a1;
       HIWORD(v319) = __ROL4__(v319, 16) >> 16;
       LOWORD(v319) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v319;
+      *(int *)((char *)a5 + 2 * a2) = v319;
       v320 = (char *)a5 + a2;
       LOWORD(v319) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v319) = __ROL4__(v319, 16) >> 16;
       LOWORD(v319) = a1;
-      *(_DWORD *)&v320[2 * a2 + 4] = v319;
+      *(int *)&v320[2 * a2 + 4] = v319;
       LOWORD(v319) = a1;
       HIWORD(v8) = __ROL4__(v319, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v320[2 * a2] = v8;
+      *(int *)&v320[2 * a2] = v8;
       break;
     case 0x89u:
 LABEL_77:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v321 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v321 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v321) = a1;
       HIWORD(v321) = __ROL4__(v321, 16) >> 16;
       LOWORD(v321) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v321;
-      v322 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v322;
+      *(int *)((char *)a5 + a2 + 4) = v321;
+      v322 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v322;
       LOWORD(v322) = a1;
       HIWORD(v322) = __ROR4__(v322, 16) >> 16;
       LOWORD(v322) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v322;
-      v323 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v323;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v322;
+      v323 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v323;
       v324 = (char *)a5 + a2;
       LOWORD(v323) = a1;
       HIWORD(v323) = __ROR4__(v323, 16) >> 16;
       LOWORD(v323) = a1;
-      *(_DWORD *)&v324[2 * a2 + 4] = v323;
+      *(int *)&v324[2 * a2 + 4] = v323;
       LOWORD(v323) = a1;
       HIWORD(v8) = __ROL4__(v323, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v324[2 * a2] = v8;
+      *(int *)&v324[2 * a2] = v8;
       break;
     case 0x8Au:
 LABEL_78:
@@ -82333,19 +82316,19 @@ LABEL_78:
       LOWORD(v325) = a1;
       HIWORD(v325) = __ROR4__(v325, 16) >> 16;
       LOWORD(v325) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v325;
-      v326 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v326;
+      *(int *)((char *)a5 + a2 + 4) = v325;
+      v326 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v326;
       LOWORD(v326) = a1;
       HIWORD(v326) = __ROL4__(v326, 16) >> 16;
       LOWORD(v326) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v326;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v326;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v327 = (char *)a5 + a2;
       v328 = &a4[a2];
-      *(_DWORD *)&v327[2 * a2 + 4] = *(_DWORD *)&v328[2 * a2 + 4];
-      v8 = *(_DWORD *)&v328[2 * a2];
-      *(_DWORD *)&v327[2 * a2] = v8;
+      *(int *)&v327[2 * a2 + 4] = *(int *)&v328[2 * a2 + 4];
+      v8 = *(int *)&v328[2 * a2];
+      *(int *)&v327[2 * a2] = v8;
       break;
     case 0x8Bu:
 LABEL_79:
@@ -82357,27 +82340,27 @@ LABEL_79:
       LOWORD(v329) = a1;
       HIWORD(v329) = __ROR4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v329;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v329;
+      *(int *)((char *)a5 + a2) = v329;
+      *(int *)((char *)a5 + a2 + 4) = v329;
       LOWORD(v329) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v329) = __ROL4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v329;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v329;
       LOWORD(v329) = a1;
       HIWORD(v329) = __ROL4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v329;
+      *(int *)((char *)a5 + 2 * a2) = v329;
       v330 = (char *)a5 + a2;
-      v331 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v330[2 * a2 + 4] = v331;
+      v331 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v330[2 * a2 + 4] = v331;
       LOWORD(v331) = a1;
       HIWORD(v8) = __ROL4__(v331, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v330[2 * a2] = v8;
+      *(int *)&v330[2 * a2] = v8;
       break;
     case 0x8Cu:
 LABEL_80:
-      v332 = *((_DWORD *)a4 + 1);
+      v332 = *((int *)a4 + 1);
       a5[1] = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
@@ -82386,22 +82369,22 @@ LABEL_80:
       LOWORD(v332) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v332;
+      *(int *)((char *)a5 + a2 + 4) = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v332;
+      *(int *)((char *)a5 + a2) = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROR4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v332;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v332;
+      *(int *)((char *)a5 + 2 * a2) = v332;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v332;
       v333 = (char *)a5 + a2;
       LOWORD(v332) = a1;
       HIWORD(v8) = __ROR4__(v332, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v333[2 * a2] = v8;
-      *(_DWORD *)&v333[2 * a2 + 4] = v8;
+      *(int *)&v333[2 * a2] = v8;
+      *(int *)&v333[2 * a2 + 4] = v8;
       break;
     case 0x8Du:
 LABEL_81:
@@ -82409,27 +82392,27 @@ LABEL_81:
       HIWORD(v334) = __ROR4__(v5, 16) >> 16;
       LOWORD(v334) = a1;
       a5[1] = v334;
-      v335 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v335 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROR4__(v335, 16) >> 16;
       LOWORD(v335) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v335;
+      *(int *)((char *)a5 + a2 + 4) = v335;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROL4__(v335, 16) >> 16;
       LOWORD(v335) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v335;
+      *(int *)((char *)a5 + a2) = v335;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROR4__(v335, 16) >> 16;
       LOWORD(v335) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v335;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v335;
+      *(int *)((char *)a5 + 2 * a2) = v335;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v335;
       v336 = (char *)a5 + a2;
       LOWORD(v335) = a1;
       HIWORD(v8) = __ROR4__(v335, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v336[2 * a2] = v8;
-      *(_DWORD *)&v336[2 * a2 + 4] = v8;
+      *(int *)&v336[2 * a2] = v8;
+      *(int *)&v336[2 * a2 + 4] = v8;
       break;
     case 0x8Eu:
 LABEL_82:
@@ -82441,23 +82424,23 @@ LABEL_82:
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v337;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v337;
+      *(int *)((char *)a5 + a2) = v337;
+      *(int *)((char *)a5 + a2 + 4) = v337;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v337;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v337;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROL4__(v337, 16) >> 16;
       LOWORD(v337) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v337;
+      *(int *)((char *)a5 + 2 * a2) = v337;
       v338 = (char *)a5 + a2;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)&v338[2 * a2 + 4] = v337;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v338[2 * a2] = v8;
+      *(int *)&v338[2 * a2 + 4] = v337;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v338[2 * a2] = v8;
       break;
     case 0x8Fu:
 LABEL_83:
@@ -82469,47 +82452,47 @@ LABEL_83:
       LOWORD(v339) = a1;
       HIWORD(v339) = __ROR4__(v339, 16) >> 16;
       LOWORD(v339) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v339;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v339;
-      v340 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v340;
+      *(int *)((char *)a5 + a2) = v339;
+      *(int *)((char *)a5 + a2 + 4) = v339;
+      v340 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v340;
       LOWORD(v340) = a1;
       HIWORD(v340) = __ROL4__(v340, 16) >> 16;
       LOWORD(v340) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v340;
+      *(int *)((char *)a5 + 2 * a2) = v340;
       v341 = (char *)a5 + a2;
-      v342 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v341[2 * a2 + 4] = v342;
+      v342 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v341[2 * a2 + 4] = v342;
       LOWORD(v342) = a1;
       HIWORD(v8) = __ROL4__(v342, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v341[2 * a2] = v8;
+      *(int *)&v341[2 * a2] = v8;
       break;
     case 0x90u:
 LABEL_84:
-      v343 = *((_DWORD *)a4 + 1);
+      v343 = *((int *)a4 + 1);
       a5[1] = v343;
       LOWORD(v343) = a1;
       HIWORD(v343) = __ROL4__(v343, 16) >> 16;
       LOWORD(v343) = a1;
       *a5 = v343;
-      v344 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v344;
+      v344 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v344;
       LOWORD(v344) = a1;
       HIWORD(v344) = __ROL4__(v344, 16) >> 16;
       LOWORD(v344) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v344;
+      *(int *)((char *)a5 + a2) = v344;
       LOWORD(v344) = a1;
       HIWORD(v344) = __ROR4__(v344, 16) >> 16;
       LOWORD(v344) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v344;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v344;
+      *(int *)((char *)a5 + 2 * a2) = v344;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v344;
       v345 = (char *)a5 + a2;
       LOWORD(v344) = a1;
       HIWORD(v8) = __ROR4__(v344, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v345[2 * a2] = v8;
-      *(_DWORD *)&v345[2 * a2 + 4] = v8;
+      *(int *)&v345[2 * a2] = v8;
+      *(int *)&v345[2 * a2 + 4] = v8;
       break;
     case 0x91u:
 LABEL_85:
@@ -82517,25 +82500,25 @@ LABEL_85:
       HIWORD(v346) = __ROR4__(v5, 16) >> 16;
       LOWORD(v346) = a1;
       a5[1] = v346;
-      v347 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v347 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v347) = a1;
       HIWORD(v347) = __ROR4__(v347, 16) >> 16;
       LOWORD(v347) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v347;
-      v348 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v348;
+      *(int *)((char *)a5 + a2 + 4) = v347;
+      v348 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v348;
       LOWORD(v348) = a1;
       HIWORD(v348) = __ROR4__(v348, 16) >> 16;
       LOWORD(v348) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v348;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v348;
+      *(int *)((char *)a5 + 2 * a2) = v348;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v348;
       v349 = (char *)a5 + a2;
       LOWORD(v348) = a1;
       HIWORD(v8) = __ROR4__(v348, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v349[2 * a2] = v8;
-      *(_DWORD *)&v349[2 * a2 + 4] = v8;
+      *(int *)&v349[2 * a2] = v8;
+      *(int *)&v349[2 * a2 + 4] = v8;
       break;
     case 0x92u:
 LABEL_86:
@@ -82547,21 +82530,21 @@ LABEL_86:
       LOWORD(v350) = a1;
       HIWORD(v350) = __ROR4__(v350, 16) >> 16;
       LOWORD(v350) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v350;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v350;
+      *(int *)((char *)a5 + a2) = v350;
+      *(int *)((char *)a5 + a2 + 4) = v350;
       LOWORD(v350) = a1;
       HIWORD(v350) = __ROR4__(v350, 16) >> 16;
       LOWORD(v350) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v350;
-      v351 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v351;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v350;
+      v351 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v351;
       v352 = (char *)a5 + a2;
       LOWORD(v351) = a1;
       HIWORD(v351) = __ROR4__(v351, 16) >> 16;
       LOWORD(v351) = a1;
-      *(_DWORD *)&v352[2 * a2 + 4] = v351;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v352[2 * a2] = v8;
+      *(int *)&v352[2 * a2 + 4] = v351;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v352[2 * a2] = v8;
       break;
     case 0x93u:
 LABEL_87:
@@ -82570,17 +82553,17 @@ LABEL_87:
       LOWORD(v353) = a1;
       *a5 = v353;
       a5[1] = v353;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v354 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v354;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v354 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v354;
       v355 = (char *)a5 + a2;
       LOWORD(v354) = a1;
       HIWORD(v8) = __ROR4__(v354, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v355[2 * a2] = v8;
-      *(_DWORD *)&v355[2 * a2 + 4] = v8;
+      *(int *)&v355[2 * a2] = v8;
+      *(int *)&v355[2 * a2 + 4] = v8;
       break;
     case 0x94u:
 LABEL_88:
@@ -82595,29 +82578,29 @@ LABEL_88:
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v356;
+      *(int *)((char *)a5 + a2 + 4) = v356;
       LOWORD(v356) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v356;
+      *(int *)((char *)a5 + a2) = v356;
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v356;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v356;
       LOWORD(v356) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v356;
+      *(int *)((char *)a5 + 2 * a2) = v356;
       v357 = (char *)a5 + a2;
       v358 = &a4[a2];
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&v358[2 * a2 + 4];
-      *(_DWORD *)&v357[2 * a2 + 4] = v356;
+      *(int *)&v357[2 * a2 + 4] = v356;
       LOWORD(v356) = *(_WORD *)&v358[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v356, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v357[2 * a2] = v8;
+      *(int *)&v357[2 * a2] = v8;
       break;
     case 0x95u:
 LABEL_89:
@@ -82626,20 +82609,20 @@ LABEL_89:
       LOWORD(v359) = a1;
       *a5 = v359;
       a5[1] = v359;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v360 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v360;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v360 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v360;
       LOWORD(v360) = a1;
       HIWORD(v360) = __ROR4__(v360, 16) >> 16;
       LOWORD(v360) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v360;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v360;
+      *(int *)((char *)a5 + 2 * a2) = v360;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v360;
       v361 = (char *)a5 + a2;
       LOWORD(v360) = a1;
       HIWORD(v8) = __ROR4__(v360, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v361[2 * a2] = v8;
-      *(_DWORD *)&v361[2 * a2 + 4] = v8;
+      *(int *)&v361[2 * a2] = v8;
+      *(int *)&v361[2 * a2 + 4] = v8;
       break;
     case 0x96u:
 LABEL_90:
@@ -82651,17 +82634,17 @@ LABEL_90:
       LOWORD(v362) = a1;
       HIWORD(v362) = __ROR4__(v362, 16) >> 16;
       LOWORD(v362) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v362;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v362;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v363 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v363;
+      *(int *)((char *)a5 + a2) = v362;
+      *(int *)((char *)a5 + a2 + 4) = v362;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v363 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v363;
       v364 = (char *)a5 + a2;
       LOWORD(v363) = a1;
       HIWORD(v8) = __ROR4__(v363, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v364[2 * a2] = v8;
-      *(_DWORD *)&v364[2 * a2 + 4] = v8;
+      *(int *)&v364[2 * a2] = v8;
+      *(int *)&v364[2 * a2 + 4] = v8;
       break;
     case 0x97u:
 LABEL_91:
@@ -82676,28 +82659,28 @@ LABEL_91:
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v365;
+      *(int *)((char *)a5 + a2 + 4) = v365;
       LOWORD(v365) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v365) = __ROL4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v365;
+      *(int *)((char *)a5 + a2) = v365;
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v365;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v365;
       LOWORD(v365) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v365) = __ROL4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v365;
+      *(int *)((char *)a5 + 2 * a2) = v365;
       v366 = (char *)a5 + a2;
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)&v366[2 * a2 + 4] = v365;
+      *(int *)&v366[2 * a2 + 4] = v365;
       LOWORD(v365) = *(_WORD *)&a4[2 * a2 + 2 + a2];
       HIWORD(v8) = __ROL4__(v365, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v366[2 * a2] = v8;
+      *(int *)&v366[2 * a2] = v8;
       break;
     case 0x98u:
 LABEL_92:
@@ -82712,28 +82695,28 @@ LABEL_92:
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v367;
+      *(int *)((char *)a5 + a2 + 4) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v367;
+      *(int *)((char *)a5 + a2) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v367;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v367;
+      *(int *)((char *)a5 + 2 * a2) = v367;
       v368 = (char *)a5 + a2;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v368[2 * a2 + 4] = v367;
+      *(int *)&v368[2 * a2 + 4] = v367;
       LOWORD(v367) = a1;
       HIWORD(v8) = __ROL4__(v367, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v368[2 * a2] = v8;
+      *(int *)&v368[2 * a2] = v8;
       break;
     case 0x99u:
 LABEL_93:
@@ -82745,21 +82728,21 @@ LABEL_93:
       LOWORD(v369) = a1;
       HIWORD(v369) = __ROR4__(v369, 16) >> 16;
       LOWORD(v369) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v369;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v369;
+      *(int *)((char *)a5 + a2) = v369;
+      *(int *)((char *)a5 + a2 + 4) = v369;
       LOWORD(v369) = a1;
       HIWORD(v369) = __ROL4__(v369, 16) >> 16;
       LOWORD(v369) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v369;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v369;
       LOWORD(v369) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v369) = __ROL4__(v369, 16) >> 16;
       LOWORD(v369) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v369;
+      *(int *)((char *)a5 + 2 * a2) = v369;
       v370 = (char *)a5 + a2;
       v371 = &a4[a2];
-      *(_DWORD *)&v370[2 * a2 + 4] = *(_DWORD *)&v371[2 * a2 + 4];
-      v8 = *(_DWORD *)&v371[2 * a2];
-      *(_DWORD *)&v370[2 * a2] = v8;
+      *(int *)&v370[2 * a2 + 4] = *(int *)&v371[2 * a2 + 4];
+      v8 = *(int *)&v371[2 * a2];
+      *(int *)&v370[2 * a2] = v8;
       break;
     case 0x9Au:
 LABEL_94:
@@ -82771,52 +82754,52 @@ LABEL_94:
       HIWORD(v372) = __ROL4__(v372, 16) >> 16;
       LOWORD(v372) = a1;
       *a5 = v372;
-      v373 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v373;
+      v373 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v373;
       LOWORD(v373) = a1;
       HIWORD(v373) = __ROL4__(v373, 16) >> 16;
       LOWORD(v373) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v373;
-      v374 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v374;
+      *(int *)((char *)a5 + a2) = v373;
+      v374 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v374;
       LOWORD(v374) = a1;
       HIWORD(v374) = __ROL4__(v374, 16) >> 16;
       LOWORD(v374) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v374;
+      *(int *)((char *)a5 + 2 * a2) = v374;
       v375 = (char *)a5 + a2;
       LOWORD(v374) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v374) = __ROL4__(v374, 16) >> 16;
       LOWORD(v374) = a1;
-      *(_DWORD *)&v375[2 * a2 + 4] = v374;
+      *(int *)&v375[2 * a2 + 4] = v374;
       LOWORD(v374) = a1;
       HIWORD(v8) = __ROL4__(v374, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v375[2 * a2] = v8;
+      *(int *)&v375[2 * a2] = v8;
       break;
     case 0x9Bu:
 LABEL_95:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v376 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v376 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v376) = a1;
       HIWORD(v376) = __ROL4__(v376, 16) >> 16;
       LOWORD(v376) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v376;
+      *(int *)((char *)a5 + a2 + 4) = v376;
       LOWORD(v376) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v376) = __ROL4__(v376, 16) >> 16;
       LOWORD(v376) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v376;
+      *(int *)((char *)a5 + a2) = v376;
       LOWORD(v376) = a1;
       HIWORD(v376) = __ROR4__(v376, 16) >> 16;
       LOWORD(v376) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v376;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v376;
+      *(int *)((char *)a5 + 2 * a2) = v376;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v376;
       v377 = (char *)a5 + a2;
       LOWORD(v376) = a1;
       HIWORD(v8) = __ROR4__(v376, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v377[2 * a2] = v8;
-      *(_DWORD *)&v377[2 * a2 + 4] = v8;
+      *(int *)&v377[2 * a2] = v8;
+      *(int *)&v377[2 * a2 + 4] = v8;
       break;
     case 0x9Cu:
 LABEL_96:
@@ -82831,28 +82814,28 @@ LABEL_96:
       LOWORD(v378) = a1;
       HIWORD(v378) = __ROR4__(v378, 16) >> 16;
       LOWORD(v378) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v378;
-      v379 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v379;
+      *(int *)((char *)a5 + a2 + 4) = v378;
+      v379 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v379;
       LOWORD(v379) = a1;
       HIWORD(v379) = __ROR4__(v379, 16) >> 16;
       LOWORD(v379) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v379;
-      v380 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v380;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v379;
+      v380 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v380;
       v381 = (char *)a5 + a2;
       LOWORD(v380) = a1;
       HIWORD(v380) = __ROR4__(v380, 16) >> 16;
       LOWORD(v380) = a1;
-      *(_DWORD *)&v381[2 * a2 + 4] = v380;
+      *(int *)&v381[2 * a2 + 4] = v380;
       LOWORD(v380) = a1;
       HIWORD(v8) = __ROL4__(v380, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v381[2 * a2] = v8;
+      *(int *)&v381[2 * a2] = v8;
       break;
     case 0x9Du:
 LABEL_97:
-      v382 = *((_DWORD *)a4 + 1);
+      v382 = *((int *)a4 + 1);
       a5[1] = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
@@ -82861,26 +82844,26 @@ LABEL_97:
       LOWORD(v382) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v382;
+      *(int *)((char *)a5 + a2 + 4) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v382;
+      *(int *)((char *)a5 + a2) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROR4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v382;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v382;
+      *(int *)((char *)a5 + 2 * a2) = v382;
       v383 = (char *)a5 + a2;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROR4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)&v383[2 * a2 + 4] = v382;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v383[2 * a2] = v8;
+      *(int *)&v383[2 * a2 + 4] = v382;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v383[2 * a2] = v8;
       break;
     case 0x9Eu:
 LABEL_98:
@@ -82888,59 +82871,59 @@ LABEL_98:
       HIWORD(v384) = __ROR4__(v5, 16) >> 16;
       LOWORD(v384) = a1;
       a5[1] = v384;
-      v385 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v385 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROR4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v385;
+      *(int *)((char *)a5 + a2 + 4) = v385;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v385;
+      *(int *)((char *)a5 + a2) = v385;
       LOWORD(v385) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v385;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v385;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v385;
+      *(int *)((char *)a5 + 2 * a2) = v385;
       v386 = (char *)a5 + a2;
-      v387 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v386[2 * a2 + 4] = v387;
+      v387 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v386[2 * a2 + 4] = v387;
       LOWORD(v387) = a1;
       HIWORD(v8) = __ROL4__(v387, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v386[2 * a2] = v8;
+      *(int *)&v386[2 * a2] = v8;
       break;
     case 0x9Fu:
 LABEL_99:
-      v388 = *((_DWORD *)a4 + 1);
+      v388 = *((int *)a4 + 1);
       a5[1] = v388;
       LOWORD(v388) = a1;
       HIWORD(v388) = __ROL4__(v388, 16) >> 16;
       LOWORD(v388) = a1;
       *a5 = v388;
-      v389 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v389;
+      v389 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v389;
       LOWORD(v389) = a1;
       HIWORD(v389) = __ROL4__(v389, 16) >> 16;
       LOWORD(v389) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v389;
+      *(int *)((char *)a5 + a2) = v389;
       LOWORD(v389) = a1;
       HIWORD(v389) = __ROR4__(v389, 16) >> 16;
       LOWORD(v389) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v389;
-      v390 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v390;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v389;
+      v390 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v390;
       v391 = (char *)a5 + a2;
       LOWORD(v390) = a1;
       HIWORD(v390) = __ROR4__(v390, 16) >> 16;
       LOWORD(v390) = a1;
-      *(_DWORD *)&v391[2 * a2 + 4] = v390;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v391[2 * a2] = v8;
+      *(int *)&v391[2 * a2 + 4] = v390;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v391[2 * a2] = v8;
       break;
     case 0xA0u:
 LABEL_100:
@@ -82952,26 +82935,26 @@ LABEL_100:
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROR4__(v392, 16) >> 16;
       LOWORD(v392) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v392;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v392;
+      *(int *)((char *)a5 + a2) = v392;
+      *(int *)((char *)a5 + a2 + 4) = v392;
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v392;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v392;
       LOWORD(v392) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v392;
+      *(int *)((char *)a5 + 2 * a2) = v392;
       v393 = (char *)a5 + a2;
       v394 = &a4[a2];
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = *(_WORD *)&v394[2 * a2 + 4];
-      *(_DWORD *)&v393[2 * a2 + 4] = v392;
+      *(int *)&v393[2 * a2 + 4] = v392;
       LOWORD(v392) = *(_WORD *)&v394[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v392, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v393[2 * a2] = v8;
+      *(int *)&v393[2 * a2] = v8;
       break;
     case 0xA1u:
 LABEL_101:
@@ -82980,24 +82963,24 @@ LABEL_101:
       LOWORD(v395) = a1;
       *a5 = v395;
       a5[1] = v395;
-      v396 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v396;
+      v396 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v396;
       LOWORD(v396) = a1;
       HIWORD(v396) = __ROL4__(v396, 16) >> 16;
       LOWORD(v396) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v396;
-      v397 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v397;
+      *(int *)((char *)a5 + a2) = v396;
+      v397 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v397;
       LOWORD(v397) = a1;
       HIWORD(v397) = __ROL4__(v397, 16) >> 16;
       LOWORD(v397) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v397;
+      *(int *)((char *)a5 + 2 * a2) = v397;
       v398 = (char *)a5 + a2;
       LOWORD(v397) = a1;
       HIWORD(v8) = __ROR4__(v397, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v398[2 * a2] = v8;
-      *(_DWORD *)&v398[2 * a2 + 4] = v8;
+      *(int *)&v398[2 * a2] = v8;
+      *(int *)&v398[2 * a2 + 4] = v8;
       break;
     case 0xA2u:
 LABEL_102:
@@ -83012,22 +82995,22 @@ LABEL_102:
       LOWORD(v399) = a1;
       HIWORD(v399) = __ROL4__(v399, 16) >> 16;
       LOWORD(v399) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v399;
+      *(int *)((char *)a5 + a2 + 4) = v399;
       LOWORD(v399) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v399) = __ROL4__(v399, 16) >> 16;
       LOWORD(v399) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v399;
+      *(int *)((char *)a5 + a2) = v399;
       LOWORD(v399) = a1;
       HIWORD(v399) = __ROR4__(v399, 16) >> 16;
       LOWORD(v399) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v399;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v399;
+      *(int *)((char *)a5 + 2 * a2) = v399;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v399;
       v400 = (char *)a5 + a2;
       LOWORD(v399) = a1;
       HIWORD(v8) = __ROR4__(v399, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v400[2 * a2] = v8;
-      *(_DWORD *)&v400[2 * a2 + 4] = v8;
+      *(int *)&v400[2 * a2] = v8;
+      *(int *)&v400[2 * a2 + 4] = v8;
       break;
     case 0xA3u:
 LABEL_103:
@@ -83039,21 +83022,21 @@ LABEL_103:
       LOWORD(v401) = a1;
       HIWORD(v401) = __ROR4__(v401, 16) >> 16;
       LOWORD(v401) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v401;
-      v402 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v402;
+      *(int *)((char *)a5 + a2 + 4) = v401;
+      v402 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v402;
       LOWORD(v402) = a1;
       HIWORD(v402) = __ROR4__(v402, 16) >> 16;
       LOWORD(v402) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v402;
-      v403 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v403;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v402;
+      v403 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v403;
       v404 = (char *)a5 + a2;
       LOWORD(v403) = a1;
       HIWORD(v8) = __ROR4__(v403, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v404[2 * a2] = v8;
-      *(_DWORD *)&v404[2 * a2 + 4] = v8;
+      *(int *)&v404[2 * a2] = v8;
+      *(int *)&v404[2 * a2 + 4] = v8;
       break;
     case 0xA4u:
 LABEL_104:
@@ -83065,25 +83048,25 @@ LABEL_104:
       LOWORD(v405) = a1;
       HIWORD(v405) = __ROR4__(v405, 16) >> 16;
       LOWORD(v405) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v405;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v405;
+      *(int *)((char *)a5 + a2) = v405;
+      *(int *)((char *)a5 + a2 + 4) = v405;
       LOWORD(v405) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v405) = __ROL4__(v405, 16) >> 16;
       LOWORD(v405) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v405;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v405;
       LOWORD(v405) = a1;
       HIWORD(v405) = __ROL4__(v405, 16) >> 16;
       LOWORD(v405) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v405;
+      *(int *)((char *)a5 + 2 * a2) = v405;
       v406 = (char *)a5 + a2;
       v407 = &a4[a2];
-      *(_DWORD *)&v406[2 * a2 + 4] = *(_DWORD *)&v407[2 * a2 + 4];
-      v8 = *(_DWORD *)&v407[2 * a2];
-      *(_DWORD *)&v406[2 * a2] = v8;
+      *(int *)&v406[2 * a2 + 4] = *(int *)&v407[2 * a2 + 4];
+      v8 = *(int *)&v407[2 * a2];
+      *(int *)&v406[2 * a2] = v8;
       break;
     case 0xA5u:
 LABEL_105:
-      v408 = *((_DWORD *)a4 + 1);
+      v408 = *((int *)a4 + 1);
       a5[1] = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
@@ -83092,51 +83075,51 @@ LABEL_105:
       LOWORD(v408) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v408;
+      *(int *)((char *)a5 + a2 + 4) = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v408;
+      *(int *)((char *)a5 + a2) = v408;
       LOWORD(v408) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v408;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v408;
+      *(int *)((char *)a5 + 2 * a2) = v408;
       v409 = (char *)a5 + a2;
-      v410 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v409[2 * a2 + 4] = v410;
+      v410 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v409[2 * a2 + 4] = v410;
       LOWORD(v410) = a1;
       HIWORD(v8) = __ROL4__(v410, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v409[2 * a2] = v8;
+      *(int *)&v409[2 * a2] = v8;
       break;
     case 0xA6u:
 LABEL_106:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v411 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v411 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v411) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v411) = __ROL4__(v411, 16) >> 16;
       LOWORD(v411) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v411;
+      *(int *)((char *)a5 + a2 + 4) = v411;
       LOWORD(v411) = a1;
       HIWORD(v411) = __ROL4__(v411, 16) >> 16;
       LOWORD(v411) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v411;
+      *(int *)((char *)a5 + a2) = v411;
       LOWORD(v411) = a1;
       HIWORD(v411) = __ROR4__(v411, 16) >> 16;
       LOWORD(v411) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v411;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v411;
+      *(int *)((char *)a5 + 2 * a2) = v411;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v411;
       v412 = (char *)a5 + a2;
       LOWORD(v411) = a1;
       HIWORD(v8) = __ROR4__(v411, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v412[2 * a2] = v8;
-      *(_DWORD *)&v412[2 * a2 + 4] = v8;
+      *(int *)&v412[2 * a2] = v8;
+      *(int *)&v412[2 * a2 + 4] = v8;
       break;
     case 0xA7u:
 LABEL_107:
@@ -83144,31 +83127,31 @@ LABEL_107:
       HIWORD(v413) = __ROR4__(v5, 16) >> 16;
       LOWORD(v413) = a1;
       a5[1] = v413;
-      v414 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v414 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v414;
+      *(int *)((char *)a5 + a2 + 4) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROL4__(v414, 16) >> 16;
       LOWORD(v414) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v414;
+      *(int *)((char *)a5 + a2) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v414;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROL4__(v414, 16) >> 16;
       LOWORD(v414) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v414;
+      *(int *)((char *)a5 + 2 * a2) = v414;
       v415 = (char *)a5 + a2;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)&v415[2 * a2 + 4] = v414;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v415[2 * a2] = v8;
+      *(int *)&v415[2 * a2 + 4] = v414;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v415[2 * a2] = v8;
       break;
     case 0xA8u:
 LABEL_108:
@@ -83180,23 +83163,23 @@ LABEL_108:
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROR4__(v416, 16) >> 16;
       LOWORD(v416) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v416;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v416;
+      *(int *)((char *)a5 + a2) = v416;
+      *(int *)((char *)a5 + a2 + 4) = v416;
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROR4__(v416, 16) >> 16;
       LOWORD(v416) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v416;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v416;
+      *(int *)((char *)a5 + 2 * a2) = v416;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v416;
       v417 = (char *)a5 + a2;
       v418 = &a4[a2];
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROL4__(v416, 16) >> 16;
       LOWORD(v416) = *(_WORD *)&v418[2 * a2 + 4];
-      *(_DWORD *)&v417[2 * a2 + 4] = v416;
+      *(int *)&v417[2 * a2 + 4] = v416;
       LOWORD(v416) = *(_WORD *)&v418[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v416, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v417[2 * a2] = v8;
+      *(int *)&v417[2 * a2] = v8;
       break;
     case 0xA9u:
 LABEL_109:
@@ -83208,25 +83191,25 @@ LABEL_109:
       LOWORD(v419) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v419;
+      *(int *)((char *)a5 + a2 + 4) = v419;
       LOWORD(v419) = a1;
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v419;
+      *(int *)((char *)a5 + a2) = v419;
       LOWORD(v419) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v419;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v419;
       LOWORD(v419) = a1;
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v419;
+      *(int *)((char *)a5 + 2 * a2) = v419;
       v420 = (char *)a5 + a2;
       LOWORD(v419) = a1;
       HIWORD(v8) = __ROR4__(v419, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v420[2 * a2] = v8;
-      *(_DWORD *)&v420[2 * a2 + 4] = v8;
+      *(int *)&v420[2 * a2] = v8;
+      *(int *)&v420[2 * a2 + 4] = v8;
       break;
     case 0xAAu:
 LABEL_110:
@@ -83241,19 +83224,19 @@ LABEL_110:
       LOWORD(v421) = a1;
       HIWORD(v421) = __ROR4__(v421, 16) >> 16;
       LOWORD(v421) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v421;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v421;
+      *(int *)((char *)a5 + a2) = v421;
+      *(int *)((char *)a5 + a2 + 4) = v421;
       LOWORD(v421) = a1;
       HIWORD(v421) = __ROR4__(v421, 16) >> 16;
       LOWORD(v421) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v421;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v421;
+      *(int *)((char *)a5 + 2 * a2) = v421;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v421;
       v422 = (char *)a5 + a2;
       LOWORD(v421) = a1;
       HIWORD(v8) = __ROR4__(v421, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v422[2 * a2] = v8;
-      *(_DWORD *)&v422[2 * a2 + 4] = v8;
+      *(int *)&v422[2 * a2] = v8;
+      *(int *)&v422[2 * a2 + 4] = v8;
       break;
     case 0xABu:
 LABEL_111:
@@ -83265,25 +83248,25 @@ LABEL_111:
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROR4__(v423, 16) >> 16;
       LOWORD(v423) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v423;
+      *(int *)((char *)a5 + a2 + 4) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROL4__(v423, 16) >> 16;
       LOWORD(v423) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v423;
+      *(int *)((char *)a5 + a2) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROR4__(v423, 16) >> 16;
       LOWORD(v423) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v423;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROL4__(v423, 16) >> 16;
       LOWORD(v423) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v423;
+      *(int *)((char *)a5 + 2 * a2) = v423;
       v424 = (char *)a5 + a2;
       LOWORD(v423) = a1;
       HIWORD(v8) = __ROR4__(v423, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v424[2 * a2] = v8;
-      *(_DWORD *)&v424[2 * a2 + 4] = v8;
+      *(int *)&v424[2 * a2] = v8;
+      *(int *)&v424[2 * a2 + 4] = v8;
       break;
     case 0xACu:
 LABEL_112:
@@ -83298,24 +83281,24 @@ LABEL_112:
       LOWORD(v425) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v425) = __ROL4__(v425, 16) >> 16;
       LOWORD(v425) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v425;
+      *(int *)((char *)a5 + a2 + 4) = v425;
       LOWORD(v425) = a1;
       HIWORD(v425) = __ROL4__(v425, 16) >> 16;
       LOWORD(v425) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v425;
-      v426 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v426;
+      *(int *)((char *)a5 + a2) = v425;
+      v426 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v426;
       LOWORD(v426) = a1;
       HIWORD(v426) = __ROL4__(v426, 16) >> 16;
       LOWORD(v426) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v426;
+      *(int *)((char *)a5 + 2 * a2) = v426;
       v427 = (char *)a5 + a2;
-      v428 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v427[2 * a2 + 4] = v428;
+      v428 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v427[2 * a2 + 4] = v428;
       LOWORD(v428) = a1;
       HIWORD(v8) = __ROL4__(v428, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v427[2 * a2] = v8;
+      *(int *)&v427[2 * a2] = v8;
       break;
     case 0xADu:
 LABEL_113:
@@ -83327,96 +83310,96 @@ LABEL_113:
       LOWORD(v429) = a1;
       HIWORD(v429) = __ROR4__(v429, 16) >> 16;
       LOWORD(v429) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v429;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v429;
-      v430 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v430;
+      *(int *)((char *)a5 + a2) = v429;
+      *(int *)((char *)a5 + a2 + 4) = v429;
+      v430 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v430;
       LOWORD(v430) = a1;
       HIWORD(v430) = __ROL4__(v430, 16) >> 16;
       LOWORD(v430) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v430;
+      *(int *)((char *)a5 + 2 * a2) = v430;
       v431 = (char *)a5 + a2;
       v432 = &a4[a2];
-      *(_DWORD *)&v431[2 * a2 + 4] = *(_DWORD *)&v432[2 * a2 + 4];
-      v8 = *(_DWORD *)&v432[2 * a2];
-      *(_DWORD *)&v431[2 * a2] = v8;
+      *(int *)&v431[2 * a2 + 4] = *(int *)&v432[2 * a2 + 4];
+      v8 = *(int *)&v432[2 * a2];
+      *(int *)&v431[2 * a2] = v8;
       break;
     case 0xAEu:
 LABEL_114:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v433 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v433;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v433 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v433;
       LOWORD(v433) = a1;
       HIWORD(v433) = __ROL4__(v433, 16) >> 16;
       LOWORD(v433) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v433;
+      *(int *)((char *)a5 + a2) = v433;
       LOWORD(v433) = a1;
       HIWORD(v433) = __ROR4__(v433, 16) >> 16;
       LOWORD(v433) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v433;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v433;
+      *(int *)((char *)a5 + 2 * a2) = v433;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v433;
       v434 = (char *)a5 + a2;
       LOWORD(v433) = a1;
       HIWORD(v8) = __ROR4__(v433, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v434[2 * a2] = v8;
-      *(_DWORD *)&v434[2 * a2 + 4] = v8;
+      *(int *)&v434[2 * a2] = v8;
+      *(int *)&v434[2 * a2 + 4] = v8;
       break;
     case 0xAFu:
 LABEL_115:
-      v435 = *((_DWORD *)a4 + 1);
+      v435 = *((int *)a4 + 1);
       a5[1] = v435;
       LOWORD(v435) = a1;
       HIWORD(v435) = __ROL4__(v435, 16) >> 16;
       LOWORD(v435) = a1;
       *a5 = v435;
-      v436 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v436;
+      v436 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v436;
       LOWORD(v436) = a1;
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v436;
+      *(int *)((char *)a5 + a2) = v436;
       LOWORD(v436) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v436;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v436;
       LOWORD(v436) = a1;
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v436;
+      *(int *)((char *)a5 + 2 * a2) = v436;
       v437 = (char *)a5 + a2;
       LOWORD(v436) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)&v437[2 * a2 + 4] = v436;
+      *(int *)&v437[2 * a2 + 4] = v436;
       LOWORD(v436) = a1;
       HIWORD(v8) = __ROL4__(v436, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v437[2 * a2] = v8;
+      *(int *)&v437[2 * a2] = v8;
       break;
     case 0xB0u:
 LABEL_116:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v438 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v438 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v438) = a1;
       HIWORD(v438) = __ROR4__(v438, 16) >> 16;
       LOWORD(v438) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v438;
-      v439 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v439;
+      *(int *)((char *)a5 + a2 + 4) = v438;
+      v439 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v439;
       LOWORD(v439) = a1;
       HIWORD(v439) = __ROR4__(v439, 16) >> 16;
       LOWORD(v439) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v439;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v439;
+      *(int *)((char *)a5 + 2 * a2) = v439;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v439;
       v440 = (char *)a5 + a2;
       LOWORD(v439) = a1;
       HIWORD(v8) = __ROR4__(v439, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v440[2 * a2] = v8;
-      *(_DWORD *)&v440[2 * a2 + 4] = v8;
+      *(int *)&v440[2 * a2] = v8;
+      *(int *)&v440[2 * a2 + 4] = v8;
       break;
     case 0xB1u:
 LABEL_117:
@@ -83424,31 +83407,31 @@ LABEL_117:
       HIWORD(v441) = __ROR4__(v5, 16) >> 16;
       LOWORD(v441) = a1;
       a5[1] = v441;
-      v442 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v442 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v442) = a1;
       HIWORD(v442) = __ROR4__(v442, 16) >> 16;
       LOWORD(v442) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v442;
-      v443 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v443;
+      *(int *)((char *)a5 + a2 + 4) = v442;
+      v443 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v443;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROR4__(v443, 16) >> 16;
       LOWORD(v443) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v443;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v443;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROL4__(v443, 16) >> 16;
       LOWORD(v443) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v443;
+      *(int *)((char *)a5 + 2 * a2) = v443;
       v444 = (char *)a5 + a2;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROR4__(v443, 16) >> 16;
       LOWORD(v443) = a1;
-      *(_DWORD *)&v444[2 * a2 + 4] = v443;
+      *(int *)&v444[2 * a2 + 4] = v443;
       LOWORD(v443) = a1;
       HIWORD(v8) = __ROL4__(v443, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v444[2 * a2] = v8;
+      *(int *)&v444[2 * a2] = v8;
       break;
     case 0xB2u:
 LABEL_118:
@@ -83463,24 +83446,24 @@ LABEL_118:
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROR4__(v445, 16) >> 16;
       LOWORD(v445) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v445;
+      *(int *)((char *)a5 + a2 + 4) = v445;
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROL4__(v445, 16) >> 16;
       LOWORD(v445) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v445;
+      *(int *)((char *)a5 + a2) = v445;
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROR4__(v445, 16) >> 16;
       LOWORD(v445) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v445;
-      v446 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v446;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v445;
+      v446 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v446;
       v447 = (char *)a5 + a2;
       LOWORD(v446) = a1;
       HIWORD(v446) = __ROR4__(v446, 16) >> 16;
       LOWORD(v446) = a1;
-      *(_DWORD *)&v447[2 * a2 + 4] = v446;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v447[2 * a2] = v8;
+      *(int *)&v447[2 * a2 + 4] = v446;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v447[2 * a2] = v8;
       break;
     case 0xB3u:
 LABEL_119:
@@ -83492,18 +83475,18 @@ LABEL_119:
       LOWORD(v448) = a1;
       HIWORD(v448) = __ROR4__(v448, 16) >> 16;
       LOWORD(v448) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v448;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v448;
+      *(int *)((char *)a5 + a2) = v448;
+      *(int *)((char *)a5 + a2 + 4) = v448;
       LOWORD(v448) = a1;
       HIWORD(v448) = __ROR4__(v448, 16) >> 16;
       LOWORD(v448) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v448;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v448;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v449 = (char *)a5 + a2;
       v450 = &a4[a2];
-      *(_DWORD *)&v449[2 * a2 + 4] = *(_DWORD *)&v450[2 * a2 + 4];
-      v8 = *(_DWORD *)&v450[2 * a2];
-      *(_DWORD *)&v449[2 * a2] = v8;
+      *(int *)&v449[2 * a2 + 4] = *(int *)&v450[2 * a2 + 4];
+      v8 = *(int *)&v450[2 * a2];
+      *(int *)&v449[2 * a2] = v8;
       break;
     case 0xB4u:
 LABEL_120:
@@ -83515,21 +83498,21 @@ LABEL_120:
       HIWORD(v451) = __ROL4__(v451, 16) >> 16;
       LOWORD(v451) = a1;
       *a5 = v451;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v452 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v452;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v452 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v452;
       v453 = (char *)a5 + a2;
       v454 = &a4[a2];
       LOWORD(v452) = a1;
       HIWORD(v452) = __ROL4__(v452, 16) >> 16;
       LOWORD(v452) = *(_WORD *)&v454[2 * a2 + 4];
-      *(_DWORD *)&v453[2 * a2 + 4] = v452;
+      *(int *)&v453[2 * a2 + 4] = v452;
       LOWORD(v452) = *(_WORD *)&v454[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v452, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v453[2 * a2] = v8;
+      *(int *)&v453[2 * a2] = v8;
       break;
     case 0xB5u:
 LABEL_121:
@@ -83537,27 +83520,27 @@ LABEL_121:
       HIWORD(v455) = __ROR4__(v5, 16) >> 16;
       LOWORD(v455) = a1;
       a5[1] = v455;
-      v456 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v456 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v456) = a1;
       HIWORD(v456) = __ROR4__(v456, 16) >> 16;
       LOWORD(v456) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v456;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v456;
+      *(int *)((char *)a5 + a2) = v456;
+      *(int *)((char *)a5 + a2 + 4) = v456;
       LOWORD(v456) = a1;
       HIWORD(v456) = __ROL4__(v456, 16) >> 16;
       LOWORD(v456) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v456;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v456;
       LOWORD(v456) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v456) = __ROL4__(v456, 16) >> 16;
       LOWORD(v456) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v456;
+      *(int *)((char *)a5 + 2 * a2) = v456;
       v457 = (char *)a5 + a2;
       LOWORD(v456) = a1;
       HIWORD(v8) = __ROR4__(v456, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v457[2 * a2] = v8;
-      *(_DWORD *)&v457[2 * a2 + 4] = v8;
+      *(int *)&v457[2 * a2] = v8;
+      *(int *)&v457[2 * a2 + 4] = v8;
       break;
     case 0xB6u:
 LABEL_122:
@@ -83569,26 +83552,26 @@ LABEL_122:
       HIWORD(v458) = __ROL4__(v458, 16) >> 16;
       LOWORD(v458) = a1;
       *a5 = v458;
-      v459 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v459;
+      v459 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v459;
       LOWORD(v459) = a1;
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v459;
+      *(int *)((char *)a5 + a2) = v459;
       LOWORD(v459) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v459;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v459;
       LOWORD(v459) = a1;
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v459;
+      *(int *)((char *)a5 + 2 * a2) = v459;
       v460 = (char *)a5 + a2;
       LOWORD(v459) = a1;
       HIWORD(v8) = __ROR4__(v459, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v460[2 * a2] = v8;
-      *(_DWORD *)&v460[2 * a2 + 4] = v8;
+      *(int *)&v460[2 * a2] = v8;
+      *(int *)&v460[2 * a2 + 4] = v8;
       break;
     case 0xB7u:
 LABEL_123:
@@ -83596,31 +83579,31 @@ LABEL_123:
       HIWORD(v461) = __ROR4__(v5, 16) >> 16;
       LOWORD(v461) = a1;
       a5[1] = v461;
-      v462 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v462 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v462) = a1;
       HIWORD(v462) = __ROL4__(v462, 16) >> 16;
       LOWORD(v462) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v462;
+      *(int *)((char *)a5 + a2 + 4) = v462;
       LOWORD(v462) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v462) = __ROL4__(v462, 16) >> 16;
       LOWORD(v462) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v462;
-      v463 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v463;
+      *(int *)((char *)a5 + a2) = v462;
+      v463 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v463;
       LOWORD(v463) = a1;
       HIWORD(v463) = __ROL4__(v463, 16) >> 16;
       LOWORD(v463) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v463;
+      *(int *)((char *)a5 + 2 * a2) = v463;
       v464 = (char *)a5 + a2;
       LOWORD(v463) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v463) = __ROL4__(v463, 16) >> 16;
       LOWORD(v463) = a1;
-      *(_DWORD *)&v464[2 * a2 + 4] = v463;
+      *(int *)&v464[2 * a2 + 4] = v463;
       LOWORD(v463) = a1;
       HIWORD(v8) = __ROL4__(v463, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v464[2 * a2] = v8;
+      *(int *)&v464[2 * a2] = v8;
       break;
     case 0xB8u:
 LABEL_124:
@@ -83635,24 +83618,24 @@ LABEL_124:
       LOWORD(v465) = a1;
       HIWORD(v465) = __ROR4__(v465, 16) >> 16;
       LOWORD(v465) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v465;
-      v466 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v466;
+      *(int *)((char *)a5 + a2 + 4) = v465;
+      v466 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v466;
       LOWORD(v466) = a1;
       HIWORD(v466) = __ROL4__(v466, 16) >> 16;
       LOWORD(v466) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v466;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v466;
       LOWORD(v466) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v466) = __ROL4__(v466, 16) >> 16;
       LOWORD(v466) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v466;
+      *(int *)((char *)a5 + 2 * a2) = v466;
       v467 = (char *)a5 + a2;
-      v468 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v467[2 * a2 + 4] = v468;
+      v468 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v467[2 * a2 + 4] = v468;
       LOWORD(v468) = a1;
       HIWORD(v8) = __ROL4__(v468, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v467[2 * a2] = v8;
+      *(int *)&v467[2 * a2] = v8;
       break;
     case 0xB9u:
 LABEL_125:
@@ -83664,27 +83647,27 @@ LABEL_125:
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROR4__(v469, 16) >> 16;
       LOWORD(v469) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v469;
+      *(int *)((char *)a5 + a2 + 4) = v469;
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROL4__(v469, 16) >> 16;
       LOWORD(v469) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v469;
+      *(int *)((char *)a5 + a2) = v469;
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROR4__(v469, 16) >> 16;
       LOWORD(v469) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v469;
-      v470 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v470;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v469;
+      v470 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v470;
       v471 = (char *)a5 + a2;
       v472 = &a4[a2];
       LOWORD(v470) = a1;
       HIWORD(v470) = __ROL4__(v470, 16) >> 16;
       LOWORD(v470) = *(_WORD *)&v472[2 * a2 + 4];
-      *(_DWORD *)&v471[2 * a2 + 4] = v470;
+      *(int *)&v471[2 * a2 + 4] = v470;
       LOWORD(v470) = *(_WORD *)&v472[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v470, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v471[2 * a2] = v8;
+      *(int *)&v471[2 * a2] = v8;
       break;
     case 0xBAu:
 LABEL_126:
@@ -83696,23 +83679,23 @@ LABEL_126:
       LOWORD(v473) = a1;
       HIWORD(v473) = __ROL4__(v473, 16) >> 16;
       LOWORD(v473) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v473;
+      *(int *)((char *)a5 + a2 + 4) = v473;
       LOWORD(v473) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v473) = __ROL4__(v473, 16) >> 16;
       LOWORD(v473) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v473;
+      *(int *)((char *)a5 + a2) = v473;
       LOWORD(v473) = a1;
       HIWORD(v473) = __ROR4__(v473, 16) >> 16;
       LOWORD(v473) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v473;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v473;
+      *(int *)((char *)a5 + 2 * a2) = v473;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v473;
       v474 = (char *)a5 + a2;
-      v475 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v474[2 * a2 + 4] = v475;
+      v475 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v474[2 * a2 + 4] = v475;
       LOWORD(v475) = a1;
       HIWORD(v8) = __ROL4__(v475, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v474[2 * a2] = v8;
+      *(int *)&v474[2 * a2] = v8;
       break;
     case 0xBBu:
 LABEL_127:
@@ -83727,27 +83710,27 @@ LABEL_127:
       LOWORD(v476) = a1;
       HIWORD(v476) = __ROR4__(v476, 16) >> 16;
       LOWORD(v476) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v476;
-      v477 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v477;
+      *(int *)((char *)a5 + a2 + 4) = v476;
+      v477 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v477;
       LOWORD(v477) = a1;
       HIWORD(v477) = __ROR4__(v477, 16) >> 16;
       LOWORD(v477) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v477;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v477;
       LOWORD(v477) = a1;
       HIWORD(v477) = __ROL4__(v477, 16) >> 16;
       LOWORD(v477) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v477;
+      *(int *)((char *)a5 + 2 * a2) = v477;
       v478 = (char *)a5 + a2;
       LOWORD(v477) = a1;
       HIWORD(v8) = __ROR4__(v477, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v478[2 * a2] = v8;
-      *(_DWORD *)&v478[2 * a2 + 4] = v8;
+      *(int *)&v478[2 * a2] = v8;
+      *(int *)&v478[2 * a2 + 4] = v8;
       break;
     case 0xBCu:
 LABEL_128:
-      v479 = *((_DWORD *)a4 + 1);
+      v479 = *((int *)a4 + 1);
       a5[1] = v479;
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
@@ -83756,26 +83739,26 @@ LABEL_128:
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
       LOWORD(v479) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v479;
+      *(int *)((char *)a5 + a2 + 4) = v479;
       LOWORD(v479) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
       LOWORD(v479) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v479;
+      *(int *)((char *)a5 + a2) = v479;
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROR4__(v479, 16) >> 16;
       LOWORD(v479) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v479;
-      v480 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v480;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v479;
+      v480 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v480;
       v481 = (char *)a5 + a2;
       LOWORD(v480) = a1;
       HIWORD(v480) = __ROR4__(v480, 16) >> 16;
       LOWORD(v480) = a1;
-      *(_DWORD *)&v481[2 * a2 + 4] = v480;
+      *(int *)&v481[2 * a2 + 4] = v480;
       LOWORD(v480) = a1;
       HIWORD(v8) = __ROL4__(v480, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v481[2 * a2] = v8;
+      *(int *)&v481[2 * a2] = v8;
       break;
     case 0xBDu:
 LABEL_129:
@@ -83787,27 +83770,27 @@ LABEL_129:
       HIWORD(v482) = __ROL4__(v482, 16) >> 16;
       LOWORD(v482) = a1;
       *a5 = v482;
-      v483 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v483;
+      v483 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v483;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v483;
+      *(int *)((char *)a5 + a2) = v483;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v483;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v483;
       LOWORD(v483) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v483;
+      *(int *)((char *)a5 + 2 * a2) = v483;
       v484 = (char *)a5 + a2;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROR4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)&v484[2 * a2 + 4] = v483;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v484[2 * a2] = v8;
+      *(int *)&v484[2 * a2 + 4] = v483;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v484[2 * a2] = v8;
       break;
     case 0xBEu:
 LABEL_130:
@@ -83819,31 +83802,31 @@ LABEL_130:
       LOWORD(v485) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v485) = __ROL4__(v485, 16) >> 16;
       LOWORD(v485) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v485;
+      *(int *)((char *)a5 + a2 + 4) = v485;
       LOWORD(v485) = a1;
       HIWORD(v485) = __ROL4__(v485, 16) >> 16;
       LOWORD(v485) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v485;
-      v486 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v486;
+      *(int *)((char *)a5 + a2) = v485;
+      v486 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v486;
       LOWORD(v486) = a1;
       HIWORD(v486) = __ROL4__(v486, 16) >> 16;
       LOWORD(v486) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v486;
+      *(int *)((char *)a5 + 2 * a2) = v486;
       v487 = (char *)a5 + a2;
       v488 = &a4[a2];
       LOWORD(v486) = a1;
       HIWORD(v486) = __ROL4__(v486, 16) >> 16;
       LOWORD(v486) = *(_WORD *)&v488[2 * a2 + 4];
-      *(_DWORD *)&v487[2 * a2 + 4] = v486;
+      *(int *)&v487[2 * a2 + 4] = v486;
       LOWORD(v486) = *(_WORD *)&v488[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v486, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v487[2 * a2] = v8;
+      *(int *)&v487[2 * a2] = v8;
       break;
     case 0xBFu:
 LABEL_131:
-      v489 = *((_DWORD *)a4 + 1);
+      v489 = *((int *)a4 + 1);
       a5[1] = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
@@ -83852,26 +83835,26 @@ LABEL_131:
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v489;
+      *(int *)((char *)a5 + a2 + 4) = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v489;
+      *(int *)((char *)a5 + a2) = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROR4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v489;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v489;
       LOWORD(v489) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v489;
+      *(int *)((char *)a5 + 2 * a2) = v489;
       v490 = (char *)a5 + a2;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROR4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)&v490[2 * a2 + 4] = v489;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v490[2 * a2] = v8;
+      *(int *)&v490[2 * a2 + 4] = v489;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v490[2 * a2] = v8;
       break;
   }
   return v8;
@@ -83886,7 +83869,7 @@ __int16 __usercall VBC16_block_decoder_4_remap@<ax>(
         int a2@<ecx>,
         unsigned __int8 *a3@<ebx>,
         char *a4@<edi>,
-        _DWORD *a5@<esi>)
+        int *a5@<esi>)
 {
   int v5; // eax
   int v6; // eax
@@ -85035,15 +85018,15 @@ LABEL_4:
       LOWORD(v6) = a1;
       *a5 = v6;
       a5[1] = v6;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v7 = (char *)a5 + a2;
       HIWORD(v8) = __ROR4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v7[2 * a2] = v8;
-      *(_DWORD *)&v7[2 * a2 + 4] = v8;
+      *(int *)&v7[2 * a2] = v8;
+      *(int *)&v7[2 * a2 + 4] = v8;
       break;
     case 1u:
 LABEL_5:
@@ -85055,19 +85038,19 @@ LABEL_5:
       LOWORD(v9) = a1;
       HIWORD(v9) = __ROR4__(v9, 16) >> 16;
       LOWORD(v9) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v9;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v9;
+      *(int *)((char *)a5 + a2) = v9;
+      *(int *)((char *)a5 + a2 + 4) = v9;
       HIWORD(v9) = HIWORD(a1);
       v10 = __ROL4__(a1, 16);
       LOWORD(v9) = v10;
       v11 = __ROL4__(v10, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v9;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v9;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v9;
+      *(int *)((char *)a5 + 2 * a2) = v9;
       v12 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v11);
       LOWORD(v8) = __ROL4__(v11, 16);
-      *(_DWORD *)&v12[2 * a2 + 4] = v8;
-      *(_DWORD *)&v12[2 * a2] = v8;
+      *(int *)&v12[2 * a2 + 4] = v8;
+      *(int *)&v12[2 * a2] = v8;
       break;
     case 2u:
 LABEL_6:
@@ -85084,28 +85067,28 @@ LABEL_6:
       v16 = __ROL4__(v15, 16);
       LOWORD(v13) = v16;
       v17 = __ROL4__(v16, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v13;
+      *(int *)((char *)a5 + a2 + 4) = v13;
       LOWORD(v13) = v17;
       HIWORD(v13) = __ROL4__(v13, 16) >> 16;
       LOWORD(v13) = v17;
-      *(_DWORD *)((char *)a5 + a2) = v13;
+      *(int *)((char *)a5 + a2) = v13;
       HIWORD(v13) = HIWORD(v17);
       v18 = __ROL4__(v17, 16);
       LOWORD(v13) = v18;
       v19 = __ROL4__(v18, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v13;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v13;
       LOWORD(v13) = v19;
       HIWORD(v13) = __ROL4__(v13, 16) >> 16;
       LOWORD(v13) = v19;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v13;
+      *(int *)((char *)a5 + 2 * a2) = v13;
       v20 = (char *)a5 + a2;
       HIWORD(v13) = HIWORD(v19);
       v21 = __ROL4__(v19, 16);
       LOWORD(v13) = v21;
-      *(_DWORD *)&v20[2 * a2 + 4] = v13;
+      *(int *)&v20[2 * a2 + 4] = v13;
       LOWORD(v8) = __ROL4__(v21, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v20[2 * a2] = v8;
+      *(int *)&v20[2 * a2] = v8;
       break;
     case 3u:
 LABEL_7:
@@ -85117,18 +85100,18 @@ LABEL_7:
       LOWORD(v22) = a1;
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       LOWORD(v22) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v22;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v22;
+      *(int *)((char *)a5 + a2) = v22;
+      *(int *)((char *)a5 + a2 + 4) = v22;
       LOWORD(v22) = a1;
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       LOWORD(v22) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v22;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v22;
+      *(int *)((char *)a5 + 2 * a2) = v22;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v22;
       v23 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v23[2 * a2 + 4] = v8;
-      *(_DWORD *)&v23[2 * a2] = v8;
+      *(int *)&v23[2 * a2 + 4] = v8;
+      *(int *)&v23[2 * a2] = v8;
       break;
     case 4u:
 LABEL_8:
@@ -85136,16 +85119,16 @@ LABEL_8:
       HIWORD(v8) = __ROL4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
       *a5 = v8;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v24 = (char *)a5 + a2;
-      *(_DWORD *)&v24[2 * a2 + 4] = a1;
+      *(int *)&v24[2 * a2 + 4] = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v24[2 * a2] = v8;
+      *(int *)&v24[2 * a2] = v8;
       break;
     case 5u:
 LABEL_9:
@@ -85158,19 +85141,19 @@ LABEL_9:
       LOWORD(v25) = v26;
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       LOWORD(v25) = v26;
-      *(_DWORD *)((char *)a5 + a2) = v25;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v25;
+      *(int *)((char *)a5 + a2) = v25;
+      *(int *)((char *)a5 + a2 + 4) = v25;
       LOWORD(v25) = v26;
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       LOWORD(v25) = v26;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v25;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v25;
+      *(int *)((char *)a5 + 2 * a2) = v25;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v25;
       v27 = (char *)a5 + a2;
       LOWORD(v25) = v26;
       HIWORD(v8) = __ROR4__(v25, 16) >> 16;
       LOWORD(v8) = v26;
-      *(_DWORD *)&v27[2 * a2] = v8;
-      *(_DWORD *)&v27[2 * a2 + 4] = v8;
+      *(int *)&v27[2 * a2] = v8;
+      *(int *)&v27[2 * a2 + 4] = v8;
       break;
     case 6u:
 LABEL_10:
@@ -85183,22 +85166,22 @@ LABEL_10:
       LOWORD(v29) = a1;
       HIWORD(v29) = __ROR4__(v29, 16) >> 16;
       LOWORD(v29) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v29;
+      *(int *)((char *)a5 + a2 + 4) = v29;
       v30 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v30;
+      *(int *)((char *)a5 + a2) = v30;
       LOWORD(v30) = a1;
       HIWORD(v30) = __ROR4__(v30, 16) >> 16;
       LOWORD(v30) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v30;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v30;
       v31 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v31;
+      *(int *)((char *)a5 + 2 * a2) = v31;
       v32 = (char *)a5 + a2;
       LOWORD(v31) = a1;
       HIWORD(v31) = __ROR4__(v31, 16) >> 16;
       LOWORD(v31) = a1;
-      *(_DWORD *)&v32[2 * a2 + 4] = v31;
+      *(int *)&v32[2 * a2 + 4] = v31;
       v8 = __ROL4__(a1, 16);
-      *(_DWORD *)&v32[2 * a2] = v8;
+      *(int *)&v32[2 * a2] = v8;
       break;
     case 7u:
 LABEL_11:
@@ -85210,22 +85193,22 @@ LABEL_11:
       v34 = __ROL4__(a1, 16);
       LOWORD(v33) = v34;
       v35 = __ROL4__(v34, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v33;
+      *(int *)((char *)a5 + a2 + 4) = v33;
       LOWORD(v33) = v35;
       HIWORD(v33) = __ROL4__(v33, 16) >> 16;
       LOWORD(v33) = v35;
-      *(_DWORD *)((char *)a5 + a2) = v33;
+      *(int *)((char *)a5 + a2) = v33;
       HIWORD(v33) = HIWORD(v35);
       v36 = __ROL4__(v35, 16);
       LOWORD(v33) = v36;
       v37 = __ROL4__(v36, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v33;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v33;
       HIWORD(v8) = HIWORD(v37);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v37;
+      *(int *)((char *)a5 + 2 * a2) = v37;
       v38 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v37, 16);
-      *(_DWORD *)&v38[2 * a2 + 4] = v8;
-      *(_DWORD *)&v38[2 * a2] = v8;
+      *(int *)&v38[2 * a2 + 4] = v8;
+      *(int *)&v38[2 * a2] = v8;
       break;
     case 8u:
 LABEL_12:
@@ -85239,22 +85222,22 @@ LABEL_12:
       v42 = __ROL4__(v41, 16);
       LOWORD(v39) = v42;
       v43 = __ROL4__(v42, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v39;
+      *(int *)((char *)a5 + a2 + 4) = v39;
       HIWORD(v39) = HIWORD(v43);
-      *(_DWORD *)((char *)a5 + a2) = v43;
+      *(int *)((char *)a5 + a2) = v43;
       v44 = __ROL4__(v43, 16);
       LOWORD(v39) = v44;
       v45 = __ROL4__(v44, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v39;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v39;
       LOWORD(v39) = v45;
       HIWORD(v39) = __ROL4__(v39, 16) >> 16;
       LOWORD(v39) = v45;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v39;
+      *(int *)((char *)a5 + 2 * a2) = v39;
       v46 = (char *)a5 + a2;
-      *(_DWORD *)&v46[2 * a2 + 4] = v45;
+      *(int *)&v46[2 * a2 + 4] = v45;
       HIWORD(v8) = __ROL4__(v45, 16) >> 16;
       LOWORD(v8) = v45;
-      *(_DWORD *)&v46[2 * a2] = v8;
+      *(int *)&v46[2 * a2] = v8;
       break;
     case 9u:
 LABEL_13:
@@ -85264,28 +85247,28 @@ LABEL_13:
       v49 = __ROL4__(v48, 16);
       a5[1] = v47;
       *a5 = v47;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v49, 16);
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v49, 16);
       HIWORD(v47) = HIWORD(v49);
       v50 = __ROL4__(v49, 16);
       LOWORD(v47) = v50;
       v51 = __ROL4__(v50, 16);
-      *(_DWORD *)((char *)a5 + a2) = v47;
+      *(int *)((char *)a5 + a2) = v47;
       LOWORD(v47) = v51;
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOWORD(v47) = v51;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v47;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v47;
       HIWORD(v47) = HIWORD(v51);
       v52 = __ROL4__(v51, 16);
       LOWORD(v47) = v52;
       v53 = __ROL4__(v52, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v47;
+      *(int *)((char *)a5 + 2 * a2) = v47;
       v54 = (char *)a5 + a2;
       LOWORD(v47) = v53;
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOWORD(v47) = v53;
-      *(_DWORD *)&v54[2 * a2 + 4] = v47;
+      *(int *)&v54[2 * a2 + 4] = v47;
       v8 = __ROL4__(v53, 16);
-      *(_DWORD *)&v54[2 * a2] = v8;
+      *(int *)&v54[2 * a2] = v8;
       break;
     case 0xAu:
 LABEL_14:
@@ -85298,23 +85281,23 @@ LABEL_14:
       LOWORD(v56) = a1;
       HIWORD(v56) = __ROR4__(v56, 16) >> 16;
       LOWORD(v56) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v56;
+      *(int *)((char *)a5 + a2 + 4) = v56;
       HIWORD(v56) = HIWORD(a1);
       v57 = __ROL4__(a1, 16);
       LOWORD(v56) = v57;
       v58 = __ROL4__(v57, 16);
-      *(_DWORD *)((char *)a5 + a2) = v56;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v58, 16);
+      *(int *)((char *)a5 + a2) = v56;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v58, 16);
       HIWORD(v56) = HIWORD(v58);
       v59 = __ROL4__(v58, 16);
       LOWORD(v56) = v59;
       v60 = __ROL4__(v59, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v56;
+      *(int *)((char *)a5 + 2 * a2) = v56;
       v61 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v60);
       LOWORD(v8) = __ROL4__(v60, 16);
-      *(_DWORD *)&v61[2 * a2 + 4] = v8;
-      *(_DWORD *)&v61[2 * a2] = v8;
+      *(int *)&v61[2 * a2 + 4] = v8;
+      *(int *)&v61[2 * a2] = v8;
       break;
     case 0xBu:
 LABEL_15:
@@ -85326,20 +85309,20 @@ LABEL_15:
       LOWORD(v62) = a1;
       HIWORD(v62) = __ROR4__(v62, 16) >> 16;
       LOWORD(v62) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v62;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v62;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v62;
+      *(int *)((char *)a5 + a2 + 4) = v62;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       HIWORD(v62) = __ROL4__(a1, 16) >> 16;
       LOWORD(v62) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v62;
+      *(int *)((char *)a5 + 2 * a2) = v62;
       v63 = (char *)a5 + a2;
       HIWORD(v62) = HIWORD(a1);
       v64 = __ROL4__(a1, 16);
       LOWORD(v62) = v64;
-      *(_DWORD *)&v63[2 * a2 + 4] = v62;
+      *(int *)&v63[2 * a2 + 4] = v62;
       LOWORD(v8) = __ROL4__(v64, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v63[2 * a2] = v8;
+      *(int *)&v63[2 * a2] = v8;
       break;
     case 0xCu:
 LABEL_16:
@@ -85352,21 +85335,21 @@ LABEL_16:
       HIWORD(v65) = __ROL4__(v65, 16) >> 16;
       LOWORD(v65) = v67;
       *a5 = v65;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v67;
+      *(int *)((char *)a5 + a2 + 4) = v67;
       HIWORD(v65) = __ROL4__(v67, 16) >> 16;
       LOWORD(v65) = v67;
-      *(_DWORD *)((char *)a5 + a2) = v65;
+      *(int *)((char *)a5 + a2) = v65;
       LOWORD(v65) = v67;
       HIWORD(v65) = __ROR4__(v65, 16) >> 16;
       LOWORD(v65) = v67;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v65;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v65;
+      *(int *)((char *)a5 + 2 * a2) = v65;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v65;
       v68 = (char *)a5 + a2;
       LOWORD(v65) = v67;
       HIWORD(v8) = __ROR4__(v65, 16) >> 16;
       LOWORD(v8) = v67;
-      *(_DWORD *)&v68[2 * a2] = v8;
-      *(_DWORD *)&v68[2 * a2 + 4] = v8;
+      *(int *)&v68[2 * a2] = v8;
+      *(int *)&v68[2 * a2 + 4] = v8;
       break;
     case 0xDu:
 LABEL_17:
@@ -85382,20 +85365,20 @@ LABEL_17:
       LOWORD(v69) = v71;
       HIWORD(v69) = __ROR4__(v69, 16) >> 16;
       LOWORD(v69) = v71;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v69;
+      *(int *)((char *)a5 + a2 + 4) = v69;
       v72 = __ROL4__(v71, 16);
-      *(_DWORD *)((char *)a5 + a2) = v72;
+      *(int *)((char *)a5 + a2) = v72;
       LOWORD(v72) = v71;
       HIWORD(v72) = __ROR4__(v72, 16) >> 16;
       LOWORD(v72) = v71;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v72;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v72;
+      *(int *)((char *)a5 + 2 * a2) = v72;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v72;
       v73 = (char *)a5 + a2;
       LOWORD(v72) = v71;
       HIWORD(v8) = __ROR4__(v72, 16) >> 16;
       LOWORD(v8) = v71;
-      *(_DWORD *)&v73[2 * a2] = v8;
-      *(_DWORD *)&v73[2 * a2 + 4] = v8;
+      *(int *)&v73[2 * a2] = v8;
+      *(int *)&v73[2 * a2 + 4] = v8;
       break;
     case 0xEu:
 LABEL_18:
@@ -85407,22 +85390,22 @@ LABEL_18:
       LOWORD(v74) = a1;
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOWORD(v74) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v74;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v74;
+      *(int *)((char *)a5 + a2) = v74;
+      *(int *)((char *)a5 + a2 + 4) = v74;
       LOWORD(v74) = a1;
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOWORD(v74) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v74;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v74;
       v75 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v75;
+      *(int *)((char *)a5 + 2 * a2) = v75;
       v76 = (char *)a5 + a2;
       LOWORD(v75) = a1;
       HIWORD(v75) = __ROR4__(v75, 16) >> 16;
       LOWORD(v75) = a1;
-      *(_DWORD *)&v76[2 * a2 + 4] = v75;
+      *(int *)&v76[2 * a2 + 4] = v75;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v76[2 * a2] = v8;
+      *(int *)&v76[2 * a2] = v8;
       break;
     case 0xFu:
 LABEL_19:
@@ -85434,25 +85417,25 @@ LABEL_19:
       LOWORD(v77) = a1;
       HIWORD(v77) = __ROR4__(v77, 16) >> 16;
       LOWORD(v77) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v77;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v77;
+      *(int *)((char *)a5 + a2) = v77;
+      *(int *)((char *)a5 + a2 + 4) = v77;
       HIWORD(v77) = HIWORD(a1);
       v78 = __ROL4__(a1, 16);
       LOWORD(v77) = v78;
       v79 = __ROL4__(v78, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v77;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v77;
       LOWORD(v77) = v79;
       HIWORD(v77) = __ROL4__(v77, 16) >> 16;
       LOWORD(v77) = v79;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v77;
+      *(int *)((char *)a5 + 2 * a2) = v77;
       v80 = (char *)a5 + a2;
       HIWORD(v77) = HIWORD(v79);
       v81 = __ROL4__(v79, 16);
       LOWORD(v77) = v81;
-      *(_DWORD *)&v80[2 * a2 + 4] = v77;
+      *(int *)&v80[2 * a2 + 4] = v77;
       LOWORD(v8) = __ROL4__(v81, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v80[2 * a2] = v8;
+      *(int *)&v80[2 * a2] = v8;
       break;
     case 0x10u:
 LABEL_20:
@@ -85469,22 +85452,22 @@ LABEL_20:
       v85 = __ROL4__(v84, 16);
       LOWORD(v82) = v85;
       LOWORD(v85) = __ROL4__(v85, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v82;
+      *(int *)((char *)a5 + a2 + 4) = v82;
       LOWORD(v82) = v85;
       HIWORD(v82) = __ROL4__(v82, 16) >> 16;
       LOWORD(v82) = v85;
-      *(_DWORD *)((char *)a5 + a2) = v82;
+      *(int *)((char *)a5 + a2) = v82;
       LOWORD(v82) = v85;
       HIWORD(v82) = __ROR4__(v82, 16) >> 16;
       LOWORD(v82) = v85;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v82;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v82;
+      *(int *)((char *)a5 + 2 * a2) = v82;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v82;
       v86 = (char *)a5 + a2;
       LOWORD(v82) = v85;
       HIWORD(v8) = __ROR4__(v82, 16) >> 16;
       LOWORD(v8) = v85;
-      *(_DWORD *)&v86[2 * a2] = v8;
-      *(_DWORD *)&v86[2 * a2 + 4] = v8;
+      *(int *)&v86[2 * a2] = v8;
+      *(int *)&v86[2 * a2 + 4] = v8;
       break;
     case 0x11u:
 LABEL_21:
@@ -85500,23 +85483,23 @@ LABEL_21:
       LOWORD(v87) = v89;
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       LOWORD(v87) = v89;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v87;
+      *(int *)((char *)a5 + a2 + 4) = v87;
       HIWORD(v87) = HIWORD(v89);
       v90 = __ROL4__(v89, 16);
       LOWORD(v87) = v90;
       LOWORD(v90) = __ROL4__(v90, 16);
-      *(_DWORD *)((char *)a5 + a2) = v87;
+      *(int *)((char *)a5 + a2) = v87;
       LOWORD(v87) = v90;
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       LOWORD(v87) = v90;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v87;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v87;
+      *(int *)((char *)a5 + 2 * a2) = v87;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v87;
       v91 = (char *)a5 + a2;
       LOWORD(v87) = v90;
       HIWORD(v8) = __ROR4__(v87, 16) >> 16;
       LOWORD(v8) = v90;
-      *(_DWORD *)&v91[2 * a2] = v8;
-      *(_DWORD *)&v91[2 * a2 + 4] = v8;
+      *(int *)&v91[2 * a2] = v8;
+      *(int *)&v91[2 * a2 + 4] = v8;
       break;
     case 0x12u:
 LABEL_22:
@@ -85528,25 +85511,25 @@ LABEL_22:
       LOWORD(v92) = a1;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v92;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v92;
+      *(int *)((char *)a5 + a2) = v92;
+      *(int *)((char *)a5 + a2 + 4) = v92;
       LOWORD(v92) = a1;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v92;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v92;
       HIWORD(v92) = HIWORD(a1);
       v93 = __ROL4__(a1, 16);
       LOWORD(v92) = v93;
       v94 = __ROL4__(v93, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v92;
+      *(int *)((char *)a5 + 2 * a2) = v92;
       v95 = (char *)a5 + a2;
       LOWORD(v92) = v94;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = v94;
-      *(_DWORD *)&v95[2 * a2 + 4] = v92;
+      *(int *)&v95[2 * a2 + 4] = v92;
       HIWORD(v8) = HIWORD(v94);
       LOWORD(v8) = __ROL4__(v94, 16);
-      *(_DWORD *)&v95[2 * a2] = v8;
+      *(int *)&v95[2 * a2] = v8;
       break;
     case 0x13u:
 LABEL_23:
@@ -85559,30 +85542,30 @@ LABEL_23:
       v97 = __ROL4__(a1, 16);
       LOWORD(v96) = v97;
       v98 = __ROL4__(v97, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v96;
-      *(_DWORD *)((char *)a5 + a2) = v96;
+      *(int *)((char *)a5 + a2 + 4) = v96;
+      *(int *)((char *)a5 + a2) = v96;
       HIWORD(v96) = HIWORD(v98);
       v99 = __ROL4__(v98, 16);
       LOWORD(v96) = v99;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v96;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v96;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v96;
+      *(int *)((char *)a5 + 2 * a2) = v96;
       v100 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v99, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v100[2 * a2] = v8;
-      *(_DWORD *)&v100[2 * a2 + 4] = v8;
+      *(int *)&v100[2 * a2] = v8;
+      *(int *)&v100[2 * a2 + 4] = v8;
       break;
     case 0x14u:
 LABEL_24:
       a5[1] = __ROL4__(a1, 16);
       *a5 = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v101 = (char *)a5 + a2;
-      *(_DWORD *)&v101[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v101[2 * a2] = a1;
+      *(int *)&v101[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v101[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x15u:
@@ -85596,19 +85579,19 @@ LABEL_25:
       v103 = __ROL4__(a1, 16);
       LOWORD(v102) = v103;
       LOWORD(v103) = __ROL4__(v103, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v102;
-      *(_DWORD *)((char *)a5 + a2) = v102;
+      *(int *)((char *)a5 + a2 + 4) = v102;
+      *(int *)((char *)a5 + a2) = v102;
       LOWORD(v102) = v103;
       HIWORD(v102) = __ROR4__(v102, 16) >> 16;
       LOWORD(v102) = v103;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v102;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v102;
+      *(int *)((char *)a5 + 2 * a2) = v102;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v102;
       v104 = (char *)a5 + a2;
       LOWORD(v102) = v103;
       HIWORD(v8) = __ROR4__(v102, 16) >> 16;
       LOWORD(v8) = v103;
-      *(_DWORD *)&v104[2 * a2] = v8;
-      *(_DWORD *)&v104[2 * a2 + 4] = v8;
+      *(int *)&v104[2 * a2] = v8;
+      *(int *)&v104[2 * a2 + 4] = v8;
       break;
     case 0x16u:
 LABEL_26:
@@ -85620,18 +85603,18 @@ LABEL_26:
       LOWORD(v105) = a1;
       HIWORD(v105) = __ROR4__(v105, 16) >> 16;
       LOWORD(v105) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v105;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v105;
+      *(int *)((char *)a5 + a2) = v105;
+      *(int *)((char *)a5 + a2 + 4) = v105;
       HIWORD(v105) = HIWORD(a1);
       v106 = __ROL4__(a1, 16);
       LOWORD(v105) = v106;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v105;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v105;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v105;
+      *(int *)((char *)a5 + 2 * a2) = v105;
       v107 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v106, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v107[2 * a2] = v8;
-      *(_DWORD *)&v107[2 * a2 + 4] = v8;
+      *(int *)&v107[2 * a2] = v8;
+      *(int *)&v107[2 * a2 + 4] = v8;
       break;
     case 0x17u:
 LABEL_27:
@@ -85642,15 +85625,15 @@ LABEL_27:
       *a5 = a1;
       HIWORD(v8) = __ROR4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = v8;
+      *(int *)((char *)a5 + a2) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v109 = (char *)a5 + a2;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v109[2 * a2 + 4] = v8;
-      *(_DWORD *)&v109[2 * a2] = a1;
+      *(int *)&v109[2 * a2 + 4] = v8;
+      *(int *)&v109[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x18u:
@@ -85662,24 +85645,24 @@ LABEL_28:
       LOWORD(v110) = a1;
       *a5 = v110;
       v111 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v111;
+      *(int *)((char *)a5 + a2 + 4) = v111;
       LOWORD(v111) = a1;
       HIWORD(v111) = __ROL4__(v111, 16) >> 16;
       LOWORD(v111) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v111;
+      *(int *)((char *)a5 + a2) = v111;
       v112 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v112;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v112;
       LOWORD(v112) = a1;
       HIWORD(v112) = __ROL4__(v112, 16) >> 16;
       LOWORD(v112) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v112;
+      *(int *)((char *)a5 + 2 * a2) = v112;
       v113 = (char *)a5 + a2;
       v114 = __ROL4__(a1, 16);
-      *(_DWORD *)&v113[2 * a2 + 4] = v114;
+      *(int *)&v113[2 * a2 + 4] = v114;
       LOWORD(v114) = a1;
       HIWORD(v8) = __ROL4__(v114, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v113[2 * a2] = v8;
+      *(int *)&v113[2 * a2] = v8;
       break;
     case 0x19u:
 LABEL_29:
@@ -85691,15 +85674,15 @@ LABEL_29:
       LOWORD(v115) = a1;
       HIWORD(v115) = __ROR4__(v115, 16) >> 16;
       LOWORD(v115) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v115;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v115;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = v115;
+      *(int *)((char *)a5 + a2 + 4) = v115;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
       HIWORD(v8) = HIWORD(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v116 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v116[2 * a2 + 4] = v8;
-      *(_DWORD *)&v116[2 * a2] = v8;
+      *(int *)&v116[2 * a2 + 4] = v8;
+      *(int *)&v116[2 * a2] = v8;
       break;
     case 0x1Au:
 LABEL_30:
@@ -85711,25 +85694,25 @@ LABEL_30:
       v118 = __ROL4__(a1, 16);
       LOWORD(v117) = v118;
       v119 = __ROL4__(v118, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v117;
+      *(int *)((char *)a5 + a2 + 4) = v117;
       LOWORD(v117) = v119;
       HIWORD(v117) = __ROL4__(v117, 16) >> 16;
       LOWORD(v117) = v119;
-      *(_DWORD *)((char *)a5 + a2) = v117;
+      *(int *)((char *)a5 + a2) = v117;
       HIWORD(v117) = HIWORD(v119);
       v120 = __ROL4__(v119, 16);
       LOWORD(v117) = v120;
       v121 = __ROL4__(v120, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v117;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v117;
       LOWORD(v117) = v121;
       HIWORD(v117) = __ROL4__(v117, 16) >> 16;
       LOWORD(v117) = v121;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v117;
+      *(int *)((char *)a5 + 2 * a2) = v117;
       v122 = (char *)a5 + a2;
-      *(_DWORD *)&v122[2 * a2 + 4] = v121;
+      *(int *)&v122[2 * a2 + 4] = v121;
       HIWORD(v8) = __ROL4__(v121, 16) >> 16;
       LOWORD(v8) = v121;
-      *(_DWORD *)&v122[2 * a2] = v8;
+      *(int *)&v122[2 * a2] = v8;
       break;
     case 0x1Bu:
 LABEL_31:
@@ -85739,18 +85722,18 @@ LABEL_31:
       v125 = __ROL4__(v124, 16);
       a5[1] = v123;
       *a5 = v123;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v125, 16);
-      *(_DWORD *)((char *)a5 + a2) = v125;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v125, 16);
+      *(int *)((char *)a5 + a2) = v125;
       HIWORD(v123) = __ROR4__(v125, 16) >> 16;
       LOWORD(v123) = v125;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v123;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v123;
+      *(int *)((char *)a5 + 2 * a2) = v123;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v123;
       v126 = (char *)a5 + a2;
       LOWORD(v123) = v125;
       HIWORD(v8) = __ROR4__(v123, 16) >> 16;
       LOWORD(v8) = v125;
-      *(_DWORD *)&v126[2 * a2] = v8;
-      *(_DWORD *)&v126[2 * a2 + 4] = v8;
+      *(int *)&v126[2 * a2] = v8;
+      *(int *)&v126[2 * a2 + 4] = v8;
       break;
     case 0x1Cu:
 LABEL_32:
@@ -85763,28 +85746,28 @@ LABEL_32:
       LOWORD(v128) = a1;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v128;
+      *(int *)((char *)a5 + a2 + 4) = v128;
       HIWORD(v128) = HIWORD(a1);
       v129 = __ROL4__(a1, 16);
       LOWORD(v128) = v129;
       v130 = __ROL4__(v129, 16);
-      *(_DWORD *)((char *)a5 + a2) = v128;
+      *(int *)((char *)a5 + a2) = v128;
       LOWORD(v128) = v130;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = v130;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v128;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v128;
       HIWORD(v128) = HIWORD(v130);
       v131 = __ROL4__(v130, 16);
       LOWORD(v128) = v131;
       v132 = __ROL4__(v131, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v128;
+      *(int *)((char *)a5 + 2 * a2) = v128;
       v133 = (char *)a5 + a2;
       LOWORD(v128) = v132;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = v132;
-      *(_DWORD *)&v133[2 * a2 + 4] = v128;
+      *(int *)&v133[2 * a2 + 4] = v128;
       v8 = __ROL4__(v132, 16);
-      *(_DWORD *)&v133[2 * a2] = v8;
+      *(int *)&v133[2 * a2] = v8;
       break;
     case 0x1Du:
 LABEL_33:
@@ -85797,24 +85780,24 @@ LABEL_33:
       HIWORD(v134) = __ROL4__(v134, 16) >> 16;
       LOWORD(v134) = v136;
       *a5 = v134;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v136;
+      *(int *)((char *)a5 + a2 + 4) = v136;
       HIWORD(v134) = __ROL4__(v136, 16) >> 16;
       LOWORD(v134) = v136;
-      *(_DWORD *)((char *)a5 + a2) = v134;
+      *(int *)((char *)a5 + a2) = v134;
       LOWORD(v134) = v136;
       HIWORD(v134) = __ROR4__(v134, 16) >> 16;
       LOWORD(v134) = v136;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v134;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v134;
       v137 = __ROL4__(v136, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v137;
+      *(int *)((char *)a5 + 2 * a2) = v137;
       v138 = (char *)a5 + a2;
       LOWORD(v137) = v136;
       HIWORD(v137) = __ROR4__(v137, 16) >> 16;
       LOWORD(v137) = v136;
-      *(_DWORD *)&v138[2 * a2 + 4] = v137;
+      *(int *)&v138[2 * a2 + 4] = v137;
       HIWORD(v8) = HIWORD(v136);
       LOWORD(v8) = __ROL4__(v136, 16);
-      *(_DWORD *)&v138[2 * a2] = v8;
+      *(int *)&v138[2 * a2] = v8;
       break;
     case 0x1Eu:
 LABEL_34:
@@ -85830,20 +85813,20 @@ LABEL_34:
       LOWORD(v139) = v141;
       HIWORD(v139) = __ROR4__(v139, 16) >> 16;
       LOWORD(v139) = v141;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v139;
-      *(_DWORD *)((char *)a5 + a2) = __ROL4__(v141, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v141;
+      *(int *)((char *)a5 + a2 + 4) = v139;
+      *(int *)((char *)a5 + a2) = __ROL4__(v141, 16);
+      *(int *)((char *)a5 + 2 * a2 + 4) = v141;
       HIWORD(v139) = __ROL4__(v141, 16) >> 16;
       LOWORD(v139) = v141;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v139;
+      *(int *)((char *)a5 + 2 * a2) = v139;
       v142 = (char *)a5 + a2;
       HIWORD(v139) = HIWORD(v141);
       v143 = __ROL4__(v141, 16);
       LOWORD(v139) = v143;
-      *(_DWORD *)&v142[2 * a2 + 4] = v139;
+      *(int *)&v142[2 * a2 + 4] = v139;
       LOWORD(v8) = __ROL4__(v143, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v142[2 * a2] = v8;
+      *(int *)&v142[2 * a2] = v8;
       break;
     case 0x1Fu:
 LABEL_35:
@@ -85860,28 +85843,28 @@ LABEL_35:
       v147 = __ROL4__(v146, 16);
       LOWORD(v144) = v147;
       v148 = __ROL4__(v147, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v144;
+      *(int *)((char *)a5 + a2 + 4) = v144;
       LOWORD(v144) = v148;
       HIWORD(v144) = __ROL4__(v144, 16) >> 16;
       LOWORD(v144) = v148;
-      *(_DWORD *)((char *)a5 + a2) = v144;
+      *(int *)((char *)a5 + a2) = v144;
       LOWORD(v144) = v148;
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       LOWORD(v144) = v148;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v144;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v144;
       HIWORD(v144) = HIWORD(v148);
       v149 = __ROL4__(v148, 16);
       LOWORD(v144) = v149;
       v150 = __ROL4__(v149, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v144;
+      *(int *)((char *)a5 + 2 * a2) = v144;
       v151 = (char *)a5 + a2;
       LOWORD(v144) = v150;
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       LOWORD(v144) = v150;
-      *(_DWORD *)&v151[2 * a2 + 4] = v144;
+      *(int *)&v151[2 * a2 + 4] = v144;
       HIWORD(v8) = HIWORD(v150);
       LOWORD(v8) = __ROL4__(v150, 16);
-      *(_DWORD *)&v151[2 * a2] = v8;
+      *(int *)&v151[2 * a2] = v8;
       break;
     case 0x20u:
 LABEL_36:
@@ -85893,13 +85876,13 @@ LABEL_36:
       LOWORD(v152) = a1;
       HIWORD(v8) = __ROR4__(v152, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v8;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2) = v8;
+      *(int *)((char *)a5 + a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v153 = (char *)a5 + a2;
-      *(_DWORD *)&v153[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v153[2 * a2] = a1;
+      *(int *)&v153[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v153[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x21u:
@@ -85913,43 +85896,43 @@ LABEL_37:
       v155 = __ROL4__(a1, 16);
       LOWORD(v154) = v155;
       v156 = __ROL4__(v155, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v154;
+      *(int *)((char *)a5 + a2 + 4) = v154;
       LOWORD(v154) = v156;
       HIWORD(v154) = __ROL4__(v154, 16) >> 16;
       LOWORD(v154) = v156;
-      *(_DWORD *)((char *)a5 + a2) = v154;
+      *(int *)((char *)a5 + a2) = v154;
       HIWORD(v154) = HIWORD(v156);
       v157 = __ROL4__(v156, 16);
       LOWORD(v154) = v157;
       LOWORD(v157) = __ROL4__(v157, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v154;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v154;
       LOWORD(v154) = v157;
       HIWORD(v154) = __ROL4__(v154, 16) >> 16;
       LOWORD(v154) = v157;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v154;
+      *(int *)((char *)a5 + 2 * a2) = v154;
       v158 = (char *)a5 + a2;
       LOWORD(v154) = v157;
       HIWORD(v8) = __ROR4__(v154, 16) >> 16;
       LOWORD(v8) = v157;
-      *(_DWORD *)&v158[2 * a2] = v8;
-      *(_DWORD *)&v158[2 * a2 + 4] = v8;
+      *(int *)&v158[2 * a2] = v8;
+      *(int *)&v158[2 * a2 + 4] = v8;
       break;
     case 0x22u:
 LABEL_38:
       a5[1] = __ROL4__(a1, 16);
       *a5 = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
       HIWORD(v159) = __ROR4__(a1, 16) >> 16;
       LOWORD(v159) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v159;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v159;
+      *(int *)((char *)a5 + 2 * a2) = v159;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v159;
       v160 = (char *)a5 + a2;
       LOWORD(v159) = a1;
       HIWORD(v8) = __ROR4__(v159, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v160[2 * a2] = v8;
-      *(_DWORD *)&v160[2 * a2 + 4] = v8;
+      *(int *)&v160[2 * a2] = v8;
+      *(int *)&v160[2 * a2 + 4] = v8;
       break;
     case 0x23u:
 LABEL_39:
@@ -85961,25 +85944,25 @@ LABEL_39:
       LOWORD(v161) = a1;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       LOWORD(v161) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v161;
+      *(int *)((char *)a5 + a2 + 4) = v161;
       HIWORD(v161) = HIWORD(a1);
       v162 = __ROL4__(a1, 16);
       LOWORD(v161) = v162;
       v163 = __ROL4__(v162, 16);
-      *(_DWORD *)((char *)a5 + a2) = v161;
+      *(int *)((char *)a5 + a2) = v161;
       LOWORD(v161) = v163;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       LOWORD(v161) = v163;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v161;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v161;
       HIWORD(v161) = HIWORD(v163);
       v164 = __ROL4__(v163, 16);
       LOWORD(v161) = v164;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v161;
+      *(int *)((char *)a5 + 2 * a2) = v161;
       v165 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v164, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v165[2 * a2] = v8;
-      *(_DWORD *)&v165[2 * a2 + 4] = v8;
+      *(int *)&v165[2 * a2] = v8;
+      *(int *)&v165[2 * a2 + 4] = v8;
       break;
     case 0x24u:
 LABEL_40:
@@ -85991,15 +85974,15 @@ LABEL_40:
       LOWORD(v166) = a1;
       HIWORD(v166) = __ROR4__(v166, 16) >> 16;
       LOWORD(v166) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v166;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v166;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = v166;
+      *(int *)((char *)a5 + a2 + 4) = v166;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + 2 * a2) = __ROL4__(a1, 16);
       v167 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v167[2 * a2 + 4] = v8;
-      *(_DWORD *)&v167[2 * a2] = v8;
+      *(int *)&v167[2 * a2 + 4] = v8;
+      *(int *)&v167[2 * a2] = v8;
       break;
     case 0x25u:
 LABEL_41:
@@ -86012,21 +85995,21 @@ LABEL_41:
       HIWORD(v168) = __ROL4__(v168, 16) >> 16;
       LOWORD(v168) = v170;
       *a5 = v168;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v170;
+      *(int *)((char *)a5 + a2 + 4) = v170;
       HIWORD(v168) = __ROL4__(v170, 16) >> 16;
       LOWORD(v168) = v170;
-      *(_DWORD *)((char *)a5 + a2) = v168;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v170;
+      *(int *)((char *)a5 + a2) = v168;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v170;
       LOWORD(v168) = v170;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v168;
+      *(int *)((char *)a5 + 2 * a2) = v168;
       v171 = (char *)a5 + a2;
       HIWORD(v168) = HIWORD(v170);
       v172 = __ROL4__(v170, 16);
       LOWORD(v168) = v172;
-      *(_DWORD *)&v171[2 * a2 + 4] = v168;
+      *(int *)&v171[2 * a2 + 4] = v168;
       LOWORD(v8) = __ROL4__(v172, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v171[2 * a2] = v8;
+      *(int *)&v171[2 * a2] = v8;
       break;
     case 0x26u:
 LABEL_42:
@@ -86036,20 +86019,20 @@ LABEL_42:
       v175 = __ROL4__(v174, 16);
       a5[1] = v173;
       *a5 = v173;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v175;
+      *(int *)((char *)a5 + a2 + 4) = v175;
       v176 = __ROL4__(v175, 16);
-      *(_DWORD *)((char *)a5 + a2) = v176;
+      *(int *)((char *)a5 + a2) = v176;
       LOWORD(v176) = v175;
       HIWORD(v176) = __ROR4__(v176, 16) >> 16;
       LOWORD(v176) = v175;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v176;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v176;
+      *(int *)((char *)a5 + 2 * a2) = v176;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v176;
       v177 = (char *)a5 + a2;
       LOWORD(v176) = v175;
       HIWORD(v8) = __ROR4__(v176, 16) >> 16;
       LOWORD(v8) = v175;
-      *(_DWORD *)&v177[2 * a2] = v8;
-      *(_DWORD *)&v177[2 * a2 + 4] = v8;
+      *(int *)&v177[2 * a2] = v8;
+      *(int *)&v177[2 * a2 + 4] = v8;
       break;
     case 0x27u:
 LABEL_43:
@@ -86065,23 +86048,23 @@ LABEL_43:
       LOWORD(v178) = v180;
       HIWORD(v178) = __ROR4__(v178, 16) >> 16;
       LOWORD(v178) = v180;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v178;
+      *(int *)((char *)a5 + a2 + 4) = v178;
       v181 = __ROL4__(v180, 16);
-      *(_DWORD *)((char *)a5 + a2) = v181;
+      *(int *)((char *)a5 + a2) = v181;
       LOWORD(v181) = v180;
       HIWORD(v181) = __ROR4__(v181, 16) >> 16;
       LOWORD(v181) = v180;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v181;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v181;
       v182 = __ROL4__(v180, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v182;
+      *(int *)((char *)a5 + 2 * a2) = v182;
       v183 = (char *)a5 + a2;
       LOWORD(v182) = v180;
       HIWORD(v182) = __ROR4__(v182, 16) >> 16;
       LOWORD(v182) = v180;
-      *(_DWORD *)&v183[2 * a2 + 4] = v182;
+      *(int *)&v183[2 * a2 + 4] = v182;
       HIWORD(v8) = HIWORD(v180);
       LOWORD(v8) = __ROL4__(v180, 16);
-      *(_DWORD *)&v183[2 * a2] = v8;
+      *(int *)&v183[2 * a2] = v8;
       break;
     case 0x28u:
 LABEL_44:
@@ -86093,16 +86076,16 @@ LABEL_44:
       LOWORD(v184) = a1;
       HIWORD(v184) = __ROR4__(v184, 16) >> 16;
       LOWORD(v184) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v184;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v184;
+      *(int *)((char *)a5 + a2) = v184;
+      *(int *)((char *)a5 + a2 + 4) = v184;
       LOWORD(v184) = a1;
       HIWORD(v8) = __ROR4__(v184, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
       v185 = (char *)a5 + a2;
-      *(_DWORD *)&v185[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v185[2 * a2] = a1;
+      *(int *)&v185[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v185[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x29u:
@@ -86112,19 +86095,19 @@ LABEL_45:
       LOWORD(v186) = a1;
       *a5 = v186;
       a5[1] = v186;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       HIWORD(v186) = __ROL4__(a1, 16) >> 16;
       LOWORD(v186) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v186;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v186;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       LOWORD(v186) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v186;
+      *(int *)((char *)a5 + 2 * a2) = v186;
       v187 = (char *)a5 + a2;
       LOWORD(v186) = a1;
       HIWORD(v8) = __ROR4__(v186, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v187[2 * a2] = v8;
-      *(_DWORD *)&v187[2 * a2 + 4] = v8;
+      *(int *)&v187[2 * a2] = v8;
+      *(int *)&v187[2 * a2 + 4] = v8;
       break;
     case 0x2Au:
 LABEL_46:
@@ -86132,19 +86115,19 @@ LABEL_46:
       *a5 = a1;
       HIWORD(v188) = __ROR4__(a1, 16) >> 16;
       LOWORD(v188) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v188;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v188;
+      *(int *)((char *)a5 + a2) = v188;
+      *(int *)((char *)a5 + a2 + 4) = v188;
       LOWORD(v188) = a1;
       HIWORD(v188) = __ROR4__(v188, 16) >> 16;
       LOWORD(v188) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v188;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v188;
+      *(int *)((char *)a5 + 2 * a2) = v188;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v188;
       v189 = (char *)a5 + a2;
       LOWORD(v188) = a1;
       HIWORD(v8) = __ROR4__(v188, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v189[2 * a2] = v8;
-      *(_DWORD *)&v189[2 * a2 + 4] = v8;
+      *(int *)&v189[2 * a2] = v8;
+      *(int *)&v189[2 * a2 + 4] = v8;
       break;
     case 0x2Bu:
 LABEL_47:
@@ -86156,21 +86139,21 @@ LABEL_47:
       LOWORD(v190) = a1;
       HIWORD(v190) = __ROR4__(v190, 16) >> 16;
       LOWORD(v190) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v190;
+      *(int *)((char *)a5 + a2 + 4) = v190;
       v191 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v191;
+      *(int *)((char *)a5 + a2) = v191;
       LOWORD(v191) = a1;
       HIWORD(v191) = __ROR4__(v191, 16) >> 16;
       LOWORD(v191) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v191;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v191;
       v192 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v192;
+      *(int *)((char *)a5 + 2 * a2) = v192;
       v193 = (char *)a5 + a2;
       LOWORD(v192) = a1;
       HIWORD(v8) = __ROR4__(v192, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v193[2 * a2] = v8;
-      *(_DWORD *)&v193[2 * a2 + 4] = v8;
+      *(int *)&v193[2 * a2] = v8;
+      *(int *)&v193[2 * a2 + 4] = v8;
       break;
     case 0x2Cu:
 LABEL_48:
@@ -86178,26 +86161,26 @@ LABEL_48:
       HIWORD(v194) = __ROL4__(a1, 16) >> 16;
       LOWORD(v194) = a1;
       *a5 = v194;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       LOWORD(v194) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v194;
+      *(int *)((char *)a5 + a2) = v194;
       HIWORD(v194) = HIWORD(a1);
       v195 = __ROL4__(a1, 16);
       LOWORD(v194) = v195;
       v196 = __ROL4__(v195, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v194;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v194;
       LOWORD(v194) = v196;
       HIWORD(v194) = __ROL4__(v194, 16) >> 16;
       LOWORD(v194) = v196;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v194;
+      *(int *)((char *)a5 + 2 * a2) = v194;
       v197 = (char *)a5 + a2;
       HIWORD(v194) = HIWORD(v196);
       v198 = __ROL4__(v196, 16);
       LOWORD(v194) = v198;
-      *(_DWORD *)&v197[2 * a2 + 4] = v194;
+      *(int *)&v197[2 * a2 + 4] = v194;
       LOWORD(v8) = __ROL4__(v198, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v197[2 * a2] = v8;
+      *(int *)&v197[2 * a2] = v8;
       break;
     case 0x2Du:
 LABEL_49:
@@ -86209,22 +86192,22 @@ LABEL_49:
       LOWORD(v199) = a1;
       HIWORD(v199) = __ROR4__(v199, 16) >> 16;
       LOWORD(v199) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v199;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v199;
+      *(int *)((char *)a5 + a2) = v199;
+      *(int *)((char *)a5 + a2 + 4) = v199;
       HIWORD(v199) = HIWORD(a1);
       v200 = __ROL4__(a1, 16);
       LOWORD(v199) = v200;
       v201 = __ROL4__(v200, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v199;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v199;
       LOWORD(v199) = v201;
       HIWORD(v199) = __ROL4__(v199, 16) >> 16;
       LOWORD(v199) = v201;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v199;
+      *(int *)((char *)a5 + 2 * a2) = v199;
       v202 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v201);
       LOWORD(v8) = __ROL4__(v201, 16);
-      *(_DWORD *)&v202[2 * a2 + 4] = v8;
-      *(_DWORD *)&v202[2 * a2] = v8;
+      *(int *)&v202[2 * a2 + 4] = v8;
+      *(int *)&v202[2 * a2] = v8;
       break;
     case 0x2Eu:
 LABEL_50:
@@ -86238,22 +86221,22 @@ LABEL_50:
       v206 = __ROL4__(v205, 16);
       LOWORD(v203) = v206;
       LOWORD(v206) = __ROL4__(v206, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v203;
+      *(int *)((char *)a5 + a2 + 4) = v203;
       LOWORD(v203) = v206;
       HIWORD(v203) = __ROL4__(v203, 16) >> 16;
       LOWORD(v203) = v206;
-      *(_DWORD *)((char *)a5 + a2) = v203;
+      *(int *)((char *)a5 + a2) = v203;
       LOWORD(v203) = v206;
       HIWORD(v203) = __ROR4__(v203, 16) >> 16;
       LOWORD(v203) = v206;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v203;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v203;
+      *(int *)((char *)a5 + 2 * a2) = v203;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v203;
       v207 = (char *)a5 + a2;
       LOWORD(v203) = v206;
       HIWORD(v8) = __ROR4__(v203, 16) >> 16;
       LOWORD(v8) = v206;
-      *(_DWORD *)&v207[2 * a2] = v8;
-      *(_DWORD *)&v207[2 * a2 + 4] = v8;
+      *(int *)&v207[2 * a2] = v8;
+      *(int *)&v207[2 * a2 + 4] = v8;
       break;
     case 0x2Fu:
 LABEL_51:
@@ -86270,19 +86253,19 @@ LABEL_51:
       v211 = __ROL4__(v210, 16);
       LOWORD(v208) = v211;
       v212 = __ROL4__(v211, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v208;
+      *(int *)((char *)a5 + a2 + 4) = v208;
       LOWORD(v208) = v212;
       HIWORD(v208) = __ROL4__(v208, 16) >> 16;
       LOWORD(v208) = v212;
-      *(_DWORD *)((char *)a5 + a2) = v208;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v212;
+      *(int *)((char *)a5 + a2) = v208;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v212;
       HIWORD(v8) = __ROL4__(v212, 16) >> 16;
       LOWORD(v8) = v212;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v213 = (char *)a5 + a2;
-      *(_DWORD *)&v213[2 * a2 + 4] = v212;
+      *(int *)&v213[2 * a2 + 4] = v212;
       LOWORD(v8) = v212;
-      *(_DWORD *)&v213[2 * a2] = v8;
+      *(int *)&v213[2 * a2] = v8;
       break;
     case 0x30u:
 LABEL_52:
@@ -86295,23 +86278,23 @@ LABEL_52:
       LOWORD(v214) = v216;
       HIWORD(v214) = __ROR4__(v214, 16) >> 16;
       LOWORD(v214) = v216;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v214;
+      *(int *)((char *)a5 + a2 + 4) = v214;
       HIWORD(v214) = HIWORD(v216);
       v217 = __ROL4__(v216, 16);
       LOWORD(v214) = v217;
       LOWORD(v217) = __ROL4__(v217, 16);
-      *(_DWORD *)((char *)a5 + a2) = v214;
+      *(int *)((char *)a5 + a2) = v214;
       LOWORD(v214) = v217;
       HIWORD(v214) = __ROR4__(v214, 16) >> 16;
       LOWORD(v214) = v217;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v214;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v214;
+      *(int *)((char *)a5 + 2 * a2) = v214;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v214;
       v218 = (char *)a5 + a2;
       LOWORD(v214) = v217;
       HIWORD(v8) = __ROR4__(v214, 16) >> 16;
       LOWORD(v8) = v217;
-      *(_DWORD *)&v218[2 * a2] = v8;
-      *(_DWORD *)&v218[2 * a2 + 4] = v8;
+      *(int *)&v218[2 * a2] = v8;
+      *(int *)&v218[2 * a2 + 4] = v8;
       break;
     case 0x31u:
 LABEL_53:
@@ -86327,25 +86310,25 @@ LABEL_53:
       LOWORD(v219) = v221;
       HIWORD(v219) = __ROR4__(v219, 16) >> 16;
       LOWORD(v219) = v221;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v219;
+      *(int *)((char *)a5 + a2 + 4) = v219;
       HIWORD(v219) = HIWORD(v221);
       v222 = __ROL4__(v221, 16);
       LOWORD(v219) = v222;
       v223 = __ROL4__(v222, 16);
-      *(_DWORD *)((char *)a5 + a2) = v219;
+      *(int *)((char *)a5 + a2) = v219;
       LOWORD(v219) = v223;
       HIWORD(v219) = __ROR4__(v219, 16) >> 16;
       LOWORD(v219) = v223;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v219;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v219;
       v224 = __ROL4__(v223, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v224;
+      *(int *)((char *)a5 + 2 * a2) = v224;
       v225 = (char *)a5 + a2;
       LOWORD(v224) = v223;
       HIWORD(v224) = __ROR4__(v224, 16) >> 16;
       LOWORD(v224) = v223;
-      *(_DWORD *)&v225[2 * a2 + 4] = v224;
+      *(int *)&v225[2 * a2 + 4] = v224;
       v8 = __ROL4__(v223, 16);
-      *(_DWORD *)&v225[2 * a2] = v8;
+      *(int *)&v225[2 * a2] = v8;
       break;
     case 0x32u:
 LABEL_54:
@@ -86358,26 +86341,26 @@ LABEL_54:
       LOWORD(v227) = a1;
       HIWORD(v227) = __ROR4__(v227, 16) >> 16;
       LOWORD(v227) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v227;
+      *(int *)((char *)a5 + a2 + 4) = v227;
       v228 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v228;
+      *(int *)((char *)a5 + a2) = v228;
       LOWORD(v228) = a1;
       HIWORD(v228) = __ROR4__(v228, 16) >> 16;
       LOWORD(v228) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v228;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v228;
       HIWORD(v228) = HIWORD(a1);
       v229 = __ROL4__(a1, 16);
       LOWORD(v228) = v229;
       v230 = __ROL4__(v229, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v228;
+      *(int *)((char *)a5 + 2 * a2) = v228;
       v231 = (char *)a5 + a2;
       LOWORD(v228) = v230;
       HIWORD(v228) = __ROR4__(v228, 16) >> 16;
       LOWORD(v228) = v230;
-      *(_DWORD *)&v231[2 * a2 + 4] = v228;
+      *(int *)&v231[2 * a2 + 4] = v228;
       HIWORD(v8) = HIWORD(v230);
       LOWORD(v8) = __ROL4__(v230, 16);
-      *(_DWORD *)&v231[2 * a2] = v8;
+      *(int *)&v231[2 * a2] = v8;
       break;
     case 0x33u:
 LABEL_55:
@@ -86389,22 +86372,22 @@ LABEL_55:
       LOWORD(v232) = a1;
       HIWORD(v232) = __ROR4__(v232, 16) >> 16;
       LOWORD(v232) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v232;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v232;
+      *(int *)((char *)a5 + a2) = v232;
+      *(int *)((char *)a5 + a2 + 4) = v232;
       LOWORD(v232) = a1;
       HIWORD(v232) = __ROR4__(v232, 16) >> 16;
       LOWORD(v232) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v232;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v232;
       HIWORD(v232) = HIWORD(a1);
       v233 = __ROL4__(a1, 16);
       LOWORD(v232) = v233;
       v234 = __ROL4__(v233, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v232;
+      *(int *)((char *)a5 + 2 * a2) = v232;
       v235 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v234);
       LOWORD(v8) = __ROL4__(v234, 16);
-      *(_DWORD *)&v235[2 * a2 + 4] = v8;
-      *(_DWORD *)&v235[2 * a2] = v8;
+      *(int *)&v235[2 * a2 + 4] = v8;
+      *(int *)&v235[2 * a2] = v8;
       break;
     case 0x34u:
 LABEL_56:
@@ -86414,17 +86397,17 @@ LABEL_56:
       v237 = __ROL4__(a1, 16);
       LOWORD(v236) = v237;
       v238 = __ROL4__(v237, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v236;
-      *(_DWORD *)((char *)a5 + a2) = v236;
+      *(int *)((char *)a5 + a2 + 4) = v236;
+      *(int *)((char *)a5 + a2) = v236;
       HIWORD(v8) = HIWORD(v238);
       v239 = __ROL4__(v238, 16);
       LOWORD(v8) = v239;
       v240 = __ROL4__(v239, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v241 = (char *)a5 + a2;
-      *(_DWORD *)&v241[2 * a2 + 4] = __ROL4__(v240, 16);
-      *(_DWORD *)&v241[2 * a2] = v240;
+      *(int *)&v241[2 * a2 + 4] = __ROL4__(v240, 16);
+      *(int *)&v241[2 * a2] = v240;
       LOWORD(v8) = v240;
       break;
     case 0x35u:
@@ -86441,15 +86424,15 @@ LABEL_57:
       LOWORD(v242) = v244;
       HIWORD(v242) = __ROR4__(v242, 16) >> 16;
       LOWORD(v242) = v244;
-      *(_DWORD *)((char *)a5 + a2) = v242;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v242;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v244, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v244;
+      *(int *)((char *)a5 + a2) = v242;
+      *(int *)((char *)a5 + a2 + 4) = v242;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v244, 16);
+      *(int *)((char *)a5 + 2 * a2) = v244;
       v245 = (char *)a5 + a2;
       HIWORD(v8) = __ROR4__(v244, 16) >> 16;
       LOWORD(v8) = v244;
-      *(_DWORD *)&v245[2 * a2] = v8;
-      *(_DWORD *)&v245[2 * a2 + 4] = v8;
+      *(int *)&v245[2 * a2] = v8;
+      *(int *)&v245[2 * a2 + 4] = v8;
       break;
     case 0x36u:
 LABEL_58:
@@ -86459,21 +86442,21 @@ LABEL_58:
       v247 = __ROL4__(a1, 16);
       LOWORD(v246) = v247;
       v248 = __ROL4__(v247, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v246;
+      *(int *)((char *)a5 + a2 + 4) = v246;
       LOWORD(v246) = v248;
       HIWORD(v246) = __ROL4__(v246, 16) >> 16;
       LOWORD(v246) = v248;
-      *(_DWORD *)((char *)a5 + a2) = v246;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v248;
+      *(int *)((char *)a5 + a2) = v246;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v248;
       HIWORD(v246) = __ROL4__(v248, 16) >> 16;
       LOWORD(v246) = v248;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v246;
+      *(int *)((char *)a5 + 2 * a2) = v246;
       v249 = (char *)a5 + a2;
       LOWORD(v246) = v248;
       HIWORD(v8) = __ROR4__(v246, 16) >> 16;
       LOWORD(v8) = v248;
-      *(_DWORD *)&v249[2 * a2] = v8;
-      *(_DWORD *)&v249[2 * a2 + 4] = v8;
+      *(int *)&v249[2 * a2] = v8;
+      *(int *)&v249[2 * a2 + 4] = v8;
       break;
     case 0x37u:
 LABEL_59:
@@ -86486,22 +86469,22 @@ LABEL_59:
       LOWORD(v250) = v251;
       v252 = __ROL4__(v251, 16);
       *a5 = v250;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v252, 16);
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v252, 16);
       HIWORD(v250) = HIWORD(v252);
-      *(_DWORD *)((char *)a5 + a2) = v252;
+      *(int *)((char *)a5 + a2) = v252;
       v253 = __ROL4__(v252, 16);
       LOWORD(v250) = v253;
       v254 = __ROL4__(v253, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v250;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v250;
       LOWORD(v250) = v254;
       HIWORD(v250) = __ROL4__(v250, 16) >> 16;
       LOWORD(v250) = v254;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v250;
+      *(int *)((char *)a5 + 2 * a2) = v250;
       v255 = (char *)a5 + a2;
-      *(_DWORD *)&v255[2 * a2 + 4] = v254;
+      *(int *)&v255[2 * a2 + 4] = v254;
       HIWORD(v8) = __ROL4__(v254, 16) >> 16;
       LOWORD(v8) = v254;
-      *(_DWORD *)&v255[2 * a2] = v8;
+      *(int *)&v255[2 * a2] = v8;
       break;
     case 0x38u:
 LABEL_60:
@@ -86514,22 +86497,22 @@ LABEL_60:
       LOWORD(v257) = a1;
       HIWORD(v257) = __ROR4__(v257, 16) >> 16;
       LOWORD(v257) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v257;
+      *(int *)((char *)a5 + a2 + 4) = v257;
       HIWORD(v257) = HIWORD(a1);
       v258 = __ROL4__(a1, 16);
       LOWORD(v257) = v258;
       v259 = __ROL4__(v258, 16);
-      *(_DWORD *)((char *)a5 + a2) = v257;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v259, 16);
+      *(int *)((char *)a5 + a2) = v257;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v259, 16);
       HIWORD(v257) = HIWORD(v259);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v259;
+      *(int *)((char *)a5 + 2 * a2) = v259;
       v260 = (char *)a5 + a2;
       v261 = __ROL4__(v259, 16);
       LOWORD(v257) = v261;
-      *(_DWORD *)&v260[2 * a2 + 4] = v257;
+      *(int *)&v260[2 * a2 + 4] = v257;
       LOWORD(v8) = __ROL4__(v261, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v260[2 * a2] = v8;
+      *(int *)&v260[2 * a2] = v8;
       break;
     case 0x39u:
 LABEL_61:
@@ -86541,21 +86524,21 @@ LABEL_61:
       LOWORD(v262) = a1;
       HIWORD(v262) = __ROR4__(v262, 16) >> 16;
       LOWORD(v262) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v262;
+      *(int *)((char *)a5 + a2 + 4) = v262;
       v263 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v263;
+      *(int *)((char *)a5 + a2) = v263;
       LOWORD(v263) = a1;
       HIWORD(v263) = __ROR4__(v263, 16) >> 16;
       LOWORD(v263) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v263;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v263;
       HIWORD(v8) = HIWORD(a1);
       v264 = __ROL4__(a1, 16);
       LOWORD(v8) = v264;
       v265 = __ROL4__(v264, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v266 = (char *)a5 + a2;
-      *(_DWORD *)&v266[2 * a2 + 4] = __ROL4__(v265, 16);
-      *(_DWORD *)&v266[2 * a2] = v265;
+      *(int *)&v266[2 * a2 + 4] = __ROL4__(v265, 16);
+      *(int *)&v266[2 * a2] = v265;
       LOWORD(v8) = v265;
       break;
     case 0x3Au:
@@ -86565,20 +86548,20 @@ LABEL_62:
       LOWORD(v267) = a1;
       *a5 = v267;
       a5[1] = v267;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
       HIWORD(v267) = __ROR4__(a1, 16) >> 16;
       LOWORD(v267) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v267;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v267;
+      *(int *)((char *)a5 + 2 * a2) = v267;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v267;
       v268 = (char *)a5 + a2;
       HIWORD(v267) = HIWORD(a1);
       v269 = __ROL4__(a1, 16);
       LOWORD(v267) = v269;
-      *(_DWORD *)&v268[2 * a2 + 4] = v267;
+      *(int *)&v268[2 * a2 + 4] = v267;
       LOWORD(v8) = __ROL4__(v269, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v268[2 * a2] = v8;
+      *(int *)&v268[2 * a2] = v8;
       break;
     case 0x3Bu:
 LABEL_63:
@@ -86586,24 +86569,24 @@ LABEL_63:
       *a5 = a1;
       HIWORD(v270) = __ROR4__(a1, 16) >> 16;
       LOWORD(v270) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v270;
+      *(int *)((char *)a5 + a2 + 4) = v270;
       HIWORD(v270) = HIWORD(a1);
       v271 = __ROL4__(a1, 16);
       LOWORD(v270) = v271;
       v272 = __ROL4__(v271, 16);
-      *(_DWORD *)((char *)a5 + a2) = v270;
+      *(int *)((char *)a5 + a2) = v270;
       LOWORD(v270) = v272;
       HIWORD(v270) = __ROR4__(v270, 16) >> 16;
       LOWORD(v270) = v272;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v270;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v270;
       v273 = __ROL4__(v272, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v273;
+      *(int *)((char *)a5 + 2 * a2) = v273;
       v274 = (char *)a5 + a2;
       LOWORD(v273) = v272;
       HIWORD(v8) = __ROR4__(v273, 16) >> 16;
       LOWORD(v8) = v272;
-      *(_DWORD *)&v274[2 * a2] = v8;
-      *(_DWORD *)&v274[2 * a2 + 4] = v8;
+      *(int *)&v274[2 * a2] = v8;
+      *(int *)&v274[2 * a2 + 4] = v8;
       break;
     case 0x3Cu:
 LABEL_64:
@@ -86616,23 +86599,23 @@ LABEL_64:
       HIWORD(v275) = __ROL4__(v275, 16) >> 16;
       LOWORD(v275) = v277;
       *a5 = v275;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v277, 16);
-      *(_DWORD *)((char *)a5 + a2) = v277;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v277, 16);
+      *(int *)((char *)a5 + a2) = v277;
       HIWORD(v275) = __ROR4__(v277, 16) >> 16;
       LOWORD(v275) = v277;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v275;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v275;
       HIWORD(v275) = HIWORD(v277);
       v278 = __ROL4__(v277, 16);
       LOWORD(v275) = v278;
       v279 = __ROL4__(v278, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v275;
+      *(int *)((char *)a5 + 2 * a2) = v275;
       v280 = (char *)a5 + a2;
       LOWORD(v275) = v279;
       HIWORD(v275) = __ROR4__(v275, 16) >> 16;
       LOWORD(v275) = v279;
-      *(_DWORD *)&v280[2 * a2 + 4] = v275;
+      *(int *)&v280[2 * a2 + 4] = v275;
       v8 = __ROL4__(v279, 16);
-      *(_DWORD *)&v280[2 * a2] = v8;
+      *(int *)&v280[2 * a2] = v8;
       break;
     case 0x3Du:
 LABEL_65:
@@ -86644,20 +86627,20 @@ LABEL_65:
       v282 = __ROL4__(a1, 16);
       LOWORD(v281) = v282;
       v283 = __ROL4__(v282, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v281;
+      *(int *)((char *)a5 + a2 + 4) = v281;
       LOWORD(v281) = v283;
       HIWORD(v281) = __ROL4__(v281, 16) >> 16;
       LOWORD(v281) = v283;
-      *(_DWORD *)((char *)a5 + a2) = v281;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v283, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v283;
+      *(int *)((char *)a5 + a2) = v281;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v283, 16);
+      *(int *)((char *)a5 + 2 * a2) = v283;
       v284 = (char *)a5 + a2;
       HIWORD(v281) = __ROR4__(v283, 16) >> 16;
       LOWORD(v281) = v283;
-      *(_DWORD *)&v284[2 * a2 + 4] = v281;
+      *(int *)&v284[2 * a2 + 4] = v281;
       HIWORD(v8) = HIWORD(v283);
       LOWORD(v8) = __ROL4__(v283, 16);
-      *(_DWORD *)&v284[2 * a2] = v8;
+      *(int *)&v284[2 * a2] = v8;
       break;
     case 0x3Eu:
 LABEL_66:
@@ -86666,22 +86649,22 @@ LABEL_66:
       LOWORD(v285) = a1;
       *a5 = v285;
       a5[1] = v285;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       HIWORD(v285) = __ROL4__(a1, 16) >> 16;
       LOWORD(v285) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v285;
+      *(int *)((char *)a5 + a2) = v285;
       HIWORD(v285) = HIWORD(a1);
       v286 = __ROL4__(a1, 16);
       LOWORD(v285) = v286;
       v287 = __ROL4__(v286, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v285;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v285;
       LOWORD(v285) = v287;
       HIWORD(v8) = __ROL4__(v285, 16) >> 16;
       LOWORD(v8) = v287;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v288 = (char *)a5 + a2;
-      *(_DWORD *)&v288[2 * a2 + 4] = __ROL4__(v287, 16);
-      *(_DWORD *)&v288[2 * a2] = v287;
+      *(int *)&v288[2 * a2 + 4] = __ROL4__(v287, 16);
+      *(int *)&v288[2 * a2] = v287;
       LOWORD(v8) = v287;
       break;
     case 0x3Fu:
@@ -86696,69 +86679,69 @@ LABEL_67:
       LOWORD(v289) = v291;
       *a5 = v289;
       v292 = __ROL4__(v291, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v292;
+      *(int *)((char *)a5 + a2 + 4) = v292;
       LOWORD(v292) = v291;
       HIWORD(v292) = __ROL4__(v292, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)((char *)a5 + a2) = v292;
+      *(int *)((char *)a5 + a2) = v292;
       LOWORD(v292) = v291;
       HIWORD(v292) = __ROR4__(v292, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v292;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v291;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v292;
+      *(int *)((char *)a5 + 2 * a2) = v291;
       v293 = (char *)a5 + a2;
       HIWORD(v292) = __ROR4__(v291, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)&v293[2 * a2 + 4] = v292;
+      *(int *)&v293[2 * a2 + 4] = v292;
       HIWORD(v8) = HIWORD(v291);
       LOWORD(v8) = __ROL4__(v291, 16);
-      *(_DWORD *)&v293[2 * a2] = v8;
+      *(int *)&v293[2 * a2] = v8;
       break;
     case 0x40u:
 LABEL_132:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v491 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v491 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v491) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v491;
+      *(int *)((char *)a5 + a2 + 4) = v491;
       LOWORD(v491) = a1;
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v491;
+      *(int *)((char *)a5 + a2) = v491;
       LOWORD(v491) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v491;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v491;
       LOWORD(v491) = a1;
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v491;
+      *(int *)((char *)a5 + 2 * a2) = v491;
       v492 = (char *)a5 + a2;
       v493 = &a4[a2];
-      *(_DWORD *)&v492[2 * a2 + 4] = *(_DWORD *)&v493[2 * a2 + 4];
-      v8 = *(_DWORD *)&v493[2 * a2];
-      *(_DWORD *)&v492[2 * a2] = v8;
+      *(int *)&v492[2 * a2 + 4] = *(int *)&v493[2 * a2 + 4];
+      v8 = *(int *)&v493[2 * a2];
+      *(int *)&v492[2 * a2] = v8;
       break;
     case 0x41u:
 LABEL_133:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v494 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v494;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v494 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v494;
       LOWORD(v494) = a1;
       HIWORD(v494) = __ROR4__(v494, 16) >> 16;
       LOWORD(v494) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v494;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v494;
+      *(int *)((char *)a5 + 2 * a2) = v494;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v494;
       v495 = (char *)a5 + a2;
       LOWORD(v494) = a1;
       HIWORD(v8) = __ROR4__(v494, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v495[2 * a2] = v8;
-      *(_DWORD *)&v495[2 * a2 + 4] = v8;
+      *(int *)&v495[2 * a2] = v8;
+      *(int *)&v495[2 * a2 + 4] = v8;
       break;
     case 0x42u:
 LABEL_134:
@@ -86766,43 +86749,43 @@ LABEL_134:
       HIWORD(v496) = __ROR4__(v5, 16) >> 16;
       LOWORD(v496) = a1;
       a5[1] = v496;
-      v497 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v497 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v497) = a1;
       HIWORD(v497) = __ROR4__(v497, 16) >> 16;
       LOWORD(v497) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v497;
-      v498 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v498;
+      *(int *)((char *)a5 + a2 + 4) = v497;
+      v498 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v498;
       LOWORD(v498) = a1;
       HIWORD(v498) = __ROR4__(v498, 16) >> 16;
       LOWORD(v498) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v498;
-      v499 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v499;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v498;
+      v499 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v499;
       v500 = (char *)a5 + a2;
       LOWORD(v499) = a1;
       HIWORD(v499) = __ROR4__(v499, 16) >> 16;
       LOWORD(v499) = a1;
-      *(_DWORD *)&v500[2 * a2 + 4] = v499;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v500[2 * a2] = v8;
+      *(int *)&v500[2 * a2 + 4] = v499;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v500[2 * a2] = v8;
       break;
     case 0x43u:
 LABEL_135:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v501 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v501;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v501 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v501;
       v502 = (char *)a5 + a2;
       LOWORD(v501) = a1;
       HIWORD(v8) = __ROR4__(v501, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v502[2 * a2] = v8;
-      *(_DWORD *)&v502[2 * a2 + 4] = v8;
+      *(int *)&v502[2 * a2] = v8;
+      *(int *)&v502[2 * a2 + 4] = v8;
       break;
     case 0x44u:
 LABEL_136:
@@ -86810,28 +86793,28 @@ LABEL_136:
       HIWORD(v503) = __ROL4__(v5, 16) >> 16;
       LOWORD(v503) = *((_WORD *)a4 + 2);
       a5[1] = v503;
-      v504 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v504 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v504) = a1;
       HIWORD(v504) = __ROL4__(v504, 16) >> 16;
       LOWORD(v504) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v504;
-      v505 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v505;
+      *(int *)((char *)a5 + a2 + 4) = v504;
+      v505 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v505;
       LOWORD(v505) = a1;
       HIWORD(v505) = __ROL4__(v505, 16) >> 16;
       LOWORD(v505) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v505;
-      v506 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v506;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v505;
+      v506 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v506;
       v507 = (char *)a5 + a2;
       v508 = &a4[a2];
       LOWORD(v506) = a1;
       HIWORD(v506) = __ROL4__(v506, 16) >> 16;
       LOWORD(v506) = *(_WORD *)&v508[2 * a2 + 4];
-      *(_DWORD *)&v507[2 * a2 + 4] = v506;
-      v8 = *(_DWORD *)&v508[2 * a2];
-      *(_DWORD *)&v507[2 * a2] = v8;
+      *(int *)&v507[2 * a2 + 4] = v506;
+      v8 = *(int *)&v508[2 * a2];
+      *(int *)&v507[2 * a2] = v8;
       break;
     case 0x45u:
 LABEL_137:
@@ -86840,44 +86823,44 @@ LABEL_137:
       LOWORD(v509) = a1;
       *a5 = v509;
       a5[1] = v509;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v510 = (char *)a5 + a2;
       v511 = &a4[a2];
-      *(_DWORD *)&v510[2 * a2 + 4] = *(_DWORD *)&v511[2 * a2 + 4];
-      v8 = *(_DWORD *)&v511[2 * a2];
-      *(_DWORD *)&v510[2 * a2] = v8;
+      *(int *)&v510[2 * a2 + 4] = *(int *)&v511[2 * a2 + 4];
+      v8 = *(int *)&v511[2 * a2];
+      *(int *)&v510[2 * a2] = v8;
       break;
     case 0x46u:
 LABEL_138:
-      v512 = *((_DWORD *)a4 + 1);
+      v512 = *((int *)a4 + 1);
       a5[1] = v512;
       LOWORD(v512) = *((_WORD *)a4 + 1);
       HIWORD(v512) = __ROL4__(v512, 16) >> 16;
       LOWORD(v512) = a1;
       *a5 = v512;
-      v513 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v513;
+      v513 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v513;
       LOWORD(v513) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v513) = __ROL4__(v513, 16) >> 16;
       LOWORD(v513) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v513;
-      v514 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v514;
+      *(int *)((char *)a5 + a2) = v513;
+      v514 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v514;
       LOWORD(v514) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v514) = __ROL4__(v514, 16) >> 16;
       LOWORD(v514) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v514;
+      *(int *)((char *)a5 + 2 * a2) = v514;
       v515 = (char *)a5 + a2;
       v516 = &a4[a2];
-      v517 = *(_DWORD *)&v516[2 * a2 + 4];
-      *(_DWORD *)&v515[2 * a2 + 4] = v517;
+      v517 = *(int *)&v516[2 * a2 + 4];
+      *(int *)&v515[2 * a2 + 4] = v517;
       LOWORD(v517) = *(_WORD *)&v516[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v517, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v515[2 * a2] = v8;
+      *(int *)&v515[2 * a2] = v8;
       break;
     case 0x47u:
 LABEL_139:
@@ -86885,28 +86868,28 @@ LABEL_139:
       HIWORD(v518) = __ROL4__(v5, 16) >> 16;
       LOWORD(v518) = *((_WORD *)a4 + 2);
       a5[1] = v518;
-      v519 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v519 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v519) = a1;
       HIWORD(v519) = __ROR4__(v519, 16) >> 16;
       LOWORD(v519) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v519;
-      v520 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v520;
+      *(int *)((char *)a5 + a2 + 4) = v519;
+      v520 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v520;
       LOWORD(v520) = a1;
       HIWORD(v520) = __ROR4__(v520, 16) >> 16;
       LOWORD(v520) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v520;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v520;
       LOWORD(v520) = a1;
       HIWORD(v520) = __ROL4__(v520, 16) >> 16;
       LOWORD(v520) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v520;
+      *(int *)((char *)a5 + 2 * a2) = v520;
       v521 = (char *)a5 + a2;
       LOWORD(v520) = a1;
       HIWORD(v8) = __ROR4__(v520, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v521[2 * a2] = v8;
-      *(_DWORD *)&v521[2 * a2 + 4] = v8;
+      *(int *)&v521[2 * a2] = v8;
+      *(int *)&v521[2 * a2 + 4] = v8;
       break;
     case 0x48u:
 LABEL_140:
@@ -86918,25 +86901,25 @@ LABEL_140:
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROR4__(v522, 16) >> 16;
       LOWORD(v522) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v522;
+      *(int *)((char *)a5 + a2 + 4) = v522;
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROL4__(v522, 16) >> 16;
       LOWORD(v522) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v522;
+      *(int *)((char *)a5 + a2) = v522;
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROR4__(v522, 16) >> 16;
       LOWORD(v522) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v522;
-      v523 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v523;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v522;
+      v523 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v523;
       v524 = (char *)a5 + a2;
       v525 = &a4[a2];
       LOWORD(v523) = a1;
       HIWORD(v523) = __ROL4__(v523, 16) >> 16;
       LOWORD(v523) = *(_WORD *)&v525[2 * a2 + 4];
-      *(_DWORD *)&v524[2 * a2 + 4] = v523;
-      v8 = *(_DWORD *)&v525[2 * a2];
-      *(_DWORD *)&v524[2 * a2] = v8;
+      *(int *)&v524[2 * a2 + 4] = v523;
+      v8 = *(int *)&v525[2 * a2];
+      *(int *)&v524[2 * a2] = v8;
       break;
     case 0x49u:
 LABEL_141:
@@ -86948,75 +86931,75 @@ LABEL_141:
       LOWORD(v526) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v526) = __ROL4__(v526, 16) >> 16;
       LOWORD(v526) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v526;
+      *(int *)((char *)a5 + a2 + 4) = v526;
       LOWORD(v526) = a1;
       HIWORD(v526) = __ROL4__(v526, 16) >> 16;
       LOWORD(v526) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v526;
-      v527 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v527;
+      *(int *)((char *)a5 + a2) = v526;
+      v527 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v527;
       LOWORD(v527) = a1;
       HIWORD(v527) = __ROL4__(v527, 16) >> 16;
       LOWORD(v527) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v527;
+      *(int *)((char *)a5 + 2 * a2) = v527;
       v528 = (char *)a5 + a2;
       v529 = &a4[a2];
-      v530 = *(_DWORD *)&v529[2 * a2 + 4];
-      *(_DWORD *)&v528[2 * a2 + 4] = v530;
+      v530 = *(int *)&v529[2 * a2 + 4];
+      *(int *)&v528[2 * a2 + 4] = v530;
       LOWORD(v530) = *(_WORD *)&v529[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v530, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v528[2 * a2] = v8;
+      *(int *)&v528[2 * a2] = v8;
       break;
     case 0x4Au:
 LABEL_142:
-      v531 = *((_DWORD *)a4 + 1);
+      v531 = *((int *)a4 + 1);
       a5[1] = v531;
       LOWORD(v531) = *((_WORD *)a4 + 1);
       HIWORD(v531) = __ROL4__(v531, 16) >> 16;
       LOWORD(v531) = a1;
       *a5 = v531;
-      v532 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v532;
+      v532 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v532;
       LOWORD(v532) = a1;
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v532;
+      *(int *)((char *)a5 + a2) = v532;
       LOWORD(v532) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v532;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v532;
       LOWORD(v532) = a1;
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v532;
+      *(int *)((char *)a5 + 2 * a2) = v532;
       v533 = (char *)a5 + a2;
       LOWORD(v532) = a1;
       HIWORD(v8) = __ROR4__(v532, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v533[2 * a2] = v8;
-      *(_DWORD *)&v533[2 * a2 + 4] = v8;
+      *(int *)&v533[2 * a2] = v8;
+      *(int *)&v533[2 * a2 + 4] = v8;
       break;
     case 0x4Bu:
 LABEL_143:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v534 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v534;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v534 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v534;
       LOWORD(v534) = a1;
       HIWORD(v534) = __ROL4__(v534, 16) >> 16;
       LOWORD(v534) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v534;
-      v535 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v535;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v534;
+      v535 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v535;
       v536 = (char *)a5 + a2;
       LOWORD(v535) = a1;
       HIWORD(v535) = __ROR4__(v535, 16) >> 16;
       LOWORD(v535) = a1;
-      *(_DWORD *)&v536[2 * a2 + 4] = v535;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v536[2 * a2] = v8;
+      *(int *)&v536[2 * a2 + 4] = v535;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v536[2 * a2] = v8;
       break;
     case 0x4Cu:
 LABEL_144:
@@ -87024,83 +87007,83 @@ LABEL_144:
       HIWORD(v537) = __ROR4__(v5, 16) >> 16;
       LOWORD(v537) = a1;
       a5[1] = v537;
-      v538 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v538 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v538) = a1;
       HIWORD(v538) = __ROL4__(v538, 16) >> 16;
       LOWORD(v538) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v538;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v538;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v539 = (char *)a5 + a2;
       v540 = &a4[a2];
-      *(_DWORD *)&v539[2 * a2 + 4] = *(_DWORD *)&v540[2 * a2 + 4];
-      v8 = *(_DWORD *)&v540[2 * a2];
-      *(_DWORD *)&v539[2 * a2] = v8;
+      *(int *)&v539[2 * a2 + 4] = *(int *)&v540[2 * a2 + 4];
+      v8 = *(int *)&v540[2 * a2];
+      *(int *)&v539[2 * a2] = v8;
       break;
     case 0x4Du:
 LABEL_145:
-      v541 = *((_DWORD *)a4 + 1);
+      v541 = *((int *)a4 + 1);
       a5[1] = v541;
       LOWORD(v541) = a1;
       HIWORD(v541) = __ROL4__(v541, 16) >> 16;
       LOWORD(v541) = a1;
       *a5 = v541;
-      v542 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v542;
+      v542 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v542;
       LOWORD(v542) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v542) = __ROL4__(v542, 16) >> 16;
       LOWORD(v542) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v542;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v542;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v543 = (char *)a5 + a2;
       v544 = &a4[a2];
-      *(_DWORD *)&v543[2 * a2 + 4] = *(_DWORD *)&v544[2 * a2 + 4];
-      v8 = *(_DWORD *)&v544[2 * a2];
-      *(_DWORD *)&v543[2 * a2] = v8;
+      *(int *)&v543[2 * a2 + 4] = *(int *)&v544[2 * a2 + 4];
+      v8 = *(int *)&v544[2 * a2];
+      *(int *)&v543[2 * a2] = v8;
       break;
     case 0x4Eu:
 LABEL_146:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v545 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v545;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v545 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v545;
       LOWORD(v545) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v545) = __ROL4__(v545, 16) >> 16;
       LOWORD(v545) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v545;
+      *(int *)((char *)a5 + 2 * a2) = v545;
       v546 = (char *)a5 + a2;
-      v547 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v546[2 * a2 + 4] = v547;
+      v547 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v546[2 * a2 + 4] = v547;
       LOWORD(v547) = a1;
       HIWORD(v8) = __ROL4__(v547, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v546[2 * a2] = v8;
+      *(int *)&v546[2 * a2] = v8;
       break;
     case 0x4Fu:
 LABEL_147:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v548 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v548;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v548 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v548;
       LOWORD(v548) = a1;
       HIWORD(v548) = __ROR4__(v548, 16) >> 16;
       LOWORD(v548) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v548;
-      v549 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v549;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v548;
+      v549 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v549;
       v550 = (char *)a5 + a2;
       LOWORD(v549) = a1;
       HIWORD(v549) = __ROR4__(v549, 16) >> 16;
       LOWORD(v549) = a1;
-      *(_DWORD *)&v550[2 * a2 + 4] = v549;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v550[2 * a2] = v8;
+      *(int *)&v550[2 * a2 + 4] = v549;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v550[2 * a2] = v8;
       break;
     case 0x50u:
 LABEL_148:
@@ -87108,83 +87091,83 @@ LABEL_148:
       HIWORD(v551) = __ROR4__(v5, 16) >> 16;
       LOWORD(v551) = a1;
       a5[1] = v551;
-      v552 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v552 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v552) = a1;
       HIWORD(v552) = __ROR4__(v552, 16) >> 16;
       LOWORD(v552) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v552;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v552;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v553 = (char *)a5 + a2;
       v554 = &a4[a2];
-      *(_DWORD *)&v553[2 * a2 + 4] = *(_DWORD *)&v554[2 * a2 + 4];
-      v8 = *(_DWORD *)&v554[2 * a2];
-      *(_DWORD *)&v553[2 * a2] = v8;
+      *(int *)&v553[2 * a2 + 4] = *(int *)&v554[2 * a2 + 4];
+      v8 = *(int *)&v554[2 * a2];
+      *(int *)&v553[2 * a2] = v8;
       break;
     case 0x51u:
 LABEL_149:
-      v555 = *((_DWORD *)a4 + 1);
+      v555 = *((int *)a4 + 1);
       a5[1] = v555;
       LOWORD(v555) = a1;
       HIWORD(v555) = __ROL4__(v555, 16) >> 16;
       LOWORD(v555) = a1;
       *a5 = v555;
-      v556 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v556;
+      v556 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v556;
       LOWORD(v556) = a1;
       HIWORD(v556) = __ROL4__(v556, 16) >> 16;
       LOWORD(v556) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v556;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v556;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v557 = (char *)a5 + a2;
       v558 = &a4[a2];
-      *(_DWORD *)&v557[2 * a2 + 4] = *(_DWORD *)&v558[2 * a2 + 4];
-      v8 = *(_DWORD *)&v558[2 * a2];
-      *(_DWORD *)&v557[2 * a2] = v8;
+      *(int *)&v557[2 * a2 + 4] = *(int *)&v558[2 * a2 + 4];
+      v8 = *(int *)&v558[2 * a2];
+      *(int *)&v557[2 * a2] = v8;
       break;
     case 0x52u:
 LABEL_150:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v559 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v559;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v559 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v559;
       LOWORD(v559) = a1;
       HIWORD(v559) = __ROL4__(v559, 16) >> 16;
       LOWORD(v559) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v559;
+      *(int *)((char *)a5 + 2 * a2) = v559;
       v560 = (char *)a5 + a2;
-      v561 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v560[2 * a2 + 4] = v561;
+      v561 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v560[2 * a2 + 4] = v561;
       LOWORD(v561) = a1;
       HIWORD(v8) = __ROL4__(v561, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v560[2 * a2] = v8;
+      *(int *)&v560[2 * a2] = v8;
       break;
     case 0x53u:
 LABEL_151:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v562 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v562 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v562) = a1;
       HIWORD(v562) = __ROR4__(v562, 16) >> 16;
       LOWORD(v562) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v562;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v562;
+      *(int *)((char *)a5 + a2) = v562;
+      *(int *)((char *)a5 + a2 + 4) = v562;
       LOWORD(v562) = a1;
       HIWORD(v562) = __ROR4__(v562, 16) >> 16;
       LOWORD(v562) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v562;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v562;
+      *(int *)((char *)a5 + 2 * a2) = v562;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v562;
       v563 = (char *)a5 + a2;
       v564 = &a4[a2];
-      *(_DWORD *)&v563[2 * a2 + 4] = *(_DWORD *)&v564[2 * a2 + 4];
-      v8 = *(_DWORD *)&v564[2 * a2];
-      *(_DWORD *)&v563[2 * a2] = v8;
+      *(int *)&v563[2 * a2 + 4] = *(int *)&v564[2 * a2 + 4];
+      v8 = *(int *)&v564[2 * a2];
+      *(int *)&v563[2 * a2] = v8;
       break;
     case 0x54u:
 LABEL_152:
@@ -87199,94 +87182,94 @@ LABEL_152:
       LOWORD(v565) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v565;
+      *(int *)((char *)a5 + a2 + 4) = v565;
       LOWORD(v565) = a1;
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v565;
+      *(int *)((char *)a5 + a2) = v565;
       LOWORD(v565) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v565;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v565;
       LOWORD(v565) = a1;
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v565;
+      *(int *)((char *)a5 + 2 * a2) = v565;
       v566 = (char *)a5 + a2;
       v567 = &a4[a2];
       LOWORD(v565) = *(_WORD *)&v567[2 * a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)&v566[2 * a2 + 4] = v565;
+      *(int *)&v566[2 * a2 + 4] = v565;
       LOWORD(v565) = a1;
       HIWORD(v8) = __ROL4__(v565, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v567[2 * a2];
-      *(_DWORD *)&v566[2 * a2] = v8;
+      *(int *)&v566[2 * a2] = v8;
       break;
     case 0x55u:
 LABEL_153:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v568 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v568 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v568) = a1;
       HIWORD(v568) = __ROR4__(v568, 16) >> 16;
       LOWORD(v568) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v568;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v568;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v568;
+      *(int *)((char *)a5 + a2 + 4) = v568;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v569 = (char *)a5 + a2;
       v570 = &a4[a2];
-      *(_DWORD *)&v569[2 * a2 + 4] = *(_DWORD *)&v570[2 * a2 + 4];
-      v8 = *(_DWORD *)&v570[2 * a2];
-      *(_DWORD *)&v569[2 * a2] = v8;
+      *(int *)&v569[2 * a2 + 4] = *(int *)&v570[2 * a2 + 4];
+      v8 = *(int *)&v570[2 * a2];
+      *(int *)&v569[2 * a2] = v8;
       break;
     case 0x56u:
 LABEL_154:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v571 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v571;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v571 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v571;
       LOWORD(v571) = a1;
       HIWORD(v571) = __ROR4__(v571, 16) >> 16;
       LOWORD(v571) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v571;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v571;
+      *(int *)((char *)a5 + 2 * a2) = v571;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v571;
       v572 = (char *)a5 + a2;
       v573 = &a4[a2];
-      *(_DWORD *)&v572[2 * a2 + 4] = *(_DWORD *)&v573[2 * a2 + 4];
-      v8 = *(_DWORD *)&v573[2 * a2];
-      *(_DWORD *)&v572[2 * a2] = v8;
+      *(int *)&v572[2 * a2 + 4] = *(int *)&v573[2 * a2 + 4];
+      v8 = *(int *)&v573[2 * a2];
+      *(int *)&v572[2 * a2] = v8;
       break;
     case 0x57u:
 LABEL_155:
-      v574 = *((_DWORD *)a4 + 1);
+      v574 = *((int *)a4 + 1);
       a5[1] = v574;
       LOWORD(v574) = a1;
       HIWORD(v574) = __ROL4__(v574, 16) >> 16;
       LOWORD(v574) = *(_WORD *)a4;
       *a5 = v574;
-      v575 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v575;
+      v575 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v575;
       LOWORD(v575) = a1;
       HIWORD(v575) = __ROL4__(v575, 16) >> 16;
       LOWORD(v575) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v575;
-      v576 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v576;
+      *(int *)((char *)a5 + a2) = v575;
+      v576 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v576;
       LOWORD(v576) = a1;
       HIWORD(v576) = __ROL4__(v576, 16) >> 16;
       LOWORD(v576) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v576;
+      *(int *)((char *)a5 + 2 * a2) = v576;
       v577 = (char *)a5 + a2;
       v578 = &a4[a2];
-      v579 = *(_DWORD *)&v578[2 * a2 + 4];
-      *(_DWORD *)&v577[2 * a2 + 4] = v579;
+      v579 = *(int *)&v578[2 * a2 + 4];
+      *(int *)&v577[2 * a2 + 4] = v579;
       LOWORD(v579) = a1;
       HIWORD(v8) = __ROL4__(v579, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v578[2 * a2];
-      *(_DWORD *)&v577[2 * a2] = v8;
+      *(int *)&v577[2 * a2] = v8;
       break;
     case 0x58u:
 LABEL_156:
@@ -87294,50 +87277,50 @@ LABEL_156:
       HIWORD(v580) = __ROL4__(v5, 16) >> 16;
       LOWORD(v580) = a1;
       a5[1] = v580;
-      v581 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v581 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v581) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v581) = __ROL4__(v581, 16) >> 16;
       LOWORD(v581) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v581;
-      v582 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v582;
+      *(int *)((char *)a5 + a2 + 4) = v581;
+      v582 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v582;
       LOWORD(v582) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v582) = __ROL4__(v582, 16) >> 16;
       LOWORD(v582) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v582;
-      v583 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v583;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v582;
+      v583 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v583;
       v584 = (char *)a5 + a2;
       v585 = &a4[a2];
       LOWORD(v583) = *(_WORD *)&v585[2 * a2 + 6];
       HIWORD(v583) = __ROL4__(v583, 16) >> 16;
       LOWORD(v583) = a1;
-      *(_DWORD *)&v584[2 * a2 + 4] = v583;
-      v8 = *(_DWORD *)&v585[2 * a2];
-      *(_DWORD *)&v584[2 * a2] = v8;
+      *(int *)&v584[2 * a2 + 4] = v583;
+      v8 = *(int *)&v585[2 * a2];
+      *(int *)&v584[2 * a2] = v8;
       break;
     case 0x59u:
 LABEL_157:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v586 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v586;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v586 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v586;
       LOWORD(v586) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v586) = __ROL4__(v586, 16) >> 16;
       LOWORD(v586) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v586;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v586;
       LOWORD(v586) = a1;
       HIWORD(v586) = __ROL4__(v586, 16) >> 16;
       LOWORD(v586) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v586;
+      *(int *)((char *)a5 + 2 * a2) = v586;
       v587 = (char *)a5 + a2;
       LOWORD(v586) = a1;
       HIWORD(v8) = __ROR4__(v586, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v587[2 * a2] = v8;
-      *(_DWORD *)&v587[2 * a2 + 4] = v8;
+      *(int *)&v587[2 * a2] = v8;
+      *(int *)&v587[2 * a2 + 4] = v8;
       break;
     case 0x5Au:
 LABEL_158:
@@ -87345,28 +87328,28 @@ LABEL_158:
       HIWORD(v588) = __ROL4__(v5, 16) >> 16;
       LOWORD(v588) = *((_WORD *)a4 + 2);
       a5[1] = v588;
-      v589 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v589 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v589) = a1;
       HIWORD(v589) = __ROR4__(v589, 16) >> 16;
       LOWORD(v589) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v589;
-      v590 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v590;
+      *(int *)((char *)a5 + a2 + 4) = v589;
+      v590 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v590;
       LOWORD(v590) = a1;
       HIWORD(v590) = __ROR4__(v590, 16) >> 16;
       LOWORD(v590) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v590;
-      v591 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v591;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v590;
+      v591 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v591;
       v592 = (char *)a5 + a2;
       v593 = &a4[a2];
       LOWORD(v591) = a1;
       HIWORD(v591) = __ROL4__(v591, 16) >> 16;
       LOWORD(v591) = *(_WORD *)&v593[2 * a2 + 4];
-      *(_DWORD *)&v592[2 * a2 + 4] = v591;
-      v8 = *(_DWORD *)&v593[2 * a2];
-      *(_DWORD *)&v592[2 * a2] = v8;
+      *(int *)&v592[2 * a2 + 4] = v591;
+      v8 = *(int *)&v593[2 * a2];
+      *(int *)&v592[2 * a2] = v8;
       break;
     case 0x5Bu:
 LABEL_159:
@@ -87378,47 +87361,47 @@ LABEL_159:
       LOWORD(v594) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v594) = __ROL4__(v594, 16) >> 16;
       LOWORD(v594) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v594;
+      *(int *)((char *)a5 + a2 + 4) = v594;
       LOWORD(v594) = a1;
       HIWORD(v594) = __ROL4__(v594, 16) >> 16;
       LOWORD(v594) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v594;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v594;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v595 = (char *)a5 + a2;
       v596 = &a4[a2];
-      *(_DWORD *)&v595[2 * a2 + 4] = *(_DWORD *)&v596[2 * a2 + 4];
-      v8 = *(_DWORD *)&v596[2 * a2];
-      *(_DWORD *)&v595[2 * a2] = v8;
+      *(int *)&v595[2 * a2 + 4] = *(int *)&v596[2 * a2 + 4];
+      v8 = *(int *)&v596[2 * a2];
+      *(int *)&v595[2 * a2] = v8;
       break;
     case 0x5Cu:
 LABEL_160:
-      v597 = *((_DWORD *)a4 + 1);
+      v597 = *((int *)a4 + 1);
       a5[1] = v597;
       LOWORD(v597) = *((_WORD *)a4 + 1);
       HIWORD(v597) = __ROL4__(v597, 16) >> 16;
       LOWORD(v597) = a1;
       *a5 = v597;
-      v598 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v598;
+      v598 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v598;
       LOWORD(v598) = a1;
       HIWORD(v598) = __ROL4__(v598, 16) >> 16;
       LOWORD(v598) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v598;
-      v599 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v599;
+      *(int *)((char *)a5 + a2) = v598;
+      v599 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v599;
       LOWORD(v599) = a1;
       HIWORD(v599) = __ROL4__(v599, 16) >> 16;
       LOWORD(v599) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v599;
+      *(int *)((char *)a5 + 2 * a2) = v599;
       v600 = (char *)a5 + a2;
       v601 = &a4[a2];
-      v602 = *(_DWORD *)&v601[2 * a2 + 4];
-      *(_DWORD *)&v600[2 * a2 + 4] = v602;
+      v602 = *(int *)&v601[2 * a2 + 4];
+      *(int *)&v600[2 * a2 + 4] = v602;
       LOWORD(v602) = *(_WORD *)&v601[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v602, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v600[2 * a2] = v8;
+      *(int *)&v600[2 * a2] = v8;
       break;
     case 0x5Du:
 LABEL_161:
@@ -87426,54 +87409,54 @@ LABEL_161:
       HIWORD(v603) = __ROR4__(v5, 16) >> 16;
       LOWORD(v603) = a1;
       a5[1] = v603;
-      v604 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v604 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v604) = a1;
       HIWORD(v604) = __ROL4__(v604, 16) >> 16;
       LOWORD(v604) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v604;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v605 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v605;
+      *(int *)((char *)a5 + a2 + 4) = v604;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v605 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v605;
       LOWORD(v605) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v605) = __ROL4__(v605, 16) >> 16;
       LOWORD(v605) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v605;
+      *(int *)((char *)a5 + 2 * a2) = v605;
       v606 = (char *)a5 + a2;
-      v607 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v606[2 * a2 + 4] = v607;
+      v607 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v606[2 * a2 + 4] = v607;
       LOWORD(v607) = a1;
       HIWORD(v8) = __ROL4__(v607, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v606[2 * a2] = v8;
+      *(int *)&v606[2 * a2] = v8;
       break;
     case 0x5Eu:
 LABEL_162:
-      v608 = *((_DWORD *)a4 + 1);
+      v608 = *((int *)a4 + 1);
       a5[1] = v608;
       LOWORD(v608) = a1;
       HIWORD(v608) = __ROL4__(v608, 16) >> 16;
       LOWORD(v608) = a1;
       *a5 = v608;
-      v609 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v609;
+      v609 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v609;
       LOWORD(v609) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v609) = __ROL4__(v609, 16) >> 16;
       LOWORD(v609) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v609;
+      *(int *)((char *)a5 + a2) = v609;
       LOWORD(v609) = a1;
       HIWORD(v609) = __ROL4__(v609, 16) >> 16;
       LOWORD(v609) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v609;
-      v610 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v610;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v609;
+      v610 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v610;
       v611 = (char *)a5 + a2;
       LOWORD(v610) = a1;
       HIWORD(v610) = __ROR4__(v610, 16) >> 16;
       LOWORD(v610) = a1;
-      *(_DWORD *)&v611[2 * a2 + 4] = v610;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v611[2 * a2] = v8;
+      *(int *)&v611[2 * a2 + 4] = v610;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v611[2 * a2] = v8;
       break;
     case 0x5Fu:
 LABEL_163:
@@ -87481,74 +87464,74 @@ LABEL_163:
       HIWORD(v612) = __ROR4__(v5, 16) >> 16;
       LOWORD(v612) = a1;
       a5[1] = v612;
-      v613 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v613 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v613) = a1;
       HIWORD(v613) = __ROR4__(v613, 16) >> 16;
       LOWORD(v613) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v613;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v614 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v614;
+      *(int *)((char *)a5 + a2 + 4) = v613;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v614 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v614;
       LOWORD(v614) = a1;
       HIWORD(v614) = __ROL4__(v614, 16) >> 16;
       LOWORD(v614) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v614;
+      *(int *)((char *)a5 + 2 * a2) = v614;
       v615 = (char *)a5 + a2;
-      v616 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v615[2 * a2 + 4] = v616;
+      v616 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v615[2 * a2 + 4] = v616;
       LOWORD(v616) = a1;
       HIWORD(v8) = __ROL4__(v616, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v615[2 * a2] = v8;
+      *(int *)&v615[2 * a2] = v8;
       break;
     case 0x60u:
 LABEL_164:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v617 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v617;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v617 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v617;
       LOWORD(v617) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v617;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v617;
       LOWORD(v617) = a1;
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v617;
+      *(int *)((char *)a5 + 2 * a2) = v617;
       v618 = (char *)a5 + a2;
       v619 = &a4[a2];
       LOWORD(v617) = *(_WORD *)&v619[2 * a2 + 6];
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = a1;
-      *(_DWORD *)&v618[2 * a2 + 4] = v617;
+      *(int *)&v618[2 * a2 + 4] = v617;
       LOWORD(v617) = a1;
       HIWORD(v8) = __ROL4__(v617, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v619[2 * a2];
-      *(_DWORD *)&v618[2 * a2] = v8;
+      *(int *)&v618[2 * a2] = v8;
       break;
     case 0x61u:
 LABEL_165:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v620 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v620 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v620) = a1;
       HIWORD(v620) = __ROR4__(v620, 16) >> 16;
       LOWORD(v620) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v620;
-      v621 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v621;
+      *(int *)((char *)a5 + a2 + 4) = v620;
+      v621 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v621;
       LOWORD(v621) = a1;
       HIWORD(v621) = __ROR4__(v621, 16) >> 16;
       LOWORD(v621) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v621;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v621;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v622 = (char *)a5 + a2;
       v623 = &a4[a2];
-      *(_DWORD *)&v622[2 * a2 + 4] = *(_DWORD *)&v623[2 * a2 + 4];
-      v8 = *(_DWORD *)&v623[2 * a2];
-      *(_DWORD *)&v622[2 * a2] = v8;
+      *(int *)&v622[2 * a2 + 4] = *(int *)&v623[2 * a2 + 4];
+      v8 = *(int *)&v623[2 * a2];
+      *(int *)&v622[2 * a2] = v8;
       break;
     case 0x62u:
 LABEL_166:
@@ -87563,62 +87546,62 @@ LABEL_166:
       LOWORD(v624) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v624) = __ROL4__(v624, 16) >> 16;
       LOWORD(v624) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v624;
+      *(int *)((char *)a5 + a2 + 4) = v624;
       LOWORD(v624) = a1;
       HIWORD(v624) = __ROL4__(v624, 16) >> 16;
       LOWORD(v624) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v624;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v624;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v625 = (char *)a5 + a2;
       v626 = &a4[a2];
-      *(_DWORD *)&v625[2 * a2 + 4] = *(_DWORD *)&v626[2 * a2 + 4];
-      v8 = *(_DWORD *)&v626[2 * a2];
-      *(_DWORD *)&v625[2 * a2] = v8;
+      *(int *)&v625[2 * a2 + 4] = *(int *)&v626[2 * a2 + 4];
+      v8 = *(int *)&v626[2 * a2];
+      *(int *)&v625[2 * a2] = v8;
       break;
     case 0x63u:
 LABEL_167:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v627 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v627;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v627 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v627;
       LOWORD(v627) = a1;
       HIWORD(v627) = __ROL4__(v627, 16) >> 16;
       LOWORD(v627) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v627;
-      v628 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v628;
+      *(int *)((char *)a5 + a2) = v627;
+      v628 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v628;
       LOWORD(v628) = a1;
       HIWORD(v628) = __ROL4__(v628, 16) >> 16;
       LOWORD(v628) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v628;
+      *(int *)((char *)a5 + 2 * a2) = v628;
       v629 = (char *)a5 + a2;
       v630 = &a4[a2];
-      *(_DWORD *)&v629[2 * a2 + 4] = *(_DWORD *)&v630[2 * a2 + 4];
-      v8 = *(_DWORD *)&v630[2 * a2];
-      *(_DWORD *)&v629[2 * a2] = v8;
+      *(int *)&v629[2 * a2 + 4] = *(int *)&v630[2 * a2 + 4];
+      v8 = *(int *)&v630[2 * a2];
+      *(int *)&v629[2 * a2] = v8;
       break;
     case 0x64u:
 LABEL_168:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v631 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v631;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v631 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v631;
       LOWORD(v631) = a1;
       HIWORD(v631) = __ROL4__(v631, 16) >> 16;
       LOWORD(v631) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v631;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v631;
       LOWORD(v631) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v631) = __ROL4__(v631, 16) >> 16;
       LOWORD(v631) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v631;
+      *(int *)((char *)a5 + 2 * a2) = v631;
       v632 = (char *)a5 + a2;
       LOWORD(v631) = a1;
       HIWORD(v8) = __ROR4__(v631, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v632[2 * a2] = v8;
-      *(_DWORD *)&v632[2 * a2 + 4] = v8;
+      *(int *)&v632[2 * a2] = v8;
+      *(int *)&v632[2 * a2 + 4] = v8;
       break;
     case 0x65u:
 LABEL_169:
@@ -87626,27 +87609,27 @@ LABEL_169:
       HIWORD(v633) = __ROR4__(v5, 16) >> 16;
       LOWORD(v633) = a1;
       a5[1] = v633;
-      v634 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v634 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v634) = a1;
       HIWORD(v634) = __ROL4__(v634, 16) >> 16;
       LOWORD(v634) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v634;
-      v635 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v635;
+      *(int *)((char *)a5 + a2 + 4) = v634;
+      v635 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v635;
       LOWORD(v635) = a1;
       HIWORD(v635) = __ROL4__(v635, 16) >> 16;
       LOWORD(v635) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v635;
-      v636 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v636;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v635;
+      v636 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v636;
       v637 = (char *)a5 + a2;
       LOWORD(v636) = a1;
       HIWORD(v636) = __ROR4__(v636, 16) >> 16;
       LOWORD(v636) = a1;
-      *(_DWORD *)&v637[2 * a2 + 4] = v636;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v637[2 * a2] = v8;
+      *(int *)&v637[2 * a2 + 4] = v636;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v637[2 * a2] = v8;
       break;
     case 0x66u:
 LABEL_170:
@@ -87658,88 +87641,88 @@ LABEL_170:
       LOWORD(v638) = a1;
       HIWORD(v638) = __ROL4__(v638, 16) >> 16;
       LOWORD(v638) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v638;
+      *(int *)((char *)a5 + a2 + 4) = v638;
       LOWORD(v638) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v638) = __ROL4__(v638, 16) >> 16;
       LOWORD(v638) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v638;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v638;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v639 = (char *)a5 + a2;
       v640 = &a4[a2];
-      *(_DWORD *)&v639[2 * a2 + 4] = *(_DWORD *)&v640[2 * a2 + 4];
-      v8 = *(_DWORD *)&v640[2 * a2];
-      *(_DWORD *)&v639[2 * a2] = v8;
+      *(int *)&v639[2 * a2 + 4] = *(int *)&v640[2 * a2 + 4];
+      v8 = *(int *)&v640[2 * a2];
+      *(int *)&v639[2 * a2] = v8;
       break;
     case 0x67u:
 LABEL_171:
-      v641 = *((_DWORD *)a4 + 1);
+      v641 = *((int *)a4 + 1);
       a5[1] = v641;
       LOWORD(v641) = a1;
       HIWORD(v641) = __ROL4__(v641, 16) >> 16;
       LOWORD(v641) = a1;
       *a5 = v641;
-      v642 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v642;
+      v642 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v642;
       LOWORD(v642) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v642) = __ROL4__(v642, 16) >> 16;
       LOWORD(v642) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v642;
-      v643 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v643;
+      *(int *)((char *)a5 + a2) = v642;
+      v643 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v643;
       LOWORD(v643) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v643) = __ROL4__(v643, 16) >> 16;
       LOWORD(v643) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v643;
+      *(int *)((char *)a5 + 2 * a2) = v643;
       v644 = (char *)a5 + a2;
-      v645 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v644[2 * a2 + 4] = v645;
+      v645 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v644[2 * a2 + 4] = v645;
       LOWORD(v645) = a1;
       HIWORD(v8) = __ROL4__(v645, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v644[2 * a2] = v8;
+      *(int *)&v644[2 * a2] = v8;
       break;
     case 0x68u:
 LABEL_172:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v646 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v646;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v646 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v646;
       v647 = (char *)a5 + a2;
       v648 = &a4[a2];
       LOWORD(v646) = *(_WORD *)&v648[2 * a2 + 6];
       HIWORD(v646) = __ROL4__(v646, 16) >> 16;
       LOWORD(v646) = a1;
-      *(_DWORD *)&v647[2 * a2 + 4] = v646;
+      *(int *)&v647[2 * a2 + 4] = v646;
       LOWORD(v646) = a1;
       HIWORD(v8) = __ROL4__(v646, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v648[2 * a2];
-      *(_DWORD *)&v647[2 * a2] = v8;
+      *(int *)&v647[2 * a2] = v8;
       break;
     case 0x69u:
 LABEL_173:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v649 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v649 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v649) = a1;
       HIWORD(v649) = __ROL4__(v649, 16) >> 16;
       LOWORD(v649) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v649;
-      v650 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v650;
+      *(int *)((char *)a5 + a2 + 4) = v649;
+      v650 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v650;
       LOWORD(v650) = a1;
       HIWORD(v650) = __ROL4__(v650, 16) >> 16;
       LOWORD(v650) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v650;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v650;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v651 = (char *)a5 + a2;
       v652 = &a4[a2];
-      *(_DWORD *)&v651[2 * a2 + 4] = *(_DWORD *)&v652[2 * a2 + 4];
-      v8 = *(_DWORD *)&v652[2 * a2];
-      *(_DWORD *)&v651[2 * a2] = v8;
+      *(int *)&v651[2 * a2 + 4] = *(int *)&v652[2 * a2 + 4];
+      v8 = *(int *)&v652[2 * a2];
+      *(int *)&v651[2 * a2] = v8;
       break;
     case 0x6Au:
 LABEL_174:
@@ -87751,37 +87734,37 @@ LABEL_174:
       HIWORD(v653) = __ROL4__(v653, 16) >> 16;
       LOWORD(v653) = *(_WORD *)a4;
       *a5 = v653;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v654 = (char *)a5 + a2;
       v655 = &a4[a2];
-      *(_DWORD *)&v654[2 * a2 + 4] = *(_DWORD *)&v655[2 * a2 + 4];
-      v8 = *(_DWORD *)&v655[2 * a2];
-      *(_DWORD *)&v654[2 * a2] = v8;
+      *(int *)&v654[2 * a2 + 4] = *(int *)&v655[2 * a2 + 4];
+      v8 = *(int *)&v655[2 * a2];
+      *(int *)&v654[2 * a2] = v8;
       break;
     case 0x6Bu:
 LABEL_175:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v656 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v656;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v656 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v656;
       LOWORD(v656) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v656) = __ROL4__(v656, 16) >> 16;
       LOWORD(v656) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v656;
-      v657 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v657;
+      *(int *)((char *)a5 + a2) = v656;
+      v657 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v657;
       LOWORD(v657) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v657) = __ROL4__(v657, 16) >> 16;
       LOWORD(v657) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v657;
+      *(int *)((char *)a5 + 2 * a2) = v657;
       v658 = (char *)a5 + a2;
       v659 = &a4[a2];
-      *(_DWORD *)&v658[2 * a2 + 4] = *(_DWORD *)&v659[2 * a2 + 4];
-      v8 = *(_DWORD *)&v659[2 * a2];
-      *(_DWORD *)&v658[2 * a2] = v8;
+      *(int *)&v658[2 * a2 + 4] = *(int *)&v659[2 * a2 + 4];
+      v8 = *(int *)&v659[2 * a2];
+      *(int *)&v658[2 * a2] = v8;
       break;
     case 0x6Cu:
 LABEL_176:
@@ -87789,47 +87772,47 @@ LABEL_176:
       HIWORD(v660) = __ROL4__(v5, 16) >> 16;
       LOWORD(v660) = *((_WORD *)a4 + 2);
       a5[1] = v660;
-      v661 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v661 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v661) = a1;
       HIWORD(v661) = __ROL4__(v661, 16) >> 16;
       LOWORD(v661) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v661;
-      v662 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v662;
+      *(int *)((char *)a5 + a2 + 4) = v661;
+      v662 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v662;
       LOWORD(v662) = a1;
       HIWORD(v662) = __ROR4__(v662, 16) >> 16;
       LOWORD(v662) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v662;
-      v663 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v663;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v662;
+      v663 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v663;
       v664 = (char *)a5 + a2;
       LOWORD(v663) = a1;
       HIWORD(v663) = __ROR4__(v663, 16) >> 16;
       LOWORD(v663) = a1;
-      *(_DWORD *)&v664[2 * a2 + 4] = v663;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v664[2 * a2] = v8;
+      *(int *)&v664[2 * a2 + 4] = v663;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v664[2 * a2] = v8;
       break;
     case 0x6Du:
 LABEL_177:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v665 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v665;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v665 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v665;
       LOWORD(v665) = a1;
       HIWORD(v665) = __ROR4__(v665, 16) >> 16;
       LOWORD(v665) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v665;
-      v666 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v666;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v665;
+      v666 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v666;
       v667 = (char *)a5 + a2;
       LOWORD(v666) = a1;
       HIWORD(v8) = __ROR4__(v666, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v667[2 * a2] = v8;
-      *(_DWORD *)&v667[2 * a2 + 4] = v8;
+      *(int *)&v667[2 * a2] = v8;
+      *(int *)&v667[2 * a2 + 4] = v8;
       break;
     case 0x6Eu:
 LABEL_178:
@@ -87841,15 +87824,15 @@ LABEL_178:
       LOWORD(v668) = a1;
       HIWORD(v668) = __ROR4__(v668, 16) >> 16;
       LOWORD(v668) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v668;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v668;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v669 = (char *)a5 + a2;
       v670 = &a4[a2];
-      *(_DWORD *)&v669[2 * a2 + 4] = *(_DWORD *)&v670[2 * a2 + 4];
-      v8 = *(_DWORD *)&v670[2 * a2];
-      *(_DWORD *)&v669[2 * a2] = v8;
+      *(int *)&v669[2 * a2 + 4] = *(int *)&v670[2 * a2 + 4];
+      v8 = *(int *)&v670[2 * a2];
+      *(int *)&v669[2 * a2] = v8;
       break;
     case 0x6Fu:
 LABEL_179:
@@ -87857,28 +87840,28 @@ LABEL_179:
       HIWORD(v671) = __ROR4__(v5, 16) >> 16;
       LOWORD(v671) = a1;
       a5[1] = v671;
-      v672 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v672 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v672) = a1;
       HIWORD(v672) = __ROR4__(v672, 16) >> 16;
       LOWORD(v672) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v672;
-      v673 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v673;
+      *(int *)((char *)a5 + a2 + 4) = v672;
+      v673 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v673;
       LOWORD(v673) = a1;
       HIWORD(v673) = __ROL4__(v673, 16) >> 16;
       LOWORD(v673) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v673;
-      v674 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v674;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v673;
+      v674 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v674;
       v675 = (char *)a5 + a2;
       v676 = &a4[a2];
       LOWORD(v674) = a1;
       HIWORD(v674) = __ROL4__(v674, 16) >> 16;
       LOWORD(v674) = *(_WORD *)&v676[2 * a2 + 4];
-      *(_DWORD *)&v675[2 * a2 + 4] = v674;
-      v8 = *(_DWORD *)&v676[2 * a2];
-      *(_DWORD *)&v675[2 * a2] = v8;
+      *(int *)&v675[2 * a2 + 4] = v674;
+      v8 = *(int *)&v676[2 * a2];
+      *(int *)&v675[2 * a2] = v8;
       break;
     case 0x70u:
 LABEL_180:
@@ -87887,95 +87870,95 @@ LABEL_180:
       LOWORD(v677) = a1;
       *a5 = v677;
       a5[1] = v677;
-      v678 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v678;
+      v678 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v678;
       LOWORD(v678) = a1;
       HIWORD(v678) = __ROL4__(v678, 16) >> 16;
       LOWORD(v678) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v678;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v678;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v679 = (char *)a5 + a2;
       v680 = &a4[a2];
-      *(_DWORD *)&v679[2 * a2 + 4] = *(_DWORD *)&v680[2 * a2 + 4];
-      v8 = *(_DWORD *)&v680[2 * a2];
-      *(_DWORD *)&v679[2 * a2] = v8;
+      *(int *)&v679[2 * a2 + 4] = *(int *)&v680[2 * a2 + 4];
+      v8 = *(int *)&v680[2 * a2];
+      *(int *)&v679[2 * a2] = v8;
       break;
     case 0x71u:
 LABEL_181:
-      v681 = *((_DWORD *)a4 + 1);
+      v681 = *((int *)a4 + 1);
       a5[1] = v681;
       LOWORD(v681) = a1;
       HIWORD(v681) = __ROL4__(v681, 16) >> 16;
       LOWORD(v681) = a1;
       *a5 = v681;
-      v682 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v682;
+      v682 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v682;
       LOWORD(v682) = a1;
       HIWORD(v682) = __ROL4__(v682, 16) >> 16;
       LOWORD(v682) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v682;
-      v683 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v683;
+      *(int *)((char *)a5 + a2) = v682;
+      v683 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v683;
       LOWORD(v683) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v683) = __ROL4__(v683, 16) >> 16;
       LOWORD(v683) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v683;
+      *(int *)((char *)a5 + 2 * a2) = v683;
       v684 = (char *)a5 + a2;
       v685 = &a4[a2];
-      v686 = *(_DWORD *)&v685[2 * a2 + 4];
-      *(_DWORD *)&v684[2 * a2 + 4] = v686;
+      v686 = *(int *)&v685[2 * a2 + 4];
+      *(int *)&v684[2 * a2 + 4] = v686;
       LOWORD(v686) = *(_WORD *)&v685[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v686, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v684[2 * a2] = v8;
+      *(int *)&v684[2 * a2] = v8;
       break;
     case 0x72u:
 LABEL_182:
-      v687 = *((_DWORD *)a4 + 1);
+      v687 = *((int *)a4 + 1);
       a5[1] = v687;
       LOWORD(v687) = *((_WORD *)a4 + 1);
       HIWORD(v687) = __ROL4__(v687, 16) >> 16;
       LOWORD(v687) = a1;
       *a5 = v687;
-      v688 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v688;
+      v688 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v688;
       LOWORD(v688) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v688) = __ROL4__(v688, 16) >> 16;
       LOWORD(v688) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v688;
-      v689 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v689;
+      *(int *)((char *)a5 + a2) = v688;
+      v689 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v689;
       LOWORD(v689) = a1;
       HIWORD(v689) = __ROL4__(v689, 16) >> 16;
       LOWORD(v689) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v689;
+      *(int *)((char *)a5 + 2 * a2) = v689;
       v690 = (char *)a5 + a2;
-      v691 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v690[2 * a2 + 4] = v691;
+      v691 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v690[2 * a2 + 4] = v691;
       LOWORD(v691) = a1;
       HIWORD(v8) = __ROL4__(v691, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v690[2 * a2] = v8;
+      *(int *)&v690[2 * a2] = v8;
       break;
     case 0x73u:
 LABEL_183:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v692 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v692;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v692 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v692;
       LOWORD(v692) = a1;
       HIWORD(v692) = __ROL4__(v692, 16) >> 16;
       LOWORD(v692) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v692;
+      *(int *)((char *)a5 + 2 * a2) = v692;
       v693 = (char *)a5 + a2;
       LOWORD(v692) = a1;
       HIWORD(v8) = __ROR4__(v692, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v693[2 * a2] = v8;
-      *(_DWORD *)&v693[2 * a2 + 4] = v8;
+      *(int *)&v693[2 * a2] = v8;
+      *(int *)&v693[2 * a2 + 4] = v8;
       break;
     case 0x74u:
 LABEL_184:
@@ -87990,48 +87973,48 @@ LABEL_184:
       LOWORD(v694) = a1;
       HIWORD(v694) = __ROR4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v694;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v694;
+      *(int *)((char *)a5 + a2) = v694;
+      *(int *)((char *)a5 + a2 + 4) = v694;
       LOWORD(v694) = a1;
       HIWORD(v694) = __ROR4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v694;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v694;
+      *(int *)((char *)a5 + 2 * a2) = v694;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v694;
       v695 = (char *)a5 + a2;
       v696 = &a4[a2];
       LOWORD(v694) = *(_WORD *)&v696[2 * a2 + 6];
       HIWORD(v694) = __ROL4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)&v695[2 * a2 + 4] = v694;
+      *(int *)&v695[2 * a2 + 4] = v694;
       LOWORD(v694) = a1;
       HIWORD(v8) = __ROL4__(v694, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v696[2 * a2];
-      *(_DWORD *)&v695[2 * a2] = v8;
+      *(int *)&v695[2 * a2] = v8;
       break;
     case 0x75u:
 LABEL_185:
-      v697 = *((_DWORD *)a4 + 1);
+      v697 = *((int *)a4 + 1);
       a5[1] = v697;
       LOWORD(v697) = a1;
       HIWORD(v697) = __ROL4__(v697, 16) >> 16;
       LOWORD(v697) = a1;
       *a5 = v697;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v698 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v698;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v698 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v698;
       LOWORD(v698) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v698) = __ROL4__(v698, 16) >> 16;
       LOWORD(v698) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v698;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v698;
       LOWORD(v698) = a1;
       HIWORD(v698) = __ROL4__(v698, 16) >> 16;
       LOWORD(v698) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v698;
+      *(int *)((char *)a5 + 2 * a2) = v698;
       v699 = (char *)a5 + a2;
       v700 = &a4[a2];
-      *(_DWORD *)&v699[2 * a2 + 4] = *(_DWORD *)&v700[2 * a2 + 4];
-      v8 = *(_DWORD *)&v700[2 * a2];
-      *(_DWORD *)&v699[2 * a2] = v8;
+      *(int *)&v699[2 * a2 + 4] = *(int *)&v700[2 * a2 + 4];
+      v8 = *(int *)&v700[2 * a2];
+      *(int *)&v699[2 * a2] = v8;
       break;
     case 0x76u:
 LABEL_186:
@@ -88046,23 +88029,23 @@ LABEL_186:
       LOWORD(v701) = a1;
       HIWORD(v701) = __ROR4__(v701, 16) >> 16;
       LOWORD(v701) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v701;
-      v702 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v702;
+      *(int *)((char *)a5 + a2 + 4) = v701;
+      v702 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v702;
       LOWORD(v702) = a1;
       HIWORD(v702) = __ROL4__(v702, 16) >> 16;
       LOWORD(v702) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v702;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v702;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v703 = (char *)a5 + a2;
       v704 = &a4[a2];
-      *(_DWORD *)&v703[2 * a2 + 4] = *(_DWORD *)&v704[2 * a2 + 4];
-      v8 = *(_DWORD *)&v704[2 * a2];
-      *(_DWORD *)&v703[2 * a2] = v8;
+      *(int *)&v703[2 * a2 + 4] = *(int *)&v704[2 * a2 + 4];
+      v8 = *(int *)&v704[2 * a2];
+      *(int *)&v703[2 * a2] = v8;
       break;
     case 0x77u:
 LABEL_187:
-      v705 = *((_DWORD *)a4 + 1);
+      v705 = *((int *)a4 + 1);
       a5[1] = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
@@ -88071,106 +88054,106 @@ LABEL_187:
       LOWORD(v705) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
       LOWORD(v705) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v705;
+      *(int *)((char *)a5 + a2 + 4) = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
       LOWORD(v705) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v705;
+      *(int *)((char *)a5 + a2) = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROR4__(v705, 16) >> 16;
       LOWORD(v705) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v705;
-      v706 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v706;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v705;
+      v706 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v706;
       v707 = (char *)a5 + a2;
       v708 = &a4[a2];
       LOWORD(v706) = a1;
       HIWORD(v706) = __ROL4__(v706, 16) >> 16;
       LOWORD(v706) = *(_WORD *)&v708[2 * a2 + 4];
-      *(_DWORD *)&v707[2 * a2 + 4] = v706;
-      v8 = *(_DWORD *)&v708[2 * a2];
-      *(_DWORD *)&v707[2 * a2] = v8;
+      *(int *)&v707[2 * a2 + 4] = v706;
+      v8 = *(int *)&v708[2 * a2];
+      *(int *)&v707[2 * a2] = v8;
       break;
     case 0x78u:
 LABEL_188:
-      v709 = *((_DWORD *)a4 + 1);
+      v709 = *((int *)a4 + 1);
       a5[1] = v709;
       LOWORD(v709) = *((_WORD *)a4 + 1);
       HIWORD(v709) = __ROL4__(v709, 16) >> 16;
       LOWORD(v709) = a1;
       *a5 = v709;
-      v710 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v710;
+      v710 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v710;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v710;
+      *(int *)((char *)a5 + a2) = v710;
       LOWORD(v710) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v710;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v710;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v710;
+      *(int *)((char *)a5 + 2 * a2) = v710;
       v711 = (char *)a5 + a2;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROR4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)&v711[2 * a2 + 4] = v710;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v711[2 * a2] = v8;
+      *(int *)&v711[2 * a2 + 4] = v710;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v711[2 * a2] = v8;
       break;
     case 0x79u:
 LABEL_189:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v712 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v712;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v712 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v712;
       LOWORD(v712) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v712) = __ROL4__(v712, 16) >> 16;
       LOWORD(v712) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v712;
-      v713 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v713;
+      *(int *)((char *)a5 + a2) = v712;
+      v713 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v713;
       LOWORD(v713) = a1;
       HIWORD(v713) = __ROL4__(v713, 16) >> 16;
       LOWORD(v713) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v713;
+      *(int *)((char *)a5 + 2 * a2) = v713;
       v714 = (char *)a5 + a2;
       v715 = &a4[a2];
       LOWORD(v713) = *(_WORD *)&v715[2 * a2 + 6];
       HIWORD(v713) = __ROL4__(v713, 16) >> 16;
       LOWORD(v713) = a1;
-      *(_DWORD *)&v714[2 * a2 + 4] = v713;
+      *(int *)&v714[2 * a2 + 4] = v713;
       LOWORD(v713) = a1;
       HIWORD(v8) = __ROL4__(v713, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v715[2 * a2];
-      *(_DWORD *)&v714[2 * a2] = v8;
+      *(int *)&v714[2 * a2] = v8;
       break;
     case 0x7Au:
 LABEL_190:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v716 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v716 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v716) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v716) = __ROL4__(v716, 16) >> 16;
       LOWORD(v716) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v716;
+      *(int *)((char *)a5 + a2 + 4) = v716;
       LOWORD(v716) = a1;
       HIWORD(v716) = __ROL4__(v716, 16) >> 16;
       LOWORD(v716) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v716;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v717 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v717;
+      *(int *)((char *)a5 + a2) = v716;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v717 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v717;
       v718 = (char *)a5 + a2;
       LOWORD(v717) = a1;
       HIWORD(v717) = __ROR4__(v717, 16) >> 16;
       LOWORD(v717) = a1;
-      *(_DWORD *)&v718[2 * a2 + 4] = v717;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v718[2 * a2] = v8;
+      *(int *)&v718[2 * a2 + 4] = v717;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v718[2 * a2] = v8;
       break;
     case 0x7Bu:
 LABEL_191:
@@ -88182,23 +88165,23 @@ LABEL_191:
       HIWORD(v719) = __ROL4__(v719, 16) >> 16;
       LOWORD(v719) = *(_WORD *)a4;
       *a5 = v719;
-      v720 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v720;
+      v720 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v720;
       LOWORD(v720) = a1;
       HIWORD(v720) = __ROL4__(v720, 16) >> 16;
       LOWORD(v720) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v720;
-      v721 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v721;
+      *(int *)((char *)a5 + a2) = v720;
+      v721 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v721;
       LOWORD(v721) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v721) = __ROL4__(v721, 16) >> 16;
       LOWORD(v721) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v721;
+      *(int *)((char *)a5 + 2 * a2) = v721;
       v722 = (char *)a5 + a2;
       v723 = &a4[a2];
-      *(_DWORD *)&v722[2 * a2 + 4] = *(_DWORD *)&v723[2 * a2 + 4];
-      v8 = *(_DWORD *)&v723[2 * a2];
-      *(_DWORD *)&v722[2 * a2] = v8;
+      *(int *)&v722[2 * a2 + 4] = *(int *)&v723[2 * a2 + 4];
+      v8 = *(int *)&v723[2 * a2];
+      *(int *)&v722[2 * a2] = v8;
       break;
     case 0x7Cu:
 LABEL_192:
@@ -88206,30 +88189,30 @@ LABEL_192:
       HIWORD(v724) = __ROR4__(v5, 16) >> 16;
       LOWORD(v724) = a1;
       a5[1] = v724;
-      v725 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v725 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v725) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v725) = __ROL4__(v725, 16) >> 16;
       LOWORD(v725) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v725;
+      *(int *)((char *)a5 + a2 + 4) = v725;
       LOWORD(v725) = a1;
       HIWORD(v725) = __ROL4__(v725, 16) >> 16;
       LOWORD(v725) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v725;
-      v726 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v726;
+      *(int *)((char *)a5 + a2) = v725;
+      v726 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v726;
       LOWORD(v726) = a1;
       HIWORD(v726) = __ROL4__(v726, 16) >> 16;
       LOWORD(v726) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v726;
+      *(int *)((char *)a5 + 2 * a2) = v726;
       v727 = (char *)a5 + a2;
       v728 = &a4[a2];
-      v729 = *(_DWORD *)&v728[2 * a2 + 4];
-      *(_DWORD *)&v727[2 * a2 + 4] = v729;
+      v729 = *(int *)&v728[2 * a2 + 4];
+      *(int *)&v727[2 * a2 + 4] = v729;
       LOWORD(v729) = *(_WORD *)&v728[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v729, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v727[2 * a2] = v8;
+      *(int *)&v727[2 * a2] = v8;
       break;
     case 0x7Du:
 LABEL_193:
@@ -88237,57 +88220,57 @@ LABEL_193:
       HIWORD(v730) = __ROL4__(v5, 16) >> 16;
       LOWORD(v730) = *((_WORD *)a4 + 2);
       a5[1] = v730;
-      v731 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v731 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v731) = a1;
       HIWORD(v731) = __ROR4__(v731, 16) >> 16;
       LOWORD(v731) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v731;
-      v732 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v732;
+      *(int *)((char *)a5 + a2 + 4) = v731;
+      v732 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v732;
       LOWORD(v732) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v732) = __ROL4__(v732, 16) >> 16;
       LOWORD(v732) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v732;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v732;
       LOWORD(v732) = a1;
       HIWORD(v732) = __ROL4__(v732, 16) >> 16;
       LOWORD(v732) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v732;
+      *(int *)((char *)a5 + 2 * a2) = v732;
       v733 = (char *)a5 + a2;
-      v734 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v733[2 * a2 + 4] = v734;
+      v734 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v733[2 * a2 + 4] = v734;
       LOWORD(v734) = a1;
       HIWORD(v8) = __ROL4__(v734, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v733[2 * a2] = v8;
+      *(int *)&v733[2 * a2] = v8;
       break;
     case 0x7Eu:
 LABEL_194:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v735 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v735 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v735) = a1;
       HIWORD(v735) = __ROL4__(v735, 16) >> 16;
       LOWORD(v735) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v735;
-      v736 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v736;
+      *(int *)((char *)a5 + a2 + 4) = v735;
+      v736 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v736;
       LOWORD(v736) = a1;
       HIWORD(v736) = __ROR4__(v736, 16) >> 16;
       LOWORD(v736) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v736;
-      v737 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v737;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v736;
+      v737 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v737;
       v738 = (char *)a5 + a2;
       v739 = &a4[a2];
       LOWORD(v737) = *(_WORD *)&v739[2 * a2 + 6];
       HIWORD(v737) = __ROL4__(v737, 16) >> 16;
       LOWORD(v737) = a1;
-      *(_DWORD *)&v738[2 * a2 + 4] = v737;
+      *(int *)&v738[2 * a2 + 4] = v737;
       LOWORD(v737) = a1;
       HIWORD(v8) = __ROL4__(v737, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v739[2 * a2];
-      *(_DWORD *)&v738[2 * a2] = v8;
+      *(int *)&v738[2 * a2] = v8;
       break;
     case 0x7Fu:
 LABEL_195:
@@ -88295,26 +88278,26 @@ LABEL_195:
       HIWORD(v740) = __ROR4__(v5, 16) >> 16;
       LOWORD(v740) = a1;
       a5[1] = v740;
-      v741 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v741 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v741) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v741) = __ROL4__(v741, 16) >> 16;
       LOWORD(v741) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v741;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v742 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v742;
+      *(int *)((char *)a5 + a2 + 4) = v741;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v742 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v742;
       LOWORD(v742) = a1;
       HIWORD(v742) = __ROL4__(v742, 16) >> 16;
       LOWORD(v742) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v742;
+      *(int *)((char *)a5 + 2 * a2) = v742;
       v743 = (char *)a5 + a2;
-      v744 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v743[2 * a2 + 4] = v744;
+      v744 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v743[2 * a2 + 4] = v744;
       LOWORD(v744) = a1;
       HIWORD(v8) = __ROL4__(v744, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v743[2 * a2] = v8;
+      *(int *)&v743[2 * a2] = v8;
       break;
     case 0x80u:
 LABEL_68:
@@ -88326,25 +88309,25 @@ LABEL_68:
       LOWORD(v294) = a1;
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v294;
+      *(int *)((char *)a5 + a2 + 4) = v294;
       LOWORD(v294) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v294;
+      *(int *)((char *)a5 + a2) = v294;
       LOWORD(v294) = a1;
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v294;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v294;
       LOWORD(v294) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v294;
+      *(int *)((char *)a5 + 2 * a2) = v294;
       v295 = (char *)a5 + a2;
       LOWORD(v294) = a1;
       HIWORD(v8) = __ROR4__(v294, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v295[2 * a2] = v8;
-      *(_DWORD *)&v295[2 * a2 + 4] = v8;
+      *(int *)&v295[2 * a2] = v8;
+      *(int *)&v295[2 * a2 + 4] = v8;
       break;
     case 0x81u:
 LABEL_69:
@@ -88356,43 +88339,43 @@ LABEL_69:
       LOWORD(v296) = a1;
       HIWORD(v296) = __ROR4__(v296, 16) >> 16;
       LOWORD(v296) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v296;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v296;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v296;
+      *(int *)((char *)a5 + a2 + 4) = v296;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v297 = (char *)a5 + a2;
       v298 = &a4[a2];
-      *(_DWORD *)&v297[2 * a2 + 4] = *(_DWORD *)&v298[2 * a2 + 4];
-      v8 = *(_DWORD *)&v298[2 * a2];
-      *(_DWORD *)&v297[2 * a2] = v8;
+      *(int *)&v297[2 * a2 + 4] = *(int *)&v298[2 * a2 + 4];
+      v8 = *(int *)&v298[2 * a2];
+      *(int *)&v297[2 * a2] = v8;
       break;
     case 0x82u:
 LABEL_70:
-      v299 = *((_DWORD *)a4 + 1);
+      v299 = *((int *)a4 + 1);
       a5[1] = v299;
       LOWORD(v299) = a1;
       HIWORD(v299) = __ROL4__(v299, 16) >> 16;
       LOWORD(v299) = a1;
       *a5 = v299;
-      v300 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v300;
+      v300 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v300;
       LOWORD(v300) = a1;
       HIWORD(v300) = __ROL4__(v300, 16) >> 16;
       LOWORD(v300) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v300;
-      v301 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v301;
+      *(int *)((char *)a5 + a2) = v300;
+      v301 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v301;
       LOWORD(v301) = a1;
       HIWORD(v301) = __ROL4__(v301, 16) >> 16;
       LOWORD(v301) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v301;
+      *(int *)((char *)a5 + 2 * a2) = v301;
       v302 = (char *)a5 + a2;
-      v303 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v302[2 * a2 + 4] = v303;
+      v303 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v302[2 * a2 + 4] = v303;
       LOWORD(v303) = a1;
       HIWORD(v8) = __ROL4__(v303, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v302[2 * a2] = v8;
+      *(int *)&v302[2 * a2] = v8;
       break;
     case 0x83u:
 LABEL_71:
@@ -88404,18 +88387,18 @@ LABEL_71:
       LOWORD(v304) = a1;
       HIWORD(v304) = __ROR4__(v304, 16) >> 16;
       LOWORD(v304) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v304;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v304;
+      *(int *)((char *)a5 + a2) = v304;
+      *(int *)((char *)a5 + a2 + 4) = v304;
       LOWORD(v304) = a1;
       HIWORD(v304) = __ROR4__(v304, 16) >> 16;
       LOWORD(v304) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v304;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v304;
+      *(int *)((char *)a5 + 2 * a2) = v304;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v304;
       v305 = (char *)a5 + a2;
       v306 = &a4[a2];
-      *(_DWORD *)&v305[2 * a2 + 4] = *(_DWORD *)&v306[2 * a2 + 4];
-      v8 = *(_DWORD *)&v306[2 * a2];
-      *(_DWORD *)&v305[2 * a2] = v8;
+      *(int *)&v305[2 * a2 + 4] = *(int *)&v306[2 * a2 + 4];
+      v8 = *(int *)&v306[2 * a2];
+      *(int *)&v305[2 * a2] = v8;
       break;
     case 0x84u:
 LABEL_72:
@@ -88430,50 +88413,50 @@ LABEL_72:
       LOWORD(v307) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v307;
+      *(int *)((char *)a5 + a2 + 4) = v307;
       LOWORD(v307) = a1;
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v307;
+      *(int *)((char *)a5 + a2) = v307;
       LOWORD(v307) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v307;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v307;
       LOWORD(v307) = a1;
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v307;
+      *(int *)((char *)a5 + 2 * a2) = v307;
       v308 = (char *)a5 + a2;
       LOWORD(v307) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)&v308[2 * a2 + 4] = v307;
+      *(int *)&v308[2 * a2 + 4] = v307;
       LOWORD(v307) = a1;
       HIWORD(v8) = __ROL4__(v307, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v308[2 * a2] = v8;
+      *(int *)&v308[2 * a2] = v8;
       break;
     case 0x85u:
 LABEL_73:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v309 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v309 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v309) = a1;
       HIWORD(v309) = __ROR4__(v309, 16) >> 16;
       LOWORD(v309) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v309;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v309;
+      *(int *)((char *)a5 + a2) = v309;
+      *(int *)((char *)a5 + a2 + 4) = v309;
       LOWORD(v309) = a1;
       HIWORD(v309) = __ROR4__(v309, 16) >> 16;
       LOWORD(v309) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v309;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v309;
+      *(int *)((char *)a5 + 2 * a2) = v309;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v309;
       v310 = (char *)a5 + a2;
       LOWORD(v309) = a1;
       HIWORD(v8) = __ROR4__(v309, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v310[2 * a2] = v8;
-      *(_DWORD *)&v310[2 * a2 + 4] = v8;
+      *(int *)&v310[2 * a2] = v8;
+      *(int *)&v310[2 * a2 + 4] = v8;
       break;
     case 0x86u:
 LABEL_74:
@@ -88488,28 +88471,28 @@ LABEL_74:
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v311;
+      *(int *)((char *)a5 + a2 + 4) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROL4__(v311, 16) >> 16;
       LOWORD(v311) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v311;
+      *(int *)((char *)a5 + a2) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v311;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROL4__(v311, 16) >> 16;
       LOWORD(v311) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v311;
+      *(int *)((char *)a5 + 2 * a2) = v311;
       v312 = (char *)a5 + a2;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)&v312[2 * a2 + 4] = v311;
+      *(int *)&v312[2 * a2 + 4] = v311;
       LOWORD(v311) = a1;
       HIWORD(v8) = __ROL4__(v311, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v312[2 * a2] = v8;
+      *(int *)&v312[2 * a2] = v8;
       break;
     case 0x87u:
 LABEL_75:
@@ -88521,76 +88504,76 @@ LABEL_75:
       HIWORD(v313) = __ROL4__(v313, 16) >> 16;
       LOWORD(v313) = a1;
       *a5 = v313;
-      v314 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v314;
+      v314 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v314;
       LOWORD(v314) = a1;
       HIWORD(v314) = __ROL4__(v314, 16) >> 16;
       LOWORD(v314) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v314;
-      v315 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v315;
+      *(int *)((char *)a5 + a2) = v314;
+      v315 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v315;
       LOWORD(v315) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v315) = __ROL4__(v315, 16) >> 16;
       LOWORD(v315) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v315;
+      *(int *)((char *)a5 + 2 * a2) = v315;
       v316 = (char *)a5 + a2;
       v317 = &a4[a2];
-      *(_DWORD *)&v316[2 * a2 + 4] = *(_DWORD *)&v317[2 * a2 + 4];
-      v8 = *(_DWORD *)&v317[2 * a2];
-      *(_DWORD *)&v316[2 * a2] = v8;
+      *(int *)&v316[2 * a2 + 4] = *(int *)&v317[2 * a2 + 4];
+      v8 = *(int *)&v317[2 * a2];
+      *(int *)&v316[2 * a2] = v8;
       break;
     case 0x88u:
 LABEL_76:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v318 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v318;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v318 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v318;
       LOWORD(v318) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v318) = __ROL4__(v318, 16) >> 16;
       LOWORD(v318) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v318;
-      v319 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v319;
+      *(int *)((char *)a5 + a2) = v318;
+      v319 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v319;
       LOWORD(v319) = a1;
       HIWORD(v319) = __ROL4__(v319, 16) >> 16;
       LOWORD(v319) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v319;
+      *(int *)((char *)a5 + 2 * a2) = v319;
       v320 = (char *)a5 + a2;
       LOWORD(v319) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v319) = __ROL4__(v319, 16) >> 16;
       LOWORD(v319) = a1;
-      *(_DWORD *)&v320[2 * a2 + 4] = v319;
+      *(int *)&v320[2 * a2 + 4] = v319;
       LOWORD(v319) = a1;
       HIWORD(v8) = __ROL4__(v319, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v320[2 * a2] = v8;
+      *(int *)&v320[2 * a2] = v8;
       break;
     case 0x89u:
 LABEL_77:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v321 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v321 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v321) = a1;
       HIWORD(v321) = __ROL4__(v321, 16) >> 16;
       LOWORD(v321) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v321;
-      v322 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v322;
+      *(int *)((char *)a5 + a2 + 4) = v321;
+      v322 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v322;
       LOWORD(v322) = a1;
       HIWORD(v322) = __ROR4__(v322, 16) >> 16;
       LOWORD(v322) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v322;
-      v323 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v323;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v322;
+      v323 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v323;
       v324 = (char *)a5 + a2;
       LOWORD(v323) = a1;
       HIWORD(v323) = __ROR4__(v323, 16) >> 16;
       LOWORD(v323) = a1;
-      *(_DWORD *)&v324[2 * a2 + 4] = v323;
+      *(int *)&v324[2 * a2 + 4] = v323;
       LOWORD(v323) = a1;
       HIWORD(v8) = __ROL4__(v323, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v324[2 * a2] = v8;
+      *(int *)&v324[2 * a2] = v8;
       break;
     case 0x8Au:
 LABEL_78:
@@ -88605,19 +88588,19 @@ LABEL_78:
       LOWORD(v325) = a1;
       HIWORD(v325) = __ROR4__(v325, 16) >> 16;
       LOWORD(v325) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v325;
-      v326 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v326;
+      *(int *)((char *)a5 + a2 + 4) = v325;
+      v326 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v326;
       LOWORD(v326) = a1;
       HIWORD(v326) = __ROL4__(v326, 16) >> 16;
       LOWORD(v326) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v326;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v326;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v327 = (char *)a5 + a2;
       v328 = &a4[a2];
-      *(_DWORD *)&v327[2 * a2 + 4] = *(_DWORD *)&v328[2 * a2 + 4];
-      v8 = *(_DWORD *)&v328[2 * a2];
-      *(_DWORD *)&v327[2 * a2] = v8;
+      *(int *)&v327[2 * a2 + 4] = *(int *)&v328[2 * a2 + 4];
+      v8 = *(int *)&v328[2 * a2];
+      *(int *)&v327[2 * a2] = v8;
       break;
     case 0x8Bu:
 LABEL_79:
@@ -88629,27 +88612,27 @@ LABEL_79:
       LOWORD(v329) = a1;
       HIWORD(v329) = __ROR4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v329;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v329;
+      *(int *)((char *)a5 + a2) = v329;
+      *(int *)((char *)a5 + a2 + 4) = v329;
       LOWORD(v329) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v329) = __ROL4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v329;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v329;
       LOWORD(v329) = a1;
       HIWORD(v329) = __ROL4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v329;
+      *(int *)((char *)a5 + 2 * a2) = v329;
       v330 = (char *)a5 + a2;
-      v331 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v330[2 * a2 + 4] = v331;
+      v331 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v330[2 * a2 + 4] = v331;
       LOWORD(v331) = a1;
       HIWORD(v8) = __ROL4__(v331, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v330[2 * a2] = v8;
+      *(int *)&v330[2 * a2] = v8;
       break;
     case 0x8Cu:
 LABEL_80:
-      v332 = *((_DWORD *)a4 + 1);
+      v332 = *((int *)a4 + 1);
       a5[1] = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
@@ -88658,22 +88641,22 @@ LABEL_80:
       LOWORD(v332) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v332;
+      *(int *)((char *)a5 + a2 + 4) = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v332;
+      *(int *)((char *)a5 + a2) = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROR4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v332;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v332;
+      *(int *)((char *)a5 + 2 * a2) = v332;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v332;
       v333 = (char *)a5 + a2;
       LOWORD(v332) = a1;
       HIWORD(v8) = __ROR4__(v332, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v333[2 * a2] = v8;
-      *(_DWORD *)&v333[2 * a2 + 4] = v8;
+      *(int *)&v333[2 * a2] = v8;
+      *(int *)&v333[2 * a2 + 4] = v8;
       break;
     case 0x8Du:
 LABEL_81:
@@ -88681,27 +88664,27 @@ LABEL_81:
       HIWORD(v334) = __ROR4__(v5, 16) >> 16;
       LOWORD(v334) = a1;
       a5[1] = v334;
-      v335 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v335 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROR4__(v335, 16) >> 16;
       LOWORD(v335) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v335;
+      *(int *)((char *)a5 + a2 + 4) = v335;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROL4__(v335, 16) >> 16;
       LOWORD(v335) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v335;
+      *(int *)((char *)a5 + a2) = v335;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROR4__(v335, 16) >> 16;
       LOWORD(v335) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v335;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v335;
+      *(int *)((char *)a5 + 2 * a2) = v335;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v335;
       v336 = (char *)a5 + a2;
       LOWORD(v335) = a1;
       HIWORD(v8) = __ROR4__(v335, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v336[2 * a2] = v8;
-      *(_DWORD *)&v336[2 * a2 + 4] = v8;
+      *(int *)&v336[2 * a2] = v8;
+      *(int *)&v336[2 * a2 + 4] = v8;
       break;
     case 0x8Eu:
 LABEL_82:
@@ -88713,23 +88696,23 @@ LABEL_82:
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v337;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v337;
+      *(int *)((char *)a5 + a2) = v337;
+      *(int *)((char *)a5 + a2 + 4) = v337;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v337;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v337;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROL4__(v337, 16) >> 16;
       LOWORD(v337) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v337;
+      *(int *)((char *)a5 + 2 * a2) = v337;
       v338 = (char *)a5 + a2;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)&v338[2 * a2 + 4] = v337;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v338[2 * a2] = v8;
+      *(int *)&v338[2 * a2 + 4] = v337;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v338[2 * a2] = v8;
       break;
     case 0x8Fu:
 LABEL_83:
@@ -88741,47 +88724,47 @@ LABEL_83:
       LOWORD(v339) = a1;
       HIWORD(v339) = __ROR4__(v339, 16) >> 16;
       LOWORD(v339) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v339;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v339;
-      v340 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v340;
+      *(int *)((char *)a5 + a2) = v339;
+      *(int *)((char *)a5 + a2 + 4) = v339;
+      v340 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v340;
       LOWORD(v340) = a1;
       HIWORD(v340) = __ROL4__(v340, 16) >> 16;
       LOWORD(v340) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v340;
+      *(int *)((char *)a5 + 2 * a2) = v340;
       v341 = (char *)a5 + a2;
-      v342 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v341[2 * a2 + 4] = v342;
+      v342 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v341[2 * a2 + 4] = v342;
       LOWORD(v342) = a1;
       HIWORD(v8) = __ROL4__(v342, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v341[2 * a2] = v8;
+      *(int *)&v341[2 * a2] = v8;
       break;
     case 0x90u:
 LABEL_84:
-      v343 = *((_DWORD *)a4 + 1);
+      v343 = *((int *)a4 + 1);
       a5[1] = v343;
       LOWORD(v343) = a1;
       HIWORD(v343) = __ROL4__(v343, 16) >> 16;
       LOWORD(v343) = a1;
       *a5 = v343;
-      v344 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v344;
+      v344 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v344;
       LOWORD(v344) = a1;
       HIWORD(v344) = __ROL4__(v344, 16) >> 16;
       LOWORD(v344) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v344;
+      *(int *)((char *)a5 + a2) = v344;
       LOWORD(v344) = a1;
       HIWORD(v344) = __ROR4__(v344, 16) >> 16;
       LOWORD(v344) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v344;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v344;
+      *(int *)((char *)a5 + 2 * a2) = v344;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v344;
       v345 = (char *)a5 + a2;
       LOWORD(v344) = a1;
       HIWORD(v8) = __ROR4__(v344, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v345[2 * a2] = v8;
-      *(_DWORD *)&v345[2 * a2 + 4] = v8;
+      *(int *)&v345[2 * a2] = v8;
+      *(int *)&v345[2 * a2 + 4] = v8;
       break;
     case 0x91u:
 LABEL_85:
@@ -88789,25 +88772,25 @@ LABEL_85:
       HIWORD(v346) = __ROR4__(v5, 16) >> 16;
       LOWORD(v346) = a1;
       a5[1] = v346;
-      v347 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v347 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v347) = a1;
       HIWORD(v347) = __ROR4__(v347, 16) >> 16;
       LOWORD(v347) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v347;
-      v348 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v348;
+      *(int *)((char *)a5 + a2 + 4) = v347;
+      v348 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v348;
       LOWORD(v348) = a1;
       HIWORD(v348) = __ROR4__(v348, 16) >> 16;
       LOWORD(v348) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v348;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v348;
+      *(int *)((char *)a5 + 2 * a2) = v348;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v348;
       v349 = (char *)a5 + a2;
       LOWORD(v348) = a1;
       HIWORD(v8) = __ROR4__(v348, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v349[2 * a2] = v8;
-      *(_DWORD *)&v349[2 * a2 + 4] = v8;
+      *(int *)&v349[2 * a2] = v8;
+      *(int *)&v349[2 * a2 + 4] = v8;
       break;
     case 0x92u:
 LABEL_86:
@@ -88819,21 +88802,21 @@ LABEL_86:
       LOWORD(v350) = a1;
       HIWORD(v350) = __ROR4__(v350, 16) >> 16;
       LOWORD(v350) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v350;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v350;
+      *(int *)((char *)a5 + a2) = v350;
+      *(int *)((char *)a5 + a2 + 4) = v350;
       LOWORD(v350) = a1;
       HIWORD(v350) = __ROR4__(v350, 16) >> 16;
       LOWORD(v350) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v350;
-      v351 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v351;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v350;
+      v351 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v351;
       v352 = (char *)a5 + a2;
       LOWORD(v351) = a1;
       HIWORD(v351) = __ROR4__(v351, 16) >> 16;
       LOWORD(v351) = a1;
-      *(_DWORD *)&v352[2 * a2 + 4] = v351;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v352[2 * a2] = v8;
+      *(int *)&v352[2 * a2 + 4] = v351;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v352[2 * a2] = v8;
       break;
     case 0x93u:
 LABEL_87:
@@ -88842,17 +88825,17 @@ LABEL_87:
       LOWORD(v353) = a1;
       *a5 = v353;
       a5[1] = v353;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v354 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v354;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v354 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v354;
       v355 = (char *)a5 + a2;
       LOWORD(v354) = a1;
       HIWORD(v8) = __ROR4__(v354, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v355[2 * a2] = v8;
-      *(_DWORD *)&v355[2 * a2 + 4] = v8;
+      *(int *)&v355[2 * a2] = v8;
+      *(int *)&v355[2 * a2 + 4] = v8;
       break;
     case 0x94u:
 LABEL_88:
@@ -88867,29 +88850,29 @@ LABEL_88:
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v356;
+      *(int *)((char *)a5 + a2 + 4) = v356;
       LOWORD(v356) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v356;
+      *(int *)((char *)a5 + a2) = v356;
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v356;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v356;
       LOWORD(v356) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v356;
+      *(int *)((char *)a5 + 2 * a2) = v356;
       v357 = (char *)a5 + a2;
       v358 = &a4[a2];
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&v358[2 * a2 + 4];
-      *(_DWORD *)&v357[2 * a2 + 4] = v356;
+      *(int *)&v357[2 * a2 + 4] = v356;
       LOWORD(v356) = *(_WORD *)&v358[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v356, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v357[2 * a2] = v8;
+      *(int *)&v357[2 * a2] = v8;
       break;
     case 0x95u:
 LABEL_89:
@@ -88898,20 +88881,20 @@ LABEL_89:
       LOWORD(v359) = a1;
       *a5 = v359;
       a5[1] = v359;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v360 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v360;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v360 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v360;
       LOWORD(v360) = a1;
       HIWORD(v360) = __ROR4__(v360, 16) >> 16;
       LOWORD(v360) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v360;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v360;
+      *(int *)((char *)a5 + 2 * a2) = v360;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v360;
       v361 = (char *)a5 + a2;
       LOWORD(v360) = a1;
       HIWORD(v8) = __ROR4__(v360, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v361[2 * a2] = v8;
-      *(_DWORD *)&v361[2 * a2 + 4] = v8;
+      *(int *)&v361[2 * a2] = v8;
+      *(int *)&v361[2 * a2 + 4] = v8;
       break;
     case 0x96u:
 LABEL_90:
@@ -88923,17 +88906,17 @@ LABEL_90:
       LOWORD(v362) = a1;
       HIWORD(v362) = __ROR4__(v362, 16) >> 16;
       LOWORD(v362) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v362;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v362;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v363 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v363;
+      *(int *)((char *)a5 + a2) = v362;
+      *(int *)((char *)a5 + a2 + 4) = v362;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v363 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v363;
       v364 = (char *)a5 + a2;
       LOWORD(v363) = a1;
       HIWORD(v8) = __ROR4__(v363, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v364[2 * a2] = v8;
-      *(_DWORD *)&v364[2 * a2 + 4] = v8;
+      *(int *)&v364[2 * a2] = v8;
+      *(int *)&v364[2 * a2 + 4] = v8;
       break;
     case 0x97u:
 LABEL_91:
@@ -88948,28 +88931,28 @@ LABEL_91:
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v365;
+      *(int *)((char *)a5 + a2 + 4) = v365;
       LOWORD(v365) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v365) = __ROL4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v365;
+      *(int *)((char *)a5 + a2) = v365;
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v365;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v365;
       LOWORD(v365) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v365) = __ROL4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v365;
+      *(int *)((char *)a5 + 2 * a2) = v365;
       v366 = (char *)a5 + a2;
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)&v366[2 * a2 + 4] = v365;
+      *(int *)&v366[2 * a2 + 4] = v365;
       LOWORD(v365) = *(_WORD *)&a4[2 * a2 + 2 + a2];
       HIWORD(v8) = __ROL4__(v365, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v366[2 * a2] = v8;
+      *(int *)&v366[2 * a2] = v8;
       break;
     case 0x98u:
 LABEL_92:
@@ -88984,28 +88967,28 @@ LABEL_92:
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v367;
+      *(int *)((char *)a5 + a2 + 4) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v367;
+      *(int *)((char *)a5 + a2) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v367;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v367;
+      *(int *)((char *)a5 + 2 * a2) = v367;
       v368 = (char *)a5 + a2;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v368[2 * a2 + 4] = v367;
+      *(int *)&v368[2 * a2 + 4] = v367;
       LOWORD(v367) = a1;
       HIWORD(v8) = __ROL4__(v367, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v368[2 * a2] = v8;
+      *(int *)&v368[2 * a2] = v8;
       break;
     case 0x99u:
 LABEL_93:
@@ -89017,21 +89000,21 @@ LABEL_93:
       LOWORD(v369) = a1;
       HIWORD(v369) = __ROR4__(v369, 16) >> 16;
       LOWORD(v369) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v369;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v369;
+      *(int *)((char *)a5 + a2) = v369;
+      *(int *)((char *)a5 + a2 + 4) = v369;
       LOWORD(v369) = a1;
       HIWORD(v369) = __ROL4__(v369, 16) >> 16;
       LOWORD(v369) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v369;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v369;
       LOWORD(v369) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v369) = __ROL4__(v369, 16) >> 16;
       LOWORD(v369) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v369;
+      *(int *)((char *)a5 + 2 * a2) = v369;
       v370 = (char *)a5 + a2;
       v371 = &a4[a2];
-      *(_DWORD *)&v370[2 * a2 + 4] = *(_DWORD *)&v371[2 * a2 + 4];
-      v8 = *(_DWORD *)&v371[2 * a2];
-      *(_DWORD *)&v370[2 * a2] = v8;
+      *(int *)&v370[2 * a2 + 4] = *(int *)&v371[2 * a2 + 4];
+      v8 = *(int *)&v371[2 * a2];
+      *(int *)&v370[2 * a2] = v8;
       break;
     case 0x9Au:
 LABEL_94:
@@ -89043,52 +89026,52 @@ LABEL_94:
       HIWORD(v372) = __ROL4__(v372, 16) >> 16;
       LOWORD(v372) = a1;
       *a5 = v372;
-      v373 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v373;
+      v373 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v373;
       LOWORD(v373) = a1;
       HIWORD(v373) = __ROL4__(v373, 16) >> 16;
       LOWORD(v373) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v373;
-      v374 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v374;
+      *(int *)((char *)a5 + a2) = v373;
+      v374 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v374;
       LOWORD(v374) = a1;
       HIWORD(v374) = __ROL4__(v374, 16) >> 16;
       LOWORD(v374) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v374;
+      *(int *)((char *)a5 + 2 * a2) = v374;
       v375 = (char *)a5 + a2;
       LOWORD(v374) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v374) = __ROL4__(v374, 16) >> 16;
       LOWORD(v374) = a1;
-      *(_DWORD *)&v375[2 * a2 + 4] = v374;
+      *(int *)&v375[2 * a2 + 4] = v374;
       LOWORD(v374) = a1;
       HIWORD(v8) = __ROL4__(v374, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v375[2 * a2] = v8;
+      *(int *)&v375[2 * a2] = v8;
       break;
     case 0x9Bu:
 LABEL_95:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v376 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v376 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v376) = a1;
       HIWORD(v376) = __ROL4__(v376, 16) >> 16;
       LOWORD(v376) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v376;
+      *(int *)((char *)a5 + a2 + 4) = v376;
       LOWORD(v376) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v376) = __ROL4__(v376, 16) >> 16;
       LOWORD(v376) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v376;
+      *(int *)((char *)a5 + a2) = v376;
       LOWORD(v376) = a1;
       HIWORD(v376) = __ROR4__(v376, 16) >> 16;
       LOWORD(v376) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v376;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v376;
+      *(int *)((char *)a5 + 2 * a2) = v376;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v376;
       v377 = (char *)a5 + a2;
       LOWORD(v376) = a1;
       HIWORD(v8) = __ROR4__(v376, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v377[2 * a2] = v8;
-      *(_DWORD *)&v377[2 * a2 + 4] = v8;
+      *(int *)&v377[2 * a2] = v8;
+      *(int *)&v377[2 * a2 + 4] = v8;
       break;
     case 0x9Cu:
 LABEL_96:
@@ -89103,28 +89086,28 @@ LABEL_96:
       LOWORD(v378) = a1;
       HIWORD(v378) = __ROR4__(v378, 16) >> 16;
       LOWORD(v378) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v378;
-      v379 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v379;
+      *(int *)((char *)a5 + a2 + 4) = v378;
+      v379 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v379;
       LOWORD(v379) = a1;
       HIWORD(v379) = __ROR4__(v379, 16) >> 16;
       LOWORD(v379) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v379;
-      v380 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v380;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v379;
+      v380 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v380;
       v381 = (char *)a5 + a2;
       LOWORD(v380) = a1;
       HIWORD(v380) = __ROR4__(v380, 16) >> 16;
       LOWORD(v380) = a1;
-      *(_DWORD *)&v381[2 * a2 + 4] = v380;
+      *(int *)&v381[2 * a2 + 4] = v380;
       LOWORD(v380) = a1;
       HIWORD(v8) = __ROL4__(v380, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v381[2 * a2] = v8;
+      *(int *)&v381[2 * a2] = v8;
       break;
     case 0x9Du:
 LABEL_97:
-      v382 = *((_DWORD *)a4 + 1);
+      v382 = *((int *)a4 + 1);
       a5[1] = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
@@ -89133,26 +89116,26 @@ LABEL_97:
       LOWORD(v382) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v382;
+      *(int *)((char *)a5 + a2 + 4) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v382;
+      *(int *)((char *)a5 + a2) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROR4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v382;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v382;
+      *(int *)((char *)a5 + 2 * a2) = v382;
       v383 = (char *)a5 + a2;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROR4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)&v383[2 * a2 + 4] = v382;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v383[2 * a2] = v8;
+      *(int *)&v383[2 * a2 + 4] = v382;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v383[2 * a2] = v8;
       break;
     case 0x9Eu:
 LABEL_98:
@@ -89160,59 +89143,59 @@ LABEL_98:
       HIWORD(v384) = __ROR4__(v5, 16) >> 16;
       LOWORD(v384) = a1;
       a5[1] = v384;
-      v385 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v385 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROR4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v385;
+      *(int *)((char *)a5 + a2 + 4) = v385;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v385;
+      *(int *)((char *)a5 + a2) = v385;
       LOWORD(v385) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v385;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v385;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v385;
+      *(int *)((char *)a5 + 2 * a2) = v385;
       v386 = (char *)a5 + a2;
-      v387 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v386[2 * a2 + 4] = v387;
+      v387 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v386[2 * a2 + 4] = v387;
       LOWORD(v387) = a1;
       HIWORD(v8) = __ROL4__(v387, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v386[2 * a2] = v8;
+      *(int *)&v386[2 * a2] = v8;
       break;
     case 0x9Fu:
 LABEL_99:
-      v388 = *((_DWORD *)a4 + 1);
+      v388 = *((int *)a4 + 1);
       a5[1] = v388;
       LOWORD(v388) = a1;
       HIWORD(v388) = __ROL4__(v388, 16) >> 16;
       LOWORD(v388) = a1;
       *a5 = v388;
-      v389 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v389;
+      v389 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v389;
       LOWORD(v389) = a1;
       HIWORD(v389) = __ROL4__(v389, 16) >> 16;
       LOWORD(v389) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v389;
+      *(int *)((char *)a5 + a2) = v389;
       LOWORD(v389) = a1;
       HIWORD(v389) = __ROR4__(v389, 16) >> 16;
       LOWORD(v389) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v389;
-      v390 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v390;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v389;
+      v390 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v390;
       v391 = (char *)a5 + a2;
       LOWORD(v390) = a1;
       HIWORD(v390) = __ROR4__(v390, 16) >> 16;
       LOWORD(v390) = a1;
-      *(_DWORD *)&v391[2 * a2 + 4] = v390;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v391[2 * a2] = v8;
+      *(int *)&v391[2 * a2 + 4] = v390;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v391[2 * a2] = v8;
       break;
     case 0xA0u:
 LABEL_100:
@@ -89224,26 +89207,26 @@ LABEL_100:
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROR4__(v392, 16) >> 16;
       LOWORD(v392) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v392;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v392;
+      *(int *)((char *)a5 + a2) = v392;
+      *(int *)((char *)a5 + a2 + 4) = v392;
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v392;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v392;
       LOWORD(v392) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v392;
+      *(int *)((char *)a5 + 2 * a2) = v392;
       v393 = (char *)a5 + a2;
       v394 = &a4[a2];
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = *(_WORD *)&v394[2 * a2 + 4];
-      *(_DWORD *)&v393[2 * a2 + 4] = v392;
+      *(int *)&v393[2 * a2 + 4] = v392;
       LOWORD(v392) = *(_WORD *)&v394[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v392, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v393[2 * a2] = v8;
+      *(int *)&v393[2 * a2] = v8;
       break;
     case 0xA1u:
 LABEL_101:
@@ -89252,24 +89235,24 @@ LABEL_101:
       LOWORD(v395) = a1;
       *a5 = v395;
       a5[1] = v395;
-      v396 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v396;
+      v396 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v396;
       LOWORD(v396) = a1;
       HIWORD(v396) = __ROL4__(v396, 16) >> 16;
       LOWORD(v396) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v396;
-      v397 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v397;
+      *(int *)((char *)a5 + a2) = v396;
+      v397 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v397;
       LOWORD(v397) = a1;
       HIWORD(v397) = __ROL4__(v397, 16) >> 16;
       LOWORD(v397) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v397;
+      *(int *)((char *)a5 + 2 * a2) = v397;
       v398 = (char *)a5 + a2;
       LOWORD(v397) = a1;
       HIWORD(v8) = __ROR4__(v397, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v398[2 * a2] = v8;
-      *(_DWORD *)&v398[2 * a2 + 4] = v8;
+      *(int *)&v398[2 * a2] = v8;
+      *(int *)&v398[2 * a2 + 4] = v8;
       break;
     case 0xA2u:
 LABEL_102:
@@ -89284,22 +89267,22 @@ LABEL_102:
       LOWORD(v399) = a1;
       HIWORD(v399) = __ROL4__(v399, 16) >> 16;
       LOWORD(v399) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v399;
+      *(int *)((char *)a5 + a2 + 4) = v399;
       LOWORD(v399) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v399) = __ROL4__(v399, 16) >> 16;
       LOWORD(v399) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v399;
+      *(int *)((char *)a5 + a2) = v399;
       LOWORD(v399) = a1;
       HIWORD(v399) = __ROR4__(v399, 16) >> 16;
       LOWORD(v399) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v399;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v399;
+      *(int *)((char *)a5 + 2 * a2) = v399;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v399;
       v400 = (char *)a5 + a2;
       LOWORD(v399) = a1;
       HIWORD(v8) = __ROR4__(v399, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v400[2 * a2] = v8;
-      *(_DWORD *)&v400[2 * a2 + 4] = v8;
+      *(int *)&v400[2 * a2] = v8;
+      *(int *)&v400[2 * a2 + 4] = v8;
       break;
     case 0xA3u:
 LABEL_103:
@@ -89311,21 +89294,21 @@ LABEL_103:
       LOWORD(v401) = a1;
       HIWORD(v401) = __ROR4__(v401, 16) >> 16;
       LOWORD(v401) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v401;
-      v402 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v402;
+      *(int *)((char *)a5 + a2 + 4) = v401;
+      v402 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v402;
       LOWORD(v402) = a1;
       HIWORD(v402) = __ROR4__(v402, 16) >> 16;
       LOWORD(v402) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v402;
-      v403 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v403;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v402;
+      v403 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v403;
       v404 = (char *)a5 + a2;
       LOWORD(v403) = a1;
       HIWORD(v8) = __ROR4__(v403, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v404[2 * a2] = v8;
-      *(_DWORD *)&v404[2 * a2 + 4] = v8;
+      *(int *)&v404[2 * a2] = v8;
+      *(int *)&v404[2 * a2 + 4] = v8;
       break;
     case 0xA4u:
 LABEL_104:
@@ -89337,25 +89320,25 @@ LABEL_104:
       LOWORD(v405) = a1;
       HIWORD(v405) = __ROR4__(v405, 16) >> 16;
       LOWORD(v405) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v405;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v405;
+      *(int *)((char *)a5 + a2) = v405;
+      *(int *)((char *)a5 + a2 + 4) = v405;
       LOWORD(v405) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v405) = __ROL4__(v405, 16) >> 16;
       LOWORD(v405) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v405;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v405;
       LOWORD(v405) = a1;
       HIWORD(v405) = __ROL4__(v405, 16) >> 16;
       LOWORD(v405) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v405;
+      *(int *)((char *)a5 + 2 * a2) = v405;
       v406 = (char *)a5 + a2;
       v407 = &a4[a2];
-      *(_DWORD *)&v406[2 * a2 + 4] = *(_DWORD *)&v407[2 * a2 + 4];
-      v8 = *(_DWORD *)&v407[2 * a2];
-      *(_DWORD *)&v406[2 * a2] = v8;
+      *(int *)&v406[2 * a2 + 4] = *(int *)&v407[2 * a2 + 4];
+      v8 = *(int *)&v407[2 * a2];
+      *(int *)&v406[2 * a2] = v8;
       break;
     case 0xA5u:
 LABEL_105:
-      v408 = *((_DWORD *)a4 + 1);
+      v408 = *((int *)a4 + 1);
       a5[1] = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
@@ -89364,51 +89347,51 @@ LABEL_105:
       LOWORD(v408) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v408;
+      *(int *)((char *)a5 + a2 + 4) = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v408;
+      *(int *)((char *)a5 + a2) = v408;
       LOWORD(v408) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v408;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v408;
+      *(int *)((char *)a5 + 2 * a2) = v408;
       v409 = (char *)a5 + a2;
-      v410 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v409[2 * a2 + 4] = v410;
+      v410 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v409[2 * a2 + 4] = v410;
       LOWORD(v410) = a1;
       HIWORD(v8) = __ROL4__(v410, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v409[2 * a2] = v8;
+      *(int *)&v409[2 * a2] = v8;
       break;
     case 0xA6u:
 LABEL_106:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v411 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v411 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v411) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v411) = __ROL4__(v411, 16) >> 16;
       LOWORD(v411) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v411;
+      *(int *)((char *)a5 + a2 + 4) = v411;
       LOWORD(v411) = a1;
       HIWORD(v411) = __ROL4__(v411, 16) >> 16;
       LOWORD(v411) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v411;
+      *(int *)((char *)a5 + a2) = v411;
       LOWORD(v411) = a1;
       HIWORD(v411) = __ROR4__(v411, 16) >> 16;
       LOWORD(v411) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v411;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v411;
+      *(int *)((char *)a5 + 2 * a2) = v411;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v411;
       v412 = (char *)a5 + a2;
       LOWORD(v411) = a1;
       HIWORD(v8) = __ROR4__(v411, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v412[2 * a2] = v8;
-      *(_DWORD *)&v412[2 * a2 + 4] = v8;
+      *(int *)&v412[2 * a2] = v8;
+      *(int *)&v412[2 * a2 + 4] = v8;
       break;
     case 0xA7u:
 LABEL_107:
@@ -89416,31 +89399,31 @@ LABEL_107:
       HIWORD(v413) = __ROR4__(v5, 16) >> 16;
       LOWORD(v413) = a1;
       a5[1] = v413;
-      v414 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v414 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v414;
+      *(int *)((char *)a5 + a2 + 4) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROL4__(v414, 16) >> 16;
       LOWORD(v414) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v414;
+      *(int *)((char *)a5 + a2) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v414;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROL4__(v414, 16) >> 16;
       LOWORD(v414) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v414;
+      *(int *)((char *)a5 + 2 * a2) = v414;
       v415 = (char *)a5 + a2;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)&v415[2 * a2 + 4] = v414;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v415[2 * a2] = v8;
+      *(int *)&v415[2 * a2 + 4] = v414;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v415[2 * a2] = v8;
       break;
     case 0xA8u:
 LABEL_108:
@@ -89452,23 +89435,23 @@ LABEL_108:
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROR4__(v416, 16) >> 16;
       LOWORD(v416) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v416;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v416;
+      *(int *)((char *)a5 + a2) = v416;
+      *(int *)((char *)a5 + a2 + 4) = v416;
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROR4__(v416, 16) >> 16;
       LOWORD(v416) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v416;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v416;
+      *(int *)((char *)a5 + 2 * a2) = v416;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v416;
       v417 = (char *)a5 + a2;
       v418 = &a4[a2];
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROL4__(v416, 16) >> 16;
       LOWORD(v416) = *(_WORD *)&v418[2 * a2 + 4];
-      *(_DWORD *)&v417[2 * a2 + 4] = v416;
+      *(int *)&v417[2 * a2 + 4] = v416;
       LOWORD(v416) = *(_WORD *)&v418[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v416, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v417[2 * a2] = v8;
+      *(int *)&v417[2 * a2] = v8;
       break;
     case 0xA9u:
 LABEL_109:
@@ -89480,25 +89463,25 @@ LABEL_109:
       LOWORD(v419) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v419;
+      *(int *)((char *)a5 + a2 + 4) = v419;
       LOWORD(v419) = a1;
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v419;
+      *(int *)((char *)a5 + a2) = v419;
       LOWORD(v419) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v419;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v419;
       LOWORD(v419) = a1;
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v419;
+      *(int *)((char *)a5 + 2 * a2) = v419;
       v420 = (char *)a5 + a2;
       LOWORD(v419) = a1;
       HIWORD(v8) = __ROR4__(v419, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v420[2 * a2] = v8;
-      *(_DWORD *)&v420[2 * a2 + 4] = v8;
+      *(int *)&v420[2 * a2] = v8;
+      *(int *)&v420[2 * a2 + 4] = v8;
       break;
     case 0xAAu:
 LABEL_110:
@@ -89513,19 +89496,19 @@ LABEL_110:
       LOWORD(v421) = a1;
       HIWORD(v421) = __ROR4__(v421, 16) >> 16;
       LOWORD(v421) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v421;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v421;
+      *(int *)((char *)a5 + a2) = v421;
+      *(int *)((char *)a5 + a2 + 4) = v421;
       LOWORD(v421) = a1;
       HIWORD(v421) = __ROR4__(v421, 16) >> 16;
       LOWORD(v421) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v421;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v421;
+      *(int *)((char *)a5 + 2 * a2) = v421;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v421;
       v422 = (char *)a5 + a2;
       LOWORD(v421) = a1;
       HIWORD(v8) = __ROR4__(v421, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v422[2 * a2] = v8;
-      *(_DWORD *)&v422[2 * a2 + 4] = v8;
+      *(int *)&v422[2 * a2] = v8;
+      *(int *)&v422[2 * a2 + 4] = v8;
       break;
     case 0xABu:
 LABEL_111:
@@ -89537,25 +89520,25 @@ LABEL_111:
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROR4__(v423, 16) >> 16;
       LOWORD(v423) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v423;
+      *(int *)((char *)a5 + a2 + 4) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROL4__(v423, 16) >> 16;
       LOWORD(v423) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v423;
+      *(int *)((char *)a5 + a2) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROR4__(v423, 16) >> 16;
       LOWORD(v423) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v423;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROL4__(v423, 16) >> 16;
       LOWORD(v423) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v423;
+      *(int *)((char *)a5 + 2 * a2) = v423;
       v424 = (char *)a5 + a2;
       LOWORD(v423) = a1;
       HIWORD(v8) = __ROR4__(v423, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v424[2 * a2] = v8;
-      *(_DWORD *)&v424[2 * a2 + 4] = v8;
+      *(int *)&v424[2 * a2] = v8;
+      *(int *)&v424[2 * a2 + 4] = v8;
       break;
     case 0xACu:
 LABEL_112:
@@ -89570,24 +89553,24 @@ LABEL_112:
       LOWORD(v425) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v425) = __ROL4__(v425, 16) >> 16;
       LOWORD(v425) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v425;
+      *(int *)((char *)a5 + a2 + 4) = v425;
       LOWORD(v425) = a1;
       HIWORD(v425) = __ROL4__(v425, 16) >> 16;
       LOWORD(v425) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v425;
-      v426 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v426;
+      *(int *)((char *)a5 + a2) = v425;
+      v426 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v426;
       LOWORD(v426) = a1;
       HIWORD(v426) = __ROL4__(v426, 16) >> 16;
       LOWORD(v426) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v426;
+      *(int *)((char *)a5 + 2 * a2) = v426;
       v427 = (char *)a5 + a2;
-      v428 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v427[2 * a2 + 4] = v428;
+      v428 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v427[2 * a2 + 4] = v428;
       LOWORD(v428) = a1;
       HIWORD(v8) = __ROL4__(v428, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v427[2 * a2] = v8;
+      *(int *)&v427[2 * a2] = v8;
       break;
     case 0xADu:
 LABEL_113:
@@ -89599,96 +89582,96 @@ LABEL_113:
       LOWORD(v429) = a1;
       HIWORD(v429) = __ROR4__(v429, 16) >> 16;
       LOWORD(v429) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v429;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v429;
-      v430 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v430;
+      *(int *)((char *)a5 + a2) = v429;
+      *(int *)((char *)a5 + a2 + 4) = v429;
+      v430 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v430;
       LOWORD(v430) = a1;
       HIWORD(v430) = __ROL4__(v430, 16) >> 16;
       LOWORD(v430) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v430;
+      *(int *)((char *)a5 + 2 * a2) = v430;
       v431 = (char *)a5 + a2;
       v432 = &a4[a2];
-      *(_DWORD *)&v431[2 * a2 + 4] = *(_DWORD *)&v432[2 * a2 + 4];
-      v8 = *(_DWORD *)&v432[2 * a2];
-      *(_DWORD *)&v431[2 * a2] = v8;
+      *(int *)&v431[2 * a2 + 4] = *(int *)&v432[2 * a2 + 4];
+      v8 = *(int *)&v432[2 * a2];
+      *(int *)&v431[2 * a2] = v8;
       break;
     case 0xAEu:
 LABEL_114:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v433 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v433;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v433 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v433;
       LOWORD(v433) = a1;
       HIWORD(v433) = __ROL4__(v433, 16) >> 16;
       LOWORD(v433) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v433;
+      *(int *)((char *)a5 + a2) = v433;
       LOWORD(v433) = a1;
       HIWORD(v433) = __ROR4__(v433, 16) >> 16;
       LOWORD(v433) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v433;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v433;
+      *(int *)((char *)a5 + 2 * a2) = v433;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v433;
       v434 = (char *)a5 + a2;
       LOWORD(v433) = a1;
       HIWORD(v8) = __ROR4__(v433, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v434[2 * a2] = v8;
-      *(_DWORD *)&v434[2 * a2 + 4] = v8;
+      *(int *)&v434[2 * a2] = v8;
+      *(int *)&v434[2 * a2 + 4] = v8;
       break;
     case 0xAFu:
 LABEL_115:
-      v435 = *((_DWORD *)a4 + 1);
+      v435 = *((int *)a4 + 1);
       a5[1] = v435;
       LOWORD(v435) = a1;
       HIWORD(v435) = __ROL4__(v435, 16) >> 16;
       LOWORD(v435) = a1;
       *a5 = v435;
-      v436 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v436;
+      v436 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v436;
       LOWORD(v436) = a1;
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v436;
+      *(int *)((char *)a5 + a2) = v436;
       LOWORD(v436) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v436;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v436;
       LOWORD(v436) = a1;
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v436;
+      *(int *)((char *)a5 + 2 * a2) = v436;
       v437 = (char *)a5 + a2;
       LOWORD(v436) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)&v437[2 * a2 + 4] = v436;
+      *(int *)&v437[2 * a2 + 4] = v436;
       LOWORD(v436) = a1;
       HIWORD(v8) = __ROL4__(v436, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v437[2 * a2] = v8;
+      *(int *)&v437[2 * a2] = v8;
       break;
     case 0xB0u:
 LABEL_116:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v438 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v438 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v438) = a1;
       HIWORD(v438) = __ROR4__(v438, 16) >> 16;
       LOWORD(v438) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v438;
-      v439 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v439;
+      *(int *)((char *)a5 + a2 + 4) = v438;
+      v439 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v439;
       LOWORD(v439) = a1;
       HIWORD(v439) = __ROR4__(v439, 16) >> 16;
       LOWORD(v439) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v439;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v439;
+      *(int *)((char *)a5 + 2 * a2) = v439;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v439;
       v440 = (char *)a5 + a2;
       LOWORD(v439) = a1;
       HIWORD(v8) = __ROR4__(v439, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v440[2 * a2] = v8;
-      *(_DWORD *)&v440[2 * a2 + 4] = v8;
+      *(int *)&v440[2 * a2] = v8;
+      *(int *)&v440[2 * a2 + 4] = v8;
       break;
     case 0xB1u:
 LABEL_117:
@@ -89696,31 +89679,31 @@ LABEL_117:
       HIWORD(v441) = __ROR4__(v5, 16) >> 16;
       LOWORD(v441) = a1;
       a5[1] = v441;
-      v442 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v442 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v442) = a1;
       HIWORD(v442) = __ROR4__(v442, 16) >> 16;
       LOWORD(v442) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v442;
-      v443 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v443;
+      *(int *)((char *)a5 + a2 + 4) = v442;
+      v443 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v443;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROR4__(v443, 16) >> 16;
       LOWORD(v443) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v443;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v443;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROL4__(v443, 16) >> 16;
       LOWORD(v443) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v443;
+      *(int *)((char *)a5 + 2 * a2) = v443;
       v444 = (char *)a5 + a2;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROR4__(v443, 16) >> 16;
       LOWORD(v443) = a1;
-      *(_DWORD *)&v444[2 * a2 + 4] = v443;
+      *(int *)&v444[2 * a2 + 4] = v443;
       LOWORD(v443) = a1;
       HIWORD(v8) = __ROL4__(v443, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v444[2 * a2] = v8;
+      *(int *)&v444[2 * a2] = v8;
       break;
     case 0xB2u:
 LABEL_118:
@@ -89735,24 +89718,24 @@ LABEL_118:
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROR4__(v445, 16) >> 16;
       LOWORD(v445) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v445;
+      *(int *)((char *)a5 + a2 + 4) = v445;
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROL4__(v445, 16) >> 16;
       LOWORD(v445) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v445;
+      *(int *)((char *)a5 + a2) = v445;
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROR4__(v445, 16) >> 16;
       LOWORD(v445) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v445;
-      v446 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v446;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v445;
+      v446 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v446;
       v447 = (char *)a5 + a2;
       LOWORD(v446) = a1;
       HIWORD(v446) = __ROR4__(v446, 16) >> 16;
       LOWORD(v446) = a1;
-      *(_DWORD *)&v447[2 * a2 + 4] = v446;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v447[2 * a2] = v8;
+      *(int *)&v447[2 * a2 + 4] = v446;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v447[2 * a2] = v8;
       break;
     case 0xB3u:
 LABEL_119:
@@ -89764,18 +89747,18 @@ LABEL_119:
       LOWORD(v448) = a1;
       HIWORD(v448) = __ROR4__(v448, 16) >> 16;
       LOWORD(v448) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v448;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v448;
+      *(int *)((char *)a5 + a2) = v448;
+      *(int *)((char *)a5 + a2 + 4) = v448;
       LOWORD(v448) = a1;
       HIWORD(v448) = __ROR4__(v448, 16) >> 16;
       LOWORD(v448) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v448;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v448;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v449 = (char *)a5 + a2;
       v450 = &a4[a2];
-      *(_DWORD *)&v449[2 * a2 + 4] = *(_DWORD *)&v450[2 * a2 + 4];
-      v8 = *(_DWORD *)&v450[2 * a2];
-      *(_DWORD *)&v449[2 * a2] = v8;
+      *(int *)&v449[2 * a2 + 4] = *(int *)&v450[2 * a2 + 4];
+      v8 = *(int *)&v450[2 * a2];
+      *(int *)&v449[2 * a2] = v8;
       break;
     case 0xB4u:
 LABEL_120:
@@ -89787,21 +89770,21 @@ LABEL_120:
       HIWORD(v451) = __ROL4__(v451, 16) >> 16;
       LOWORD(v451) = a1;
       *a5 = v451;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v452 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v452;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v452 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v452;
       v453 = (char *)a5 + a2;
       v454 = &a4[a2];
       LOWORD(v452) = a1;
       HIWORD(v452) = __ROL4__(v452, 16) >> 16;
       LOWORD(v452) = *(_WORD *)&v454[2 * a2 + 4];
-      *(_DWORD *)&v453[2 * a2 + 4] = v452;
+      *(int *)&v453[2 * a2 + 4] = v452;
       LOWORD(v452) = *(_WORD *)&v454[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v452, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v453[2 * a2] = v8;
+      *(int *)&v453[2 * a2] = v8;
       break;
     case 0xB5u:
 LABEL_121:
@@ -89809,27 +89792,27 @@ LABEL_121:
       HIWORD(v455) = __ROR4__(v5, 16) >> 16;
       LOWORD(v455) = a1;
       a5[1] = v455;
-      v456 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v456 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v456) = a1;
       HIWORD(v456) = __ROR4__(v456, 16) >> 16;
       LOWORD(v456) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v456;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v456;
+      *(int *)((char *)a5 + a2) = v456;
+      *(int *)((char *)a5 + a2 + 4) = v456;
       LOWORD(v456) = a1;
       HIWORD(v456) = __ROL4__(v456, 16) >> 16;
       LOWORD(v456) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v456;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v456;
       LOWORD(v456) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v456) = __ROL4__(v456, 16) >> 16;
       LOWORD(v456) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v456;
+      *(int *)((char *)a5 + 2 * a2) = v456;
       v457 = (char *)a5 + a2;
       LOWORD(v456) = a1;
       HIWORD(v8) = __ROR4__(v456, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v457[2 * a2] = v8;
-      *(_DWORD *)&v457[2 * a2 + 4] = v8;
+      *(int *)&v457[2 * a2] = v8;
+      *(int *)&v457[2 * a2 + 4] = v8;
       break;
     case 0xB6u:
 LABEL_122:
@@ -89841,26 +89824,26 @@ LABEL_122:
       HIWORD(v458) = __ROL4__(v458, 16) >> 16;
       LOWORD(v458) = a1;
       *a5 = v458;
-      v459 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v459;
+      v459 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v459;
       LOWORD(v459) = a1;
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v459;
+      *(int *)((char *)a5 + a2) = v459;
       LOWORD(v459) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v459;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v459;
       LOWORD(v459) = a1;
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v459;
+      *(int *)((char *)a5 + 2 * a2) = v459;
       v460 = (char *)a5 + a2;
       LOWORD(v459) = a1;
       HIWORD(v8) = __ROR4__(v459, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v460[2 * a2] = v8;
-      *(_DWORD *)&v460[2 * a2 + 4] = v8;
+      *(int *)&v460[2 * a2] = v8;
+      *(int *)&v460[2 * a2 + 4] = v8;
       break;
     case 0xB7u:
 LABEL_123:
@@ -89868,31 +89851,31 @@ LABEL_123:
       HIWORD(v461) = __ROR4__(v5, 16) >> 16;
       LOWORD(v461) = a1;
       a5[1] = v461;
-      v462 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v462 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v462) = a1;
       HIWORD(v462) = __ROL4__(v462, 16) >> 16;
       LOWORD(v462) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v462;
+      *(int *)((char *)a5 + a2 + 4) = v462;
       LOWORD(v462) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v462) = __ROL4__(v462, 16) >> 16;
       LOWORD(v462) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v462;
-      v463 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v463;
+      *(int *)((char *)a5 + a2) = v462;
+      v463 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v463;
       LOWORD(v463) = a1;
       HIWORD(v463) = __ROL4__(v463, 16) >> 16;
       LOWORD(v463) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v463;
+      *(int *)((char *)a5 + 2 * a2) = v463;
       v464 = (char *)a5 + a2;
       LOWORD(v463) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v463) = __ROL4__(v463, 16) >> 16;
       LOWORD(v463) = a1;
-      *(_DWORD *)&v464[2 * a2 + 4] = v463;
+      *(int *)&v464[2 * a2 + 4] = v463;
       LOWORD(v463) = a1;
       HIWORD(v8) = __ROL4__(v463, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v464[2 * a2] = v8;
+      *(int *)&v464[2 * a2] = v8;
       break;
     case 0xB8u:
 LABEL_124:
@@ -89907,24 +89890,24 @@ LABEL_124:
       LOWORD(v465) = a1;
       HIWORD(v465) = __ROR4__(v465, 16) >> 16;
       LOWORD(v465) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v465;
-      v466 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v466;
+      *(int *)((char *)a5 + a2 + 4) = v465;
+      v466 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v466;
       LOWORD(v466) = a1;
       HIWORD(v466) = __ROL4__(v466, 16) >> 16;
       LOWORD(v466) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v466;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v466;
       LOWORD(v466) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v466) = __ROL4__(v466, 16) >> 16;
       LOWORD(v466) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v466;
+      *(int *)((char *)a5 + 2 * a2) = v466;
       v467 = (char *)a5 + a2;
-      v468 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v467[2 * a2 + 4] = v468;
+      v468 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v467[2 * a2 + 4] = v468;
       LOWORD(v468) = a1;
       HIWORD(v8) = __ROL4__(v468, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v467[2 * a2] = v8;
+      *(int *)&v467[2 * a2] = v8;
       break;
     case 0xB9u:
 LABEL_125:
@@ -89936,27 +89919,27 @@ LABEL_125:
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROR4__(v469, 16) >> 16;
       LOWORD(v469) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v469;
+      *(int *)((char *)a5 + a2 + 4) = v469;
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROL4__(v469, 16) >> 16;
       LOWORD(v469) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v469;
+      *(int *)((char *)a5 + a2) = v469;
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROR4__(v469, 16) >> 16;
       LOWORD(v469) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v469;
-      v470 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v470;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v469;
+      v470 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v470;
       v471 = (char *)a5 + a2;
       v472 = &a4[a2];
       LOWORD(v470) = a1;
       HIWORD(v470) = __ROL4__(v470, 16) >> 16;
       LOWORD(v470) = *(_WORD *)&v472[2 * a2 + 4];
-      *(_DWORD *)&v471[2 * a2 + 4] = v470;
+      *(int *)&v471[2 * a2 + 4] = v470;
       LOWORD(v470) = *(_WORD *)&v472[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v470, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v471[2 * a2] = v8;
+      *(int *)&v471[2 * a2] = v8;
       break;
     case 0xBAu:
 LABEL_126:
@@ -89968,23 +89951,23 @@ LABEL_126:
       LOWORD(v473) = a1;
       HIWORD(v473) = __ROL4__(v473, 16) >> 16;
       LOWORD(v473) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v473;
+      *(int *)((char *)a5 + a2 + 4) = v473;
       LOWORD(v473) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v473) = __ROL4__(v473, 16) >> 16;
       LOWORD(v473) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v473;
+      *(int *)((char *)a5 + a2) = v473;
       LOWORD(v473) = a1;
       HIWORD(v473) = __ROR4__(v473, 16) >> 16;
       LOWORD(v473) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v473;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v473;
+      *(int *)((char *)a5 + 2 * a2) = v473;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v473;
       v474 = (char *)a5 + a2;
-      v475 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v474[2 * a2 + 4] = v475;
+      v475 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v474[2 * a2 + 4] = v475;
       LOWORD(v475) = a1;
       HIWORD(v8) = __ROL4__(v475, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v474[2 * a2] = v8;
+      *(int *)&v474[2 * a2] = v8;
       break;
     case 0xBBu:
 LABEL_127:
@@ -89999,27 +89982,27 @@ LABEL_127:
       LOWORD(v476) = a1;
       HIWORD(v476) = __ROR4__(v476, 16) >> 16;
       LOWORD(v476) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v476;
-      v477 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v477;
+      *(int *)((char *)a5 + a2 + 4) = v476;
+      v477 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v477;
       LOWORD(v477) = a1;
       HIWORD(v477) = __ROR4__(v477, 16) >> 16;
       LOWORD(v477) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v477;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v477;
       LOWORD(v477) = a1;
       HIWORD(v477) = __ROL4__(v477, 16) >> 16;
       LOWORD(v477) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v477;
+      *(int *)((char *)a5 + 2 * a2) = v477;
       v478 = (char *)a5 + a2;
       LOWORD(v477) = a1;
       HIWORD(v8) = __ROR4__(v477, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v478[2 * a2] = v8;
-      *(_DWORD *)&v478[2 * a2 + 4] = v8;
+      *(int *)&v478[2 * a2] = v8;
+      *(int *)&v478[2 * a2 + 4] = v8;
       break;
     case 0xBCu:
 LABEL_128:
-      v479 = *((_DWORD *)a4 + 1);
+      v479 = *((int *)a4 + 1);
       a5[1] = v479;
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
@@ -90028,26 +90011,26 @@ LABEL_128:
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
       LOWORD(v479) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v479;
+      *(int *)((char *)a5 + a2 + 4) = v479;
       LOWORD(v479) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
       LOWORD(v479) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v479;
+      *(int *)((char *)a5 + a2) = v479;
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROR4__(v479, 16) >> 16;
       LOWORD(v479) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v479;
-      v480 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v480;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v479;
+      v480 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v480;
       v481 = (char *)a5 + a2;
       LOWORD(v480) = a1;
       HIWORD(v480) = __ROR4__(v480, 16) >> 16;
       LOWORD(v480) = a1;
-      *(_DWORD *)&v481[2 * a2 + 4] = v480;
+      *(int *)&v481[2 * a2 + 4] = v480;
       LOWORD(v480) = a1;
       HIWORD(v8) = __ROL4__(v480, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v481[2 * a2] = v8;
+      *(int *)&v481[2 * a2] = v8;
       break;
     case 0xBDu:
 LABEL_129:
@@ -90059,27 +90042,27 @@ LABEL_129:
       HIWORD(v482) = __ROL4__(v482, 16) >> 16;
       LOWORD(v482) = a1;
       *a5 = v482;
-      v483 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v483;
+      v483 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v483;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v483;
+      *(int *)((char *)a5 + a2) = v483;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v483;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v483;
       LOWORD(v483) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v483;
+      *(int *)((char *)a5 + 2 * a2) = v483;
       v484 = (char *)a5 + a2;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROR4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)&v484[2 * a2 + 4] = v483;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v484[2 * a2] = v8;
+      *(int *)&v484[2 * a2 + 4] = v483;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v484[2 * a2] = v8;
       break;
     case 0xBEu:
 LABEL_130:
@@ -90091,31 +90074,31 @@ LABEL_130:
       LOWORD(v485) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v485) = __ROL4__(v485, 16) >> 16;
       LOWORD(v485) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v485;
+      *(int *)((char *)a5 + a2 + 4) = v485;
       LOWORD(v485) = a1;
       HIWORD(v485) = __ROL4__(v485, 16) >> 16;
       LOWORD(v485) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v485;
-      v486 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v486;
+      *(int *)((char *)a5 + a2) = v485;
+      v486 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v486;
       LOWORD(v486) = a1;
       HIWORD(v486) = __ROL4__(v486, 16) >> 16;
       LOWORD(v486) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v486;
+      *(int *)((char *)a5 + 2 * a2) = v486;
       v487 = (char *)a5 + a2;
       v488 = &a4[a2];
       LOWORD(v486) = a1;
       HIWORD(v486) = __ROL4__(v486, 16) >> 16;
       LOWORD(v486) = *(_WORD *)&v488[2 * a2 + 4];
-      *(_DWORD *)&v487[2 * a2 + 4] = v486;
+      *(int *)&v487[2 * a2 + 4] = v486;
       LOWORD(v486) = *(_WORD *)&v488[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v486, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v487[2 * a2] = v8;
+      *(int *)&v487[2 * a2] = v8;
       break;
     case 0xBFu:
 LABEL_131:
-      v489 = *((_DWORD *)a4 + 1);
+      v489 = *((int *)a4 + 1);
       a5[1] = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
@@ -90124,26 +90107,26 @@ LABEL_131:
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v489;
+      *(int *)((char *)a5 + a2 + 4) = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v489;
+      *(int *)((char *)a5 + a2) = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROR4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v489;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v489;
       LOWORD(v489) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v489;
+      *(int *)((char *)a5 + 2 * a2) = v489;
       v490 = (char *)a5 + a2;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROR4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)&v490[2 * a2 + 4] = v489;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v490[2 * a2] = v8;
+      *(int *)&v490[2 * a2 + 4] = v489;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v490[2 * a2] = v8;
       break;
   }
   return v8;
@@ -90159,7 +90142,7 @@ __int16 __usercall VBC16_block_decoder_4_palette@<ax>(
         int a2@<ecx>,
         unsigned __int8 *a3@<ebx>,
         char *a4@<edi>,
-        _DWORD *a5@<esi>)
+        int *a5@<esi>)
 {
   int v5; // eax
   int v6; // eax
@@ -91308,15 +91291,15 @@ LABEL_4:
       LOWORD(v6) = a1;
       *a5 = v6;
       a5[1] = v6;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v7 = (char *)a5 + a2;
       HIWORD(v8) = __ROR4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v7[2 * a2] = v8;
-      *(_DWORD *)&v7[2 * a2 + 4] = v8;
+      *(int *)&v7[2 * a2] = v8;
+      *(int *)&v7[2 * a2 + 4] = v8;
       break;
     case 1u:
 LABEL_5:
@@ -91328,19 +91311,19 @@ LABEL_5:
       LOWORD(v9) = a1;
       HIWORD(v9) = __ROR4__(v9, 16) >> 16;
       LOWORD(v9) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v9;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v9;
+      *(int *)((char *)a5 + a2) = v9;
+      *(int *)((char *)a5 + a2 + 4) = v9;
       HIWORD(v9) = HIWORD(a1);
       v10 = __ROL4__(a1, 16);
       LOWORD(v9) = v10;
       v11 = __ROL4__(v10, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v9;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v9;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v9;
+      *(int *)((char *)a5 + 2 * a2) = v9;
       v12 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v11);
       LOWORD(v8) = __ROL4__(v11, 16);
-      *(_DWORD *)&v12[2 * a2 + 4] = v8;
-      *(_DWORD *)&v12[2 * a2] = v8;
+      *(int *)&v12[2 * a2 + 4] = v8;
+      *(int *)&v12[2 * a2] = v8;
       break;
     case 2u:
 LABEL_6:
@@ -91357,28 +91340,28 @@ LABEL_6:
       v16 = __ROL4__(v15, 16);
       LOWORD(v13) = v16;
       v17 = __ROL4__(v16, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v13;
+      *(int *)((char *)a5 + a2 + 4) = v13;
       LOWORD(v13) = v17;
       HIWORD(v13) = __ROL4__(v13, 16) >> 16;
       LOWORD(v13) = v17;
-      *(_DWORD *)((char *)a5 + a2) = v13;
+      *(int *)((char *)a5 + a2) = v13;
       HIWORD(v13) = HIWORD(v17);
       v18 = __ROL4__(v17, 16);
       LOWORD(v13) = v18;
       v19 = __ROL4__(v18, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v13;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v13;
       LOWORD(v13) = v19;
       HIWORD(v13) = __ROL4__(v13, 16) >> 16;
       LOWORD(v13) = v19;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v13;
+      *(int *)((char *)a5 + 2 * a2) = v13;
       v20 = (char *)a5 + a2;
       HIWORD(v13) = HIWORD(v19);
       v21 = __ROL4__(v19, 16);
       LOWORD(v13) = v21;
-      *(_DWORD *)&v20[2 * a2 + 4] = v13;
+      *(int *)&v20[2 * a2 + 4] = v13;
       LOWORD(v8) = __ROL4__(v21, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v20[2 * a2] = v8;
+      *(int *)&v20[2 * a2] = v8;
       break;
     case 3u:
 LABEL_7:
@@ -91390,18 +91373,18 @@ LABEL_7:
       LOWORD(v22) = a1;
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       LOWORD(v22) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v22;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v22;
+      *(int *)((char *)a5 + a2) = v22;
+      *(int *)((char *)a5 + a2 + 4) = v22;
       LOWORD(v22) = a1;
       HIWORD(v22) = __ROR4__(v22, 16) >> 16;
       LOWORD(v22) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v22;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v22;
+      *(int *)((char *)a5 + 2 * a2) = v22;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v22;
       v23 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v23[2 * a2 + 4] = v8;
-      *(_DWORD *)&v23[2 * a2] = v8;
+      *(int *)&v23[2 * a2 + 4] = v8;
+      *(int *)&v23[2 * a2] = v8;
       break;
     case 4u:
 LABEL_8:
@@ -91409,16 +91392,16 @@ LABEL_8:
       HIWORD(v8) = __ROL4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
       *a5 = v8;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v24 = (char *)a5 + a2;
-      *(_DWORD *)&v24[2 * a2 + 4] = a1;
+      *(int *)&v24[2 * a2 + 4] = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v24[2 * a2] = v8;
+      *(int *)&v24[2 * a2] = v8;
       break;
     case 5u:
 LABEL_9:
@@ -91431,19 +91414,19 @@ LABEL_9:
       LOWORD(v25) = v26;
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       LOWORD(v25) = v26;
-      *(_DWORD *)((char *)a5 + a2) = v25;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v25;
+      *(int *)((char *)a5 + a2) = v25;
+      *(int *)((char *)a5 + a2 + 4) = v25;
       LOWORD(v25) = v26;
       HIWORD(v25) = __ROR4__(v25, 16) >> 16;
       LOWORD(v25) = v26;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v25;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v25;
+      *(int *)((char *)a5 + 2 * a2) = v25;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v25;
       v27 = (char *)a5 + a2;
       LOWORD(v25) = v26;
       HIWORD(v8) = __ROR4__(v25, 16) >> 16;
       LOWORD(v8) = v26;
-      *(_DWORD *)&v27[2 * a2] = v8;
-      *(_DWORD *)&v27[2 * a2 + 4] = v8;
+      *(int *)&v27[2 * a2] = v8;
+      *(int *)&v27[2 * a2 + 4] = v8;
       break;
     case 6u:
 LABEL_10:
@@ -91456,22 +91439,22 @@ LABEL_10:
       LOWORD(v29) = a1;
       HIWORD(v29) = __ROR4__(v29, 16) >> 16;
       LOWORD(v29) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v29;
+      *(int *)((char *)a5 + a2 + 4) = v29;
       v30 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v30;
+      *(int *)((char *)a5 + a2) = v30;
       LOWORD(v30) = a1;
       HIWORD(v30) = __ROR4__(v30, 16) >> 16;
       LOWORD(v30) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v30;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v30;
       v31 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v31;
+      *(int *)((char *)a5 + 2 * a2) = v31;
       v32 = (char *)a5 + a2;
       LOWORD(v31) = a1;
       HIWORD(v31) = __ROR4__(v31, 16) >> 16;
       LOWORD(v31) = a1;
-      *(_DWORD *)&v32[2 * a2 + 4] = v31;
+      *(int *)&v32[2 * a2 + 4] = v31;
       v8 = __ROL4__(a1, 16);
-      *(_DWORD *)&v32[2 * a2] = v8;
+      *(int *)&v32[2 * a2] = v8;
       break;
     case 7u:
 LABEL_11:
@@ -91483,22 +91466,22 @@ LABEL_11:
       v34 = __ROL4__(a1, 16);
       LOWORD(v33) = v34;
       v35 = __ROL4__(v34, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v33;
+      *(int *)((char *)a5 + a2 + 4) = v33;
       LOWORD(v33) = v35;
       HIWORD(v33) = __ROL4__(v33, 16) >> 16;
       LOWORD(v33) = v35;
-      *(_DWORD *)((char *)a5 + a2) = v33;
+      *(int *)((char *)a5 + a2) = v33;
       HIWORD(v33) = HIWORD(v35);
       v36 = __ROL4__(v35, 16);
       LOWORD(v33) = v36;
       v37 = __ROL4__(v36, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v33;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v33;
       HIWORD(v8) = HIWORD(v37);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v37;
+      *(int *)((char *)a5 + 2 * a2) = v37;
       v38 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v37, 16);
-      *(_DWORD *)&v38[2 * a2 + 4] = v8;
-      *(_DWORD *)&v38[2 * a2] = v8;
+      *(int *)&v38[2 * a2 + 4] = v8;
+      *(int *)&v38[2 * a2] = v8;
       break;
     case 8u:
 LABEL_12:
@@ -91512,22 +91495,22 @@ LABEL_12:
       v42 = __ROL4__(v41, 16);
       LOWORD(v39) = v42;
       v43 = __ROL4__(v42, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v39;
+      *(int *)((char *)a5 + a2 + 4) = v39;
       HIWORD(v39) = HIWORD(v43);
-      *(_DWORD *)((char *)a5 + a2) = v43;
+      *(int *)((char *)a5 + a2) = v43;
       v44 = __ROL4__(v43, 16);
       LOWORD(v39) = v44;
       v45 = __ROL4__(v44, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v39;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v39;
       LOWORD(v39) = v45;
       HIWORD(v39) = __ROL4__(v39, 16) >> 16;
       LOWORD(v39) = v45;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v39;
+      *(int *)((char *)a5 + 2 * a2) = v39;
       v46 = (char *)a5 + a2;
-      *(_DWORD *)&v46[2 * a2 + 4] = v45;
+      *(int *)&v46[2 * a2 + 4] = v45;
       HIWORD(v8) = __ROL4__(v45, 16) >> 16;
       LOWORD(v8) = v45;
-      *(_DWORD *)&v46[2 * a2] = v8;
+      *(int *)&v46[2 * a2] = v8;
       break;
     case 9u:
 LABEL_13:
@@ -91537,28 +91520,28 @@ LABEL_13:
       v49 = __ROL4__(v48, 16);
       a5[1] = v47;
       *a5 = v47;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v49, 16);
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v49, 16);
       HIWORD(v47) = HIWORD(v49);
       v50 = __ROL4__(v49, 16);
       LOWORD(v47) = v50;
       v51 = __ROL4__(v50, 16);
-      *(_DWORD *)((char *)a5 + a2) = v47;
+      *(int *)((char *)a5 + a2) = v47;
       LOWORD(v47) = v51;
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOWORD(v47) = v51;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v47;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v47;
       HIWORD(v47) = HIWORD(v51);
       v52 = __ROL4__(v51, 16);
       LOWORD(v47) = v52;
       v53 = __ROL4__(v52, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v47;
+      *(int *)((char *)a5 + 2 * a2) = v47;
       v54 = (char *)a5 + a2;
       LOWORD(v47) = v53;
       HIWORD(v47) = __ROR4__(v47, 16) >> 16;
       LOWORD(v47) = v53;
-      *(_DWORD *)&v54[2 * a2 + 4] = v47;
+      *(int *)&v54[2 * a2 + 4] = v47;
       v8 = __ROL4__(v53, 16);
-      *(_DWORD *)&v54[2 * a2] = v8;
+      *(int *)&v54[2 * a2] = v8;
       break;
     case 0xAu:
 LABEL_14:
@@ -91571,23 +91554,23 @@ LABEL_14:
       LOWORD(v56) = a1;
       HIWORD(v56) = __ROR4__(v56, 16) >> 16;
       LOWORD(v56) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v56;
+      *(int *)((char *)a5 + a2 + 4) = v56;
       HIWORD(v56) = HIWORD(a1);
       v57 = __ROL4__(a1, 16);
       LOWORD(v56) = v57;
       v58 = __ROL4__(v57, 16);
-      *(_DWORD *)((char *)a5 + a2) = v56;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v58, 16);
+      *(int *)((char *)a5 + a2) = v56;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v58, 16);
       HIWORD(v56) = HIWORD(v58);
       v59 = __ROL4__(v58, 16);
       LOWORD(v56) = v59;
       v60 = __ROL4__(v59, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v56;
+      *(int *)((char *)a5 + 2 * a2) = v56;
       v61 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v60);
       LOWORD(v8) = __ROL4__(v60, 16);
-      *(_DWORD *)&v61[2 * a2 + 4] = v8;
-      *(_DWORD *)&v61[2 * a2] = v8;
+      *(int *)&v61[2 * a2 + 4] = v8;
+      *(int *)&v61[2 * a2] = v8;
       break;
     case 0xBu:
 LABEL_15:
@@ -91599,20 +91582,20 @@ LABEL_15:
       LOWORD(v62) = a1;
       HIWORD(v62) = __ROR4__(v62, 16) >> 16;
       LOWORD(v62) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v62;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v62;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v62;
+      *(int *)((char *)a5 + a2 + 4) = v62;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       HIWORD(v62) = __ROL4__(a1, 16) >> 16;
       LOWORD(v62) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v62;
+      *(int *)((char *)a5 + 2 * a2) = v62;
       v63 = (char *)a5 + a2;
       HIWORD(v62) = HIWORD(a1);
       v64 = __ROL4__(a1, 16);
       LOWORD(v62) = v64;
-      *(_DWORD *)&v63[2 * a2 + 4] = v62;
+      *(int *)&v63[2 * a2 + 4] = v62;
       LOWORD(v8) = __ROL4__(v64, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v63[2 * a2] = v8;
+      *(int *)&v63[2 * a2] = v8;
       break;
     case 0xCu:
 LABEL_16:
@@ -91625,21 +91608,21 @@ LABEL_16:
       HIWORD(v65) = __ROL4__(v65, 16) >> 16;
       LOWORD(v65) = v67;
       *a5 = v65;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v67;
+      *(int *)((char *)a5 + a2 + 4) = v67;
       HIWORD(v65) = __ROL4__(v67, 16) >> 16;
       LOWORD(v65) = v67;
-      *(_DWORD *)((char *)a5 + a2) = v65;
+      *(int *)((char *)a5 + a2) = v65;
       LOWORD(v65) = v67;
       HIWORD(v65) = __ROR4__(v65, 16) >> 16;
       LOWORD(v65) = v67;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v65;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v65;
+      *(int *)((char *)a5 + 2 * a2) = v65;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v65;
       v68 = (char *)a5 + a2;
       LOWORD(v65) = v67;
       HIWORD(v8) = __ROR4__(v65, 16) >> 16;
       LOWORD(v8) = v67;
-      *(_DWORD *)&v68[2 * a2] = v8;
-      *(_DWORD *)&v68[2 * a2 + 4] = v8;
+      *(int *)&v68[2 * a2] = v8;
+      *(int *)&v68[2 * a2 + 4] = v8;
       break;
     case 0xDu:
 LABEL_17:
@@ -91655,20 +91638,20 @@ LABEL_17:
       LOWORD(v69) = v71;
       HIWORD(v69) = __ROR4__(v69, 16) >> 16;
       LOWORD(v69) = v71;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v69;
+      *(int *)((char *)a5 + a2 + 4) = v69;
       v72 = __ROL4__(v71, 16);
-      *(_DWORD *)((char *)a5 + a2) = v72;
+      *(int *)((char *)a5 + a2) = v72;
       LOWORD(v72) = v71;
       HIWORD(v72) = __ROR4__(v72, 16) >> 16;
       LOWORD(v72) = v71;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v72;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v72;
+      *(int *)((char *)a5 + 2 * a2) = v72;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v72;
       v73 = (char *)a5 + a2;
       LOWORD(v72) = v71;
       HIWORD(v8) = __ROR4__(v72, 16) >> 16;
       LOWORD(v8) = v71;
-      *(_DWORD *)&v73[2 * a2] = v8;
-      *(_DWORD *)&v73[2 * a2 + 4] = v8;
+      *(int *)&v73[2 * a2] = v8;
+      *(int *)&v73[2 * a2 + 4] = v8;
       break;
     case 0xEu:
 LABEL_18:
@@ -91680,22 +91663,22 @@ LABEL_18:
       LOWORD(v74) = a1;
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOWORD(v74) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v74;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v74;
+      *(int *)((char *)a5 + a2) = v74;
+      *(int *)((char *)a5 + a2 + 4) = v74;
       LOWORD(v74) = a1;
       HIWORD(v74) = __ROR4__(v74, 16) >> 16;
       LOWORD(v74) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v74;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v74;
       v75 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v75;
+      *(int *)((char *)a5 + 2 * a2) = v75;
       v76 = (char *)a5 + a2;
       LOWORD(v75) = a1;
       HIWORD(v75) = __ROR4__(v75, 16) >> 16;
       LOWORD(v75) = a1;
-      *(_DWORD *)&v76[2 * a2 + 4] = v75;
+      *(int *)&v76[2 * a2 + 4] = v75;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v76[2 * a2] = v8;
+      *(int *)&v76[2 * a2] = v8;
       break;
     case 0xFu:
 LABEL_19:
@@ -91707,25 +91690,25 @@ LABEL_19:
       LOWORD(v77) = a1;
       HIWORD(v77) = __ROR4__(v77, 16) >> 16;
       LOWORD(v77) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v77;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v77;
+      *(int *)((char *)a5 + a2) = v77;
+      *(int *)((char *)a5 + a2 + 4) = v77;
       HIWORD(v77) = HIWORD(a1);
       v78 = __ROL4__(a1, 16);
       LOWORD(v77) = v78;
       v79 = __ROL4__(v78, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v77;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v77;
       LOWORD(v77) = v79;
       HIWORD(v77) = __ROL4__(v77, 16) >> 16;
       LOWORD(v77) = v79;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v77;
+      *(int *)((char *)a5 + 2 * a2) = v77;
       v80 = (char *)a5 + a2;
       HIWORD(v77) = HIWORD(v79);
       v81 = __ROL4__(v79, 16);
       LOWORD(v77) = v81;
-      *(_DWORD *)&v80[2 * a2 + 4] = v77;
+      *(int *)&v80[2 * a2 + 4] = v77;
       LOWORD(v8) = __ROL4__(v81, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v80[2 * a2] = v8;
+      *(int *)&v80[2 * a2] = v8;
       break;
     case 0x10u:
 LABEL_20:
@@ -91742,22 +91725,22 @@ LABEL_20:
       v85 = __ROL4__(v84, 16);
       LOWORD(v82) = v85;
       LOWORD(v85) = __ROL4__(v85, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v82;
+      *(int *)((char *)a5 + a2 + 4) = v82;
       LOWORD(v82) = v85;
       HIWORD(v82) = __ROL4__(v82, 16) >> 16;
       LOWORD(v82) = v85;
-      *(_DWORD *)((char *)a5 + a2) = v82;
+      *(int *)((char *)a5 + a2) = v82;
       LOWORD(v82) = v85;
       HIWORD(v82) = __ROR4__(v82, 16) >> 16;
       LOWORD(v82) = v85;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v82;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v82;
+      *(int *)((char *)a5 + 2 * a2) = v82;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v82;
       v86 = (char *)a5 + a2;
       LOWORD(v82) = v85;
       HIWORD(v8) = __ROR4__(v82, 16) >> 16;
       LOWORD(v8) = v85;
-      *(_DWORD *)&v86[2 * a2] = v8;
-      *(_DWORD *)&v86[2 * a2 + 4] = v8;
+      *(int *)&v86[2 * a2] = v8;
+      *(int *)&v86[2 * a2 + 4] = v8;
       break;
     case 0x11u:
 LABEL_21:
@@ -91773,23 +91756,23 @@ LABEL_21:
       LOWORD(v87) = v89;
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       LOWORD(v87) = v89;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v87;
+      *(int *)((char *)a5 + a2 + 4) = v87;
       HIWORD(v87) = HIWORD(v89);
       v90 = __ROL4__(v89, 16);
       LOWORD(v87) = v90;
       LOWORD(v90) = __ROL4__(v90, 16);
-      *(_DWORD *)((char *)a5 + a2) = v87;
+      *(int *)((char *)a5 + a2) = v87;
       LOWORD(v87) = v90;
       HIWORD(v87) = __ROR4__(v87, 16) >> 16;
       LOWORD(v87) = v90;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v87;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v87;
+      *(int *)((char *)a5 + 2 * a2) = v87;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v87;
       v91 = (char *)a5 + a2;
       LOWORD(v87) = v90;
       HIWORD(v8) = __ROR4__(v87, 16) >> 16;
       LOWORD(v8) = v90;
-      *(_DWORD *)&v91[2 * a2] = v8;
-      *(_DWORD *)&v91[2 * a2 + 4] = v8;
+      *(int *)&v91[2 * a2] = v8;
+      *(int *)&v91[2 * a2 + 4] = v8;
       break;
     case 0x12u:
 LABEL_22:
@@ -91801,25 +91784,25 @@ LABEL_22:
       LOWORD(v92) = a1;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v92;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v92;
+      *(int *)((char *)a5 + a2) = v92;
+      *(int *)((char *)a5 + a2 + 4) = v92;
       LOWORD(v92) = a1;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v92;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v92;
       HIWORD(v92) = HIWORD(a1);
       v93 = __ROL4__(a1, 16);
       LOWORD(v92) = v93;
       v94 = __ROL4__(v93, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v92;
+      *(int *)((char *)a5 + 2 * a2) = v92;
       v95 = (char *)a5 + a2;
       LOWORD(v92) = v94;
       HIWORD(v92) = __ROR4__(v92, 16) >> 16;
       LOWORD(v92) = v94;
-      *(_DWORD *)&v95[2 * a2 + 4] = v92;
+      *(int *)&v95[2 * a2 + 4] = v92;
       HIWORD(v8) = HIWORD(v94);
       LOWORD(v8) = __ROL4__(v94, 16);
-      *(_DWORD *)&v95[2 * a2] = v8;
+      *(int *)&v95[2 * a2] = v8;
       break;
     case 0x13u:
 LABEL_23:
@@ -91832,30 +91815,30 @@ LABEL_23:
       v97 = __ROL4__(a1, 16);
       LOWORD(v96) = v97;
       v98 = __ROL4__(v97, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v96;
-      *(_DWORD *)((char *)a5 + a2) = v96;
+      *(int *)((char *)a5 + a2 + 4) = v96;
+      *(int *)((char *)a5 + a2) = v96;
       HIWORD(v96) = HIWORD(v98);
       v99 = __ROL4__(v98, 16);
       LOWORD(v96) = v99;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v96;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v96;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v96;
+      *(int *)((char *)a5 + 2 * a2) = v96;
       v100 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v99, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v100[2 * a2] = v8;
-      *(_DWORD *)&v100[2 * a2 + 4] = v8;
+      *(int *)&v100[2 * a2] = v8;
+      *(int *)&v100[2 * a2 + 4] = v8;
       break;
     case 0x14u:
 LABEL_24:
       a5[1] = __ROL4__(a1, 16);
       *a5 = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v101 = (char *)a5 + a2;
-      *(_DWORD *)&v101[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v101[2 * a2] = a1;
+      *(int *)&v101[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v101[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x15u:
@@ -91869,19 +91852,19 @@ LABEL_25:
       v103 = __ROL4__(a1, 16);
       LOWORD(v102) = v103;
       LOWORD(v103) = __ROL4__(v103, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v102;
-      *(_DWORD *)((char *)a5 + a2) = v102;
+      *(int *)((char *)a5 + a2 + 4) = v102;
+      *(int *)((char *)a5 + a2) = v102;
       LOWORD(v102) = v103;
       HIWORD(v102) = __ROR4__(v102, 16) >> 16;
       LOWORD(v102) = v103;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v102;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v102;
+      *(int *)((char *)a5 + 2 * a2) = v102;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v102;
       v104 = (char *)a5 + a2;
       LOWORD(v102) = v103;
       HIWORD(v8) = __ROR4__(v102, 16) >> 16;
       LOWORD(v8) = v103;
-      *(_DWORD *)&v104[2 * a2] = v8;
-      *(_DWORD *)&v104[2 * a2 + 4] = v8;
+      *(int *)&v104[2 * a2] = v8;
+      *(int *)&v104[2 * a2 + 4] = v8;
       break;
     case 0x16u:
 LABEL_26:
@@ -91893,18 +91876,18 @@ LABEL_26:
       LOWORD(v105) = a1;
       HIWORD(v105) = __ROR4__(v105, 16) >> 16;
       LOWORD(v105) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v105;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v105;
+      *(int *)((char *)a5 + a2) = v105;
+      *(int *)((char *)a5 + a2 + 4) = v105;
       HIWORD(v105) = HIWORD(a1);
       v106 = __ROL4__(a1, 16);
       LOWORD(v105) = v106;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v105;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v105;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v105;
+      *(int *)((char *)a5 + 2 * a2) = v105;
       v107 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v106, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v107[2 * a2] = v8;
-      *(_DWORD *)&v107[2 * a2 + 4] = v8;
+      *(int *)&v107[2 * a2] = v8;
+      *(int *)&v107[2 * a2 + 4] = v8;
       break;
     case 0x17u:
 LABEL_27:
@@ -91915,15 +91898,15 @@ LABEL_27:
       *a5 = a1;
       HIWORD(v8) = __ROR4__(a1, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = v8;
+      *(int *)((char *)a5 + a2) = a1;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v109 = (char *)a5 + a2;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v109[2 * a2 + 4] = v8;
-      *(_DWORD *)&v109[2 * a2] = a1;
+      *(int *)&v109[2 * a2 + 4] = v8;
+      *(int *)&v109[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x18u:
@@ -91935,24 +91918,24 @@ LABEL_28:
       LOWORD(v110) = a1;
       *a5 = v110;
       v111 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v111;
+      *(int *)((char *)a5 + a2 + 4) = v111;
       LOWORD(v111) = a1;
       HIWORD(v111) = __ROL4__(v111, 16) >> 16;
       LOWORD(v111) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v111;
+      *(int *)((char *)a5 + a2) = v111;
       v112 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v112;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v112;
       LOWORD(v112) = a1;
       HIWORD(v112) = __ROL4__(v112, 16) >> 16;
       LOWORD(v112) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v112;
+      *(int *)((char *)a5 + 2 * a2) = v112;
       v113 = (char *)a5 + a2;
       v114 = __ROL4__(a1, 16);
-      *(_DWORD *)&v113[2 * a2 + 4] = v114;
+      *(int *)&v113[2 * a2 + 4] = v114;
       LOWORD(v114) = a1;
       HIWORD(v8) = __ROL4__(v114, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v113[2 * a2] = v8;
+      *(int *)&v113[2 * a2] = v8;
       break;
     case 0x19u:
 LABEL_29:
@@ -91964,15 +91947,15 @@ LABEL_29:
       LOWORD(v115) = a1;
       HIWORD(v115) = __ROR4__(v115, 16) >> 16;
       LOWORD(v115) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v115;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v115;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = v115;
+      *(int *)((char *)a5 + a2 + 4) = v115;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
       HIWORD(v8) = HIWORD(a1);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v116 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v116[2 * a2 + 4] = v8;
-      *(_DWORD *)&v116[2 * a2] = v8;
+      *(int *)&v116[2 * a2 + 4] = v8;
+      *(int *)&v116[2 * a2] = v8;
       break;
     case 0x1Au:
 LABEL_30:
@@ -91984,25 +91967,25 @@ LABEL_30:
       v118 = __ROL4__(a1, 16);
       LOWORD(v117) = v118;
       v119 = __ROL4__(v118, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v117;
+      *(int *)((char *)a5 + a2 + 4) = v117;
       LOWORD(v117) = v119;
       HIWORD(v117) = __ROL4__(v117, 16) >> 16;
       LOWORD(v117) = v119;
-      *(_DWORD *)((char *)a5 + a2) = v117;
+      *(int *)((char *)a5 + a2) = v117;
       HIWORD(v117) = HIWORD(v119);
       v120 = __ROL4__(v119, 16);
       LOWORD(v117) = v120;
       v121 = __ROL4__(v120, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v117;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v117;
       LOWORD(v117) = v121;
       HIWORD(v117) = __ROL4__(v117, 16) >> 16;
       LOWORD(v117) = v121;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v117;
+      *(int *)((char *)a5 + 2 * a2) = v117;
       v122 = (char *)a5 + a2;
-      *(_DWORD *)&v122[2 * a2 + 4] = v121;
+      *(int *)&v122[2 * a2 + 4] = v121;
       HIWORD(v8) = __ROL4__(v121, 16) >> 16;
       LOWORD(v8) = v121;
-      *(_DWORD *)&v122[2 * a2] = v8;
+      *(int *)&v122[2 * a2] = v8;
       break;
     case 0x1Bu:
 LABEL_31:
@@ -92012,18 +91995,18 @@ LABEL_31:
       v125 = __ROL4__(v124, 16);
       a5[1] = v123;
       *a5 = v123;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v125, 16);
-      *(_DWORD *)((char *)a5 + a2) = v125;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v125, 16);
+      *(int *)((char *)a5 + a2) = v125;
       HIWORD(v123) = __ROR4__(v125, 16) >> 16;
       LOWORD(v123) = v125;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v123;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v123;
+      *(int *)((char *)a5 + 2 * a2) = v123;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v123;
       v126 = (char *)a5 + a2;
       LOWORD(v123) = v125;
       HIWORD(v8) = __ROR4__(v123, 16) >> 16;
       LOWORD(v8) = v125;
-      *(_DWORD *)&v126[2 * a2] = v8;
-      *(_DWORD *)&v126[2 * a2 + 4] = v8;
+      *(int *)&v126[2 * a2] = v8;
+      *(int *)&v126[2 * a2 + 4] = v8;
       break;
     case 0x1Cu:
 LABEL_32:
@@ -92036,28 +92019,28 @@ LABEL_32:
       LOWORD(v128) = a1;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v128;
+      *(int *)((char *)a5 + a2 + 4) = v128;
       HIWORD(v128) = HIWORD(a1);
       v129 = __ROL4__(a1, 16);
       LOWORD(v128) = v129;
       v130 = __ROL4__(v129, 16);
-      *(_DWORD *)((char *)a5 + a2) = v128;
+      *(int *)((char *)a5 + a2) = v128;
       LOWORD(v128) = v130;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = v130;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v128;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v128;
       HIWORD(v128) = HIWORD(v130);
       v131 = __ROL4__(v130, 16);
       LOWORD(v128) = v131;
       v132 = __ROL4__(v131, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v128;
+      *(int *)((char *)a5 + 2 * a2) = v128;
       v133 = (char *)a5 + a2;
       LOWORD(v128) = v132;
       HIWORD(v128) = __ROR4__(v128, 16) >> 16;
       LOWORD(v128) = v132;
-      *(_DWORD *)&v133[2 * a2 + 4] = v128;
+      *(int *)&v133[2 * a2 + 4] = v128;
       v8 = __ROL4__(v132, 16);
-      *(_DWORD *)&v133[2 * a2] = v8;
+      *(int *)&v133[2 * a2] = v8;
       break;
     case 0x1Du:
 LABEL_33:
@@ -92070,24 +92053,24 @@ LABEL_33:
       HIWORD(v134) = __ROL4__(v134, 16) >> 16;
       LOWORD(v134) = v136;
       *a5 = v134;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v136;
+      *(int *)((char *)a5 + a2 + 4) = v136;
       HIWORD(v134) = __ROL4__(v136, 16) >> 16;
       LOWORD(v134) = v136;
-      *(_DWORD *)((char *)a5 + a2) = v134;
+      *(int *)((char *)a5 + a2) = v134;
       LOWORD(v134) = v136;
       HIWORD(v134) = __ROR4__(v134, 16) >> 16;
       LOWORD(v134) = v136;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v134;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v134;
       v137 = __ROL4__(v136, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v137;
+      *(int *)((char *)a5 + 2 * a2) = v137;
       v138 = (char *)a5 + a2;
       LOWORD(v137) = v136;
       HIWORD(v137) = __ROR4__(v137, 16) >> 16;
       LOWORD(v137) = v136;
-      *(_DWORD *)&v138[2 * a2 + 4] = v137;
+      *(int *)&v138[2 * a2 + 4] = v137;
       HIWORD(v8) = HIWORD(v136);
       LOWORD(v8) = __ROL4__(v136, 16);
-      *(_DWORD *)&v138[2 * a2] = v8;
+      *(int *)&v138[2 * a2] = v8;
       break;
     case 0x1Eu:
 LABEL_34:
@@ -92103,20 +92086,20 @@ LABEL_34:
       LOWORD(v139) = v141;
       HIWORD(v139) = __ROR4__(v139, 16) >> 16;
       LOWORD(v139) = v141;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v139;
-      *(_DWORD *)((char *)a5 + a2) = __ROL4__(v141, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v141;
+      *(int *)((char *)a5 + a2 + 4) = v139;
+      *(int *)((char *)a5 + a2) = __ROL4__(v141, 16);
+      *(int *)((char *)a5 + 2 * a2 + 4) = v141;
       HIWORD(v139) = __ROL4__(v141, 16) >> 16;
       LOWORD(v139) = v141;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v139;
+      *(int *)((char *)a5 + 2 * a2) = v139;
       v142 = (char *)a5 + a2;
       HIWORD(v139) = HIWORD(v141);
       v143 = __ROL4__(v141, 16);
       LOWORD(v139) = v143;
-      *(_DWORD *)&v142[2 * a2 + 4] = v139;
+      *(int *)&v142[2 * a2 + 4] = v139;
       LOWORD(v8) = __ROL4__(v143, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v142[2 * a2] = v8;
+      *(int *)&v142[2 * a2] = v8;
       break;
     case 0x1Fu:
 LABEL_35:
@@ -92133,28 +92116,28 @@ LABEL_35:
       v147 = __ROL4__(v146, 16);
       LOWORD(v144) = v147;
       v148 = __ROL4__(v147, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v144;
+      *(int *)((char *)a5 + a2 + 4) = v144;
       LOWORD(v144) = v148;
       HIWORD(v144) = __ROL4__(v144, 16) >> 16;
       LOWORD(v144) = v148;
-      *(_DWORD *)((char *)a5 + a2) = v144;
+      *(int *)((char *)a5 + a2) = v144;
       LOWORD(v144) = v148;
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       LOWORD(v144) = v148;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v144;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v144;
       HIWORD(v144) = HIWORD(v148);
       v149 = __ROL4__(v148, 16);
       LOWORD(v144) = v149;
       v150 = __ROL4__(v149, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v144;
+      *(int *)((char *)a5 + 2 * a2) = v144;
       v151 = (char *)a5 + a2;
       LOWORD(v144) = v150;
       HIWORD(v144) = __ROR4__(v144, 16) >> 16;
       LOWORD(v144) = v150;
-      *(_DWORD *)&v151[2 * a2 + 4] = v144;
+      *(int *)&v151[2 * a2 + 4] = v144;
       HIWORD(v8) = HIWORD(v150);
       LOWORD(v8) = __ROL4__(v150, 16);
-      *(_DWORD *)&v151[2 * a2] = v8;
+      *(int *)&v151[2 * a2] = v8;
       break;
     case 0x20u:
 LABEL_36:
@@ -92166,13 +92149,13 @@ LABEL_36:
       LOWORD(v152) = a1;
       HIWORD(v8) = __ROR4__(v152, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v8;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = a1;
+      *(int *)((char *)a5 + a2) = v8;
+      *(int *)((char *)a5 + a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + 2 * a2) = a1;
       v153 = (char *)a5 + a2;
-      *(_DWORD *)&v153[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v153[2 * a2] = a1;
+      *(int *)&v153[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v153[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x21u:
@@ -92186,43 +92169,43 @@ LABEL_37:
       v155 = __ROL4__(a1, 16);
       LOWORD(v154) = v155;
       v156 = __ROL4__(v155, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v154;
+      *(int *)((char *)a5 + a2 + 4) = v154;
       LOWORD(v154) = v156;
       HIWORD(v154) = __ROL4__(v154, 16) >> 16;
       LOWORD(v154) = v156;
-      *(_DWORD *)((char *)a5 + a2) = v154;
+      *(int *)((char *)a5 + a2) = v154;
       HIWORD(v154) = HIWORD(v156);
       v157 = __ROL4__(v156, 16);
       LOWORD(v154) = v157;
       LOWORD(v157) = __ROL4__(v157, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v154;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v154;
       LOWORD(v154) = v157;
       HIWORD(v154) = __ROL4__(v154, 16) >> 16;
       LOWORD(v154) = v157;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v154;
+      *(int *)((char *)a5 + 2 * a2) = v154;
       v158 = (char *)a5 + a2;
       LOWORD(v154) = v157;
       HIWORD(v8) = __ROR4__(v154, 16) >> 16;
       LOWORD(v8) = v157;
-      *(_DWORD *)&v158[2 * a2] = v8;
-      *(_DWORD *)&v158[2 * a2 + 4] = v8;
+      *(int *)&v158[2 * a2] = v8;
+      *(int *)&v158[2 * a2 + 4] = v8;
       break;
     case 0x22u:
 LABEL_38:
       a5[1] = __ROL4__(a1, 16);
       *a5 = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
       HIWORD(v159) = __ROR4__(a1, 16) >> 16;
       LOWORD(v159) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v159;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v159;
+      *(int *)((char *)a5 + 2 * a2) = v159;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v159;
       v160 = (char *)a5 + a2;
       LOWORD(v159) = a1;
       HIWORD(v8) = __ROR4__(v159, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v160[2 * a2] = v8;
-      *(_DWORD *)&v160[2 * a2 + 4] = v8;
+      *(int *)&v160[2 * a2] = v8;
+      *(int *)&v160[2 * a2 + 4] = v8;
       break;
     case 0x23u:
 LABEL_39:
@@ -92234,25 +92217,25 @@ LABEL_39:
       LOWORD(v161) = a1;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       LOWORD(v161) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v161;
+      *(int *)((char *)a5 + a2 + 4) = v161;
       HIWORD(v161) = HIWORD(a1);
       v162 = __ROL4__(a1, 16);
       LOWORD(v161) = v162;
       v163 = __ROL4__(v162, 16);
-      *(_DWORD *)((char *)a5 + a2) = v161;
+      *(int *)((char *)a5 + a2) = v161;
       LOWORD(v161) = v163;
       HIWORD(v161) = __ROR4__(v161, 16) >> 16;
       LOWORD(v161) = v163;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v161;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v161;
       HIWORD(v161) = HIWORD(v163);
       v164 = __ROL4__(v163, 16);
       LOWORD(v161) = v164;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v161;
+      *(int *)((char *)a5 + 2 * a2) = v161;
       v165 = (char *)a5 + a2;
       LOWORD(v8) = __ROL4__(v164, 16);
       HIWORD(v8) = __ROR4__(v8, 16) >> 16;
-      *(_DWORD *)&v165[2 * a2] = v8;
-      *(_DWORD *)&v165[2 * a2 + 4] = v8;
+      *(int *)&v165[2 * a2] = v8;
+      *(int *)&v165[2 * a2 + 4] = v8;
       break;
     case 0x24u:
 LABEL_40:
@@ -92264,15 +92247,15 @@ LABEL_40:
       LOWORD(v166) = a1;
       HIWORD(v166) = __ROR4__(v166, 16) >> 16;
       LOWORD(v166) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v166;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v166;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = v166;
+      *(int *)((char *)a5 + a2 + 4) = v166;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + 2 * a2) = __ROL4__(a1, 16);
       v167 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(a1);
       LOWORD(v8) = __ROL4__(a1, 16);
-      *(_DWORD *)&v167[2 * a2 + 4] = v8;
-      *(_DWORD *)&v167[2 * a2] = v8;
+      *(int *)&v167[2 * a2 + 4] = v8;
+      *(int *)&v167[2 * a2] = v8;
       break;
     case 0x25u:
 LABEL_41:
@@ -92285,21 +92268,21 @@ LABEL_41:
       HIWORD(v168) = __ROL4__(v168, 16) >> 16;
       LOWORD(v168) = v170;
       *a5 = v168;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v170;
+      *(int *)((char *)a5 + a2 + 4) = v170;
       HIWORD(v168) = __ROL4__(v170, 16) >> 16;
       LOWORD(v168) = v170;
-      *(_DWORD *)((char *)a5 + a2) = v168;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v170;
+      *(int *)((char *)a5 + a2) = v168;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v170;
       LOWORD(v168) = v170;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v168;
+      *(int *)((char *)a5 + 2 * a2) = v168;
       v171 = (char *)a5 + a2;
       HIWORD(v168) = HIWORD(v170);
       v172 = __ROL4__(v170, 16);
       LOWORD(v168) = v172;
-      *(_DWORD *)&v171[2 * a2 + 4] = v168;
+      *(int *)&v171[2 * a2 + 4] = v168;
       LOWORD(v8) = __ROL4__(v172, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v171[2 * a2] = v8;
+      *(int *)&v171[2 * a2] = v8;
       break;
     case 0x26u:
 LABEL_42:
@@ -92309,20 +92292,20 @@ LABEL_42:
       v175 = __ROL4__(v174, 16);
       a5[1] = v173;
       *a5 = v173;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v175;
+      *(int *)((char *)a5 + a2 + 4) = v175;
       v176 = __ROL4__(v175, 16);
-      *(_DWORD *)((char *)a5 + a2) = v176;
+      *(int *)((char *)a5 + a2) = v176;
       LOWORD(v176) = v175;
       HIWORD(v176) = __ROR4__(v176, 16) >> 16;
       LOWORD(v176) = v175;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v176;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v176;
+      *(int *)((char *)a5 + 2 * a2) = v176;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v176;
       v177 = (char *)a5 + a2;
       LOWORD(v176) = v175;
       HIWORD(v8) = __ROR4__(v176, 16) >> 16;
       LOWORD(v8) = v175;
-      *(_DWORD *)&v177[2 * a2] = v8;
-      *(_DWORD *)&v177[2 * a2 + 4] = v8;
+      *(int *)&v177[2 * a2] = v8;
+      *(int *)&v177[2 * a2 + 4] = v8;
       break;
     case 0x27u:
 LABEL_43:
@@ -92338,23 +92321,23 @@ LABEL_43:
       LOWORD(v178) = v180;
       HIWORD(v178) = __ROR4__(v178, 16) >> 16;
       LOWORD(v178) = v180;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v178;
+      *(int *)((char *)a5 + a2 + 4) = v178;
       v181 = __ROL4__(v180, 16);
-      *(_DWORD *)((char *)a5 + a2) = v181;
+      *(int *)((char *)a5 + a2) = v181;
       LOWORD(v181) = v180;
       HIWORD(v181) = __ROR4__(v181, 16) >> 16;
       LOWORD(v181) = v180;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v181;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v181;
       v182 = __ROL4__(v180, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v182;
+      *(int *)((char *)a5 + 2 * a2) = v182;
       v183 = (char *)a5 + a2;
       LOWORD(v182) = v180;
       HIWORD(v182) = __ROR4__(v182, 16) >> 16;
       LOWORD(v182) = v180;
-      *(_DWORD *)&v183[2 * a2 + 4] = v182;
+      *(int *)&v183[2 * a2 + 4] = v182;
       HIWORD(v8) = HIWORD(v180);
       LOWORD(v8) = __ROL4__(v180, 16);
-      *(_DWORD *)&v183[2 * a2] = v8;
+      *(int *)&v183[2 * a2] = v8;
       break;
     case 0x28u:
 LABEL_44:
@@ -92366,16 +92349,16 @@ LABEL_44:
       LOWORD(v184) = a1;
       HIWORD(v184) = __ROR4__(v184, 16) >> 16;
       LOWORD(v184) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v184;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v184;
+      *(int *)((char *)a5 + a2) = v184;
+      *(int *)((char *)a5 + a2 + 4) = v184;
       LOWORD(v184) = a1;
       HIWORD(v8) = __ROR4__(v184, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
       v185 = (char *)a5 + a2;
-      *(_DWORD *)&v185[2 * a2 + 4] = __ROL4__(a1, 16);
-      *(_DWORD *)&v185[2 * a2] = a1;
+      *(int *)&v185[2 * a2 + 4] = __ROL4__(a1, 16);
+      *(int *)&v185[2 * a2] = a1;
       LOWORD(v8) = a1;
       break;
     case 0x29u:
@@ -92385,19 +92368,19 @@ LABEL_45:
       LOWORD(v186) = a1;
       *a5 = v186;
       a5[1] = v186;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       HIWORD(v186) = __ROL4__(a1, 16) >> 16;
       LOWORD(v186) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v186;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = a1;
+      *(int *)((char *)a5 + a2) = v186;
+      *(int *)((char *)a5 + 2 * a2 + 4) = a1;
       LOWORD(v186) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v186;
+      *(int *)((char *)a5 + 2 * a2) = v186;
       v187 = (char *)a5 + a2;
       LOWORD(v186) = a1;
       HIWORD(v8) = __ROR4__(v186, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v187[2 * a2] = v8;
-      *(_DWORD *)&v187[2 * a2 + 4] = v8;
+      *(int *)&v187[2 * a2] = v8;
+      *(int *)&v187[2 * a2 + 4] = v8;
       break;
     case 0x2Au:
 LABEL_46:
@@ -92405,19 +92388,19 @@ LABEL_46:
       *a5 = a1;
       HIWORD(v188) = __ROR4__(a1, 16) >> 16;
       LOWORD(v188) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v188;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v188;
+      *(int *)((char *)a5 + a2) = v188;
+      *(int *)((char *)a5 + a2 + 4) = v188;
       LOWORD(v188) = a1;
       HIWORD(v188) = __ROR4__(v188, 16) >> 16;
       LOWORD(v188) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v188;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v188;
+      *(int *)((char *)a5 + 2 * a2) = v188;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v188;
       v189 = (char *)a5 + a2;
       LOWORD(v188) = a1;
       HIWORD(v8) = __ROR4__(v188, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v189[2 * a2] = v8;
-      *(_DWORD *)&v189[2 * a2 + 4] = v8;
+      *(int *)&v189[2 * a2] = v8;
+      *(int *)&v189[2 * a2 + 4] = v8;
       break;
     case 0x2Bu:
 LABEL_47:
@@ -92429,21 +92412,21 @@ LABEL_47:
       LOWORD(v190) = a1;
       HIWORD(v190) = __ROR4__(v190, 16) >> 16;
       LOWORD(v190) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v190;
+      *(int *)((char *)a5 + a2 + 4) = v190;
       v191 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v191;
+      *(int *)((char *)a5 + a2) = v191;
       LOWORD(v191) = a1;
       HIWORD(v191) = __ROR4__(v191, 16) >> 16;
       LOWORD(v191) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v191;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v191;
       v192 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v192;
+      *(int *)((char *)a5 + 2 * a2) = v192;
       v193 = (char *)a5 + a2;
       LOWORD(v192) = a1;
       HIWORD(v8) = __ROR4__(v192, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v193[2 * a2] = v8;
-      *(_DWORD *)&v193[2 * a2 + 4] = v8;
+      *(int *)&v193[2 * a2] = v8;
+      *(int *)&v193[2 * a2 + 4] = v8;
       break;
     case 0x2Cu:
 LABEL_48:
@@ -92451,26 +92434,26 @@ LABEL_48:
       HIWORD(v194) = __ROL4__(a1, 16) >> 16;
       LOWORD(v194) = a1;
       *a5 = v194;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       LOWORD(v194) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v194;
+      *(int *)((char *)a5 + a2) = v194;
       HIWORD(v194) = HIWORD(a1);
       v195 = __ROL4__(a1, 16);
       LOWORD(v194) = v195;
       v196 = __ROL4__(v195, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v194;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v194;
       LOWORD(v194) = v196;
       HIWORD(v194) = __ROL4__(v194, 16) >> 16;
       LOWORD(v194) = v196;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v194;
+      *(int *)((char *)a5 + 2 * a2) = v194;
       v197 = (char *)a5 + a2;
       HIWORD(v194) = HIWORD(v196);
       v198 = __ROL4__(v196, 16);
       LOWORD(v194) = v198;
-      *(_DWORD *)&v197[2 * a2 + 4] = v194;
+      *(int *)&v197[2 * a2 + 4] = v194;
       LOWORD(v8) = __ROL4__(v198, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v197[2 * a2] = v8;
+      *(int *)&v197[2 * a2] = v8;
       break;
     case 0x2Du:
 LABEL_49:
@@ -92482,22 +92465,22 @@ LABEL_49:
       LOWORD(v199) = a1;
       HIWORD(v199) = __ROR4__(v199, 16) >> 16;
       LOWORD(v199) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v199;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v199;
+      *(int *)((char *)a5 + a2) = v199;
+      *(int *)((char *)a5 + a2 + 4) = v199;
       HIWORD(v199) = HIWORD(a1);
       v200 = __ROL4__(a1, 16);
       LOWORD(v199) = v200;
       v201 = __ROL4__(v200, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v199;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v199;
       LOWORD(v199) = v201;
       HIWORD(v199) = __ROL4__(v199, 16) >> 16;
       LOWORD(v199) = v201;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v199;
+      *(int *)((char *)a5 + 2 * a2) = v199;
       v202 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v201);
       LOWORD(v8) = __ROL4__(v201, 16);
-      *(_DWORD *)&v202[2 * a2 + 4] = v8;
-      *(_DWORD *)&v202[2 * a2] = v8;
+      *(int *)&v202[2 * a2 + 4] = v8;
+      *(int *)&v202[2 * a2] = v8;
       break;
     case 0x2Eu:
 LABEL_50:
@@ -92511,22 +92494,22 @@ LABEL_50:
       v206 = __ROL4__(v205, 16);
       LOWORD(v203) = v206;
       LOWORD(v206) = __ROL4__(v206, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v203;
+      *(int *)((char *)a5 + a2 + 4) = v203;
       LOWORD(v203) = v206;
       HIWORD(v203) = __ROL4__(v203, 16) >> 16;
       LOWORD(v203) = v206;
-      *(_DWORD *)((char *)a5 + a2) = v203;
+      *(int *)((char *)a5 + a2) = v203;
       LOWORD(v203) = v206;
       HIWORD(v203) = __ROR4__(v203, 16) >> 16;
       LOWORD(v203) = v206;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v203;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v203;
+      *(int *)((char *)a5 + 2 * a2) = v203;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v203;
       v207 = (char *)a5 + a2;
       LOWORD(v203) = v206;
       HIWORD(v8) = __ROR4__(v203, 16) >> 16;
       LOWORD(v8) = v206;
-      *(_DWORD *)&v207[2 * a2] = v8;
-      *(_DWORD *)&v207[2 * a2 + 4] = v8;
+      *(int *)&v207[2 * a2] = v8;
+      *(int *)&v207[2 * a2 + 4] = v8;
       break;
     case 0x2Fu:
 LABEL_51:
@@ -92543,19 +92526,19 @@ LABEL_51:
       v211 = __ROL4__(v210, 16);
       LOWORD(v208) = v211;
       v212 = __ROL4__(v211, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v208;
+      *(int *)((char *)a5 + a2 + 4) = v208;
       LOWORD(v208) = v212;
       HIWORD(v208) = __ROL4__(v208, 16) >> 16;
       LOWORD(v208) = v212;
-      *(_DWORD *)((char *)a5 + a2) = v208;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v212;
+      *(int *)((char *)a5 + a2) = v208;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v212;
       HIWORD(v8) = __ROL4__(v212, 16) >> 16;
       LOWORD(v8) = v212;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v213 = (char *)a5 + a2;
-      *(_DWORD *)&v213[2 * a2 + 4] = v212;
+      *(int *)&v213[2 * a2 + 4] = v212;
       LOWORD(v8) = v212;
-      *(_DWORD *)&v213[2 * a2] = v8;
+      *(int *)&v213[2 * a2] = v8;
       break;
     case 0x30u:
 LABEL_52:
@@ -92568,23 +92551,23 @@ LABEL_52:
       LOWORD(v214) = v216;
       HIWORD(v214) = __ROR4__(v214, 16) >> 16;
       LOWORD(v214) = v216;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v214;
+      *(int *)((char *)a5 + a2 + 4) = v214;
       HIWORD(v214) = HIWORD(v216);
       v217 = __ROL4__(v216, 16);
       LOWORD(v214) = v217;
       LOWORD(v217) = __ROL4__(v217, 16);
-      *(_DWORD *)((char *)a5 + a2) = v214;
+      *(int *)((char *)a5 + a2) = v214;
       LOWORD(v214) = v217;
       HIWORD(v214) = __ROR4__(v214, 16) >> 16;
       LOWORD(v214) = v217;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v214;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v214;
+      *(int *)((char *)a5 + 2 * a2) = v214;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v214;
       v218 = (char *)a5 + a2;
       LOWORD(v214) = v217;
       HIWORD(v8) = __ROR4__(v214, 16) >> 16;
       LOWORD(v8) = v217;
-      *(_DWORD *)&v218[2 * a2] = v8;
-      *(_DWORD *)&v218[2 * a2 + 4] = v8;
+      *(int *)&v218[2 * a2] = v8;
+      *(int *)&v218[2 * a2 + 4] = v8;
       break;
     case 0x31u:
 LABEL_53:
@@ -92600,25 +92583,25 @@ LABEL_53:
       LOWORD(v219) = v221;
       HIWORD(v219) = __ROR4__(v219, 16) >> 16;
       LOWORD(v219) = v221;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v219;
+      *(int *)((char *)a5 + a2 + 4) = v219;
       HIWORD(v219) = HIWORD(v221);
       v222 = __ROL4__(v221, 16);
       LOWORD(v219) = v222;
       v223 = __ROL4__(v222, 16);
-      *(_DWORD *)((char *)a5 + a2) = v219;
+      *(int *)((char *)a5 + a2) = v219;
       LOWORD(v219) = v223;
       HIWORD(v219) = __ROR4__(v219, 16) >> 16;
       LOWORD(v219) = v223;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v219;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v219;
       v224 = __ROL4__(v223, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v224;
+      *(int *)((char *)a5 + 2 * a2) = v224;
       v225 = (char *)a5 + a2;
       LOWORD(v224) = v223;
       HIWORD(v224) = __ROR4__(v224, 16) >> 16;
       LOWORD(v224) = v223;
-      *(_DWORD *)&v225[2 * a2 + 4] = v224;
+      *(int *)&v225[2 * a2 + 4] = v224;
       v8 = __ROL4__(v223, 16);
-      *(_DWORD *)&v225[2 * a2] = v8;
+      *(int *)&v225[2 * a2] = v8;
       break;
     case 0x32u:
 LABEL_54:
@@ -92631,26 +92614,26 @@ LABEL_54:
       LOWORD(v227) = a1;
       HIWORD(v227) = __ROR4__(v227, 16) >> 16;
       LOWORD(v227) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v227;
+      *(int *)((char *)a5 + a2 + 4) = v227;
       v228 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v228;
+      *(int *)((char *)a5 + a2) = v228;
       LOWORD(v228) = a1;
       HIWORD(v228) = __ROR4__(v228, 16) >> 16;
       LOWORD(v228) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v228;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v228;
       HIWORD(v228) = HIWORD(a1);
       v229 = __ROL4__(a1, 16);
       LOWORD(v228) = v229;
       v230 = __ROL4__(v229, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v228;
+      *(int *)((char *)a5 + 2 * a2) = v228;
       v231 = (char *)a5 + a2;
       LOWORD(v228) = v230;
       HIWORD(v228) = __ROR4__(v228, 16) >> 16;
       LOWORD(v228) = v230;
-      *(_DWORD *)&v231[2 * a2 + 4] = v228;
+      *(int *)&v231[2 * a2 + 4] = v228;
       HIWORD(v8) = HIWORD(v230);
       LOWORD(v8) = __ROL4__(v230, 16);
-      *(_DWORD *)&v231[2 * a2] = v8;
+      *(int *)&v231[2 * a2] = v8;
       break;
     case 0x33u:
 LABEL_55:
@@ -92662,22 +92645,22 @@ LABEL_55:
       LOWORD(v232) = a1;
       HIWORD(v232) = __ROR4__(v232, 16) >> 16;
       LOWORD(v232) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v232;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v232;
+      *(int *)((char *)a5 + a2) = v232;
+      *(int *)((char *)a5 + a2 + 4) = v232;
       LOWORD(v232) = a1;
       HIWORD(v232) = __ROR4__(v232, 16) >> 16;
       LOWORD(v232) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v232;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v232;
       HIWORD(v232) = HIWORD(a1);
       v233 = __ROL4__(a1, 16);
       LOWORD(v232) = v233;
       v234 = __ROL4__(v233, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v232;
+      *(int *)((char *)a5 + 2 * a2) = v232;
       v235 = (char *)a5 + a2;
       HIWORD(v8) = HIWORD(v234);
       LOWORD(v8) = __ROL4__(v234, 16);
-      *(_DWORD *)&v235[2 * a2 + 4] = v8;
-      *(_DWORD *)&v235[2 * a2] = v8;
+      *(int *)&v235[2 * a2 + 4] = v8;
+      *(int *)&v235[2 * a2] = v8;
       break;
     case 0x34u:
 LABEL_56:
@@ -92687,17 +92670,17 @@ LABEL_56:
       v237 = __ROL4__(a1, 16);
       LOWORD(v236) = v237;
       v238 = __ROL4__(v237, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v236;
-      *(_DWORD *)((char *)a5 + a2) = v236;
+      *(int *)((char *)a5 + a2 + 4) = v236;
+      *(int *)((char *)a5 + a2) = v236;
       HIWORD(v8) = HIWORD(v238);
       v239 = __ROL4__(v238, 16);
       LOWORD(v8) = v239;
       v240 = __ROL4__(v239, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v8;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v241 = (char *)a5 + a2;
-      *(_DWORD *)&v241[2 * a2 + 4] = __ROL4__(v240, 16);
-      *(_DWORD *)&v241[2 * a2] = v240;
+      *(int *)&v241[2 * a2 + 4] = __ROL4__(v240, 16);
+      *(int *)&v241[2 * a2] = v240;
       LOWORD(v8) = v240;
       break;
     case 0x35u:
@@ -92714,15 +92697,15 @@ LABEL_57:
       LOWORD(v242) = v244;
       HIWORD(v242) = __ROR4__(v242, 16) >> 16;
       LOWORD(v242) = v244;
-      *(_DWORD *)((char *)a5 + a2) = v242;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v242;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v244, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v244;
+      *(int *)((char *)a5 + a2) = v242;
+      *(int *)((char *)a5 + a2 + 4) = v242;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v244, 16);
+      *(int *)((char *)a5 + 2 * a2) = v244;
       v245 = (char *)a5 + a2;
       HIWORD(v8) = __ROR4__(v244, 16) >> 16;
       LOWORD(v8) = v244;
-      *(_DWORD *)&v245[2 * a2] = v8;
-      *(_DWORD *)&v245[2 * a2 + 4] = v8;
+      *(int *)&v245[2 * a2] = v8;
+      *(int *)&v245[2 * a2 + 4] = v8;
       break;
     case 0x36u:
 LABEL_58:
@@ -92732,21 +92715,21 @@ LABEL_58:
       v247 = __ROL4__(a1, 16);
       LOWORD(v246) = v247;
       v248 = __ROL4__(v247, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v246;
+      *(int *)((char *)a5 + a2 + 4) = v246;
       LOWORD(v246) = v248;
       HIWORD(v246) = __ROL4__(v246, 16) >> 16;
       LOWORD(v246) = v248;
-      *(_DWORD *)((char *)a5 + a2) = v246;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v248;
+      *(int *)((char *)a5 + a2) = v246;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v248;
       HIWORD(v246) = __ROL4__(v248, 16) >> 16;
       LOWORD(v246) = v248;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v246;
+      *(int *)((char *)a5 + 2 * a2) = v246;
       v249 = (char *)a5 + a2;
       LOWORD(v246) = v248;
       HIWORD(v8) = __ROR4__(v246, 16) >> 16;
       LOWORD(v8) = v248;
-      *(_DWORD *)&v249[2 * a2] = v8;
-      *(_DWORD *)&v249[2 * a2 + 4] = v8;
+      *(int *)&v249[2 * a2] = v8;
+      *(int *)&v249[2 * a2 + 4] = v8;
       break;
     case 0x37u:
 LABEL_59:
@@ -92759,22 +92742,22 @@ LABEL_59:
       LOWORD(v250) = v251;
       v252 = __ROL4__(v251, 16);
       *a5 = v250;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v252, 16);
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v252, 16);
       HIWORD(v250) = HIWORD(v252);
-      *(_DWORD *)((char *)a5 + a2) = v252;
+      *(int *)((char *)a5 + a2) = v252;
       v253 = __ROL4__(v252, 16);
       LOWORD(v250) = v253;
       v254 = __ROL4__(v253, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v250;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v250;
       LOWORD(v250) = v254;
       HIWORD(v250) = __ROL4__(v250, 16) >> 16;
       LOWORD(v250) = v254;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v250;
+      *(int *)((char *)a5 + 2 * a2) = v250;
       v255 = (char *)a5 + a2;
-      *(_DWORD *)&v255[2 * a2 + 4] = v254;
+      *(int *)&v255[2 * a2 + 4] = v254;
       HIWORD(v8) = __ROL4__(v254, 16) >> 16;
       LOWORD(v8) = v254;
-      *(_DWORD *)&v255[2 * a2] = v8;
+      *(int *)&v255[2 * a2] = v8;
       break;
     case 0x38u:
 LABEL_60:
@@ -92787,22 +92770,22 @@ LABEL_60:
       LOWORD(v257) = a1;
       HIWORD(v257) = __ROR4__(v257, 16) >> 16;
       LOWORD(v257) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v257;
+      *(int *)((char *)a5 + a2 + 4) = v257;
       HIWORD(v257) = HIWORD(a1);
       v258 = __ROL4__(a1, 16);
       LOWORD(v257) = v258;
       v259 = __ROL4__(v258, 16);
-      *(_DWORD *)((char *)a5 + a2) = v257;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v259, 16);
+      *(int *)((char *)a5 + a2) = v257;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v259, 16);
       HIWORD(v257) = HIWORD(v259);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v259;
+      *(int *)((char *)a5 + 2 * a2) = v259;
       v260 = (char *)a5 + a2;
       v261 = __ROL4__(v259, 16);
       LOWORD(v257) = v261;
-      *(_DWORD *)&v260[2 * a2 + 4] = v257;
+      *(int *)&v260[2 * a2 + 4] = v257;
       LOWORD(v8) = __ROL4__(v261, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v260[2 * a2] = v8;
+      *(int *)&v260[2 * a2] = v8;
       break;
     case 0x39u:
 LABEL_61:
@@ -92814,21 +92797,21 @@ LABEL_61:
       LOWORD(v262) = a1;
       HIWORD(v262) = __ROR4__(v262, 16) >> 16;
       LOWORD(v262) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v262;
+      *(int *)((char *)a5 + a2 + 4) = v262;
       v263 = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = v263;
+      *(int *)((char *)a5 + a2) = v263;
       LOWORD(v263) = a1;
       HIWORD(v263) = __ROR4__(v263, 16) >> 16;
       LOWORD(v263) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v263;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v263;
       HIWORD(v8) = HIWORD(a1);
       v264 = __ROL4__(a1, 16);
       LOWORD(v8) = v264;
       v265 = __ROL4__(v264, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v266 = (char *)a5 + a2;
-      *(_DWORD *)&v266[2 * a2 + 4] = __ROL4__(v265, 16);
-      *(_DWORD *)&v266[2 * a2] = v265;
+      *(int *)&v266[2 * a2 + 4] = __ROL4__(v265, 16);
+      *(int *)&v266[2 * a2] = v265;
       LOWORD(v8) = v265;
       break;
     case 0x3Au:
@@ -92838,20 +92821,20 @@ LABEL_62:
       LOWORD(v267) = a1;
       *a5 = v267;
       a5[1] = v267;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
-      *(_DWORD *)((char *)a5 + a2) = a1;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(a1, 16);
+      *(int *)((char *)a5 + a2) = a1;
       HIWORD(v267) = __ROR4__(a1, 16) >> 16;
       LOWORD(v267) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v267;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v267;
+      *(int *)((char *)a5 + 2 * a2) = v267;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v267;
       v268 = (char *)a5 + a2;
       HIWORD(v267) = HIWORD(a1);
       v269 = __ROL4__(a1, 16);
       LOWORD(v267) = v269;
-      *(_DWORD *)&v268[2 * a2 + 4] = v267;
+      *(int *)&v268[2 * a2 + 4] = v267;
       LOWORD(v8) = __ROL4__(v269, 16);
       HIWORD(v8) = __ROL4__(v8, 16) >> 16;
-      *(_DWORD *)&v268[2 * a2] = v8;
+      *(int *)&v268[2 * a2] = v8;
       break;
     case 0x3Bu:
 LABEL_63:
@@ -92859,24 +92842,24 @@ LABEL_63:
       *a5 = a1;
       HIWORD(v270) = __ROR4__(a1, 16) >> 16;
       LOWORD(v270) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v270;
+      *(int *)((char *)a5 + a2 + 4) = v270;
       HIWORD(v270) = HIWORD(a1);
       v271 = __ROL4__(a1, 16);
       LOWORD(v270) = v271;
       v272 = __ROL4__(v271, 16);
-      *(_DWORD *)((char *)a5 + a2) = v270;
+      *(int *)((char *)a5 + a2) = v270;
       LOWORD(v270) = v272;
       HIWORD(v270) = __ROR4__(v270, 16) >> 16;
       LOWORD(v270) = v272;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v270;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v270;
       v273 = __ROL4__(v272, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v273;
+      *(int *)((char *)a5 + 2 * a2) = v273;
       v274 = (char *)a5 + a2;
       LOWORD(v273) = v272;
       HIWORD(v8) = __ROR4__(v273, 16) >> 16;
       LOWORD(v8) = v272;
-      *(_DWORD *)&v274[2 * a2] = v8;
-      *(_DWORD *)&v274[2 * a2 + 4] = v8;
+      *(int *)&v274[2 * a2] = v8;
+      *(int *)&v274[2 * a2 + 4] = v8;
       break;
     case 0x3Cu:
 LABEL_64:
@@ -92889,23 +92872,23 @@ LABEL_64:
       HIWORD(v275) = __ROL4__(v275, 16) >> 16;
       LOWORD(v275) = v277;
       *a5 = v275;
-      *(_DWORD *)((char *)a5 + a2 + 4) = __ROL4__(v277, 16);
-      *(_DWORD *)((char *)a5 + a2) = v277;
+      *(int *)((char *)a5 + a2 + 4) = __ROL4__(v277, 16);
+      *(int *)((char *)a5 + a2) = v277;
       HIWORD(v275) = __ROR4__(v277, 16) >> 16;
       LOWORD(v275) = v277;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v275;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v275;
       HIWORD(v275) = HIWORD(v277);
       v278 = __ROL4__(v277, 16);
       LOWORD(v275) = v278;
       v279 = __ROL4__(v278, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v275;
+      *(int *)((char *)a5 + 2 * a2) = v275;
       v280 = (char *)a5 + a2;
       LOWORD(v275) = v279;
       HIWORD(v275) = __ROR4__(v275, 16) >> 16;
       LOWORD(v275) = v279;
-      *(_DWORD *)&v280[2 * a2 + 4] = v275;
+      *(int *)&v280[2 * a2 + 4] = v275;
       v8 = __ROL4__(v279, 16);
-      *(_DWORD *)&v280[2 * a2] = v8;
+      *(int *)&v280[2 * a2] = v8;
       break;
     case 0x3Du:
 LABEL_65:
@@ -92917,20 +92900,20 @@ LABEL_65:
       v282 = __ROL4__(a1, 16);
       LOWORD(v281) = v282;
       v283 = __ROL4__(v282, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v281;
+      *(int *)((char *)a5 + a2 + 4) = v281;
       LOWORD(v281) = v283;
       HIWORD(v281) = __ROL4__(v281, 16) >> 16;
       LOWORD(v281) = v283;
-      *(_DWORD *)((char *)a5 + a2) = v281;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v283, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2) = v283;
+      *(int *)((char *)a5 + a2) = v281;
+      *(int *)((char *)a5 + 2 * a2 + 4) = __ROL4__(v283, 16);
+      *(int *)((char *)a5 + 2 * a2) = v283;
       v284 = (char *)a5 + a2;
       HIWORD(v281) = __ROR4__(v283, 16) >> 16;
       LOWORD(v281) = v283;
-      *(_DWORD *)&v284[2 * a2 + 4] = v281;
+      *(int *)&v284[2 * a2 + 4] = v281;
       HIWORD(v8) = HIWORD(v283);
       LOWORD(v8) = __ROL4__(v283, 16);
-      *(_DWORD *)&v284[2 * a2] = v8;
+      *(int *)&v284[2 * a2] = v8;
       break;
     case 0x3Eu:
 LABEL_66:
@@ -92939,22 +92922,22 @@ LABEL_66:
       LOWORD(v285) = a1;
       *a5 = v285;
       a5[1] = v285;
-      *(_DWORD *)((char *)a5 + a2 + 4) = a1;
+      *(int *)((char *)a5 + a2 + 4) = a1;
       HIWORD(v285) = __ROL4__(a1, 16) >> 16;
       LOWORD(v285) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v285;
+      *(int *)((char *)a5 + a2) = v285;
       HIWORD(v285) = HIWORD(a1);
       v286 = __ROL4__(a1, 16);
       LOWORD(v285) = v286;
       v287 = __ROL4__(v286, 16);
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v285;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v285;
       LOWORD(v285) = v287;
       HIWORD(v8) = __ROL4__(v285, 16) >> 16;
       LOWORD(v8) = v287;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v8;
+      *(int *)((char *)a5 + 2 * a2) = v8;
       v288 = (char *)a5 + a2;
-      *(_DWORD *)&v288[2 * a2 + 4] = __ROL4__(v287, 16);
-      *(_DWORD *)&v288[2 * a2] = v287;
+      *(int *)&v288[2 * a2 + 4] = __ROL4__(v287, 16);
+      *(int *)&v288[2 * a2] = v287;
       LOWORD(v8) = v287;
       break;
     case 0x3Fu:
@@ -92969,69 +92952,69 @@ LABEL_67:
       LOWORD(v289) = v291;
       *a5 = v289;
       v292 = __ROL4__(v291, 16);
-      *(_DWORD *)((char *)a5 + a2 + 4) = v292;
+      *(int *)((char *)a5 + a2 + 4) = v292;
       LOWORD(v292) = v291;
       HIWORD(v292) = __ROL4__(v292, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)((char *)a5 + a2) = v292;
+      *(int *)((char *)a5 + a2) = v292;
       LOWORD(v292) = v291;
       HIWORD(v292) = __ROR4__(v292, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v292;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v291;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v292;
+      *(int *)((char *)a5 + 2 * a2) = v291;
       v293 = (char *)a5 + a2;
       HIWORD(v292) = __ROR4__(v291, 16) >> 16;
       LOWORD(v292) = v291;
-      *(_DWORD *)&v293[2 * a2 + 4] = v292;
+      *(int *)&v293[2 * a2 + 4] = v292;
       HIWORD(v8) = HIWORD(v291);
       LOWORD(v8) = __ROL4__(v291, 16);
-      *(_DWORD *)&v293[2 * a2] = v8;
+      *(int *)&v293[2 * a2] = v8;
       break;
     case 0x40u:
 LABEL_132:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v491 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v491 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v491) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v491;
+      *(int *)((char *)a5 + a2 + 4) = v491;
       LOWORD(v491) = a1;
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v491;
+      *(int *)((char *)a5 + a2) = v491;
       LOWORD(v491) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v491;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v491;
       LOWORD(v491) = a1;
       HIWORD(v491) = __ROL4__(v491, 16) >> 16;
       LOWORD(v491) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v491;
+      *(int *)((char *)a5 + 2 * a2) = v491;
       v492 = (char *)a5 + a2;
       v493 = &a4[a2];
-      *(_DWORD *)&v492[2 * a2 + 4] = *(_DWORD *)&v493[2 * a2 + 4];
-      v8 = *(_DWORD *)&v493[2 * a2];
-      *(_DWORD *)&v492[2 * a2] = v8;
+      *(int *)&v492[2 * a2 + 4] = *(int *)&v493[2 * a2 + 4];
+      v8 = *(int *)&v493[2 * a2];
+      *(int *)&v492[2 * a2] = v8;
       break;
     case 0x41u:
 LABEL_133:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v494 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v494;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v494 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v494;
       LOWORD(v494) = a1;
       HIWORD(v494) = __ROR4__(v494, 16) >> 16;
       LOWORD(v494) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v494;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v494;
+      *(int *)((char *)a5 + 2 * a2) = v494;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v494;
       v495 = (char *)a5 + a2;
       LOWORD(v494) = a1;
       HIWORD(v8) = __ROR4__(v494, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v495[2 * a2] = v8;
-      *(_DWORD *)&v495[2 * a2 + 4] = v8;
+      *(int *)&v495[2 * a2] = v8;
+      *(int *)&v495[2 * a2 + 4] = v8;
       break;
     case 0x42u:
 LABEL_134:
@@ -93039,43 +93022,43 @@ LABEL_134:
       HIWORD(v496) = __ROR4__(v5, 16) >> 16;
       LOWORD(v496) = a1;
       a5[1] = v496;
-      v497 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v497 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v497) = a1;
       HIWORD(v497) = __ROR4__(v497, 16) >> 16;
       LOWORD(v497) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v497;
-      v498 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v498;
+      *(int *)((char *)a5 + a2 + 4) = v497;
+      v498 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v498;
       LOWORD(v498) = a1;
       HIWORD(v498) = __ROR4__(v498, 16) >> 16;
       LOWORD(v498) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v498;
-      v499 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v499;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v498;
+      v499 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v499;
       v500 = (char *)a5 + a2;
       LOWORD(v499) = a1;
       HIWORD(v499) = __ROR4__(v499, 16) >> 16;
       LOWORD(v499) = a1;
-      *(_DWORD *)&v500[2 * a2 + 4] = v499;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v500[2 * a2] = v8;
+      *(int *)&v500[2 * a2 + 4] = v499;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v500[2 * a2] = v8;
       break;
     case 0x43u:
 LABEL_135:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v501 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v501;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v501 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v501;
       v502 = (char *)a5 + a2;
       LOWORD(v501) = a1;
       HIWORD(v8) = __ROR4__(v501, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v502[2 * a2] = v8;
-      *(_DWORD *)&v502[2 * a2 + 4] = v8;
+      *(int *)&v502[2 * a2] = v8;
+      *(int *)&v502[2 * a2 + 4] = v8;
       break;
     case 0x44u:
 LABEL_136:
@@ -93083,28 +93066,28 @@ LABEL_136:
       HIWORD(v503) = __ROL4__(v5, 16) >> 16;
       LOWORD(v503) = *((_WORD *)a4 + 2);
       a5[1] = v503;
-      v504 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v504 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v504) = a1;
       HIWORD(v504) = __ROL4__(v504, 16) >> 16;
       LOWORD(v504) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v504;
-      v505 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v505;
+      *(int *)((char *)a5 + a2 + 4) = v504;
+      v505 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v505;
       LOWORD(v505) = a1;
       HIWORD(v505) = __ROL4__(v505, 16) >> 16;
       LOWORD(v505) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v505;
-      v506 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v506;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v505;
+      v506 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v506;
       v507 = (char *)a5 + a2;
       v508 = &a4[a2];
       LOWORD(v506) = a1;
       HIWORD(v506) = __ROL4__(v506, 16) >> 16;
       LOWORD(v506) = *(_WORD *)&v508[2 * a2 + 4];
-      *(_DWORD *)&v507[2 * a2 + 4] = v506;
-      v8 = *(_DWORD *)&v508[2 * a2];
-      *(_DWORD *)&v507[2 * a2] = v8;
+      *(int *)&v507[2 * a2 + 4] = v506;
+      v8 = *(int *)&v508[2 * a2];
+      *(int *)&v507[2 * a2] = v8;
       break;
     case 0x45u:
 LABEL_137:
@@ -93113,44 +93096,44 @@ LABEL_137:
       LOWORD(v509) = a1;
       *a5 = v509;
       a5[1] = v509;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v510 = (char *)a5 + a2;
       v511 = &a4[a2];
-      *(_DWORD *)&v510[2 * a2 + 4] = *(_DWORD *)&v511[2 * a2 + 4];
-      v8 = *(_DWORD *)&v511[2 * a2];
-      *(_DWORD *)&v510[2 * a2] = v8;
+      *(int *)&v510[2 * a2 + 4] = *(int *)&v511[2 * a2 + 4];
+      v8 = *(int *)&v511[2 * a2];
+      *(int *)&v510[2 * a2] = v8;
       break;
     case 0x46u:
 LABEL_138:
-      v512 = *((_DWORD *)a4 + 1);
+      v512 = *((int *)a4 + 1);
       a5[1] = v512;
       LOWORD(v512) = *((_WORD *)a4 + 1);
       HIWORD(v512) = __ROL4__(v512, 16) >> 16;
       LOWORD(v512) = a1;
       *a5 = v512;
-      v513 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v513;
+      v513 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v513;
       LOWORD(v513) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v513) = __ROL4__(v513, 16) >> 16;
       LOWORD(v513) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v513;
-      v514 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v514;
+      *(int *)((char *)a5 + a2) = v513;
+      v514 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v514;
       LOWORD(v514) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v514) = __ROL4__(v514, 16) >> 16;
       LOWORD(v514) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v514;
+      *(int *)((char *)a5 + 2 * a2) = v514;
       v515 = (char *)a5 + a2;
       v516 = &a4[a2];
-      v517 = *(_DWORD *)&v516[2 * a2 + 4];
-      *(_DWORD *)&v515[2 * a2 + 4] = v517;
+      v517 = *(int *)&v516[2 * a2 + 4];
+      *(int *)&v515[2 * a2 + 4] = v517;
       LOWORD(v517) = *(_WORD *)&v516[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v517, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v515[2 * a2] = v8;
+      *(int *)&v515[2 * a2] = v8;
       break;
     case 0x47u:
 LABEL_139:
@@ -93158,28 +93141,28 @@ LABEL_139:
       HIWORD(v518) = __ROL4__(v5, 16) >> 16;
       LOWORD(v518) = *((_WORD *)a4 + 2);
       a5[1] = v518;
-      v519 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v519 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v519) = a1;
       HIWORD(v519) = __ROR4__(v519, 16) >> 16;
       LOWORD(v519) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v519;
-      v520 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v520;
+      *(int *)((char *)a5 + a2 + 4) = v519;
+      v520 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v520;
       LOWORD(v520) = a1;
       HIWORD(v520) = __ROR4__(v520, 16) >> 16;
       LOWORD(v520) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v520;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v520;
       LOWORD(v520) = a1;
       HIWORD(v520) = __ROL4__(v520, 16) >> 16;
       LOWORD(v520) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v520;
+      *(int *)((char *)a5 + 2 * a2) = v520;
       v521 = (char *)a5 + a2;
       LOWORD(v520) = a1;
       HIWORD(v8) = __ROR4__(v520, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v521[2 * a2] = v8;
-      *(_DWORD *)&v521[2 * a2 + 4] = v8;
+      *(int *)&v521[2 * a2] = v8;
+      *(int *)&v521[2 * a2 + 4] = v8;
       break;
     case 0x48u:
 LABEL_140:
@@ -93191,25 +93174,25 @@ LABEL_140:
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROR4__(v522, 16) >> 16;
       LOWORD(v522) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v522;
+      *(int *)((char *)a5 + a2 + 4) = v522;
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROL4__(v522, 16) >> 16;
       LOWORD(v522) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v522;
+      *(int *)((char *)a5 + a2) = v522;
       LOWORD(v522) = a1;
       HIWORD(v522) = __ROR4__(v522, 16) >> 16;
       LOWORD(v522) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v522;
-      v523 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v523;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v522;
+      v523 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v523;
       v524 = (char *)a5 + a2;
       v525 = &a4[a2];
       LOWORD(v523) = a1;
       HIWORD(v523) = __ROL4__(v523, 16) >> 16;
       LOWORD(v523) = *(_WORD *)&v525[2 * a2 + 4];
-      *(_DWORD *)&v524[2 * a2 + 4] = v523;
-      v8 = *(_DWORD *)&v525[2 * a2];
-      *(_DWORD *)&v524[2 * a2] = v8;
+      *(int *)&v524[2 * a2 + 4] = v523;
+      v8 = *(int *)&v525[2 * a2];
+      *(int *)&v524[2 * a2] = v8;
       break;
     case 0x49u:
 LABEL_141:
@@ -93221,75 +93204,75 @@ LABEL_141:
       LOWORD(v526) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v526) = __ROL4__(v526, 16) >> 16;
       LOWORD(v526) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v526;
+      *(int *)((char *)a5 + a2 + 4) = v526;
       LOWORD(v526) = a1;
       HIWORD(v526) = __ROL4__(v526, 16) >> 16;
       LOWORD(v526) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v526;
-      v527 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v527;
+      *(int *)((char *)a5 + a2) = v526;
+      v527 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v527;
       LOWORD(v527) = a1;
       HIWORD(v527) = __ROL4__(v527, 16) >> 16;
       LOWORD(v527) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v527;
+      *(int *)((char *)a5 + 2 * a2) = v527;
       v528 = (char *)a5 + a2;
       v529 = &a4[a2];
-      v530 = *(_DWORD *)&v529[2 * a2 + 4];
-      *(_DWORD *)&v528[2 * a2 + 4] = v530;
+      v530 = *(int *)&v529[2 * a2 + 4];
+      *(int *)&v528[2 * a2 + 4] = v530;
       LOWORD(v530) = *(_WORD *)&v529[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v530, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v528[2 * a2] = v8;
+      *(int *)&v528[2 * a2] = v8;
       break;
     case 0x4Au:
 LABEL_142:
-      v531 = *((_DWORD *)a4 + 1);
+      v531 = *((int *)a4 + 1);
       a5[1] = v531;
       LOWORD(v531) = *((_WORD *)a4 + 1);
       HIWORD(v531) = __ROL4__(v531, 16) >> 16;
       LOWORD(v531) = a1;
       *a5 = v531;
-      v532 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v532;
+      v532 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v532;
       LOWORD(v532) = a1;
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v532;
+      *(int *)((char *)a5 + a2) = v532;
       LOWORD(v532) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v532;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v532;
       LOWORD(v532) = a1;
       HIWORD(v532) = __ROL4__(v532, 16) >> 16;
       LOWORD(v532) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v532;
+      *(int *)((char *)a5 + 2 * a2) = v532;
       v533 = (char *)a5 + a2;
       LOWORD(v532) = a1;
       HIWORD(v8) = __ROR4__(v532, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v533[2 * a2] = v8;
-      *(_DWORD *)&v533[2 * a2 + 4] = v8;
+      *(int *)&v533[2 * a2] = v8;
+      *(int *)&v533[2 * a2 + 4] = v8;
       break;
     case 0x4Bu:
 LABEL_143:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v534 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v534;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v534 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v534;
       LOWORD(v534) = a1;
       HIWORD(v534) = __ROL4__(v534, 16) >> 16;
       LOWORD(v534) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v534;
-      v535 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v535;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v534;
+      v535 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v535;
       v536 = (char *)a5 + a2;
       LOWORD(v535) = a1;
       HIWORD(v535) = __ROR4__(v535, 16) >> 16;
       LOWORD(v535) = a1;
-      *(_DWORD *)&v536[2 * a2 + 4] = v535;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v536[2 * a2] = v8;
+      *(int *)&v536[2 * a2 + 4] = v535;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v536[2 * a2] = v8;
       break;
     case 0x4Cu:
 LABEL_144:
@@ -93297,83 +93280,83 @@ LABEL_144:
       HIWORD(v537) = __ROR4__(v5, 16) >> 16;
       LOWORD(v537) = a1;
       a5[1] = v537;
-      v538 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v538 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v538) = a1;
       HIWORD(v538) = __ROL4__(v538, 16) >> 16;
       LOWORD(v538) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v538;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v538;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v539 = (char *)a5 + a2;
       v540 = &a4[a2];
-      *(_DWORD *)&v539[2 * a2 + 4] = *(_DWORD *)&v540[2 * a2 + 4];
-      v8 = *(_DWORD *)&v540[2 * a2];
-      *(_DWORD *)&v539[2 * a2] = v8;
+      *(int *)&v539[2 * a2 + 4] = *(int *)&v540[2 * a2 + 4];
+      v8 = *(int *)&v540[2 * a2];
+      *(int *)&v539[2 * a2] = v8;
       break;
     case 0x4Du:
 LABEL_145:
-      v541 = *((_DWORD *)a4 + 1);
+      v541 = *((int *)a4 + 1);
       a5[1] = v541;
       LOWORD(v541) = a1;
       HIWORD(v541) = __ROL4__(v541, 16) >> 16;
       LOWORD(v541) = a1;
       *a5 = v541;
-      v542 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v542;
+      v542 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v542;
       LOWORD(v542) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v542) = __ROL4__(v542, 16) >> 16;
       LOWORD(v542) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v542;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v542;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v543 = (char *)a5 + a2;
       v544 = &a4[a2];
-      *(_DWORD *)&v543[2 * a2 + 4] = *(_DWORD *)&v544[2 * a2 + 4];
-      v8 = *(_DWORD *)&v544[2 * a2];
-      *(_DWORD *)&v543[2 * a2] = v8;
+      *(int *)&v543[2 * a2 + 4] = *(int *)&v544[2 * a2 + 4];
+      v8 = *(int *)&v544[2 * a2];
+      *(int *)&v543[2 * a2] = v8;
       break;
     case 0x4Eu:
 LABEL_146:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v545 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v545;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v545 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v545;
       LOWORD(v545) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v545) = __ROL4__(v545, 16) >> 16;
       LOWORD(v545) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v545;
+      *(int *)((char *)a5 + 2 * a2) = v545;
       v546 = (char *)a5 + a2;
-      v547 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v546[2 * a2 + 4] = v547;
+      v547 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v546[2 * a2 + 4] = v547;
       LOWORD(v547) = a1;
       HIWORD(v8) = __ROL4__(v547, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v546[2 * a2] = v8;
+      *(int *)&v546[2 * a2] = v8;
       break;
     case 0x4Fu:
 LABEL_147:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v548 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v548;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v548 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v548;
       LOWORD(v548) = a1;
       HIWORD(v548) = __ROR4__(v548, 16) >> 16;
       LOWORD(v548) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v548;
-      v549 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v549;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v548;
+      v549 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v549;
       v550 = (char *)a5 + a2;
       LOWORD(v549) = a1;
       HIWORD(v549) = __ROR4__(v549, 16) >> 16;
       LOWORD(v549) = a1;
-      *(_DWORD *)&v550[2 * a2 + 4] = v549;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v550[2 * a2] = v8;
+      *(int *)&v550[2 * a2 + 4] = v549;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v550[2 * a2] = v8;
       break;
     case 0x50u:
 LABEL_148:
@@ -93381,83 +93364,83 @@ LABEL_148:
       HIWORD(v551) = __ROR4__(v5, 16) >> 16;
       LOWORD(v551) = a1;
       a5[1] = v551;
-      v552 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v552 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v552) = a1;
       HIWORD(v552) = __ROR4__(v552, 16) >> 16;
       LOWORD(v552) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v552;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v552;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v553 = (char *)a5 + a2;
       v554 = &a4[a2];
-      *(_DWORD *)&v553[2 * a2 + 4] = *(_DWORD *)&v554[2 * a2 + 4];
-      v8 = *(_DWORD *)&v554[2 * a2];
-      *(_DWORD *)&v553[2 * a2] = v8;
+      *(int *)&v553[2 * a2 + 4] = *(int *)&v554[2 * a2 + 4];
+      v8 = *(int *)&v554[2 * a2];
+      *(int *)&v553[2 * a2] = v8;
       break;
     case 0x51u:
 LABEL_149:
-      v555 = *((_DWORD *)a4 + 1);
+      v555 = *((int *)a4 + 1);
       a5[1] = v555;
       LOWORD(v555) = a1;
       HIWORD(v555) = __ROL4__(v555, 16) >> 16;
       LOWORD(v555) = a1;
       *a5 = v555;
-      v556 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v556;
+      v556 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v556;
       LOWORD(v556) = a1;
       HIWORD(v556) = __ROL4__(v556, 16) >> 16;
       LOWORD(v556) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v556;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v556;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v557 = (char *)a5 + a2;
       v558 = &a4[a2];
-      *(_DWORD *)&v557[2 * a2 + 4] = *(_DWORD *)&v558[2 * a2 + 4];
-      v8 = *(_DWORD *)&v558[2 * a2];
-      *(_DWORD *)&v557[2 * a2] = v8;
+      *(int *)&v557[2 * a2 + 4] = *(int *)&v558[2 * a2 + 4];
+      v8 = *(int *)&v558[2 * a2];
+      *(int *)&v557[2 * a2] = v8;
       break;
     case 0x52u:
 LABEL_150:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v559 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v559;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v559 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v559;
       LOWORD(v559) = a1;
       HIWORD(v559) = __ROL4__(v559, 16) >> 16;
       LOWORD(v559) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v559;
+      *(int *)((char *)a5 + 2 * a2) = v559;
       v560 = (char *)a5 + a2;
-      v561 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v560[2 * a2 + 4] = v561;
+      v561 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v560[2 * a2 + 4] = v561;
       LOWORD(v561) = a1;
       HIWORD(v8) = __ROL4__(v561, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v560[2 * a2] = v8;
+      *(int *)&v560[2 * a2] = v8;
       break;
     case 0x53u:
 LABEL_151:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v562 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v562 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v562) = a1;
       HIWORD(v562) = __ROR4__(v562, 16) >> 16;
       LOWORD(v562) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v562;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v562;
+      *(int *)((char *)a5 + a2) = v562;
+      *(int *)((char *)a5 + a2 + 4) = v562;
       LOWORD(v562) = a1;
       HIWORD(v562) = __ROR4__(v562, 16) >> 16;
       LOWORD(v562) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v562;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v562;
+      *(int *)((char *)a5 + 2 * a2) = v562;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v562;
       v563 = (char *)a5 + a2;
       v564 = &a4[a2];
-      *(_DWORD *)&v563[2 * a2 + 4] = *(_DWORD *)&v564[2 * a2 + 4];
-      v8 = *(_DWORD *)&v564[2 * a2];
-      *(_DWORD *)&v563[2 * a2] = v8;
+      *(int *)&v563[2 * a2 + 4] = *(int *)&v564[2 * a2 + 4];
+      v8 = *(int *)&v564[2 * a2];
+      *(int *)&v563[2 * a2] = v8;
       break;
     case 0x54u:
 LABEL_152:
@@ -93472,94 +93455,94 @@ LABEL_152:
       LOWORD(v565) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v565;
+      *(int *)((char *)a5 + a2 + 4) = v565;
       LOWORD(v565) = a1;
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v565;
+      *(int *)((char *)a5 + a2) = v565;
       LOWORD(v565) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v565;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v565;
       LOWORD(v565) = a1;
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v565;
+      *(int *)((char *)a5 + 2 * a2) = v565;
       v566 = (char *)a5 + a2;
       v567 = &a4[a2];
       LOWORD(v565) = *(_WORD *)&v567[2 * a2 + 6];
       HIWORD(v565) = __ROL4__(v565, 16) >> 16;
       LOWORD(v565) = a1;
-      *(_DWORD *)&v566[2 * a2 + 4] = v565;
+      *(int *)&v566[2 * a2 + 4] = v565;
       LOWORD(v565) = a1;
       HIWORD(v8) = __ROL4__(v565, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v567[2 * a2];
-      *(_DWORD *)&v566[2 * a2] = v8;
+      *(int *)&v566[2 * a2] = v8;
       break;
     case 0x55u:
 LABEL_153:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v568 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v568 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v568) = a1;
       HIWORD(v568) = __ROR4__(v568, 16) >> 16;
       LOWORD(v568) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v568;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v568;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v568;
+      *(int *)((char *)a5 + a2 + 4) = v568;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v569 = (char *)a5 + a2;
       v570 = &a4[a2];
-      *(_DWORD *)&v569[2 * a2 + 4] = *(_DWORD *)&v570[2 * a2 + 4];
-      v8 = *(_DWORD *)&v570[2 * a2];
-      *(_DWORD *)&v569[2 * a2] = v8;
+      *(int *)&v569[2 * a2 + 4] = *(int *)&v570[2 * a2 + 4];
+      v8 = *(int *)&v570[2 * a2];
+      *(int *)&v569[2 * a2] = v8;
       break;
     case 0x56u:
 LABEL_154:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v571 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v571;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v571 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v571;
       LOWORD(v571) = a1;
       HIWORD(v571) = __ROR4__(v571, 16) >> 16;
       LOWORD(v571) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v571;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v571;
+      *(int *)((char *)a5 + 2 * a2) = v571;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v571;
       v572 = (char *)a5 + a2;
       v573 = &a4[a2];
-      *(_DWORD *)&v572[2 * a2 + 4] = *(_DWORD *)&v573[2 * a2 + 4];
-      v8 = *(_DWORD *)&v573[2 * a2];
-      *(_DWORD *)&v572[2 * a2] = v8;
+      *(int *)&v572[2 * a2 + 4] = *(int *)&v573[2 * a2 + 4];
+      v8 = *(int *)&v573[2 * a2];
+      *(int *)&v572[2 * a2] = v8;
       break;
     case 0x57u:
 LABEL_155:
-      v574 = *((_DWORD *)a4 + 1);
+      v574 = *((int *)a4 + 1);
       a5[1] = v574;
       LOWORD(v574) = a1;
       HIWORD(v574) = __ROL4__(v574, 16) >> 16;
       LOWORD(v574) = *(_WORD *)a4;
       *a5 = v574;
-      v575 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v575;
+      v575 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v575;
       LOWORD(v575) = a1;
       HIWORD(v575) = __ROL4__(v575, 16) >> 16;
       LOWORD(v575) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v575;
-      v576 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v576;
+      *(int *)((char *)a5 + a2) = v575;
+      v576 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v576;
       LOWORD(v576) = a1;
       HIWORD(v576) = __ROL4__(v576, 16) >> 16;
       LOWORD(v576) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v576;
+      *(int *)((char *)a5 + 2 * a2) = v576;
       v577 = (char *)a5 + a2;
       v578 = &a4[a2];
-      v579 = *(_DWORD *)&v578[2 * a2 + 4];
-      *(_DWORD *)&v577[2 * a2 + 4] = v579;
+      v579 = *(int *)&v578[2 * a2 + 4];
+      *(int *)&v577[2 * a2 + 4] = v579;
       LOWORD(v579) = a1;
       HIWORD(v8) = __ROL4__(v579, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v578[2 * a2];
-      *(_DWORD *)&v577[2 * a2] = v8;
+      *(int *)&v577[2 * a2] = v8;
       break;
     case 0x58u:
 LABEL_156:
@@ -93567,50 +93550,50 @@ LABEL_156:
       HIWORD(v580) = __ROL4__(v5, 16) >> 16;
       LOWORD(v580) = a1;
       a5[1] = v580;
-      v581 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v581 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v581) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v581) = __ROL4__(v581, 16) >> 16;
       LOWORD(v581) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v581;
-      v582 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v582;
+      *(int *)((char *)a5 + a2 + 4) = v581;
+      v582 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v582;
       LOWORD(v582) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v582) = __ROL4__(v582, 16) >> 16;
       LOWORD(v582) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v582;
-      v583 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v583;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v582;
+      v583 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v583;
       v584 = (char *)a5 + a2;
       v585 = &a4[a2];
       LOWORD(v583) = *(_WORD *)&v585[2 * a2 + 6];
       HIWORD(v583) = __ROL4__(v583, 16) >> 16;
       LOWORD(v583) = a1;
-      *(_DWORD *)&v584[2 * a2 + 4] = v583;
-      v8 = *(_DWORD *)&v585[2 * a2];
-      *(_DWORD *)&v584[2 * a2] = v8;
+      *(int *)&v584[2 * a2 + 4] = v583;
+      v8 = *(int *)&v585[2 * a2];
+      *(int *)&v584[2 * a2] = v8;
       break;
     case 0x59u:
 LABEL_157:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v586 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v586;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v586 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v586;
       LOWORD(v586) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v586) = __ROL4__(v586, 16) >> 16;
       LOWORD(v586) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v586;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v586;
       LOWORD(v586) = a1;
       HIWORD(v586) = __ROL4__(v586, 16) >> 16;
       LOWORD(v586) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v586;
+      *(int *)((char *)a5 + 2 * a2) = v586;
       v587 = (char *)a5 + a2;
       LOWORD(v586) = a1;
       HIWORD(v8) = __ROR4__(v586, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v587[2 * a2] = v8;
-      *(_DWORD *)&v587[2 * a2 + 4] = v8;
+      *(int *)&v587[2 * a2] = v8;
+      *(int *)&v587[2 * a2 + 4] = v8;
       break;
     case 0x5Au:
 LABEL_158:
@@ -93618,28 +93601,28 @@ LABEL_158:
       HIWORD(v588) = __ROL4__(v5, 16) >> 16;
       LOWORD(v588) = *((_WORD *)a4 + 2);
       a5[1] = v588;
-      v589 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v589 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v589) = a1;
       HIWORD(v589) = __ROR4__(v589, 16) >> 16;
       LOWORD(v589) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v589;
-      v590 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v590;
+      *(int *)((char *)a5 + a2 + 4) = v589;
+      v590 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v590;
       LOWORD(v590) = a1;
       HIWORD(v590) = __ROR4__(v590, 16) >> 16;
       LOWORD(v590) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v590;
-      v591 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v591;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v590;
+      v591 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v591;
       v592 = (char *)a5 + a2;
       v593 = &a4[a2];
       LOWORD(v591) = a1;
       HIWORD(v591) = __ROL4__(v591, 16) >> 16;
       LOWORD(v591) = *(_WORD *)&v593[2 * a2 + 4];
-      *(_DWORD *)&v592[2 * a2 + 4] = v591;
-      v8 = *(_DWORD *)&v593[2 * a2];
-      *(_DWORD *)&v592[2 * a2] = v8;
+      *(int *)&v592[2 * a2 + 4] = v591;
+      v8 = *(int *)&v593[2 * a2];
+      *(int *)&v592[2 * a2] = v8;
       break;
     case 0x5Bu:
 LABEL_159:
@@ -93651,47 +93634,47 @@ LABEL_159:
       LOWORD(v594) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v594) = __ROL4__(v594, 16) >> 16;
       LOWORD(v594) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v594;
+      *(int *)((char *)a5 + a2 + 4) = v594;
       LOWORD(v594) = a1;
       HIWORD(v594) = __ROL4__(v594, 16) >> 16;
       LOWORD(v594) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v594;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v594;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v595 = (char *)a5 + a2;
       v596 = &a4[a2];
-      *(_DWORD *)&v595[2 * a2 + 4] = *(_DWORD *)&v596[2 * a2 + 4];
-      v8 = *(_DWORD *)&v596[2 * a2];
-      *(_DWORD *)&v595[2 * a2] = v8;
+      *(int *)&v595[2 * a2 + 4] = *(int *)&v596[2 * a2 + 4];
+      v8 = *(int *)&v596[2 * a2];
+      *(int *)&v595[2 * a2] = v8;
       break;
     case 0x5Cu:
 LABEL_160:
-      v597 = *((_DWORD *)a4 + 1);
+      v597 = *((int *)a4 + 1);
       a5[1] = v597;
       LOWORD(v597) = *((_WORD *)a4 + 1);
       HIWORD(v597) = __ROL4__(v597, 16) >> 16;
       LOWORD(v597) = a1;
       *a5 = v597;
-      v598 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v598;
+      v598 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v598;
       LOWORD(v598) = a1;
       HIWORD(v598) = __ROL4__(v598, 16) >> 16;
       LOWORD(v598) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v598;
-      v599 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v599;
+      *(int *)((char *)a5 + a2) = v598;
+      v599 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v599;
       LOWORD(v599) = a1;
       HIWORD(v599) = __ROL4__(v599, 16) >> 16;
       LOWORD(v599) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v599;
+      *(int *)((char *)a5 + 2 * a2) = v599;
       v600 = (char *)a5 + a2;
       v601 = &a4[a2];
-      v602 = *(_DWORD *)&v601[2 * a2 + 4];
-      *(_DWORD *)&v600[2 * a2 + 4] = v602;
+      v602 = *(int *)&v601[2 * a2 + 4];
+      *(int *)&v600[2 * a2 + 4] = v602;
       LOWORD(v602) = *(_WORD *)&v601[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v602, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v600[2 * a2] = v8;
+      *(int *)&v600[2 * a2] = v8;
       break;
     case 0x5Du:
 LABEL_161:
@@ -93699,54 +93682,54 @@ LABEL_161:
       HIWORD(v603) = __ROR4__(v5, 16) >> 16;
       LOWORD(v603) = a1;
       a5[1] = v603;
-      v604 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v604 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v604) = a1;
       HIWORD(v604) = __ROL4__(v604, 16) >> 16;
       LOWORD(v604) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v604;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v605 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v605;
+      *(int *)((char *)a5 + a2 + 4) = v604;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v605 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v605;
       LOWORD(v605) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v605) = __ROL4__(v605, 16) >> 16;
       LOWORD(v605) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v605;
+      *(int *)((char *)a5 + 2 * a2) = v605;
       v606 = (char *)a5 + a2;
-      v607 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v606[2 * a2 + 4] = v607;
+      v607 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v606[2 * a2 + 4] = v607;
       LOWORD(v607) = a1;
       HIWORD(v8) = __ROL4__(v607, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v606[2 * a2] = v8;
+      *(int *)&v606[2 * a2] = v8;
       break;
     case 0x5Eu:
 LABEL_162:
-      v608 = *((_DWORD *)a4 + 1);
+      v608 = *((int *)a4 + 1);
       a5[1] = v608;
       LOWORD(v608) = a1;
       HIWORD(v608) = __ROL4__(v608, 16) >> 16;
       LOWORD(v608) = a1;
       *a5 = v608;
-      v609 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v609;
+      v609 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v609;
       LOWORD(v609) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v609) = __ROL4__(v609, 16) >> 16;
       LOWORD(v609) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v609;
+      *(int *)((char *)a5 + a2) = v609;
       LOWORD(v609) = a1;
       HIWORD(v609) = __ROL4__(v609, 16) >> 16;
       LOWORD(v609) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v609;
-      v610 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v610;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v609;
+      v610 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v610;
       v611 = (char *)a5 + a2;
       LOWORD(v610) = a1;
       HIWORD(v610) = __ROR4__(v610, 16) >> 16;
       LOWORD(v610) = a1;
-      *(_DWORD *)&v611[2 * a2 + 4] = v610;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v611[2 * a2] = v8;
+      *(int *)&v611[2 * a2 + 4] = v610;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v611[2 * a2] = v8;
       break;
     case 0x5Fu:
 LABEL_163:
@@ -93754,74 +93737,74 @@ LABEL_163:
       HIWORD(v612) = __ROR4__(v5, 16) >> 16;
       LOWORD(v612) = a1;
       a5[1] = v612;
-      v613 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v613 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v613) = a1;
       HIWORD(v613) = __ROR4__(v613, 16) >> 16;
       LOWORD(v613) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v613;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v614 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v614;
+      *(int *)((char *)a5 + a2 + 4) = v613;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v614 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v614;
       LOWORD(v614) = a1;
       HIWORD(v614) = __ROL4__(v614, 16) >> 16;
       LOWORD(v614) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v614;
+      *(int *)((char *)a5 + 2 * a2) = v614;
       v615 = (char *)a5 + a2;
-      v616 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v615[2 * a2 + 4] = v616;
+      v616 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v615[2 * a2 + 4] = v616;
       LOWORD(v616) = a1;
       HIWORD(v8) = __ROL4__(v616, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v615[2 * a2] = v8;
+      *(int *)&v615[2 * a2] = v8;
       break;
     case 0x60u:
 LABEL_164:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v617 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v617;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v617 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v617;
       LOWORD(v617) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v617;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v617;
       LOWORD(v617) = a1;
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v617;
+      *(int *)((char *)a5 + 2 * a2) = v617;
       v618 = (char *)a5 + a2;
       v619 = &a4[a2];
       LOWORD(v617) = *(_WORD *)&v619[2 * a2 + 6];
       HIWORD(v617) = __ROL4__(v617, 16) >> 16;
       LOWORD(v617) = a1;
-      *(_DWORD *)&v618[2 * a2 + 4] = v617;
+      *(int *)&v618[2 * a2 + 4] = v617;
       LOWORD(v617) = a1;
       HIWORD(v8) = __ROL4__(v617, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v619[2 * a2];
-      *(_DWORD *)&v618[2 * a2] = v8;
+      *(int *)&v618[2 * a2] = v8;
       break;
     case 0x61u:
 LABEL_165:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v620 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v620 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v620) = a1;
       HIWORD(v620) = __ROR4__(v620, 16) >> 16;
       LOWORD(v620) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v620;
-      v621 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v621;
+      *(int *)((char *)a5 + a2 + 4) = v620;
+      v621 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v621;
       LOWORD(v621) = a1;
       HIWORD(v621) = __ROR4__(v621, 16) >> 16;
       LOWORD(v621) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v621;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v621;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v622 = (char *)a5 + a2;
       v623 = &a4[a2];
-      *(_DWORD *)&v622[2 * a2 + 4] = *(_DWORD *)&v623[2 * a2 + 4];
-      v8 = *(_DWORD *)&v623[2 * a2];
-      *(_DWORD *)&v622[2 * a2] = v8;
+      *(int *)&v622[2 * a2 + 4] = *(int *)&v623[2 * a2 + 4];
+      v8 = *(int *)&v623[2 * a2];
+      *(int *)&v622[2 * a2] = v8;
       break;
     case 0x62u:
 LABEL_166:
@@ -93836,62 +93819,62 @@ LABEL_166:
       LOWORD(v624) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v624) = __ROL4__(v624, 16) >> 16;
       LOWORD(v624) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v624;
+      *(int *)((char *)a5 + a2 + 4) = v624;
       LOWORD(v624) = a1;
       HIWORD(v624) = __ROL4__(v624, 16) >> 16;
       LOWORD(v624) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v624;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v624;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v625 = (char *)a5 + a2;
       v626 = &a4[a2];
-      *(_DWORD *)&v625[2 * a2 + 4] = *(_DWORD *)&v626[2 * a2 + 4];
-      v8 = *(_DWORD *)&v626[2 * a2];
-      *(_DWORD *)&v625[2 * a2] = v8;
+      *(int *)&v625[2 * a2 + 4] = *(int *)&v626[2 * a2 + 4];
+      v8 = *(int *)&v626[2 * a2];
+      *(int *)&v625[2 * a2] = v8;
       break;
     case 0x63u:
 LABEL_167:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v627 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v627;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v627 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v627;
       LOWORD(v627) = a1;
       HIWORD(v627) = __ROL4__(v627, 16) >> 16;
       LOWORD(v627) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v627;
-      v628 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v628;
+      *(int *)((char *)a5 + a2) = v627;
+      v628 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v628;
       LOWORD(v628) = a1;
       HIWORD(v628) = __ROL4__(v628, 16) >> 16;
       LOWORD(v628) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v628;
+      *(int *)((char *)a5 + 2 * a2) = v628;
       v629 = (char *)a5 + a2;
       v630 = &a4[a2];
-      *(_DWORD *)&v629[2 * a2 + 4] = *(_DWORD *)&v630[2 * a2 + 4];
-      v8 = *(_DWORD *)&v630[2 * a2];
-      *(_DWORD *)&v629[2 * a2] = v8;
+      *(int *)&v629[2 * a2 + 4] = *(int *)&v630[2 * a2 + 4];
+      v8 = *(int *)&v630[2 * a2];
+      *(int *)&v629[2 * a2] = v8;
       break;
     case 0x64u:
 LABEL_168:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v631 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v631;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v631 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v631;
       LOWORD(v631) = a1;
       HIWORD(v631) = __ROL4__(v631, 16) >> 16;
       LOWORD(v631) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v631;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v631;
       LOWORD(v631) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v631) = __ROL4__(v631, 16) >> 16;
       LOWORD(v631) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v631;
+      *(int *)((char *)a5 + 2 * a2) = v631;
       v632 = (char *)a5 + a2;
       LOWORD(v631) = a1;
       HIWORD(v8) = __ROR4__(v631, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v632[2 * a2] = v8;
-      *(_DWORD *)&v632[2 * a2 + 4] = v8;
+      *(int *)&v632[2 * a2] = v8;
+      *(int *)&v632[2 * a2 + 4] = v8;
       break;
     case 0x65u:
 LABEL_169:
@@ -93899,27 +93882,27 @@ LABEL_169:
       HIWORD(v633) = __ROR4__(v5, 16) >> 16;
       LOWORD(v633) = a1;
       a5[1] = v633;
-      v634 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v634 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v634) = a1;
       HIWORD(v634) = __ROL4__(v634, 16) >> 16;
       LOWORD(v634) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v634;
-      v635 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v635;
+      *(int *)((char *)a5 + a2 + 4) = v634;
+      v635 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v635;
       LOWORD(v635) = a1;
       HIWORD(v635) = __ROL4__(v635, 16) >> 16;
       LOWORD(v635) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v635;
-      v636 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v636;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v635;
+      v636 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v636;
       v637 = (char *)a5 + a2;
       LOWORD(v636) = a1;
       HIWORD(v636) = __ROR4__(v636, 16) >> 16;
       LOWORD(v636) = a1;
-      *(_DWORD *)&v637[2 * a2 + 4] = v636;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v637[2 * a2] = v8;
+      *(int *)&v637[2 * a2 + 4] = v636;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v637[2 * a2] = v8;
       break;
     case 0x66u:
 LABEL_170:
@@ -93931,88 +93914,88 @@ LABEL_170:
       LOWORD(v638) = a1;
       HIWORD(v638) = __ROL4__(v638, 16) >> 16;
       LOWORD(v638) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v638;
+      *(int *)((char *)a5 + a2 + 4) = v638;
       LOWORD(v638) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v638) = __ROL4__(v638, 16) >> 16;
       LOWORD(v638) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v638;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v638;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v639 = (char *)a5 + a2;
       v640 = &a4[a2];
-      *(_DWORD *)&v639[2 * a2 + 4] = *(_DWORD *)&v640[2 * a2 + 4];
-      v8 = *(_DWORD *)&v640[2 * a2];
-      *(_DWORD *)&v639[2 * a2] = v8;
+      *(int *)&v639[2 * a2 + 4] = *(int *)&v640[2 * a2 + 4];
+      v8 = *(int *)&v640[2 * a2];
+      *(int *)&v639[2 * a2] = v8;
       break;
     case 0x67u:
 LABEL_171:
-      v641 = *((_DWORD *)a4 + 1);
+      v641 = *((int *)a4 + 1);
       a5[1] = v641;
       LOWORD(v641) = a1;
       HIWORD(v641) = __ROL4__(v641, 16) >> 16;
       LOWORD(v641) = a1;
       *a5 = v641;
-      v642 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v642;
+      v642 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v642;
       LOWORD(v642) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v642) = __ROL4__(v642, 16) >> 16;
       LOWORD(v642) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v642;
-      v643 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v643;
+      *(int *)((char *)a5 + a2) = v642;
+      v643 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v643;
       LOWORD(v643) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v643) = __ROL4__(v643, 16) >> 16;
       LOWORD(v643) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v643;
+      *(int *)((char *)a5 + 2 * a2) = v643;
       v644 = (char *)a5 + a2;
-      v645 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v644[2 * a2 + 4] = v645;
+      v645 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v644[2 * a2 + 4] = v645;
       LOWORD(v645) = a1;
       HIWORD(v8) = __ROL4__(v645, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v644[2 * a2] = v8;
+      *(int *)&v644[2 * a2] = v8;
       break;
     case 0x68u:
 LABEL_172:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v646 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v646;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v646 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v646;
       v647 = (char *)a5 + a2;
       v648 = &a4[a2];
       LOWORD(v646) = *(_WORD *)&v648[2 * a2 + 6];
       HIWORD(v646) = __ROL4__(v646, 16) >> 16;
       LOWORD(v646) = a1;
-      *(_DWORD *)&v647[2 * a2 + 4] = v646;
+      *(int *)&v647[2 * a2 + 4] = v646;
       LOWORD(v646) = a1;
       HIWORD(v8) = __ROL4__(v646, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v648[2 * a2];
-      *(_DWORD *)&v647[2 * a2] = v8;
+      *(int *)&v647[2 * a2] = v8;
       break;
     case 0x69u:
 LABEL_173:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v649 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v649 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v649) = a1;
       HIWORD(v649) = __ROL4__(v649, 16) >> 16;
       LOWORD(v649) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v649;
-      v650 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v650;
+      *(int *)((char *)a5 + a2 + 4) = v649;
+      v650 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v650;
       LOWORD(v650) = a1;
       HIWORD(v650) = __ROL4__(v650, 16) >> 16;
       LOWORD(v650) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v650;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v650;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v651 = (char *)a5 + a2;
       v652 = &a4[a2];
-      *(_DWORD *)&v651[2 * a2 + 4] = *(_DWORD *)&v652[2 * a2 + 4];
-      v8 = *(_DWORD *)&v652[2 * a2];
-      *(_DWORD *)&v651[2 * a2] = v8;
+      *(int *)&v651[2 * a2 + 4] = *(int *)&v652[2 * a2 + 4];
+      v8 = *(int *)&v652[2 * a2];
+      *(int *)&v651[2 * a2] = v8;
       break;
     case 0x6Au:
 LABEL_174:
@@ -94024,37 +94007,37 @@ LABEL_174:
       HIWORD(v653) = __ROL4__(v653, 16) >> 16;
       LOWORD(v653) = *(_WORD *)a4;
       *a5 = v653;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v654 = (char *)a5 + a2;
       v655 = &a4[a2];
-      *(_DWORD *)&v654[2 * a2 + 4] = *(_DWORD *)&v655[2 * a2 + 4];
-      v8 = *(_DWORD *)&v655[2 * a2];
-      *(_DWORD *)&v654[2 * a2] = v8;
+      *(int *)&v654[2 * a2 + 4] = *(int *)&v655[2 * a2 + 4];
+      v8 = *(int *)&v655[2 * a2];
+      *(int *)&v654[2 * a2] = v8;
       break;
     case 0x6Bu:
 LABEL_175:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v656 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v656;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v656 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v656;
       LOWORD(v656) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v656) = __ROL4__(v656, 16) >> 16;
       LOWORD(v656) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v656;
-      v657 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v657;
+      *(int *)((char *)a5 + a2) = v656;
+      v657 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v657;
       LOWORD(v657) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v657) = __ROL4__(v657, 16) >> 16;
       LOWORD(v657) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v657;
+      *(int *)((char *)a5 + 2 * a2) = v657;
       v658 = (char *)a5 + a2;
       v659 = &a4[a2];
-      *(_DWORD *)&v658[2 * a2 + 4] = *(_DWORD *)&v659[2 * a2 + 4];
-      v8 = *(_DWORD *)&v659[2 * a2];
-      *(_DWORD *)&v658[2 * a2] = v8;
+      *(int *)&v658[2 * a2 + 4] = *(int *)&v659[2 * a2 + 4];
+      v8 = *(int *)&v659[2 * a2];
+      *(int *)&v658[2 * a2] = v8;
       break;
     case 0x6Cu:
 LABEL_176:
@@ -94062,47 +94045,47 @@ LABEL_176:
       HIWORD(v660) = __ROL4__(v5, 16) >> 16;
       LOWORD(v660) = *((_WORD *)a4 + 2);
       a5[1] = v660;
-      v661 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v661 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v661) = a1;
       HIWORD(v661) = __ROL4__(v661, 16) >> 16;
       LOWORD(v661) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v661;
-      v662 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v662;
+      *(int *)((char *)a5 + a2 + 4) = v661;
+      v662 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v662;
       LOWORD(v662) = a1;
       HIWORD(v662) = __ROR4__(v662, 16) >> 16;
       LOWORD(v662) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v662;
-      v663 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v663;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v662;
+      v663 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v663;
       v664 = (char *)a5 + a2;
       LOWORD(v663) = a1;
       HIWORD(v663) = __ROR4__(v663, 16) >> 16;
       LOWORD(v663) = a1;
-      *(_DWORD *)&v664[2 * a2 + 4] = v663;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v664[2 * a2] = v8;
+      *(int *)&v664[2 * a2 + 4] = v663;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v664[2 * a2] = v8;
       break;
     case 0x6Du:
 LABEL_177:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v665 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v665;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v665 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v665;
       LOWORD(v665) = a1;
       HIWORD(v665) = __ROR4__(v665, 16) >> 16;
       LOWORD(v665) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v665;
-      v666 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v666;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v665;
+      v666 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v666;
       v667 = (char *)a5 + a2;
       LOWORD(v666) = a1;
       HIWORD(v8) = __ROR4__(v666, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v667[2 * a2] = v8;
-      *(_DWORD *)&v667[2 * a2 + 4] = v8;
+      *(int *)&v667[2 * a2] = v8;
+      *(int *)&v667[2 * a2 + 4] = v8;
       break;
     case 0x6Eu:
 LABEL_178:
@@ -94114,15 +94097,15 @@ LABEL_178:
       LOWORD(v668) = a1;
       HIWORD(v668) = __ROR4__(v668, 16) >> 16;
       LOWORD(v668) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v668;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2 + 4) = v668;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v669 = (char *)a5 + a2;
       v670 = &a4[a2];
-      *(_DWORD *)&v669[2 * a2 + 4] = *(_DWORD *)&v670[2 * a2 + 4];
-      v8 = *(_DWORD *)&v670[2 * a2];
-      *(_DWORD *)&v669[2 * a2] = v8;
+      *(int *)&v669[2 * a2 + 4] = *(int *)&v670[2 * a2 + 4];
+      v8 = *(int *)&v670[2 * a2];
+      *(int *)&v669[2 * a2] = v8;
       break;
     case 0x6Fu:
 LABEL_179:
@@ -94130,28 +94113,28 @@ LABEL_179:
       HIWORD(v671) = __ROR4__(v5, 16) >> 16;
       LOWORD(v671) = a1;
       a5[1] = v671;
-      v672 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v672 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v672) = a1;
       HIWORD(v672) = __ROR4__(v672, 16) >> 16;
       LOWORD(v672) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v672;
-      v673 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v673;
+      *(int *)((char *)a5 + a2 + 4) = v672;
+      v673 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v673;
       LOWORD(v673) = a1;
       HIWORD(v673) = __ROL4__(v673, 16) >> 16;
       LOWORD(v673) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v673;
-      v674 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v674;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v673;
+      v674 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v674;
       v675 = (char *)a5 + a2;
       v676 = &a4[a2];
       LOWORD(v674) = a1;
       HIWORD(v674) = __ROL4__(v674, 16) >> 16;
       LOWORD(v674) = *(_WORD *)&v676[2 * a2 + 4];
-      *(_DWORD *)&v675[2 * a2 + 4] = v674;
-      v8 = *(_DWORD *)&v676[2 * a2];
-      *(_DWORD *)&v675[2 * a2] = v8;
+      *(int *)&v675[2 * a2 + 4] = v674;
+      v8 = *(int *)&v676[2 * a2];
+      *(int *)&v675[2 * a2] = v8;
       break;
     case 0x70u:
 LABEL_180:
@@ -94160,95 +94143,95 @@ LABEL_180:
       LOWORD(v677) = a1;
       *a5 = v677;
       a5[1] = v677;
-      v678 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v678;
+      v678 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v678;
       LOWORD(v678) = a1;
       HIWORD(v678) = __ROL4__(v678, 16) >> 16;
       LOWORD(v678) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v678;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v678;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v679 = (char *)a5 + a2;
       v680 = &a4[a2];
-      *(_DWORD *)&v679[2 * a2 + 4] = *(_DWORD *)&v680[2 * a2 + 4];
-      v8 = *(_DWORD *)&v680[2 * a2];
-      *(_DWORD *)&v679[2 * a2] = v8;
+      *(int *)&v679[2 * a2 + 4] = *(int *)&v680[2 * a2 + 4];
+      v8 = *(int *)&v680[2 * a2];
+      *(int *)&v679[2 * a2] = v8;
       break;
     case 0x71u:
 LABEL_181:
-      v681 = *((_DWORD *)a4 + 1);
+      v681 = *((int *)a4 + 1);
       a5[1] = v681;
       LOWORD(v681) = a1;
       HIWORD(v681) = __ROL4__(v681, 16) >> 16;
       LOWORD(v681) = a1;
       *a5 = v681;
-      v682 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v682;
+      v682 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v682;
       LOWORD(v682) = a1;
       HIWORD(v682) = __ROL4__(v682, 16) >> 16;
       LOWORD(v682) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v682;
-      v683 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v683;
+      *(int *)((char *)a5 + a2) = v682;
+      v683 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v683;
       LOWORD(v683) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v683) = __ROL4__(v683, 16) >> 16;
       LOWORD(v683) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v683;
+      *(int *)((char *)a5 + 2 * a2) = v683;
       v684 = (char *)a5 + a2;
       v685 = &a4[a2];
-      v686 = *(_DWORD *)&v685[2 * a2 + 4];
-      *(_DWORD *)&v684[2 * a2 + 4] = v686;
+      v686 = *(int *)&v685[2 * a2 + 4];
+      *(int *)&v684[2 * a2 + 4] = v686;
       LOWORD(v686) = *(_WORD *)&v685[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v686, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v684[2 * a2] = v8;
+      *(int *)&v684[2 * a2] = v8;
       break;
     case 0x72u:
 LABEL_182:
-      v687 = *((_DWORD *)a4 + 1);
+      v687 = *((int *)a4 + 1);
       a5[1] = v687;
       LOWORD(v687) = *((_WORD *)a4 + 1);
       HIWORD(v687) = __ROL4__(v687, 16) >> 16;
       LOWORD(v687) = a1;
       *a5 = v687;
-      v688 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v688;
+      v688 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v688;
       LOWORD(v688) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v688) = __ROL4__(v688, 16) >> 16;
       LOWORD(v688) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v688;
-      v689 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v689;
+      *(int *)((char *)a5 + a2) = v688;
+      v689 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v689;
       LOWORD(v689) = a1;
       HIWORD(v689) = __ROL4__(v689, 16) >> 16;
       LOWORD(v689) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v689;
+      *(int *)((char *)a5 + 2 * a2) = v689;
       v690 = (char *)a5 + a2;
-      v691 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v690[2 * a2 + 4] = v691;
+      v691 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v690[2 * a2 + 4] = v691;
       LOWORD(v691) = a1;
       HIWORD(v8) = __ROL4__(v691, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v690[2 * a2] = v8;
+      *(int *)&v690[2 * a2] = v8;
       break;
     case 0x73u:
 LABEL_183:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v692 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v692;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v692 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v692;
       LOWORD(v692) = a1;
       HIWORD(v692) = __ROL4__(v692, 16) >> 16;
       LOWORD(v692) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v692;
+      *(int *)((char *)a5 + 2 * a2) = v692;
       v693 = (char *)a5 + a2;
       LOWORD(v692) = a1;
       HIWORD(v8) = __ROR4__(v692, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v693[2 * a2] = v8;
-      *(_DWORD *)&v693[2 * a2 + 4] = v8;
+      *(int *)&v693[2 * a2] = v8;
+      *(int *)&v693[2 * a2 + 4] = v8;
       break;
     case 0x74u:
 LABEL_184:
@@ -94263,48 +94246,48 @@ LABEL_184:
       LOWORD(v694) = a1;
       HIWORD(v694) = __ROR4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v694;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v694;
+      *(int *)((char *)a5 + a2) = v694;
+      *(int *)((char *)a5 + a2 + 4) = v694;
       LOWORD(v694) = a1;
       HIWORD(v694) = __ROR4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v694;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v694;
+      *(int *)((char *)a5 + 2 * a2) = v694;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v694;
       v695 = (char *)a5 + a2;
       v696 = &a4[a2];
       LOWORD(v694) = *(_WORD *)&v696[2 * a2 + 6];
       HIWORD(v694) = __ROL4__(v694, 16) >> 16;
       LOWORD(v694) = a1;
-      *(_DWORD *)&v695[2 * a2 + 4] = v694;
+      *(int *)&v695[2 * a2 + 4] = v694;
       LOWORD(v694) = a1;
       HIWORD(v8) = __ROL4__(v694, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v696[2 * a2];
-      *(_DWORD *)&v695[2 * a2] = v8;
+      *(int *)&v695[2 * a2] = v8;
       break;
     case 0x75u:
 LABEL_185:
-      v697 = *((_DWORD *)a4 + 1);
+      v697 = *((int *)a4 + 1);
       a5[1] = v697;
       LOWORD(v697) = a1;
       HIWORD(v697) = __ROL4__(v697, 16) >> 16;
       LOWORD(v697) = a1;
       *a5 = v697;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v698 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v698;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v698 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v698;
       LOWORD(v698) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v698) = __ROL4__(v698, 16) >> 16;
       LOWORD(v698) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v698;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v698;
       LOWORD(v698) = a1;
       HIWORD(v698) = __ROL4__(v698, 16) >> 16;
       LOWORD(v698) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v698;
+      *(int *)((char *)a5 + 2 * a2) = v698;
       v699 = (char *)a5 + a2;
       v700 = &a4[a2];
-      *(_DWORD *)&v699[2 * a2 + 4] = *(_DWORD *)&v700[2 * a2 + 4];
-      v8 = *(_DWORD *)&v700[2 * a2];
-      *(_DWORD *)&v699[2 * a2] = v8;
+      *(int *)&v699[2 * a2 + 4] = *(int *)&v700[2 * a2 + 4];
+      v8 = *(int *)&v700[2 * a2];
+      *(int *)&v699[2 * a2] = v8;
       break;
     case 0x76u:
 LABEL_186:
@@ -94319,23 +94302,23 @@ LABEL_186:
       LOWORD(v701) = a1;
       HIWORD(v701) = __ROR4__(v701, 16) >> 16;
       LOWORD(v701) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v701;
-      v702 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v702;
+      *(int *)((char *)a5 + a2 + 4) = v701;
+      v702 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v702;
       LOWORD(v702) = a1;
       HIWORD(v702) = __ROL4__(v702, 16) >> 16;
       LOWORD(v702) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v702;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v702;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v703 = (char *)a5 + a2;
       v704 = &a4[a2];
-      *(_DWORD *)&v703[2 * a2 + 4] = *(_DWORD *)&v704[2 * a2 + 4];
-      v8 = *(_DWORD *)&v704[2 * a2];
-      *(_DWORD *)&v703[2 * a2] = v8;
+      *(int *)&v703[2 * a2 + 4] = *(int *)&v704[2 * a2 + 4];
+      v8 = *(int *)&v704[2 * a2];
+      *(int *)&v703[2 * a2] = v8;
       break;
     case 0x77u:
 LABEL_187:
-      v705 = *((_DWORD *)a4 + 1);
+      v705 = *((int *)a4 + 1);
       a5[1] = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
@@ -94344,106 +94327,106 @@ LABEL_187:
       LOWORD(v705) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
       LOWORD(v705) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v705;
+      *(int *)((char *)a5 + a2 + 4) = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROL4__(v705, 16) >> 16;
       LOWORD(v705) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v705;
+      *(int *)((char *)a5 + a2) = v705;
       LOWORD(v705) = a1;
       HIWORD(v705) = __ROR4__(v705, 16) >> 16;
       LOWORD(v705) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v705;
-      v706 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v706;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v705;
+      v706 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v706;
       v707 = (char *)a5 + a2;
       v708 = &a4[a2];
       LOWORD(v706) = a1;
       HIWORD(v706) = __ROL4__(v706, 16) >> 16;
       LOWORD(v706) = *(_WORD *)&v708[2 * a2 + 4];
-      *(_DWORD *)&v707[2 * a2 + 4] = v706;
-      v8 = *(_DWORD *)&v708[2 * a2];
-      *(_DWORD *)&v707[2 * a2] = v8;
+      *(int *)&v707[2 * a2 + 4] = v706;
+      v8 = *(int *)&v708[2 * a2];
+      *(int *)&v707[2 * a2] = v8;
       break;
     case 0x78u:
 LABEL_188:
-      v709 = *((_DWORD *)a4 + 1);
+      v709 = *((int *)a4 + 1);
       a5[1] = v709;
       LOWORD(v709) = *((_WORD *)a4 + 1);
       HIWORD(v709) = __ROL4__(v709, 16) >> 16;
       LOWORD(v709) = a1;
       *a5 = v709;
-      v710 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v710;
+      v710 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v710;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v710;
+      *(int *)((char *)a5 + a2) = v710;
       LOWORD(v710) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v710;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v710;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROL4__(v710, 16) >> 16;
       LOWORD(v710) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v710;
+      *(int *)((char *)a5 + 2 * a2) = v710;
       v711 = (char *)a5 + a2;
       LOWORD(v710) = a1;
       HIWORD(v710) = __ROR4__(v710, 16) >> 16;
       LOWORD(v710) = a1;
-      *(_DWORD *)&v711[2 * a2 + 4] = v710;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v711[2 * a2] = v8;
+      *(int *)&v711[2 * a2 + 4] = v710;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v711[2 * a2] = v8;
       break;
     case 0x79u:
 LABEL_189:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v712 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v712;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v712 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v712;
       LOWORD(v712) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v712) = __ROL4__(v712, 16) >> 16;
       LOWORD(v712) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v712;
-      v713 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v713;
+      *(int *)((char *)a5 + a2) = v712;
+      v713 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v713;
       LOWORD(v713) = a1;
       HIWORD(v713) = __ROL4__(v713, 16) >> 16;
       LOWORD(v713) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v713;
+      *(int *)((char *)a5 + 2 * a2) = v713;
       v714 = (char *)a5 + a2;
       v715 = &a4[a2];
       LOWORD(v713) = *(_WORD *)&v715[2 * a2 + 6];
       HIWORD(v713) = __ROL4__(v713, 16) >> 16;
       LOWORD(v713) = a1;
-      *(_DWORD *)&v714[2 * a2 + 4] = v713;
+      *(int *)&v714[2 * a2 + 4] = v713;
       LOWORD(v713) = a1;
       HIWORD(v8) = __ROL4__(v713, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v715[2 * a2];
-      *(_DWORD *)&v714[2 * a2] = v8;
+      *(int *)&v714[2 * a2] = v8;
       break;
     case 0x7Au:
 LABEL_190:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v716 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v716 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v716) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v716) = __ROL4__(v716, 16) >> 16;
       LOWORD(v716) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v716;
+      *(int *)((char *)a5 + a2 + 4) = v716;
       LOWORD(v716) = a1;
       HIWORD(v716) = __ROL4__(v716, 16) >> 16;
       LOWORD(v716) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v716;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v717 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v717;
+      *(int *)((char *)a5 + a2) = v716;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v717 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v717;
       v718 = (char *)a5 + a2;
       LOWORD(v717) = a1;
       HIWORD(v717) = __ROR4__(v717, 16) >> 16;
       LOWORD(v717) = a1;
-      *(_DWORD *)&v718[2 * a2 + 4] = v717;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v718[2 * a2] = v8;
+      *(int *)&v718[2 * a2 + 4] = v717;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v718[2 * a2] = v8;
       break;
     case 0x7Bu:
 LABEL_191:
@@ -94455,23 +94438,23 @@ LABEL_191:
       HIWORD(v719) = __ROL4__(v719, 16) >> 16;
       LOWORD(v719) = *(_WORD *)a4;
       *a5 = v719;
-      v720 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v720;
+      v720 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v720;
       LOWORD(v720) = a1;
       HIWORD(v720) = __ROL4__(v720, 16) >> 16;
       LOWORD(v720) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v720;
-      v721 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v721;
+      *(int *)((char *)a5 + a2) = v720;
+      v721 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v721;
       LOWORD(v721) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v721) = __ROL4__(v721, 16) >> 16;
       LOWORD(v721) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v721;
+      *(int *)((char *)a5 + 2 * a2) = v721;
       v722 = (char *)a5 + a2;
       v723 = &a4[a2];
-      *(_DWORD *)&v722[2 * a2 + 4] = *(_DWORD *)&v723[2 * a2 + 4];
-      v8 = *(_DWORD *)&v723[2 * a2];
-      *(_DWORD *)&v722[2 * a2] = v8;
+      *(int *)&v722[2 * a2 + 4] = *(int *)&v723[2 * a2 + 4];
+      v8 = *(int *)&v723[2 * a2];
+      *(int *)&v722[2 * a2] = v8;
       break;
     case 0x7Cu:
 LABEL_192:
@@ -94479,30 +94462,30 @@ LABEL_192:
       HIWORD(v724) = __ROR4__(v5, 16) >> 16;
       LOWORD(v724) = a1;
       a5[1] = v724;
-      v725 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v725 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v725) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v725) = __ROL4__(v725, 16) >> 16;
       LOWORD(v725) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v725;
+      *(int *)((char *)a5 + a2 + 4) = v725;
       LOWORD(v725) = a1;
       HIWORD(v725) = __ROL4__(v725, 16) >> 16;
       LOWORD(v725) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v725;
-      v726 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v726;
+      *(int *)((char *)a5 + a2) = v725;
+      v726 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v726;
       LOWORD(v726) = a1;
       HIWORD(v726) = __ROL4__(v726, 16) >> 16;
       LOWORD(v726) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v726;
+      *(int *)((char *)a5 + 2 * a2) = v726;
       v727 = (char *)a5 + a2;
       v728 = &a4[a2];
-      v729 = *(_DWORD *)&v728[2 * a2 + 4];
-      *(_DWORD *)&v727[2 * a2 + 4] = v729;
+      v729 = *(int *)&v728[2 * a2 + 4];
+      *(int *)&v727[2 * a2 + 4] = v729;
       LOWORD(v729) = *(_WORD *)&v728[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v729, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v727[2 * a2] = v8;
+      *(int *)&v727[2 * a2] = v8;
       break;
     case 0x7Du:
 LABEL_193:
@@ -94510,57 +94493,57 @@ LABEL_193:
       HIWORD(v730) = __ROL4__(v5, 16) >> 16;
       LOWORD(v730) = *((_WORD *)a4 + 2);
       a5[1] = v730;
-      v731 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v731 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v731) = a1;
       HIWORD(v731) = __ROR4__(v731, 16) >> 16;
       LOWORD(v731) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v731;
-      v732 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v732;
+      *(int *)((char *)a5 + a2 + 4) = v731;
+      v732 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v732;
       LOWORD(v732) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v732) = __ROL4__(v732, 16) >> 16;
       LOWORD(v732) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v732;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v732;
       LOWORD(v732) = a1;
       HIWORD(v732) = __ROL4__(v732, 16) >> 16;
       LOWORD(v732) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v732;
+      *(int *)((char *)a5 + 2 * a2) = v732;
       v733 = (char *)a5 + a2;
-      v734 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v733[2 * a2 + 4] = v734;
+      v734 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v733[2 * a2 + 4] = v734;
       LOWORD(v734) = a1;
       HIWORD(v8) = __ROL4__(v734, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v733[2 * a2] = v8;
+      *(int *)&v733[2 * a2] = v8;
       break;
     case 0x7Eu:
 LABEL_194:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v735 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v735 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v735) = a1;
       HIWORD(v735) = __ROL4__(v735, 16) >> 16;
       LOWORD(v735) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v735;
-      v736 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v736;
+      *(int *)((char *)a5 + a2 + 4) = v735;
+      v736 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v736;
       LOWORD(v736) = a1;
       HIWORD(v736) = __ROR4__(v736, 16) >> 16;
       LOWORD(v736) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v736;
-      v737 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v737;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v736;
+      v737 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v737;
       v738 = (char *)a5 + a2;
       v739 = &a4[a2];
       LOWORD(v737) = *(_WORD *)&v739[2 * a2 + 6];
       HIWORD(v737) = __ROL4__(v737, 16) >> 16;
       LOWORD(v737) = a1;
-      *(_DWORD *)&v738[2 * a2 + 4] = v737;
+      *(int *)&v738[2 * a2 + 4] = v737;
       LOWORD(v737) = a1;
       HIWORD(v8) = __ROL4__(v737, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&v739[2 * a2];
-      *(_DWORD *)&v738[2 * a2] = v8;
+      *(int *)&v738[2 * a2] = v8;
       break;
     case 0x7Fu:
 LABEL_195:
@@ -94568,26 +94551,26 @@ LABEL_195:
       HIWORD(v740) = __ROR4__(v5, 16) >> 16;
       LOWORD(v740) = a1;
       a5[1] = v740;
-      v741 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v741 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v741) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v741) = __ROL4__(v741, 16) >> 16;
       LOWORD(v741) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v741;
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      v742 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v742;
+      *(int *)((char *)a5 + a2 + 4) = v741;
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      v742 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v742;
       LOWORD(v742) = a1;
       HIWORD(v742) = __ROL4__(v742, 16) >> 16;
       LOWORD(v742) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v742;
+      *(int *)((char *)a5 + 2 * a2) = v742;
       v743 = (char *)a5 + a2;
-      v744 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v743[2 * a2 + 4] = v744;
+      v744 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v743[2 * a2 + 4] = v744;
       LOWORD(v744) = a1;
       HIWORD(v8) = __ROL4__(v744, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v743[2 * a2] = v8;
+      *(int *)&v743[2 * a2] = v8;
       break;
     case 0x80u:
 LABEL_68:
@@ -94599,25 +94582,25 @@ LABEL_68:
       LOWORD(v294) = a1;
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v294;
+      *(int *)((char *)a5 + a2 + 4) = v294;
       LOWORD(v294) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v294;
+      *(int *)((char *)a5 + a2) = v294;
       LOWORD(v294) = a1;
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v294;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v294;
       LOWORD(v294) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v294) = __ROL4__(v294, 16) >> 16;
       LOWORD(v294) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v294;
+      *(int *)((char *)a5 + 2 * a2) = v294;
       v295 = (char *)a5 + a2;
       LOWORD(v294) = a1;
       HIWORD(v8) = __ROR4__(v294, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v295[2 * a2] = v8;
-      *(_DWORD *)&v295[2 * a2 + 4] = v8;
+      *(int *)&v295[2 * a2] = v8;
+      *(int *)&v295[2 * a2 + 4] = v8;
       break;
     case 0x81u:
 LABEL_69:
@@ -94629,43 +94612,43 @@ LABEL_69:
       LOWORD(v296) = a1;
       HIWORD(v296) = __ROR4__(v296, 16) >> 16;
       LOWORD(v296) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v296;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v296;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + a2) = v296;
+      *(int *)((char *)a5 + a2 + 4) = v296;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v297 = (char *)a5 + a2;
       v298 = &a4[a2];
-      *(_DWORD *)&v297[2 * a2 + 4] = *(_DWORD *)&v298[2 * a2 + 4];
-      v8 = *(_DWORD *)&v298[2 * a2];
-      *(_DWORD *)&v297[2 * a2] = v8;
+      *(int *)&v297[2 * a2 + 4] = *(int *)&v298[2 * a2 + 4];
+      v8 = *(int *)&v298[2 * a2];
+      *(int *)&v297[2 * a2] = v8;
       break;
     case 0x82u:
 LABEL_70:
-      v299 = *((_DWORD *)a4 + 1);
+      v299 = *((int *)a4 + 1);
       a5[1] = v299;
       LOWORD(v299) = a1;
       HIWORD(v299) = __ROL4__(v299, 16) >> 16;
       LOWORD(v299) = a1;
       *a5 = v299;
-      v300 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v300;
+      v300 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v300;
       LOWORD(v300) = a1;
       HIWORD(v300) = __ROL4__(v300, 16) >> 16;
       LOWORD(v300) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v300;
-      v301 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v301;
+      *(int *)((char *)a5 + a2) = v300;
+      v301 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v301;
       LOWORD(v301) = a1;
       HIWORD(v301) = __ROL4__(v301, 16) >> 16;
       LOWORD(v301) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v301;
+      *(int *)((char *)a5 + 2 * a2) = v301;
       v302 = (char *)a5 + a2;
-      v303 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v302[2 * a2 + 4] = v303;
+      v303 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v302[2 * a2 + 4] = v303;
       LOWORD(v303) = a1;
       HIWORD(v8) = __ROL4__(v303, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v302[2 * a2] = v8;
+      *(int *)&v302[2 * a2] = v8;
       break;
     case 0x83u:
 LABEL_71:
@@ -94677,18 +94660,18 @@ LABEL_71:
       LOWORD(v304) = a1;
       HIWORD(v304) = __ROR4__(v304, 16) >> 16;
       LOWORD(v304) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v304;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v304;
+      *(int *)((char *)a5 + a2) = v304;
+      *(int *)((char *)a5 + a2 + 4) = v304;
       LOWORD(v304) = a1;
       HIWORD(v304) = __ROR4__(v304, 16) >> 16;
       LOWORD(v304) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v304;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v304;
+      *(int *)((char *)a5 + 2 * a2) = v304;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v304;
       v305 = (char *)a5 + a2;
       v306 = &a4[a2];
-      *(_DWORD *)&v305[2 * a2 + 4] = *(_DWORD *)&v306[2 * a2 + 4];
-      v8 = *(_DWORD *)&v306[2 * a2];
-      *(_DWORD *)&v305[2 * a2] = v8;
+      *(int *)&v305[2 * a2 + 4] = *(int *)&v306[2 * a2 + 4];
+      v8 = *(int *)&v306[2 * a2];
+      *(int *)&v305[2 * a2] = v8;
       break;
     case 0x84u:
 LABEL_72:
@@ -94703,50 +94686,50 @@ LABEL_72:
       LOWORD(v307) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v307;
+      *(int *)((char *)a5 + a2 + 4) = v307;
       LOWORD(v307) = a1;
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v307;
+      *(int *)((char *)a5 + a2) = v307;
       LOWORD(v307) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v307;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v307;
       LOWORD(v307) = a1;
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v307;
+      *(int *)((char *)a5 + 2 * a2) = v307;
       v308 = (char *)a5 + a2;
       LOWORD(v307) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v307) = __ROL4__(v307, 16) >> 16;
       LOWORD(v307) = a1;
-      *(_DWORD *)&v308[2 * a2 + 4] = v307;
+      *(int *)&v308[2 * a2 + 4] = v307;
       LOWORD(v307) = a1;
       HIWORD(v8) = __ROL4__(v307, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v308[2 * a2] = v8;
+      *(int *)&v308[2 * a2] = v8;
       break;
     case 0x85u:
 LABEL_73:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v309 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v309 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v309) = a1;
       HIWORD(v309) = __ROR4__(v309, 16) >> 16;
       LOWORD(v309) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v309;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v309;
+      *(int *)((char *)a5 + a2) = v309;
+      *(int *)((char *)a5 + a2 + 4) = v309;
       LOWORD(v309) = a1;
       HIWORD(v309) = __ROR4__(v309, 16) >> 16;
       LOWORD(v309) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v309;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v309;
+      *(int *)((char *)a5 + 2 * a2) = v309;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v309;
       v310 = (char *)a5 + a2;
       LOWORD(v309) = a1;
       HIWORD(v8) = __ROR4__(v309, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v310[2 * a2] = v8;
-      *(_DWORD *)&v310[2 * a2 + 4] = v8;
+      *(int *)&v310[2 * a2] = v8;
+      *(int *)&v310[2 * a2 + 4] = v8;
       break;
     case 0x86u:
 LABEL_74:
@@ -94761,28 +94744,28 @@ LABEL_74:
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v311;
+      *(int *)((char *)a5 + a2 + 4) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROL4__(v311, 16) >> 16;
       LOWORD(v311) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v311;
+      *(int *)((char *)a5 + a2) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v311;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v311;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROL4__(v311, 16) >> 16;
       LOWORD(v311) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v311;
+      *(int *)((char *)a5 + 2 * a2) = v311;
       v312 = (char *)a5 + a2;
       LOWORD(v311) = a1;
       HIWORD(v311) = __ROR4__(v311, 16) >> 16;
       LOWORD(v311) = a1;
-      *(_DWORD *)&v312[2 * a2 + 4] = v311;
+      *(int *)&v312[2 * a2 + 4] = v311;
       LOWORD(v311) = a1;
       HIWORD(v8) = __ROL4__(v311, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v312[2 * a2] = v8;
+      *(int *)&v312[2 * a2] = v8;
       break;
     case 0x87u:
 LABEL_75:
@@ -94794,76 +94777,76 @@ LABEL_75:
       HIWORD(v313) = __ROL4__(v313, 16) >> 16;
       LOWORD(v313) = a1;
       *a5 = v313;
-      v314 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v314;
+      v314 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v314;
       LOWORD(v314) = a1;
       HIWORD(v314) = __ROL4__(v314, 16) >> 16;
       LOWORD(v314) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v314;
-      v315 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v315;
+      *(int *)((char *)a5 + a2) = v314;
+      v315 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v315;
       LOWORD(v315) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v315) = __ROL4__(v315, 16) >> 16;
       LOWORD(v315) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v315;
+      *(int *)((char *)a5 + 2 * a2) = v315;
       v316 = (char *)a5 + a2;
       v317 = &a4[a2];
-      *(_DWORD *)&v316[2 * a2 + 4] = *(_DWORD *)&v317[2 * a2 + 4];
-      v8 = *(_DWORD *)&v317[2 * a2];
-      *(_DWORD *)&v316[2 * a2] = v8;
+      *(int *)&v316[2 * a2 + 4] = *(int *)&v317[2 * a2 + 4];
+      v8 = *(int *)&v317[2 * a2];
+      *(int *)&v316[2 * a2] = v8;
       break;
     case 0x88u:
 LABEL_76:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v318 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v318;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v318 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v318;
       LOWORD(v318) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v318) = __ROL4__(v318, 16) >> 16;
       LOWORD(v318) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v318;
-      v319 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v319;
+      *(int *)((char *)a5 + a2) = v318;
+      v319 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v319;
       LOWORD(v319) = a1;
       HIWORD(v319) = __ROL4__(v319, 16) >> 16;
       LOWORD(v319) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v319;
+      *(int *)((char *)a5 + 2 * a2) = v319;
       v320 = (char *)a5 + a2;
       LOWORD(v319) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v319) = __ROL4__(v319, 16) >> 16;
       LOWORD(v319) = a1;
-      *(_DWORD *)&v320[2 * a2 + 4] = v319;
+      *(int *)&v320[2 * a2 + 4] = v319;
       LOWORD(v319) = a1;
       HIWORD(v8) = __ROL4__(v319, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v320[2 * a2] = v8;
+      *(int *)&v320[2 * a2] = v8;
       break;
     case 0x89u:
 LABEL_77:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v321 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v321 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v321) = a1;
       HIWORD(v321) = __ROL4__(v321, 16) >> 16;
       LOWORD(v321) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v321;
-      v322 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v322;
+      *(int *)((char *)a5 + a2 + 4) = v321;
+      v322 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v322;
       LOWORD(v322) = a1;
       HIWORD(v322) = __ROR4__(v322, 16) >> 16;
       LOWORD(v322) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v322;
-      v323 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v323;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v322;
+      v323 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v323;
       v324 = (char *)a5 + a2;
       LOWORD(v323) = a1;
       HIWORD(v323) = __ROR4__(v323, 16) >> 16;
       LOWORD(v323) = a1;
-      *(_DWORD *)&v324[2 * a2 + 4] = v323;
+      *(int *)&v324[2 * a2 + 4] = v323;
       LOWORD(v323) = a1;
       HIWORD(v8) = __ROL4__(v323, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v324[2 * a2] = v8;
+      *(int *)&v324[2 * a2] = v8;
       break;
     case 0x8Au:
 LABEL_78:
@@ -94878,19 +94861,19 @@ LABEL_78:
       LOWORD(v325) = a1;
       HIWORD(v325) = __ROR4__(v325, 16) >> 16;
       LOWORD(v325) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v325;
-      v326 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v326;
+      *(int *)((char *)a5 + a2 + 4) = v325;
+      v326 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v326;
       LOWORD(v326) = a1;
       HIWORD(v326) = __ROL4__(v326, 16) >> 16;
       LOWORD(v326) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v326;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v326;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v327 = (char *)a5 + a2;
       v328 = &a4[a2];
-      *(_DWORD *)&v327[2 * a2 + 4] = *(_DWORD *)&v328[2 * a2 + 4];
-      v8 = *(_DWORD *)&v328[2 * a2];
-      *(_DWORD *)&v327[2 * a2] = v8;
+      *(int *)&v327[2 * a2 + 4] = *(int *)&v328[2 * a2 + 4];
+      v8 = *(int *)&v328[2 * a2];
+      *(int *)&v327[2 * a2] = v8;
       break;
     case 0x8Bu:
 LABEL_79:
@@ -94902,27 +94885,27 @@ LABEL_79:
       LOWORD(v329) = a1;
       HIWORD(v329) = __ROR4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v329;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v329;
+      *(int *)((char *)a5 + a2) = v329;
+      *(int *)((char *)a5 + a2 + 4) = v329;
       LOWORD(v329) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v329) = __ROL4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v329;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v329;
       LOWORD(v329) = a1;
       HIWORD(v329) = __ROL4__(v329, 16) >> 16;
       LOWORD(v329) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v329;
+      *(int *)((char *)a5 + 2 * a2) = v329;
       v330 = (char *)a5 + a2;
-      v331 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v330[2 * a2 + 4] = v331;
+      v331 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v330[2 * a2 + 4] = v331;
       LOWORD(v331) = a1;
       HIWORD(v8) = __ROL4__(v331, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v330[2 * a2] = v8;
+      *(int *)&v330[2 * a2] = v8;
       break;
     case 0x8Cu:
 LABEL_80:
-      v332 = *((_DWORD *)a4 + 1);
+      v332 = *((int *)a4 + 1);
       a5[1] = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
@@ -94931,22 +94914,22 @@ LABEL_80:
       LOWORD(v332) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v332;
+      *(int *)((char *)a5 + a2 + 4) = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROL4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v332;
+      *(int *)((char *)a5 + a2) = v332;
       LOWORD(v332) = a1;
       HIWORD(v332) = __ROR4__(v332, 16) >> 16;
       LOWORD(v332) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v332;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v332;
+      *(int *)((char *)a5 + 2 * a2) = v332;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v332;
       v333 = (char *)a5 + a2;
       LOWORD(v332) = a1;
       HIWORD(v8) = __ROR4__(v332, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v333[2 * a2] = v8;
-      *(_DWORD *)&v333[2 * a2 + 4] = v8;
+      *(int *)&v333[2 * a2] = v8;
+      *(int *)&v333[2 * a2 + 4] = v8;
       break;
     case 0x8Du:
 LABEL_81:
@@ -94954,27 +94937,27 @@ LABEL_81:
       HIWORD(v334) = __ROR4__(v5, 16) >> 16;
       LOWORD(v334) = a1;
       a5[1] = v334;
-      v335 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v335 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROR4__(v335, 16) >> 16;
       LOWORD(v335) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v335;
+      *(int *)((char *)a5 + a2 + 4) = v335;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROL4__(v335, 16) >> 16;
       LOWORD(v335) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v335;
+      *(int *)((char *)a5 + a2) = v335;
       LOWORD(v335) = a1;
       HIWORD(v335) = __ROR4__(v335, 16) >> 16;
       LOWORD(v335) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v335;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v335;
+      *(int *)((char *)a5 + 2 * a2) = v335;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v335;
       v336 = (char *)a5 + a2;
       LOWORD(v335) = a1;
       HIWORD(v8) = __ROR4__(v335, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v336[2 * a2] = v8;
-      *(_DWORD *)&v336[2 * a2 + 4] = v8;
+      *(int *)&v336[2 * a2] = v8;
+      *(int *)&v336[2 * a2 + 4] = v8;
       break;
     case 0x8Eu:
 LABEL_82:
@@ -94986,23 +94969,23 @@ LABEL_82:
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v337;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v337;
+      *(int *)((char *)a5 + a2) = v337;
+      *(int *)((char *)a5 + a2 + 4) = v337;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v337;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v337;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROL4__(v337, 16) >> 16;
       LOWORD(v337) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v337;
+      *(int *)((char *)a5 + 2 * a2) = v337;
       v338 = (char *)a5 + a2;
       LOWORD(v337) = a1;
       HIWORD(v337) = __ROR4__(v337, 16) >> 16;
       LOWORD(v337) = a1;
-      *(_DWORD *)&v338[2 * a2 + 4] = v337;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v338[2 * a2] = v8;
+      *(int *)&v338[2 * a2 + 4] = v337;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v338[2 * a2] = v8;
       break;
     case 0x8Fu:
 LABEL_83:
@@ -95014,47 +94997,47 @@ LABEL_83:
       LOWORD(v339) = a1;
       HIWORD(v339) = __ROR4__(v339, 16) >> 16;
       LOWORD(v339) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v339;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v339;
-      v340 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v340;
+      *(int *)((char *)a5 + a2) = v339;
+      *(int *)((char *)a5 + a2 + 4) = v339;
+      v340 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v340;
       LOWORD(v340) = a1;
       HIWORD(v340) = __ROL4__(v340, 16) >> 16;
       LOWORD(v340) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v340;
+      *(int *)((char *)a5 + 2 * a2) = v340;
       v341 = (char *)a5 + a2;
-      v342 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v341[2 * a2 + 4] = v342;
+      v342 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v341[2 * a2 + 4] = v342;
       LOWORD(v342) = a1;
       HIWORD(v8) = __ROL4__(v342, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v341[2 * a2] = v8;
+      *(int *)&v341[2 * a2] = v8;
       break;
     case 0x90u:
 LABEL_84:
-      v343 = *((_DWORD *)a4 + 1);
+      v343 = *((int *)a4 + 1);
       a5[1] = v343;
       LOWORD(v343) = a1;
       HIWORD(v343) = __ROL4__(v343, 16) >> 16;
       LOWORD(v343) = a1;
       *a5 = v343;
-      v344 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v344;
+      v344 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v344;
       LOWORD(v344) = a1;
       HIWORD(v344) = __ROL4__(v344, 16) >> 16;
       LOWORD(v344) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v344;
+      *(int *)((char *)a5 + a2) = v344;
       LOWORD(v344) = a1;
       HIWORD(v344) = __ROR4__(v344, 16) >> 16;
       LOWORD(v344) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v344;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v344;
+      *(int *)((char *)a5 + 2 * a2) = v344;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v344;
       v345 = (char *)a5 + a2;
       LOWORD(v344) = a1;
       HIWORD(v8) = __ROR4__(v344, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v345[2 * a2] = v8;
-      *(_DWORD *)&v345[2 * a2 + 4] = v8;
+      *(int *)&v345[2 * a2] = v8;
+      *(int *)&v345[2 * a2 + 4] = v8;
       break;
     case 0x91u:
 LABEL_85:
@@ -95062,25 +95045,25 @@ LABEL_85:
       HIWORD(v346) = __ROR4__(v5, 16) >> 16;
       LOWORD(v346) = a1;
       a5[1] = v346;
-      v347 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v347 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v347) = a1;
       HIWORD(v347) = __ROR4__(v347, 16) >> 16;
       LOWORD(v347) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v347;
-      v348 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v348;
+      *(int *)((char *)a5 + a2 + 4) = v347;
+      v348 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v348;
       LOWORD(v348) = a1;
       HIWORD(v348) = __ROR4__(v348, 16) >> 16;
       LOWORD(v348) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v348;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v348;
+      *(int *)((char *)a5 + 2 * a2) = v348;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v348;
       v349 = (char *)a5 + a2;
       LOWORD(v348) = a1;
       HIWORD(v8) = __ROR4__(v348, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v349[2 * a2] = v8;
-      *(_DWORD *)&v349[2 * a2 + 4] = v8;
+      *(int *)&v349[2 * a2] = v8;
+      *(int *)&v349[2 * a2 + 4] = v8;
       break;
     case 0x92u:
 LABEL_86:
@@ -95092,21 +95075,21 @@ LABEL_86:
       LOWORD(v350) = a1;
       HIWORD(v350) = __ROR4__(v350, 16) >> 16;
       LOWORD(v350) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v350;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v350;
+      *(int *)((char *)a5 + a2) = v350;
+      *(int *)((char *)a5 + a2 + 4) = v350;
       LOWORD(v350) = a1;
       HIWORD(v350) = __ROR4__(v350, 16) >> 16;
       LOWORD(v350) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v350;
-      v351 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v351;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v350;
+      v351 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v351;
       v352 = (char *)a5 + a2;
       LOWORD(v351) = a1;
       HIWORD(v351) = __ROR4__(v351, 16) >> 16;
       LOWORD(v351) = a1;
-      *(_DWORD *)&v352[2 * a2 + 4] = v351;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v352[2 * a2] = v8;
+      *(int *)&v352[2 * a2 + 4] = v351;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v352[2 * a2] = v8;
       break;
     case 0x93u:
 LABEL_87:
@@ -95115,17 +95098,17 @@ LABEL_87:
       LOWORD(v353) = a1;
       *a5 = v353;
       a5[1] = v353;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v354 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v354;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v354 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v354;
       v355 = (char *)a5 + a2;
       LOWORD(v354) = a1;
       HIWORD(v8) = __ROR4__(v354, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v355[2 * a2] = v8;
-      *(_DWORD *)&v355[2 * a2 + 4] = v8;
+      *(int *)&v355[2 * a2] = v8;
+      *(int *)&v355[2 * a2 + 4] = v8;
       break;
     case 0x94u:
 LABEL_88:
@@ -95140,29 +95123,29 @@ LABEL_88:
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v356;
+      *(int *)((char *)a5 + a2 + 4) = v356;
       LOWORD(v356) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v356;
+      *(int *)((char *)a5 + a2) = v356;
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v356;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v356;
       LOWORD(v356) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v356;
+      *(int *)((char *)a5 + 2 * a2) = v356;
       v357 = (char *)a5 + a2;
       v358 = &a4[a2];
       LOWORD(v356) = a1;
       HIWORD(v356) = __ROL4__(v356, 16) >> 16;
       LOWORD(v356) = *(_WORD *)&v358[2 * a2 + 4];
-      *(_DWORD *)&v357[2 * a2 + 4] = v356;
+      *(int *)&v357[2 * a2 + 4] = v356;
       LOWORD(v356) = *(_WORD *)&v358[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v356, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v357[2 * a2] = v8;
+      *(int *)&v357[2 * a2] = v8;
       break;
     case 0x95u:
 LABEL_89:
@@ -95171,20 +95154,20 @@ LABEL_89:
       LOWORD(v359) = a1;
       *a5 = v359;
       a5[1] = v359;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      v360 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v360;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      v360 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v360;
       LOWORD(v360) = a1;
       HIWORD(v360) = __ROR4__(v360, 16) >> 16;
       LOWORD(v360) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v360;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v360;
+      *(int *)((char *)a5 + 2 * a2) = v360;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v360;
       v361 = (char *)a5 + a2;
       LOWORD(v360) = a1;
       HIWORD(v8) = __ROR4__(v360, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v361[2 * a2] = v8;
-      *(_DWORD *)&v361[2 * a2 + 4] = v8;
+      *(int *)&v361[2 * a2] = v8;
+      *(int *)&v361[2 * a2 + 4] = v8;
       break;
     case 0x96u:
 LABEL_90:
@@ -95196,17 +95179,17 @@ LABEL_90:
       LOWORD(v362) = a1;
       HIWORD(v362) = __ROR4__(v362, 16) >> 16;
       LOWORD(v362) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v362;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v362;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v363 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v363;
+      *(int *)((char *)a5 + a2) = v362;
+      *(int *)((char *)a5 + a2 + 4) = v362;
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v363 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v363;
       v364 = (char *)a5 + a2;
       LOWORD(v363) = a1;
       HIWORD(v8) = __ROR4__(v363, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v364[2 * a2] = v8;
-      *(_DWORD *)&v364[2 * a2 + 4] = v8;
+      *(int *)&v364[2 * a2] = v8;
+      *(int *)&v364[2 * a2 + 4] = v8;
       break;
     case 0x97u:
 LABEL_91:
@@ -95221,28 +95204,28 @@ LABEL_91:
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v365;
+      *(int *)((char *)a5 + a2 + 4) = v365;
       LOWORD(v365) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v365) = __ROL4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v365;
+      *(int *)((char *)a5 + a2) = v365;
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v365;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v365;
       LOWORD(v365) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v365) = __ROL4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v365;
+      *(int *)((char *)a5 + 2 * a2) = v365;
       v366 = (char *)a5 + a2;
       LOWORD(v365) = a1;
       HIWORD(v365) = __ROR4__(v365, 16) >> 16;
       LOWORD(v365) = a1;
-      *(_DWORD *)&v366[2 * a2 + 4] = v365;
+      *(int *)&v366[2 * a2 + 4] = v365;
       LOWORD(v365) = *(_WORD *)&a4[2 * a2 + 2 + a2];
       HIWORD(v8) = __ROL4__(v365, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v366[2 * a2] = v8;
+      *(int *)&v366[2 * a2] = v8;
       break;
     case 0x98u:
 LABEL_92:
@@ -95257,28 +95240,28 @@ LABEL_92:
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v367;
+      *(int *)((char *)a5 + a2 + 4) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v367;
+      *(int *)((char *)a5 + a2) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v367;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v367;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v367;
+      *(int *)((char *)a5 + 2 * a2) = v367;
       v368 = (char *)a5 + a2;
       LOWORD(v367) = a1;
       HIWORD(v367) = __ROL4__(v367, 16) >> 16;
       LOWORD(v367) = *(_WORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v368[2 * a2 + 4] = v367;
+      *(int *)&v368[2 * a2 + 4] = v367;
       LOWORD(v367) = a1;
       HIWORD(v8) = __ROL4__(v367, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v368[2 * a2] = v8;
+      *(int *)&v368[2 * a2] = v8;
       break;
     case 0x99u:
 LABEL_93:
@@ -95290,21 +95273,21 @@ LABEL_93:
       LOWORD(v369) = a1;
       HIWORD(v369) = __ROR4__(v369, 16) >> 16;
       LOWORD(v369) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v369;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v369;
+      *(int *)((char *)a5 + a2) = v369;
+      *(int *)((char *)a5 + a2 + 4) = v369;
       LOWORD(v369) = a1;
       HIWORD(v369) = __ROL4__(v369, 16) >> 16;
       LOWORD(v369) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v369;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v369;
       LOWORD(v369) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v369) = __ROL4__(v369, 16) >> 16;
       LOWORD(v369) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v369;
+      *(int *)((char *)a5 + 2 * a2) = v369;
       v370 = (char *)a5 + a2;
       v371 = &a4[a2];
-      *(_DWORD *)&v370[2 * a2 + 4] = *(_DWORD *)&v371[2 * a2 + 4];
-      v8 = *(_DWORD *)&v371[2 * a2];
-      *(_DWORD *)&v370[2 * a2] = v8;
+      *(int *)&v370[2 * a2 + 4] = *(int *)&v371[2 * a2 + 4];
+      v8 = *(int *)&v371[2 * a2];
+      *(int *)&v370[2 * a2] = v8;
       break;
     case 0x9Au:
 LABEL_94:
@@ -95316,52 +95299,52 @@ LABEL_94:
       HIWORD(v372) = __ROL4__(v372, 16) >> 16;
       LOWORD(v372) = a1;
       *a5 = v372;
-      v373 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v373;
+      v373 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v373;
       LOWORD(v373) = a1;
       HIWORD(v373) = __ROL4__(v373, 16) >> 16;
       LOWORD(v373) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v373;
-      v374 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v374;
+      *(int *)((char *)a5 + a2) = v373;
+      v374 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v374;
       LOWORD(v374) = a1;
       HIWORD(v374) = __ROL4__(v374, 16) >> 16;
       LOWORD(v374) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v374;
+      *(int *)((char *)a5 + 2 * a2) = v374;
       v375 = (char *)a5 + a2;
       LOWORD(v374) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v374) = __ROL4__(v374, 16) >> 16;
       LOWORD(v374) = a1;
-      *(_DWORD *)&v375[2 * a2 + 4] = v374;
+      *(int *)&v375[2 * a2 + 4] = v374;
       LOWORD(v374) = a1;
       HIWORD(v8) = __ROL4__(v374, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v375[2 * a2] = v8;
+      *(int *)&v375[2 * a2] = v8;
       break;
     case 0x9Bu:
 LABEL_95:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v376 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v376 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v376) = a1;
       HIWORD(v376) = __ROL4__(v376, 16) >> 16;
       LOWORD(v376) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v376;
+      *(int *)((char *)a5 + a2 + 4) = v376;
       LOWORD(v376) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v376) = __ROL4__(v376, 16) >> 16;
       LOWORD(v376) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v376;
+      *(int *)((char *)a5 + a2) = v376;
       LOWORD(v376) = a1;
       HIWORD(v376) = __ROR4__(v376, 16) >> 16;
       LOWORD(v376) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v376;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v376;
+      *(int *)((char *)a5 + 2 * a2) = v376;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v376;
       v377 = (char *)a5 + a2;
       LOWORD(v376) = a1;
       HIWORD(v8) = __ROR4__(v376, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v377[2 * a2] = v8;
-      *(_DWORD *)&v377[2 * a2 + 4] = v8;
+      *(int *)&v377[2 * a2] = v8;
+      *(int *)&v377[2 * a2 + 4] = v8;
       break;
     case 0x9Cu:
 LABEL_96:
@@ -95376,28 +95359,28 @@ LABEL_96:
       LOWORD(v378) = a1;
       HIWORD(v378) = __ROR4__(v378, 16) >> 16;
       LOWORD(v378) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v378;
-      v379 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v379;
+      *(int *)((char *)a5 + a2 + 4) = v378;
+      v379 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v379;
       LOWORD(v379) = a1;
       HIWORD(v379) = __ROR4__(v379, 16) >> 16;
       LOWORD(v379) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v379;
-      v380 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v380;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v379;
+      v380 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v380;
       v381 = (char *)a5 + a2;
       LOWORD(v380) = a1;
       HIWORD(v380) = __ROR4__(v380, 16) >> 16;
       LOWORD(v380) = a1;
-      *(_DWORD *)&v381[2 * a2 + 4] = v380;
+      *(int *)&v381[2 * a2 + 4] = v380;
       LOWORD(v380) = a1;
       HIWORD(v8) = __ROL4__(v380, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v381[2 * a2] = v8;
+      *(int *)&v381[2 * a2] = v8;
       break;
     case 0x9Du:
 LABEL_97:
-      v382 = *((_DWORD *)a4 + 1);
+      v382 = *((int *)a4 + 1);
       a5[1] = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
@@ -95406,26 +95389,26 @@ LABEL_97:
       LOWORD(v382) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v382;
+      *(int *)((char *)a5 + a2 + 4) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v382;
+      *(int *)((char *)a5 + a2) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROR4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v382;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v382;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROL4__(v382, 16) >> 16;
       LOWORD(v382) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v382;
+      *(int *)((char *)a5 + 2 * a2) = v382;
       v383 = (char *)a5 + a2;
       LOWORD(v382) = a1;
       HIWORD(v382) = __ROR4__(v382, 16) >> 16;
       LOWORD(v382) = a1;
-      *(_DWORD *)&v383[2 * a2 + 4] = v382;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v383[2 * a2] = v8;
+      *(int *)&v383[2 * a2 + 4] = v382;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v383[2 * a2] = v8;
       break;
     case 0x9Eu:
 LABEL_98:
@@ -95433,59 +95416,59 @@ LABEL_98:
       HIWORD(v384) = __ROR4__(v5, 16) >> 16;
       LOWORD(v384) = a1;
       a5[1] = v384;
-      v385 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v385 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROR4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v385;
+      *(int *)((char *)a5 + a2 + 4) = v385;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v385;
+      *(int *)((char *)a5 + a2) = v385;
       LOWORD(v385) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v385;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v385;
       LOWORD(v385) = a1;
       HIWORD(v385) = __ROL4__(v385, 16) >> 16;
       LOWORD(v385) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v385;
+      *(int *)((char *)a5 + 2 * a2) = v385;
       v386 = (char *)a5 + a2;
-      v387 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v386[2 * a2 + 4] = v387;
+      v387 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v386[2 * a2 + 4] = v387;
       LOWORD(v387) = a1;
       HIWORD(v8) = __ROL4__(v387, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v386[2 * a2] = v8;
+      *(int *)&v386[2 * a2] = v8;
       break;
     case 0x9Fu:
 LABEL_99:
-      v388 = *((_DWORD *)a4 + 1);
+      v388 = *((int *)a4 + 1);
       a5[1] = v388;
       LOWORD(v388) = a1;
       HIWORD(v388) = __ROL4__(v388, 16) >> 16;
       LOWORD(v388) = a1;
       *a5 = v388;
-      v389 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v389;
+      v389 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v389;
       LOWORD(v389) = a1;
       HIWORD(v389) = __ROL4__(v389, 16) >> 16;
       LOWORD(v389) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v389;
+      *(int *)((char *)a5 + a2) = v389;
       LOWORD(v389) = a1;
       HIWORD(v389) = __ROR4__(v389, 16) >> 16;
       LOWORD(v389) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v389;
-      v390 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v390;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v389;
+      v390 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v390;
       v391 = (char *)a5 + a2;
       LOWORD(v390) = a1;
       HIWORD(v390) = __ROR4__(v390, 16) >> 16;
       LOWORD(v390) = a1;
-      *(_DWORD *)&v391[2 * a2 + 4] = v390;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v391[2 * a2] = v8;
+      *(int *)&v391[2 * a2 + 4] = v390;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v391[2 * a2] = v8;
       break;
     case 0xA0u:
 LABEL_100:
@@ -95497,26 +95480,26 @@ LABEL_100:
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROR4__(v392, 16) >> 16;
       LOWORD(v392) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v392;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v392;
+      *(int *)((char *)a5 + a2) = v392;
+      *(int *)((char *)a5 + a2 + 4) = v392;
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v392;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v392;
       LOWORD(v392) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v392;
+      *(int *)((char *)a5 + 2 * a2) = v392;
       v393 = (char *)a5 + a2;
       v394 = &a4[a2];
       LOWORD(v392) = a1;
       HIWORD(v392) = __ROL4__(v392, 16) >> 16;
       LOWORD(v392) = *(_WORD *)&v394[2 * a2 + 4];
-      *(_DWORD *)&v393[2 * a2 + 4] = v392;
+      *(int *)&v393[2 * a2 + 4] = v392;
       LOWORD(v392) = *(_WORD *)&v394[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v392, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v393[2 * a2] = v8;
+      *(int *)&v393[2 * a2] = v8;
       break;
     case 0xA1u:
 LABEL_101:
@@ -95525,24 +95508,24 @@ LABEL_101:
       LOWORD(v395) = a1;
       *a5 = v395;
       a5[1] = v395;
-      v396 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v396;
+      v396 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v396;
       LOWORD(v396) = a1;
       HIWORD(v396) = __ROL4__(v396, 16) >> 16;
       LOWORD(v396) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v396;
-      v397 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v397;
+      *(int *)((char *)a5 + a2) = v396;
+      v397 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v397;
       LOWORD(v397) = a1;
       HIWORD(v397) = __ROL4__(v397, 16) >> 16;
       LOWORD(v397) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v397;
+      *(int *)((char *)a5 + 2 * a2) = v397;
       v398 = (char *)a5 + a2;
       LOWORD(v397) = a1;
       HIWORD(v8) = __ROR4__(v397, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v398[2 * a2] = v8;
-      *(_DWORD *)&v398[2 * a2 + 4] = v8;
+      *(int *)&v398[2 * a2] = v8;
+      *(int *)&v398[2 * a2 + 4] = v8;
       break;
     case 0xA2u:
 LABEL_102:
@@ -95557,22 +95540,22 @@ LABEL_102:
       LOWORD(v399) = a1;
       HIWORD(v399) = __ROL4__(v399, 16) >> 16;
       LOWORD(v399) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v399;
+      *(int *)((char *)a5 + a2 + 4) = v399;
       LOWORD(v399) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v399) = __ROL4__(v399, 16) >> 16;
       LOWORD(v399) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v399;
+      *(int *)((char *)a5 + a2) = v399;
       LOWORD(v399) = a1;
       HIWORD(v399) = __ROR4__(v399, 16) >> 16;
       LOWORD(v399) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v399;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v399;
+      *(int *)((char *)a5 + 2 * a2) = v399;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v399;
       v400 = (char *)a5 + a2;
       LOWORD(v399) = a1;
       HIWORD(v8) = __ROR4__(v399, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v400[2 * a2] = v8;
-      *(_DWORD *)&v400[2 * a2 + 4] = v8;
+      *(int *)&v400[2 * a2] = v8;
+      *(int *)&v400[2 * a2 + 4] = v8;
       break;
     case 0xA3u:
 LABEL_103:
@@ -95584,21 +95567,21 @@ LABEL_103:
       LOWORD(v401) = a1;
       HIWORD(v401) = __ROR4__(v401, 16) >> 16;
       LOWORD(v401) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v401;
-      v402 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v402;
+      *(int *)((char *)a5 + a2 + 4) = v401;
+      v402 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v402;
       LOWORD(v402) = a1;
       HIWORD(v402) = __ROR4__(v402, 16) >> 16;
       LOWORD(v402) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v402;
-      v403 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v403;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v402;
+      v403 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v403;
       v404 = (char *)a5 + a2;
       LOWORD(v403) = a1;
       HIWORD(v8) = __ROR4__(v403, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v404[2 * a2] = v8;
-      *(_DWORD *)&v404[2 * a2 + 4] = v8;
+      *(int *)&v404[2 * a2] = v8;
+      *(int *)&v404[2 * a2 + 4] = v8;
       break;
     case 0xA4u:
 LABEL_104:
@@ -95610,25 +95593,25 @@ LABEL_104:
       LOWORD(v405) = a1;
       HIWORD(v405) = __ROR4__(v405, 16) >> 16;
       LOWORD(v405) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v405;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v405;
+      *(int *)((char *)a5 + a2) = v405;
+      *(int *)((char *)a5 + a2 + 4) = v405;
       LOWORD(v405) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v405) = __ROL4__(v405, 16) >> 16;
       LOWORD(v405) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v405;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v405;
       LOWORD(v405) = a1;
       HIWORD(v405) = __ROL4__(v405, 16) >> 16;
       LOWORD(v405) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v405;
+      *(int *)((char *)a5 + 2 * a2) = v405;
       v406 = (char *)a5 + a2;
       v407 = &a4[a2];
-      *(_DWORD *)&v406[2 * a2 + 4] = *(_DWORD *)&v407[2 * a2 + 4];
-      v8 = *(_DWORD *)&v407[2 * a2];
-      *(_DWORD *)&v406[2 * a2] = v8;
+      *(int *)&v406[2 * a2 + 4] = *(int *)&v407[2 * a2 + 4];
+      v8 = *(int *)&v407[2 * a2];
+      *(int *)&v406[2 * a2] = v8;
       break;
     case 0xA5u:
 LABEL_105:
-      v408 = *((_DWORD *)a4 + 1);
+      v408 = *((int *)a4 + 1);
       a5[1] = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
@@ -95637,51 +95620,51 @@ LABEL_105:
       LOWORD(v408) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v408;
+      *(int *)((char *)a5 + a2 + 4) = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v408;
+      *(int *)((char *)a5 + a2) = v408;
       LOWORD(v408) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v408;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v408;
       LOWORD(v408) = a1;
       HIWORD(v408) = __ROL4__(v408, 16) >> 16;
       LOWORD(v408) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v408;
+      *(int *)((char *)a5 + 2 * a2) = v408;
       v409 = (char *)a5 + a2;
-      v410 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v409[2 * a2 + 4] = v410;
+      v410 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v409[2 * a2 + 4] = v410;
       LOWORD(v410) = a1;
       HIWORD(v8) = __ROL4__(v410, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v409[2 * a2] = v8;
+      *(int *)&v409[2 * a2] = v8;
       break;
     case 0xA6u:
 LABEL_106:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v411 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v411 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v411) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v411) = __ROL4__(v411, 16) >> 16;
       LOWORD(v411) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v411;
+      *(int *)((char *)a5 + a2 + 4) = v411;
       LOWORD(v411) = a1;
       HIWORD(v411) = __ROL4__(v411, 16) >> 16;
       LOWORD(v411) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v411;
+      *(int *)((char *)a5 + a2) = v411;
       LOWORD(v411) = a1;
       HIWORD(v411) = __ROR4__(v411, 16) >> 16;
       LOWORD(v411) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v411;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v411;
+      *(int *)((char *)a5 + 2 * a2) = v411;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v411;
       v412 = (char *)a5 + a2;
       LOWORD(v411) = a1;
       HIWORD(v8) = __ROR4__(v411, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v412[2 * a2] = v8;
-      *(_DWORD *)&v412[2 * a2 + 4] = v8;
+      *(int *)&v412[2 * a2] = v8;
+      *(int *)&v412[2 * a2 + 4] = v8;
       break;
     case 0xA7u:
 LABEL_107:
@@ -95689,31 +95672,31 @@ LABEL_107:
       HIWORD(v413) = __ROR4__(v5, 16) >> 16;
       LOWORD(v413) = a1;
       a5[1] = v413;
-      v414 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v414 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v414;
+      *(int *)((char *)a5 + a2 + 4) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROL4__(v414, 16) >> 16;
       LOWORD(v414) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v414;
+      *(int *)((char *)a5 + a2) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v414;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v414;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROL4__(v414, 16) >> 16;
       LOWORD(v414) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v414;
+      *(int *)((char *)a5 + 2 * a2) = v414;
       v415 = (char *)a5 + a2;
       LOWORD(v414) = a1;
       HIWORD(v414) = __ROR4__(v414, 16) >> 16;
       LOWORD(v414) = a1;
-      *(_DWORD *)&v415[2 * a2 + 4] = v414;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v415[2 * a2] = v8;
+      *(int *)&v415[2 * a2 + 4] = v414;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v415[2 * a2] = v8;
       break;
     case 0xA8u:
 LABEL_108:
@@ -95725,23 +95708,23 @@ LABEL_108:
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROR4__(v416, 16) >> 16;
       LOWORD(v416) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v416;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v416;
+      *(int *)((char *)a5 + a2) = v416;
+      *(int *)((char *)a5 + a2 + 4) = v416;
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROR4__(v416, 16) >> 16;
       LOWORD(v416) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v416;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v416;
+      *(int *)((char *)a5 + 2 * a2) = v416;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v416;
       v417 = (char *)a5 + a2;
       v418 = &a4[a2];
       LOWORD(v416) = a1;
       HIWORD(v416) = __ROL4__(v416, 16) >> 16;
       LOWORD(v416) = *(_WORD *)&v418[2 * a2 + 4];
-      *(_DWORD *)&v417[2 * a2 + 4] = v416;
+      *(int *)&v417[2 * a2 + 4] = v416;
       LOWORD(v416) = *(_WORD *)&v418[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v416, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v417[2 * a2] = v8;
+      *(int *)&v417[2 * a2] = v8;
       break;
     case 0xA9u:
 LABEL_109:
@@ -95753,25 +95736,25 @@ LABEL_109:
       LOWORD(v419) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v419;
+      *(int *)((char *)a5 + a2 + 4) = v419;
       LOWORD(v419) = a1;
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v419;
+      *(int *)((char *)a5 + a2) = v419;
       LOWORD(v419) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v419;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v419;
       LOWORD(v419) = a1;
       HIWORD(v419) = __ROL4__(v419, 16) >> 16;
       LOWORD(v419) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v419;
+      *(int *)((char *)a5 + 2 * a2) = v419;
       v420 = (char *)a5 + a2;
       LOWORD(v419) = a1;
       HIWORD(v8) = __ROR4__(v419, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v420[2 * a2] = v8;
-      *(_DWORD *)&v420[2 * a2 + 4] = v8;
+      *(int *)&v420[2 * a2] = v8;
+      *(int *)&v420[2 * a2 + 4] = v8;
       break;
     case 0xAAu:
 LABEL_110:
@@ -95786,19 +95769,19 @@ LABEL_110:
       LOWORD(v421) = a1;
       HIWORD(v421) = __ROR4__(v421, 16) >> 16;
       LOWORD(v421) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v421;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v421;
+      *(int *)((char *)a5 + a2) = v421;
+      *(int *)((char *)a5 + a2 + 4) = v421;
       LOWORD(v421) = a1;
       HIWORD(v421) = __ROR4__(v421, 16) >> 16;
       LOWORD(v421) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v421;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v421;
+      *(int *)((char *)a5 + 2 * a2) = v421;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v421;
       v422 = (char *)a5 + a2;
       LOWORD(v421) = a1;
       HIWORD(v8) = __ROR4__(v421, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v422[2 * a2] = v8;
-      *(_DWORD *)&v422[2 * a2 + 4] = v8;
+      *(int *)&v422[2 * a2] = v8;
+      *(int *)&v422[2 * a2 + 4] = v8;
       break;
     case 0xABu:
 LABEL_111:
@@ -95810,25 +95793,25 @@ LABEL_111:
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROR4__(v423, 16) >> 16;
       LOWORD(v423) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v423;
+      *(int *)((char *)a5 + a2 + 4) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROL4__(v423, 16) >> 16;
       LOWORD(v423) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v423;
+      *(int *)((char *)a5 + a2) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROR4__(v423, 16) >> 16;
       LOWORD(v423) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v423;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v423;
       LOWORD(v423) = a1;
       HIWORD(v423) = __ROL4__(v423, 16) >> 16;
       LOWORD(v423) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v423;
+      *(int *)((char *)a5 + 2 * a2) = v423;
       v424 = (char *)a5 + a2;
       LOWORD(v423) = a1;
       HIWORD(v8) = __ROR4__(v423, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v424[2 * a2] = v8;
-      *(_DWORD *)&v424[2 * a2 + 4] = v8;
+      *(int *)&v424[2 * a2] = v8;
+      *(int *)&v424[2 * a2 + 4] = v8;
       break;
     case 0xACu:
 LABEL_112:
@@ -95843,24 +95826,24 @@ LABEL_112:
       LOWORD(v425) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v425) = __ROL4__(v425, 16) >> 16;
       LOWORD(v425) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v425;
+      *(int *)((char *)a5 + a2 + 4) = v425;
       LOWORD(v425) = a1;
       HIWORD(v425) = __ROL4__(v425, 16) >> 16;
       LOWORD(v425) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v425;
-      v426 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v426;
+      *(int *)((char *)a5 + a2) = v425;
+      v426 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v426;
       LOWORD(v426) = a1;
       HIWORD(v426) = __ROL4__(v426, 16) >> 16;
       LOWORD(v426) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v426;
+      *(int *)((char *)a5 + 2 * a2) = v426;
       v427 = (char *)a5 + a2;
-      v428 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v427[2 * a2 + 4] = v428;
+      v428 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v427[2 * a2 + 4] = v428;
       LOWORD(v428) = a1;
       HIWORD(v8) = __ROL4__(v428, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v427[2 * a2] = v8;
+      *(int *)&v427[2 * a2] = v8;
       break;
     case 0xADu:
 LABEL_113:
@@ -95872,96 +95855,96 @@ LABEL_113:
       LOWORD(v429) = a1;
       HIWORD(v429) = __ROR4__(v429, 16) >> 16;
       LOWORD(v429) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v429;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v429;
-      v430 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v430;
+      *(int *)((char *)a5 + a2) = v429;
+      *(int *)((char *)a5 + a2 + 4) = v429;
+      v430 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v430;
       LOWORD(v430) = a1;
       HIWORD(v430) = __ROL4__(v430, 16) >> 16;
       LOWORD(v430) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v430;
+      *(int *)((char *)a5 + 2 * a2) = v430;
       v431 = (char *)a5 + a2;
       v432 = &a4[a2];
-      *(_DWORD *)&v431[2 * a2 + 4] = *(_DWORD *)&v432[2 * a2 + 4];
-      v8 = *(_DWORD *)&v432[2 * a2];
-      *(_DWORD *)&v431[2 * a2] = v8;
+      *(int *)&v431[2 * a2 + 4] = *(int *)&v432[2 * a2 + 4];
+      v8 = *(int *)&v432[2 * a2];
+      *(int *)&v431[2 * a2] = v8;
       break;
     case 0xAEu:
 LABEL_114:
-      a5[1] = *((_DWORD *)a4 + 1);
-      *a5 = *(_DWORD *)a4;
-      v433 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v433;
+      a5[1] = *((int *)a4 + 1);
+      *a5 = *(int *)a4;
+      v433 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v433;
       LOWORD(v433) = a1;
       HIWORD(v433) = __ROL4__(v433, 16) >> 16;
       LOWORD(v433) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v433;
+      *(int *)((char *)a5 + a2) = v433;
       LOWORD(v433) = a1;
       HIWORD(v433) = __ROR4__(v433, 16) >> 16;
       LOWORD(v433) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v433;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v433;
+      *(int *)((char *)a5 + 2 * a2) = v433;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v433;
       v434 = (char *)a5 + a2;
       LOWORD(v433) = a1;
       HIWORD(v8) = __ROR4__(v433, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v434[2 * a2] = v8;
-      *(_DWORD *)&v434[2 * a2 + 4] = v8;
+      *(int *)&v434[2 * a2] = v8;
+      *(int *)&v434[2 * a2 + 4] = v8;
       break;
     case 0xAFu:
 LABEL_115:
-      v435 = *((_DWORD *)a4 + 1);
+      v435 = *((int *)a4 + 1);
       a5[1] = v435;
       LOWORD(v435) = a1;
       HIWORD(v435) = __ROL4__(v435, 16) >> 16;
       LOWORD(v435) = a1;
       *a5 = v435;
-      v436 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v436;
+      v436 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v436;
       LOWORD(v436) = a1;
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v436;
+      *(int *)((char *)a5 + a2) = v436;
       LOWORD(v436) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v436;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v436;
       LOWORD(v436) = a1;
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v436;
+      *(int *)((char *)a5 + 2 * a2) = v436;
       v437 = (char *)a5 + a2;
       LOWORD(v436) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v436) = __ROL4__(v436, 16) >> 16;
       LOWORD(v436) = a1;
-      *(_DWORD *)&v437[2 * a2 + 4] = v436;
+      *(int *)&v437[2 * a2 + 4] = v436;
       LOWORD(v436) = a1;
       HIWORD(v8) = __ROL4__(v436, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v437[2 * a2] = v8;
+      *(int *)&v437[2 * a2] = v8;
       break;
     case 0xB0u:
 LABEL_116:
-      a5[1] = *((_DWORD *)a4 + 1);
-      v438 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      a5[1] = *((int *)a4 + 1);
+      v438 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v438) = a1;
       HIWORD(v438) = __ROR4__(v438, 16) >> 16;
       LOWORD(v438) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v438;
-      v439 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v439;
+      *(int *)((char *)a5 + a2 + 4) = v438;
+      v439 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v439;
       LOWORD(v439) = a1;
       HIWORD(v439) = __ROR4__(v439, 16) >> 16;
       LOWORD(v439) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v439;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v439;
+      *(int *)((char *)a5 + 2 * a2) = v439;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v439;
       v440 = (char *)a5 + a2;
       LOWORD(v439) = a1;
       HIWORD(v8) = __ROR4__(v439, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v440[2 * a2] = v8;
-      *(_DWORD *)&v440[2 * a2 + 4] = v8;
+      *(int *)&v440[2 * a2] = v8;
+      *(int *)&v440[2 * a2 + 4] = v8;
       break;
     case 0xB1u:
 LABEL_117:
@@ -95969,31 +95952,31 @@ LABEL_117:
       HIWORD(v441) = __ROR4__(v5, 16) >> 16;
       LOWORD(v441) = a1;
       a5[1] = v441;
-      v442 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v442 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v442) = a1;
       HIWORD(v442) = __ROR4__(v442, 16) >> 16;
       LOWORD(v442) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v442;
-      v443 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v443;
+      *(int *)((char *)a5 + a2 + 4) = v442;
+      v443 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v443;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROR4__(v443, 16) >> 16;
       LOWORD(v443) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v443;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v443;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROL4__(v443, 16) >> 16;
       LOWORD(v443) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v443;
+      *(int *)((char *)a5 + 2 * a2) = v443;
       v444 = (char *)a5 + a2;
       LOWORD(v443) = a1;
       HIWORD(v443) = __ROR4__(v443, 16) >> 16;
       LOWORD(v443) = a1;
-      *(_DWORD *)&v444[2 * a2 + 4] = v443;
+      *(int *)&v444[2 * a2 + 4] = v443;
       LOWORD(v443) = a1;
       HIWORD(v8) = __ROL4__(v443, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v444[2 * a2] = v8;
+      *(int *)&v444[2 * a2] = v8;
       break;
     case 0xB2u:
 LABEL_118:
@@ -96008,24 +95991,24 @@ LABEL_118:
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROR4__(v445, 16) >> 16;
       LOWORD(v445) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v445;
+      *(int *)((char *)a5 + a2 + 4) = v445;
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROL4__(v445, 16) >> 16;
       LOWORD(v445) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v445;
+      *(int *)((char *)a5 + a2) = v445;
       LOWORD(v445) = a1;
       HIWORD(v445) = __ROR4__(v445, 16) >> 16;
       LOWORD(v445) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v445;
-      v446 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v446;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v445;
+      v446 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v446;
       v447 = (char *)a5 + a2;
       LOWORD(v446) = a1;
       HIWORD(v446) = __ROR4__(v446, 16) >> 16;
       LOWORD(v446) = a1;
-      *(_DWORD *)&v447[2 * a2 + 4] = v446;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v447[2 * a2] = v8;
+      *(int *)&v447[2 * a2 + 4] = v446;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v447[2 * a2] = v8;
       break;
     case 0xB3u:
 LABEL_119:
@@ -96037,18 +96020,18 @@ LABEL_119:
       LOWORD(v448) = a1;
       HIWORD(v448) = __ROR4__(v448, 16) >> 16;
       LOWORD(v448) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v448;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v448;
+      *(int *)((char *)a5 + a2) = v448;
+      *(int *)((char *)a5 + a2 + 4) = v448;
       LOWORD(v448) = a1;
       HIWORD(v448) = __ROR4__(v448, 16) >> 16;
       LOWORD(v448) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v448;
-      *(_DWORD *)((char *)a5 + 2 * a2) = *(_DWORD *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v448;
+      *(int *)((char *)a5 + 2 * a2) = *(int *)&a4[2 * a2];
       v449 = (char *)a5 + a2;
       v450 = &a4[a2];
-      *(_DWORD *)&v449[2 * a2 + 4] = *(_DWORD *)&v450[2 * a2 + 4];
-      v8 = *(_DWORD *)&v450[2 * a2];
-      *(_DWORD *)&v449[2 * a2] = v8;
+      *(int *)&v449[2 * a2 + 4] = *(int *)&v450[2 * a2 + 4];
+      v8 = *(int *)&v450[2 * a2];
+      *(int *)&v449[2 * a2] = v8;
       break;
     case 0xB4u:
 LABEL_120:
@@ -96060,21 +96043,21 @@ LABEL_120:
       HIWORD(v451) = __ROL4__(v451, 16) >> 16;
       LOWORD(v451) = a1;
       *a5 = v451;
-      *(_DWORD *)((char *)a5 + a2 + 4) = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2) = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = *(_DWORD *)&a4[2 * a2 + 4];
-      v452 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v452;
+      *(int *)((char *)a5 + a2 + 4) = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2) = *(int *)&a4[a2];
+      *(int *)((char *)a5 + 2 * a2 + 4) = *(int *)&a4[2 * a2 + 4];
+      v452 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v452;
       v453 = (char *)a5 + a2;
       v454 = &a4[a2];
       LOWORD(v452) = a1;
       HIWORD(v452) = __ROL4__(v452, 16) >> 16;
       LOWORD(v452) = *(_WORD *)&v454[2 * a2 + 4];
-      *(_DWORD *)&v453[2 * a2 + 4] = v452;
+      *(int *)&v453[2 * a2 + 4] = v452;
       LOWORD(v452) = *(_WORD *)&v454[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v452, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v453[2 * a2] = v8;
+      *(int *)&v453[2 * a2] = v8;
       break;
     case 0xB5u:
 LABEL_121:
@@ -96082,27 +96065,27 @@ LABEL_121:
       HIWORD(v455) = __ROR4__(v5, 16) >> 16;
       LOWORD(v455) = a1;
       a5[1] = v455;
-      v456 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v456 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v456) = a1;
       HIWORD(v456) = __ROR4__(v456, 16) >> 16;
       LOWORD(v456) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v456;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v456;
+      *(int *)((char *)a5 + a2) = v456;
+      *(int *)((char *)a5 + a2 + 4) = v456;
       LOWORD(v456) = a1;
       HIWORD(v456) = __ROL4__(v456, 16) >> 16;
       LOWORD(v456) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v456;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v456;
       LOWORD(v456) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v456) = __ROL4__(v456, 16) >> 16;
       LOWORD(v456) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v456;
+      *(int *)((char *)a5 + 2 * a2) = v456;
       v457 = (char *)a5 + a2;
       LOWORD(v456) = a1;
       HIWORD(v8) = __ROR4__(v456, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v457[2 * a2] = v8;
-      *(_DWORD *)&v457[2 * a2 + 4] = v8;
+      *(int *)&v457[2 * a2] = v8;
+      *(int *)&v457[2 * a2 + 4] = v8;
       break;
     case 0xB6u:
 LABEL_122:
@@ -96114,26 +96097,26 @@ LABEL_122:
       HIWORD(v458) = __ROL4__(v458, 16) >> 16;
       LOWORD(v458) = a1;
       *a5 = v458;
-      v459 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v459;
+      v459 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v459;
       LOWORD(v459) = a1;
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v459;
+      *(int *)((char *)a5 + a2) = v459;
       LOWORD(v459) = *(_WORD *)&a4[2 * a2 + 6];
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v459;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v459;
       LOWORD(v459) = a1;
       HIWORD(v459) = __ROL4__(v459, 16) >> 16;
       LOWORD(v459) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v459;
+      *(int *)((char *)a5 + 2 * a2) = v459;
       v460 = (char *)a5 + a2;
       LOWORD(v459) = a1;
       HIWORD(v8) = __ROR4__(v459, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v460[2 * a2] = v8;
-      *(_DWORD *)&v460[2 * a2 + 4] = v8;
+      *(int *)&v460[2 * a2] = v8;
+      *(int *)&v460[2 * a2 + 4] = v8;
       break;
     case 0xB7u:
 LABEL_123:
@@ -96141,31 +96124,31 @@ LABEL_123:
       HIWORD(v461) = __ROR4__(v5, 16) >> 16;
       LOWORD(v461) = a1;
       a5[1] = v461;
-      v462 = *(_DWORD *)a4;
-      *a5 = *(_DWORD *)a4;
+      v462 = *(int *)a4;
+      *a5 = *(int *)a4;
       LOWORD(v462) = a1;
       HIWORD(v462) = __ROL4__(v462, 16) >> 16;
       LOWORD(v462) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v462;
+      *(int *)((char *)a5 + a2 + 4) = v462;
       LOWORD(v462) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v462) = __ROL4__(v462, 16) >> 16;
       LOWORD(v462) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v462;
-      v463 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v463;
+      *(int *)((char *)a5 + a2) = v462;
+      v463 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v463;
       LOWORD(v463) = a1;
       HIWORD(v463) = __ROL4__(v463, 16) >> 16;
       LOWORD(v463) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v463;
+      *(int *)((char *)a5 + 2 * a2) = v463;
       v464 = (char *)a5 + a2;
       LOWORD(v463) = *(_WORD *)&a4[2 * a2 + 6 + a2];
       HIWORD(v463) = __ROL4__(v463, 16) >> 16;
       LOWORD(v463) = a1;
-      *(_DWORD *)&v464[2 * a2 + 4] = v463;
+      *(int *)&v464[2 * a2 + 4] = v463;
       LOWORD(v463) = a1;
       HIWORD(v8) = __ROL4__(v463, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v464[2 * a2] = v8;
+      *(int *)&v464[2 * a2] = v8;
       break;
     case 0xB8u:
 LABEL_124:
@@ -96180,24 +96163,24 @@ LABEL_124:
       LOWORD(v465) = a1;
       HIWORD(v465) = __ROR4__(v465, 16) >> 16;
       LOWORD(v465) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v465;
-      v466 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v466;
+      *(int *)((char *)a5 + a2 + 4) = v465;
+      v466 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v466;
       LOWORD(v466) = a1;
       HIWORD(v466) = __ROL4__(v466, 16) >> 16;
       LOWORD(v466) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v466;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v466;
       LOWORD(v466) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v466) = __ROL4__(v466, 16) >> 16;
       LOWORD(v466) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v466;
+      *(int *)((char *)a5 + 2 * a2) = v466;
       v467 = (char *)a5 + a2;
-      v468 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v467[2 * a2 + 4] = v468;
+      v468 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v467[2 * a2 + 4] = v468;
       LOWORD(v468) = a1;
       HIWORD(v8) = __ROL4__(v468, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v467[2 * a2] = v8;
+      *(int *)&v467[2 * a2] = v8;
       break;
     case 0xB9u:
 LABEL_125:
@@ -96209,27 +96192,27 @@ LABEL_125:
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROR4__(v469, 16) >> 16;
       LOWORD(v469) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v469;
+      *(int *)((char *)a5 + a2 + 4) = v469;
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROL4__(v469, 16) >> 16;
       LOWORD(v469) = *(_WORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v469;
+      *(int *)((char *)a5 + a2) = v469;
       LOWORD(v469) = a1;
       HIWORD(v469) = __ROR4__(v469, 16) >> 16;
       LOWORD(v469) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v469;
-      v470 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v470;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v469;
+      v470 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v470;
       v471 = (char *)a5 + a2;
       v472 = &a4[a2];
       LOWORD(v470) = a1;
       HIWORD(v470) = __ROL4__(v470, 16) >> 16;
       LOWORD(v470) = *(_WORD *)&v472[2 * a2 + 4];
-      *(_DWORD *)&v471[2 * a2 + 4] = v470;
+      *(int *)&v471[2 * a2 + 4] = v470;
       LOWORD(v470) = *(_WORD *)&v472[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v470, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v471[2 * a2] = v8;
+      *(int *)&v471[2 * a2] = v8;
       break;
     case 0xBAu:
 LABEL_126:
@@ -96241,23 +96224,23 @@ LABEL_126:
       LOWORD(v473) = a1;
       HIWORD(v473) = __ROL4__(v473, 16) >> 16;
       LOWORD(v473) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v473;
+      *(int *)((char *)a5 + a2 + 4) = v473;
       LOWORD(v473) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v473) = __ROL4__(v473, 16) >> 16;
       LOWORD(v473) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v473;
+      *(int *)((char *)a5 + a2) = v473;
       LOWORD(v473) = a1;
       HIWORD(v473) = __ROR4__(v473, 16) >> 16;
       LOWORD(v473) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v473;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v473;
+      *(int *)((char *)a5 + 2 * a2) = v473;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v473;
       v474 = (char *)a5 + a2;
-      v475 = *(_DWORD *)&a4[2 * a2 + 4 + a2];
-      *(_DWORD *)&v474[2 * a2 + 4] = v475;
+      v475 = *(int *)&a4[2 * a2 + 4 + a2];
+      *(int *)&v474[2 * a2 + 4] = v475;
       LOWORD(v475) = a1;
       HIWORD(v8) = __ROL4__(v475, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v474[2 * a2] = v8;
+      *(int *)&v474[2 * a2] = v8;
       break;
     case 0xBBu:
 LABEL_127:
@@ -96272,27 +96255,27 @@ LABEL_127:
       LOWORD(v476) = a1;
       HIWORD(v476) = __ROR4__(v476, 16) >> 16;
       LOWORD(v476) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v476;
-      v477 = *(_DWORD *)&a4[a2];
-      *(_DWORD *)((char *)a5 + a2) = v477;
+      *(int *)((char *)a5 + a2 + 4) = v476;
+      v477 = *(int *)&a4[a2];
+      *(int *)((char *)a5 + a2) = v477;
       LOWORD(v477) = a1;
       HIWORD(v477) = __ROR4__(v477, 16) >> 16;
       LOWORD(v477) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v477;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v477;
       LOWORD(v477) = a1;
       HIWORD(v477) = __ROL4__(v477, 16) >> 16;
       LOWORD(v477) = *(_WORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v477;
+      *(int *)((char *)a5 + 2 * a2) = v477;
       v478 = (char *)a5 + a2;
       LOWORD(v477) = a1;
       HIWORD(v8) = __ROR4__(v477, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v478[2 * a2] = v8;
-      *(_DWORD *)&v478[2 * a2 + 4] = v8;
+      *(int *)&v478[2 * a2] = v8;
+      *(int *)&v478[2 * a2 + 4] = v8;
       break;
     case 0xBCu:
 LABEL_128:
-      v479 = *((_DWORD *)a4 + 1);
+      v479 = *((int *)a4 + 1);
       a5[1] = v479;
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
@@ -96301,26 +96284,26 @@ LABEL_128:
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
       LOWORD(v479) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v479;
+      *(int *)((char *)a5 + a2 + 4) = v479;
       LOWORD(v479) = *(_WORD *)&a4[a2 + 2];
       HIWORD(v479) = __ROL4__(v479, 16) >> 16;
       LOWORD(v479) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v479;
+      *(int *)((char *)a5 + a2) = v479;
       LOWORD(v479) = a1;
       HIWORD(v479) = __ROR4__(v479, 16) >> 16;
       LOWORD(v479) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v479;
-      v480 = *(_DWORD *)&a4[2 * a2];
-      *(_DWORD *)((char *)a5 + 2 * a2) = v480;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v479;
+      v480 = *(int *)&a4[2 * a2];
+      *(int *)((char *)a5 + 2 * a2) = v480;
       v481 = (char *)a5 + a2;
       LOWORD(v480) = a1;
       HIWORD(v480) = __ROR4__(v480, 16) >> 16;
       LOWORD(v480) = a1;
-      *(_DWORD *)&v481[2 * a2 + 4] = v480;
+      *(int *)&v481[2 * a2 + 4] = v480;
       LOWORD(v480) = a1;
       HIWORD(v8) = __ROL4__(v480, 16) >> 16;
       LOWORD(v8) = *(_WORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v481[2 * a2] = v8;
+      *(int *)&v481[2 * a2] = v8;
       break;
     case 0xBDu:
 LABEL_129:
@@ -96332,27 +96315,27 @@ LABEL_129:
       HIWORD(v482) = __ROL4__(v482, 16) >> 16;
       LOWORD(v482) = a1;
       *a5 = v482;
-      v483 = *(_DWORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v483;
+      v483 = *(int *)&a4[a2 + 4];
+      *(int *)((char *)a5 + a2 + 4) = v483;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v483;
+      *(int *)((char *)a5 + a2) = v483;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = *(_WORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v483;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v483;
       LOWORD(v483) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v483) = __ROL4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v483;
+      *(int *)((char *)a5 + 2 * a2) = v483;
       v484 = (char *)a5 + a2;
       LOWORD(v483) = a1;
       HIWORD(v483) = __ROR4__(v483, 16) >> 16;
       LOWORD(v483) = a1;
-      *(_DWORD *)&v484[2 * a2 + 4] = v483;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v484[2 * a2] = v8;
+      *(int *)&v484[2 * a2 + 4] = v483;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v484[2 * a2] = v8;
       break;
     case 0xBEu:
 LABEL_130:
@@ -96364,31 +96347,31 @@ LABEL_130:
       LOWORD(v485) = *(_WORD *)&a4[a2 + 6];
       HIWORD(v485) = __ROL4__(v485, 16) >> 16;
       LOWORD(v485) = a1;
-      *(_DWORD *)((char *)a5 + a2 + 4) = v485;
+      *(int *)((char *)a5 + a2 + 4) = v485;
       LOWORD(v485) = a1;
       HIWORD(v485) = __ROL4__(v485, 16) >> 16;
       LOWORD(v485) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v485;
-      v486 = *(_DWORD *)&a4[2 * a2 + 4];
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v486;
+      *(int *)((char *)a5 + a2) = v485;
+      v486 = *(int *)&a4[2 * a2 + 4];
+      *(int *)((char *)a5 + 2 * a2 + 4) = v486;
       LOWORD(v486) = a1;
       HIWORD(v486) = __ROL4__(v486, 16) >> 16;
       LOWORD(v486) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v486;
+      *(int *)((char *)a5 + 2 * a2) = v486;
       v487 = (char *)a5 + a2;
       v488 = &a4[a2];
       LOWORD(v486) = a1;
       HIWORD(v486) = __ROL4__(v486, 16) >> 16;
       LOWORD(v486) = *(_WORD *)&v488[2 * a2 + 4];
-      *(_DWORD *)&v487[2 * a2 + 4] = v486;
+      *(int *)&v487[2 * a2 + 4] = v486;
       LOWORD(v486) = *(_WORD *)&v488[2 * a2 + 2];
       HIWORD(v8) = __ROL4__(v486, 16) >> 16;
       LOWORD(v8) = a1;
-      *(_DWORD *)&v487[2 * a2] = v8;
+      *(int *)&v487[2 * a2] = v8;
       break;
     case 0xBFu:
 LABEL_131:
-      v489 = *((_DWORD *)a4 + 1);
+      v489 = *((int *)a4 + 1);
       a5[1] = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
@@ -96397,26 +96380,26 @@ LABEL_131:
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = *(_WORD *)&a4[a2 + 4];
-      *(_DWORD *)((char *)a5 + a2 + 4) = v489;
+      *(int *)((char *)a5 + a2 + 4) = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + a2) = v489;
+      *(int *)((char *)a5 + a2) = v489;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROR4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2 + 4) = v489;
+      *(int *)((char *)a5 + 2 * a2 + 4) = v489;
       LOWORD(v489) = *(_WORD *)&a4[2 * a2 + 2];
       HIWORD(v489) = __ROL4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)((char *)a5 + 2 * a2) = v489;
+      *(int *)((char *)a5 + 2 * a2) = v489;
       v490 = (char *)a5 + a2;
       LOWORD(v489) = a1;
       HIWORD(v489) = __ROR4__(v489, 16) >> 16;
       LOWORD(v489) = a1;
-      *(_DWORD *)&v490[2 * a2 + 4] = v489;
-      v8 = *(_DWORD *)&a4[2 * a2 + a2];
-      *(_DWORD *)&v490[2 * a2] = v8;
+      *(int *)&v490[2 * a2 + 4] = v489;
+      v8 = *(int *)&a4[2 * a2 + a2];
+      *(int *)&v490[2 * a2] = v8;
       break;
   }
   return v8;
@@ -96440,7 +96423,7 @@ unsigned __int8 *__cdecl VBC_decode_16bpp(
   int v12; // ecx
   int v13; // eax
   int v14; // eax
-  _DWORD *v15; // esi
+  int *v15; // esi
   int v16; // eax
   int v17; // ecx
   int v19; // [esp+Ch] [ebp-Ch]
@@ -96449,13 +96432,13 @@ unsigned __int8 *__cdecl VBC_decode_16bpp(
 
   if ( a9 == 1 )                                // has palette
   {
-    off_4772E8[0] = (int (*)())&loc_45D1A4;     // BUG
+    off_4772E8[0] = (int (*)())0;//&loc_45D1A4;     // BUG
     off_4772EC[0] = (int (*)())VBC16_block_decoder_3_palette;
     off_4772F0 = (int (*)())VBC16_block_decoder_4_palette;
   }
   else if ( a9 == 2 )                           // has palette remap
   {
-    off_4772E8[0] = (int (*)())&loc_45D19B;     // BUG
+    off_4772E8[0] = (int (*)())0;//&loc_45D19B;     // BUG
     off_4772EC[0] = (int (*)())VBC16_block_decoder_3_remap;
     off_4772F0 = (int (*)())VBC16_block_decoder_4_remap;
   }
@@ -96485,10 +96468,10 @@ unsigned __int8 *__cdecl VBC_decode_16bpp(
       v14 = v19;
       LOBYTE(v14) = v19 & 0xC;
       (*(int (**)())((char *)g_vbc16_block_decoders + v14))();
-      v15 = (_DWORD *)(v9 + 24);
+      v15 = (int *)(v9 + 24);
       v16 = v19;
       LOBYTE(v16) = v19 & 3;
-      ((void (__usercall *)(int@<ecx>, _DWORD *@<esi>))g_vbc16_block_decoders[v16])(v17, v15);
+      ((void (__usercall *)(int@<ecx>, int *@<esi>))g_vbc16_block_decoders[v16])(v17, v15);
       v9 = (int)(v15 + 2);
       --v21;
     }
