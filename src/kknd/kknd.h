@@ -8,11 +8,15 @@
 #include <dplay.h>
 #include <dsound.h>
 
+#ifndef nullptr
+  #define nullptr NULL
+#endif
+
 typedef struct Entity Entity;
 typedef struct Unit Unit;
 
-typedef __int32 fixed;
-typedef unsigned short bool16_t;
+typedef int32_t fixed;
+typedef uint16_t bool16_t;
 
 typedef struct {
   fixed x;
@@ -20,8 +24,8 @@ typedef struct {
 } Vec2i;
 
 typedef struct {
-  typeof_unqual(struct OilPatch) *next;
-  typeof_unqual(struct OilPatch) *prev;
+  struct OilPatch *next;
+  struct OilPatch *prev;
   Entity *entity;
   int amount;
   Unit *drillrig;
@@ -157,10 +161,10 @@ typedef enum : unsigned int {
   MobdId_Mute_Menagerie = 42,
   MobdId_Mute_MachinegunNest = 43,
   MobdId_Surv_MissileBattery = 44,
-  MobdId_Cursor = 45,
+  MobdId_MainMenu = 45,
   MobdId_LevelSelectionButtons = 46,
   MobdId_Mute_MonsterTruck = 47,
-  MobdId_Mute_OilTanker = 48,
+  MobdId_Mute_Tanker = 48,
   MobdId_Mute_PowerStation = 49,
   MobdId_Mute_Drillrig = 50,
   MobdId_OilPatch = 51,
@@ -185,7 +189,7 @@ typedef enum : unsigned int {
   MobdId_Mute_BikeAndSidecar = 70,
   MobdId_Surv_Sniper = 71,
   MobdId_AcidSplash = 72,
-  MobdId_Surv_OilTanker = 73,
+  MobdId_Surv_Tanker = 73,
   MobdId_Surv_PowerStation = 74,
   MobdId_Surv_Drillrig = 75,
   MobdId_Surv_Swat = 76,
@@ -196,7 +200,7 @@ typedef enum : unsigned int {
   MobdId_Mute_Vandal = 81,
   MobdId_Mute_Wasp = 82,
   MobdId_Surv_Bomber = 83,
-  MobdId_Invalid = -1,
+  MobdId_Invalid = (unsigned int)-1,
 } MobdId;
 
 typedef enum : unsigned int {
@@ -506,9 +510,11 @@ typedef enum : unsigned int {
   TaskMessage_AnimationAdvanced = 0xFFFFFFFF,
 } TaskMessageType;
 
+typedef struct Task Task;
+
 typedef struct {
-  typeof_unqual(struct TaskMessage) *next;
-  struct Task *task;
+  struct TaskMessage *next;
+  Task *task;
   TaskMessageType type;
   void *payload;
 } TaskMessage;
@@ -553,20 +559,20 @@ typedef enum : unsigned int {
   TaskWait_Any             = 0xC0000000,  // Yield: wake up on any condition
 } TaskWaitFlags;
 
-typedef void (__fastcall *MessageHandler)(struct Task *receiver, struct Task *sender, TaskMessageType message, void *payload);
+typedef void (__fastcall *MessageHandler)(Task *receiver, Task *sender, TaskMessageType message, void *payload);
 
-typedef void (__cdecl *TaskFn)(struct Task *task);
+typedef void (__cdecl *TaskFn)(Task *task);
 
 typedef struct
 {
-  typeof_unqual(struct TaskLocal) *next;
-  typeof_unqual(struct TaskLocal) *prev;
+  struct TaskLocal *next;
+  struct TaskLocal *prev;
   char data[];
 } TaskLocal;
 
-typedef struct {
-  typeof_unqual(struct Task) *next;
-  typeof_unqual(struct Task) *prev;
+struct Task {
+  Task *next;
+  Task *prev;
   TaskLocal *locals;
   TaskChannel channel;
   int _task_field_10;
@@ -582,7 +588,7 @@ typedef struct {
   Entity *entity;
   void *ctx;
   TaskFn entry_point;
-} Task;
+};
 
 typedef struct {
   int hitpoints;                        ///< HP inhereted from the deploying unit (base, drillrig)
@@ -595,8 +601,8 @@ typedef struct {
 } EntityProjectileContext;
 
 typedef struct {
-  typeof_unqual(struct MenuWidget) *next;
-  typeof_unqual(struct MenuWidget) *prev;
+  struct MenuWidget *next;
+  struct MenuWidget *prev;
   Entity *entity;
   int flags;
 } MenuWidget;
@@ -630,8 +636,8 @@ typedef enum : unsigned int {
 } RenderCommandFlags;
 
 typedef struct {
-  typeof_unqual(struct RenderViewport) *next;
-  typeof_unqual(struct RenderViewport) *prev;
+  struct RenderViewport *next;
+  struct RenderViewport *prev;
   int flags;
   int brightness;                       ///< Seemingly uses 8.23 format - brightness factor actually used is (brightness >> 23)
   int clip_x;
@@ -669,13 +675,13 @@ struct RenderNode {
   int _render_node_field_38;
 };
 
-typedef struct __attribute__((packed)) {
+typedef struct {
   int width;
   int height;
   unsigned __int8 format;               ///< pixel format: 0=raw, 2=RLE compressed
                                         ///< raw: one byte per pixel (palette index). Zero bytes are transparent
   unsigned __int8 pixels[];
-} MobdImageData;
+} __attribute__((packed)) MobdImageData;
 
 typedef struct {
   Blitter blitter;
@@ -790,16 +796,16 @@ typedef struct {
   int x;
   int y;
   int z;
-  typeof_unqual(struct CplcEntity) *next_x_sorted;
-  typeof_unqual(struct CplcEntity) *prev_x_sorted;
-  typeof_unqual(struct CplcEntity) *next_y_sorted;
-  typeof_unqual(struct CplcEntity) *prev_y_sorted;
+  struct CplcEntity *next_x_sorted;
+  struct CplcEntity *prev_x_sorted;
+  struct CplcEntity *next_y_sorted;
+  struct CplcEntity *prev_y_sorted;
   CplcSpawnParams spawn_params;
 } CplcEntity;
 
 typedef struct {
-  typeof_unqual(struct CplcEntityInViewport) *next;
-  typeof_unqual(struct CplcEntityInViewport) *prev;
+  struct CplcEntityInViewport *next;
+  struct CplcEntityInViewport *prev;
   Entity *entity;
 } CplcEntityInViewport;
 
@@ -1099,8 +1105,8 @@ typedef struct {
 
 typedef struct
 {
-  typeof_unqual(struct UnitEscortNode) *next;
-  typeof_unqual(struct UnitEscortNode) *prev;
+  struct UnitEscortNode *next;
+  struct UnitEscortNode *prev;
   Unit *escort;
 } UnitEscortNode;
 
@@ -1207,7 +1213,7 @@ struct Unit {
                                         ///<     Meaning: detect_radius → then captured_by_side
                                         ///<
                                         ///< 7. Scout — Detection radius (value: 76800)
-                                        ///<     Set to 76800 in UNIT_Handler_Scout (Mission.cpp:936)
+                                        ///<     Set to 76800 in UNIT_scout_tick (Mission.cpp:936)
                                         ///<     Same pattern as tech bunker — passed to entity_find_player_entity_in_radius()
                                         ///<     Meaning: scout_detect_radius
   int cplc_spawn_param;                 ///< 1. Prison/Bunker — Spawn queue count (value: 0–10)
@@ -1223,7 +1229,7 @@ struct Unit {
                                         ///<     Meaning: techbunker_spawn_type
                                         ///<
                                         ///< 3. Hut — Variant / orientation selector (value: 0–4)
-                                        ///<     Read on creation in UNIT_Handler_Hut, used in switch to pick anim frame (0/16/32/48/64)
+                                        ///<     Read on creation in UNIT_hut_tick, used in switch to pick anim frame (0/16/32/48/64)
                                         ///<     Comes from level data. Never modified after init.
                                         ///<     Meaning: hut_variant
                                         ///<
@@ -1251,7 +1257,7 @@ struct Unit {
                                         ///<     Meaning: spawn_source_param (how many tiles to walk out of building)
                                         ///<
                                         ///< 8. Scout — Discovery delay multiplier (value: 60)
-                                        ///<     Set to 60 in UNIT_Handler_Scout (Mission.cpp:935)
+                                        ///<     Set to 60 in UNIT_scout_tick (Mission.cpp:935)
                                         ///<     Stored into _134 on discovery: _134 = _12C
                                         ///<     Meaning: scout_discovery_delay
                                         ///<
@@ -1344,7 +1350,7 @@ typedef struct
 {
   BoxdCollisionShape *shape;
   Entity *entity;
-  typeof_unqual(struct BoxdSpatialHashEntry) *next;
+  struct BoxdSpatialHashEntry *next;
 } BoxdSpatialHashEntry;
 
 typedef struct {
@@ -1403,8 +1409,8 @@ typedef struct {
 } LevelMapd;
 
 typedef struct {
-  typeof_unqual(struct MapdRenderNode) *next;
-  typeof_unqual(struct MapdRenderNode) *prev;
+  struct MapdRenderNode *next;
+  struct MapdRenderNode *prev;
   RenderNode *rn;
   MapdScrlImage *scrl;
   int z;
@@ -1438,15 +1444,15 @@ typedef enum : unsigned int {
 } MenuId;
 
 typedef struct {
-  typeof_unqual(struct Coroutine) *yield_to;
+  struct Coroutine *yield_to;
   int *context;
   void *stack;
-  typeof_unqual(struct Coroutine) *next;
+  struct Coroutine *next;
 } Coroutine;
 
 typedef struct {
-  typeof_unqual(struct RenderBatch) *next;
-  typeof_unqual(struct RenderBatch) *prev;
+  struct RenderBatch *next;
+  struct RenderBatch *prev;
 } RenderBatch;
 
 /// The game does NOT use a traditional switch-based game state dispatcher. Instead, three nested `do/while` loops share a single guard variable `g_game_loop`. Value `0` means "keep ticking current loop.
@@ -1658,19 +1664,19 @@ typedef enum : unsigned __int8 {
 /// One event is dequeued per tick
 ///
 /// Verified NOT NetzGameEvent
-typedef struct __attribute__((packed)) {
+typedef struct {
   GameEventType type;
   char payload[12];
   bool ready_to_consume;                ///< when produced, is set to true
                                         ///< when NETZ consumes the event, is set to false
-} GameEvent;
+} __attribute__((packed)) GameEvent;
 
-typedef struct __attribute__((packed)) {
-  typeof_unqual(struct GameEventNode) *next;
+typedef struct {
+  struct GameEventNode *next;
   GameEvent evt;
   char field_12;
   char field_13;
-} GameEventNode;
+} __attribute__((packed)) GameEventNode;
 
 typedef enum : unsigned int {
   UnitCommandArchetype_None = 0,
@@ -1686,8 +1692,8 @@ typedef enum : unsigned int {
 } UnitCommandArchetype;
 
 typedef struct {
-  typeof_unqual(struct CursorUnitSelection) *next;
-  typeof_unqual(struct CursorUnitSelection) *prev;
+  struct CursorUnitSelection *next;
+  struct CursorUnitSelection *prev;
   Task *unit_task;
 } CursorUnitSelection;
 
@@ -1757,8 +1763,8 @@ typedef enum : unsigned int {
 } ConstructStage;
 
 typedef struct {
-  typeof_unqual(struct Construct) *next;
-  typeof_unqual(struct Construct) *prev;
+  struct Construct *next;
+  struct Construct *prev;
   int unit_id;
   int player_num;
   ConstructStage stage;
@@ -1841,11 +1847,11 @@ typedef struct {
 } ProductionSharedState;
 
 typedef struct {
-  typeof_unqual(struct SidebarButton) *next;
-  typeof_unqual(struct SidebarButton) *prev;
+  struct SidebarButton *next;
+  struct SidebarButton *prev;
   Task *task;
-  void (__fastcall *mode_open)(typeof_unqual(struct SidebarButton) *);
-  void (__fastcall *mode_close)(typeof_unqual(struct SidebarButton) *);
+  void (__fastcall *mode_open)(struct SidebarButton *);
+  void (__fastcall *mode_close)(struct SidebarButton *);
   ptrdiff_t icon_mobd_frame;
   int base_cost;                        ///< for progress bar calc
   ProductionSharedState *production_state;
@@ -1857,8 +1863,8 @@ typedef struct {
 
 /// One per buildable unit type within SidebarFactoryProduction parent
 typedef struct {
-  typeof_unqual(struct SidebarFactoryProductionOption) *next;
-  typeof_unqual(struct SidebarFactoryProductionOption) *prev;
+  struct SidebarFactoryProductionOption *next;
+  struct SidebarFactoryProductionOption *prev;
   Unit *factory;                  ///< factory unit ptr
   UnitType product_type;          ///< type of unit being produced
   ptrdiff_t icon_mobd_frame;            ///< sidebar icon mobd offset
@@ -1871,8 +1877,8 @@ typedef struct {
 /// One for each type of parent factory's production (tank, tanker, etc) - see FactoryProduction
 /// Player can enqueue more than one of the same unit, but it's managed in the sidebar logic
 typedef struct {
-  typeof_unqual(struct FactoryProdJob) *next;
-  typeof_unqual(struct FactoryProdJob) *prev;
+  struct FactoryProdJob *next;
+  struct FactoryProdJob *prev;
   int base_bandwidth;                   ///< max amount of money factory can spend per tick
   int effective_bandwidth;              ///< effective amount of money this production receives based on number of other concurrent productions
   int base_cost;                        ///< base total cost of the unit
@@ -1894,8 +1900,8 @@ typedef enum : unsigned int {
 } SidebarFactoryProductionType;
 
 typedef struct {
-  typeof_unqual(struct Sidebar) *next;
-  typeof_unqual(struct Sidebar) *prev;
+  struct Sidebar *next;
+  struct Sidebar *prev;
   Task *task;
   int num_buttons;
   fixed x;
@@ -1916,8 +1922,8 @@ typedef struct {
 } Sidebar;
 
 typedef struct {
-  typeof_unqual(struct SidebarFactoryProduction) *next;
-  typeof_unqual(struct SidebarFactoryProduction) *prev;
+  struct SidebarFactoryProduction *next;
+  struct SidebarFactoryProduction *prev;
   SidebarFactoryProductionType type;
   Unit *factory_or_factory_type;
   Sidebar *sidebar;
@@ -1939,8 +1945,8 @@ typedef struct {
 
 /// Production per individual factory
 typedef struct {
-  typeof_unqual(struct FactoryProd) *next;
-  typeof_unqual(struct FactoryProd) *prev;
+  struct FactoryProd *next;
+  struct FactoryProd *prev;
   FactoryProdJob *jobs_head;
   FactoryProdJob *jobs_tail;
   int _factory_production_field_10_unused;
@@ -1974,8 +1980,8 @@ typedef struct {
 } BuildingState;
 
 typedef struct {
-  typeof_unqual(struct Bomber) *next;
-  typeof_unqual(struct Bomber) *prev;
+  struct Bomber *next;
+  struct Bomber *prev;
   Unit *unit;
 } Bomber;
 
@@ -1991,8 +1997,8 @@ typedef struct {
 } Vec2;
 
 typedef struct {
-  typeof_unqual(struct BuildLimits) *next;
-  typeof_unqual(struct BuildLimits) *prev;
+  struct BuildLimits *next;
+  struct BuildLimits *prev;
   UnitType type;
   int num_buildings_of_this_type;
 } BuildLimits;
@@ -2007,8 +2013,8 @@ typedef struct {
 } DrillrigState;
 
 typedef struct {
-  typeof_unqual(struct Scar) *next;
-  typeof_unqual(struct Scar) *prev;
+  struct Scar *next;
+  struct Scar *prev;
   ptrdiff_t mobd_frame;
   Entity *entity;
 } Scar;
@@ -2092,7 +2098,7 @@ typedef enum {
 } ScriptType;
 
 typedef struct {
-  typeof_unqual(struct Glyph) *next;
+  struct Glyph *next;
   RenderNode *rn;
 } Glyph;
 
@@ -2112,8 +2118,8 @@ typedef struct {
 } FontMobd;
 
 typedef struct {
-  typeof_unqual(struct UiStr) *next;
-  typeof_unqual(struct UiStr) *prev;
+  struct UiStr *next;
+  struct UiStr *prev;
   Glyph *glyphs;
   int cols;
   int rows;
@@ -2124,8 +2130,8 @@ typedef struct {
 
 /// formerly _stru9_unit_order_2
 typedef struct {
-  typeof_unqual(struct SelectionNode) *next;
-  typeof_unqual(struct SelectionNode) *prev;
+  struct SelectionNode *next;
+  struct SelectionNode *prev;
   Task *unit_task;
 } SelectionNode;
 
@@ -2154,29 +2160,29 @@ typedef struct {
 typedef struct AiSquadNode AiSquadNode;
 
 typedef struct {
-  typeof_unqual(struct AiUnitNode) *next;
-  typeof_unqual(struct AiUnitNode) *prev;
+  struct AiUnitNode *next;
+  struct AiUnitNode *prev;
   Unit *unit;
   AiSquadNode *squad;
 } AiUnitNode;
 
 typedef struct {
-  typeof_unqual(struct AiWandererNode) *next;
-  typeof_unqual(struct AiWandererNode) *prev;
+  struct AiWandererNode *next;
+  struct AiWandererNode *prev;
   int _ai_wanderer_node_8;
   Unit *unit;
 } AiWandererNode;
 
 typedef struct {
-  typeof_unqual(struct AiAttackerNode) *next;
-  typeof_unqual(struct AiAttackerNode) *prev;
+  struct AiAttackerNode *next;
+  struct AiAttackerNode *prev;
   AiSquadNode *squad;
   Unit *unit;
 } AiAttackerNode;
 
 typedef struct {
-  typeof_unqual(struct AiBuildNode) *next;
-  typeof_unqual(struct AiBuildNode) *prev;
+  struct AiBuildNode *next;
+  struct AiBuildNode *prev;
   Unit *unit;
   int remaining_cost;
   UnitType unit_type;
@@ -2187,15 +2193,15 @@ typedef struct {
 typedef struct AiDrillrigNode AiDrillrigNode;
 
 typedef struct {
-  typeof_unqual(struct AiTankerNode) *next;
-  typeof_unqual(struct AiTankerNode) *prev;
+  struct AiTankerNode *next;
+  struct AiTankerNode *prev;
   AiDrillrigNode *drillrig;
   Unit *unit;
 } AiTankerNode;
 
 typedef struct {
-  typeof_unqual(struct AiPowerPlantNode) *next;
-  typeof_unqual(struct AiPowerPlantNode) *prev;
+  struct AiPowerPlantNode *next;
+  struct AiPowerPlantNode *prev;
   Unit *unit;
 } AiPowerPlantNode;
 
@@ -2217,20 +2223,20 @@ struct AiDrillrigNode {
 };
 
 typedef struct {
-  typeof_unqual(struct AiEnemyNode) *next;
-  typeof_unqual(struct AiEnemyNode) *prev;
+  struct AiEnemyNode *next;
+  struct AiEnemyNode *prev;
   Unit *unit;
 } AiEnemyNode;
 
 typedef struct {
-  typeof_unqual(struct AiBuildOrderNode) *next;
-  typeof_unqual(struct AiBuildOrderNode) *prev;
+  struct AiBuildOrderNode *next;
+  struct AiBuildOrderNode *prev;
   int _ai_stru26C_node_8;
 } AiBuildOrderNode;
 
 typedef struct {
-  typeof_unqual(struct AiBuildingPlacementNode) *next;
-  typeof_unqual(struct AiBuildingPlacementNode) *prev;
+  struct AiBuildingPlacementNode *next;
+  struct AiBuildingPlacementNode *prev;
   Unit *unit;
   UnitType unit_type;
   int unit_x;
@@ -2261,8 +2267,8 @@ struct SquadNode {
 };
 
 typedef struct {
-  typeof_unqual(struct AiController) *next;
-  typeof_unqual(struct AiController) *prev;
+  struct AiController *next;
+  struct AiController *prev;
   void *ctx1;
   void *ctx2;
   AiUnitNode *unit_node_pool;
@@ -2650,8 +2656,8 @@ typedef struct {
 } BlitterDesc;
 
 typedef struct {
-  typeof_unqual(struct RenderBlitter) *next;
-  typeof_unqual(struct RenderBlitter) *prev;
+  struct RenderBlitter *next;
+  struct RenderBlitter *prev;
   int hunk;
   int (__fastcall *mode_init)();
   Blitter mode_render;
@@ -2671,8 +2677,8 @@ typedef struct {
   void *map_base;
   void *map_cursor;
   void *map_end;
-  typeof_unqual(struct File) *next;
-  typeof_unqual(struct File) *prev;
+  struct File *next;
+  struct File *prev;
 } File;
 
 typedef enum : unsigned int
@@ -2696,8 +2702,8 @@ typedef struct {
   int pan_transition_remaining_ticks;
   int pan_transition_per_tick;
   int flags;
-  typeof_unqual(struct SoundStream) *next;
-  typeof_unqual(struct SoundStream) *prev;
+  struct SoundStream *next;
+  struct SoundStream *prev;
   int streaming_bytes_remaining;
   char filename[32];
   char _stru7_sound_64[42];
@@ -2740,7 +2746,7 @@ typedef enum : unsigned __int16
   Movie_HasSubtitles = 0x40,
 } MovieFlags;
 
-typedef struct __attribute__((packed)) {
+typedef struct {
   int size;
   MovieFlags flags;
   __int16 x;                            ///< partial update position
@@ -2766,7 +2772,7 @@ typedef struct __attribute__((packed)) {
   __int16 _movie_frame_36;
   __int16 _movie_frame_38;
   __int16 _movie_frame_3A;
-} MovieFrame;
+} __attribute__((packed)) MovieFrame;
 
 typedef struct {
   Blitter mode_render;
@@ -2783,7 +2789,7 @@ typedef struct {
   int _movie_frame_image_2C;
 } FmvFrameImage;
 
-typedef struct __attribute__((packed)) {
+typedef struct {
   MovieHeader header;
   char _movie_2C[372];
   int _movie_1A0[80];
@@ -2799,7 +2805,7 @@ typedef struct __attribute__((packed)) {
   MovieFrame frame;
   char _movie_780[131016];
   char data[1];
-} Movie;
+} __attribute__((packed)) Movie;
 
 typedef enum : unsigned __int32
 {
@@ -2821,7 +2827,7 @@ typedef struct {
   BOOL active;
   GUID guid;
   const char *name;
-  typeof_unqual(struct DpProvider) *next;
+  struct DpProvider *next;
 } DpProvider;
 
 typedef enum : unsigned int
@@ -3053,10 +3059,10 @@ typedef struct {
 } UnitTypeTag;
 
 /// Verified NOT GameEvent
-typedef struct __attribute__((packed)) {
+typedef struct {
   GameEventType type;
   char payload[12];
-} NetzGameEvent;
+} __attribute__((packed)) NetzGameEvent;
 
 typedef enum : unsigned int
 {
@@ -3144,10 +3150,10 @@ typedef struct {
   int last_send_size;
 } NetzSendBuffer;
 
-typedef struct __attribute__((packed)) {
+typedef struct {
   int settings;
   char _kaos_settings_field_4;
-} KaosSettings;
+} __attribute__((packed)) KaosSettings;
 
 typedef struct {
   int player_num;
@@ -3160,7 +3166,7 @@ typedef struct {
   int max_players;
   int flags;
   char session_name[16];
-  typeof_unqual(struct DplaySession) *next;
+  struct DplaySession *next;
 } DplaySession;
 
 typedef struct {
@@ -3194,26 +3200,26 @@ typedef struct {
 
 typedef struct {
   BOOL active;
-  typeof_unqual(struct NetzTimer) *next;
+  struct NetzTimer *next;
   int _netz_timer_field_8[2];
   int fire_at;
   int retries;
   void (__fastcall *handler)();
 } NetzTimer;
 
-typedef struct __attribute__((packed)) {
+typedef struct {
   uint8_t name[7];
   uint8_t palette;
   uint32_t flags;
   uint8_t build_date[12];
   uint8_t build_time[9];
-} NetzJoinPkt;
+} __attribute__((packed)) NetzJoinPkt;
 
 typedef struct {
   char short_name[16];
   char long_name[16];
   DPID player_id;
-  typeof_unqual(struct DplayPlayer) *next;
+  struct DplayPlayer *next;
 } DplayPlayer;
 
 typedef struct {
@@ -3222,8 +3228,8 @@ typedef struct {
 } SaveSlot;
 
 typedef struct {
-  typeof_unqual(struct NetzMobemPhonebook) *next;
-  typeof_unqual(struct NetzMobemPhonebook) *prev;
+  struct NetzMobemPhonebook *next;
+  struct NetzMobemPhonebook *prev;
   char name[12];
   char phone[12];
   int baud_index;
