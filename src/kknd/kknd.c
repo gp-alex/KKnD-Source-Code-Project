@@ -2,12 +2,12 @@
 
 
 BOOL UNIT_bomber_init();
-void __fastcall mode_null(Task *);
+void __cdecl mode_null(Task *);
 void UNIT_bomber_cleanup();
 void __cdecl UNIT_beast_enclosure_tick(Task *task);
 void __fastcall MSG_blacksmith_upgrades(Task *receiver, Task *sender, TaskMessageType message, void *payload);
 void __fastcall UNIT_bomber_add(Unit *unit);
-void __cdecl TURRET_cosmetic_task(Task *task);
+void __cdecl TURRET_cosmetic_tick(Task *task);
 void __fastcall TURRET_mode_bomber_follow_orientation(Turret *turret);
 void __fastcall TURRET_mode_bomber_init(Turret *turret);
 void __fastcall TURRET_bomber_init(Unit *unit);
@@ -91,7 +91,7 @@ void __fastcall UNIT_mode_clanhall_downgrade_production(Unit *unit);
 BOOL __fastcall PROD_is_tower_available(UnitType type);
 BOOL __fastcall PROD_is_building_available(UnitType type);
 void __fastcall UNIT_mode_clanhall_on_death(Unit *unit);
-void __fastcall PAL_copy(unsigned __int8 *dst, unsigned __int8 *src);
+void PAL_copy(uint8_t *dst, uint8_t *src);
 BOOL __fastcall BOXD_collide_solid(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
 BOOL __fastcall BOXD_collide_floor(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
 BOOL __fastcall BOXD_collide_ramp_ltr(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
@@ -117,15 +117,15 @@ int __fastcall UISTR_scroll_up(UiStr *str, int row, int x);
 void __fastcall UISTR_set_row_y(UiStr *str, int row, int y);
 void __fastcall UISTR_set_text_multiline(UiStr *str, const char *text, int x, int y);
 void __cdecl GAME_mission_briefing_or_credits(Task *task);
-BOOL LVL_cplc_init();
-BOOL __fastcall CPLC_select(int id);
-void CPLC_restore_from_backup();
+bool CPLC_init();
+bool CPLC_select(int id);
+bool CPLC_restore();
 void __fastcall CPLC_entity_spawn(CplcEntity *cplc);
 void __fastcall CPLC_viewport_remove(CplcEntityInViewport *view);
 void CPLC_viewport_update();
-void __fastcall CPLC_init_with_objects(TaskType type);
-void __fastcall CPLC_init(TaskType type, BOOL create_objects);
-void __fastcall CPLC_init_without_objects(TaskType type);
+void __fastcall CPLC_exec_with_objects(TaskType type);
+void __fastcall CPLC_exec(TaskType type, BOOL create_objects);
+void __fastcall CPLC_exec_without_objects(TaskType type);
 void CPLC_cleanup();
 void __cdecl UNIT_mobile_derrick_tick(Task *task);
 void __fastcall UNIT_mobile_derrick_init(Unit *unit);
@@ -236,7 +236,7 @@ BoxdPathingClassification __fastcall BOXD_place_unit_xl(Unit *unit, int x, int y
 BOOL REND_routines_init();
 BOOL REND_set_display_dimensions();
 const char *__cdecl REND_get_resource_resolution();
-void __fastcall PAL_apply(PaletteEntry *pal);
+void PAL_apply(PaletteEntry *pal);
 void __fastcall PAL_adjust_brightness(unsigned int brightness);
 void REND_clear_screen();
 PaletteEntry *PAL_get_selected();
@@ -478,8 +478,8 @@ void __fastcall TSK_discard_queue(Task *task);
 void TSK_message_pool_cleanup();
 void __cdecl GAME_mission_briefing(Task *task);
 void __fastcall GAME_mission_briefing_scroll_row(BOOL scroll);
-void CPLC_init_all();
-void CPLC_init_subset();
+void CPLC_exec_all();
+void CPLC_exec_subset();
 void SAVE_infer_player_num();
 void GAME_parse_cmd_line();
 void __fastcall GAME_read_campaign_progress(const char *filename);
@@ -832,8 +832,8 @@ void __cdecl UI_main_menu_campaign_surv(Task *task);
 void __cdecl UI_main_menu_campaign_mute(Task *task);
 void __cdecl UI_main_menu(Task *task);
 void __cdecl UI_main_menu_multi_ipx(Task *task);
-void __fastcall UI_main_menu_multi_serial(Task *task);
-void __fastcall UI_main_menu_multi_modem(Task *task);
+void __cdecl UI_main_menu_multi_serial(Task *task);
+void __cdecl UI_main_menu_multi_modem(Task *task);
 void __cdecl UI_main_menu_multi_cancel(Task *task);
 void __cdecl UI_main_menu_multi_cancel_to_modem_1(Task *task);
 void __cdecl UI_main_menu_multi_cancel_to_modem_2(Task *task);
@@ -995,7 +995,7 @@ void __fastcall UNIT_mode_tower_finalize(Unit *unit);
 void __fastcall MSG_tower(Task *receiver, Task *sender, TaskMessageType message, Unit *payload);
 void __fastcall UINT_tower_on_attack_order(Unit *unit, AttackOrderPayload *prder);
 void __fastcall TURRET_tower_init(Unit *unit);
-void __cdecl TURRET_combat_task(Task *task);
+void __cdecl TURRET_combat_tick(Task *task);
 BOOL __fastcall TURRET_try_acquire_target(Turret *turret);
 void __fastcall TURRET_mode_tower_idle(Turret *turret);
 void __fastcall TURRET_mode_tower_attack_target(Turret *turret);
@@ -1472,7 +1472,7 @@ void *g_script_handlers[352] =
   UNIT_scout_tick,
   UNIT_prison_tick,
   UNIT_prison_tick,
-  TURRET_cosmetic_task,
+  TURRET_cosmetic_tick,
   UNIT_bomber_tick,
   TURRET_mode_bomber_follow_orientation,
   TURRET_mode_bomber_init,
@@ -1768,7 +1768,7 @@ void *g_script_handlers[352] =
   UNIT_mode_tower_on_death,
   UNIT_mode_tower_finalize,
   MSG_tower,
-  TURRET_combat_task,
+  TURRET_combat_tick,
   TURRET_mode_tower_idle,
   TURRET_mode_tower_attack_target,
   TURRET_mode_start_tracking,
@@ -1782,7 +1782,7 @@ void *g_script_handlers[352] =
   TURRET_mode_reload_missile_battery,
   TURRET_mode_null,
   MSG_turret_tower,
-  TURRET_combat_task,
+  TURRET_combat_tick,
   TURRET_mode_vehicle_init,
   TURRET_mode_vehicle_idle,
   TURRET_mode_vehicle_rotate_to_target,
@@ -1791,7 +1791,7 @@ void *g_script_handlers[352] =
   TURRET_mode_vehicle_finalize,
   MSG_turret_vehicle,
   SCHRAP_explosion_medium_task,
-  TURRET_cosmetic_task,
+  TURRET_cosmetic_tick,
   TURRET_mode_cosmetic_init,
   TURRET_mode_cosmetic_animate,
   TURRET_mode_cosmetic_finalize,
@@ -4910,41 +4910,41 @@ UnitProjectileType g_proj_grenade                = { MobdId_Surv_Sapper,        
 UnitProjectileType g_proj_nuke                   = { MobdId_Surv_Bomber,         PROJ_mode_nuke,          384,    0,  1, 2000, 2900, 1500, 128, 0 };
 UnitProjectileType g_proj_building               = { MobdId_Mute_AlchemyHall,    nullptr,                   0,    0,  1,   15,   15,   15,  32, 0 };
 
-UnitAttachment g_turret_anaconda_cannon     = { MobdId_Surv_AnacondaTank,    TURRET_combat_task,    3, 105, 105,  1,  960,  960, &g_proj_shell_anaconda,         0 };
-UnitAttachment g_turret_plasma_cannon       = { MobdId_PlasmaTank,           TURRET_combat_task,    3,  10,  60,  3,  920,  920, &g_proj_plasma_cannon,          0 };
-UnitAttachment g_turret_sentinel_droid      = { MobdId_SentinelDroid,        TURRET_combat_task,    3,  30, 120,  2, 1664, 1664, &g_proj_laser_cannon,           0 };
-UnitAttachment g_turret_mech                = { MobdId_Mech,                 TURRET_combat_task,    3,  20, 120,  3, 1304, 1304, &g_proj_mech,                   0 };
-UnitAttachment g_turret_atv                 = { MobdId_Surv_Atv,             TURRET_combat_task,    8,  30,  90, 10,  768,  768, &g_proj_machinegun,             0 };
-UnitAttachment g_turret_atv_flamethrower    = { MobdId_Surv_AtvFlamethrower, TURRET_combat_task,    8, 120, 120,  1,  768,  768, &g_proj_flamethrower,           0 };
-UnitAttachment g_turret_monster_truck       = { MobdId_Mute_MonsterTruck,    TURRET_combat_task,    8,  30,  90, 10,  704,  704, &g_proj_machinegun,             0 };
-UnitAttachment g_turret_4x4_pickup          = { MobdId_Mute_MonsterTruck,    TURRET_combat_task,    8,  45,  60, 10,  704,  704, &g_proj_machinegun,             0 };
-UnitAttachment g_turret_bike_and_sidecar    = { MobdId_Mute_BikeAndSidecar,  TURRET_combat_task,    8,  45,  60, 10,  768,  768, &g_proj_machinegun,             0 };
-UnitAttachment g_turret_war_mastadont       = { MobdId_Mute_WarMastadont,    TURRET_combat_task,    8,  10, 160,  4, 1472, 1472, &g_proj_shell_war_mastadont,    0 };
-UnitAttachment g_turret_barrage_craft       = { MobdId_Surv_BarrageCraft,    TURRET_combat_task,    8,  20, 420,  6,  704,  704, &g_proj_rocket_barrage_craft,   0 };
-UnitAttachment g_turret_autocannon_tank     = { MobdId_Surv_AutocannonTank,  TURRET_combat_task,    8,   5,   5,  1, 1152, 1088, &g_proj_machinegun,             0 };
-UnitAttachment g_turret_missile_crab        = { MobdId_Mute_MissileCrab,     TURRET_combat_task,    8,  30,  90,  2, 1472, 1472, &g_proj_rocket_missile_crab,    0 };
-UnitAttachment g_turret_cannon_tower        = { MobdId_Surv_CannonTower,     TURRET_combat_task,    8,  10, 125,  2,  700,  636, &g_proj_shell_cannon_tower,     0 };
-UnitAttachment g_turret_guard_tower         = { MobdId_Surv_GuardTower,      TURRET_combat_task,    8,  15,  90, 10,  416,  416, &g_proj_machinegun,             0 };
-UnitAttachment g_turret_machinegun_nest     = { MobdId_Mute_MachinegunNest,  TURRET_combat_task,    8,  15,  90, 10,  380,  380, &g_proj_machinegun,             0 };
-UnitAttachment g_turrent_grapeshot_cannon   = { MobdId_Mute_GrapeshotTower,  TURRET_combat_task,    8,   0, 120, 10,  572,  572, &g_proj_grapeshot,              0 };
-UnitAttachment g_turret_missile_battery     = { MobdId_Surv_MissileBattery,  TURRET_combat_task,    2,  30, 120,  3,  436,  372, &g_proj_rocket_missile_battery, 0 };
-UnitAttachment g_turret_rotary_cannon       = { MobdId_Mute_RotaryCannon,    TURRET_combat_task,    8,   6,  10, 10,  764,  700, &g_proj_machinegun,             0 };
-UnitAttachment g_attach_bomber              = { MobdId_Surv_Bomber,          TURRET_cosmetic_task,  0,   0,   0,  0,  508,  508, nullptr,                        0 };
-UnitAttachment g_attach_wasp                = { MobdId_Mute_Wasp,            TURRET_cosmetic_task,  0,   0,   0,  0,  576,  576, nullptr,                        0 };
-UnitAttachment g_attach_power_station_surv  = { MobdId_Surv_PowerStation,    TURRET_cosmetic_task,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
-UnitAttachment g_attach_power_station_mute  = { MobdId_Mute_PowerStation,    TURRET_cosmetic_task,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
-UnitAttachment g_attach_outpost             = { MobdId_Surv_Outpost,         TURRET_cosmetic_task,  0,   0,   0,  0, 1040, 1040, nullptr,                        0 };
-UnitAttachment g_attach_machine_shop        = { MobdId_Surv_MachineShop,     TURRET_cosmetic_task,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
-UnitAttachment g_attach_beast_enclosure     = { MobdId_Mute_BeastEnclosure,  TURRET_cosmetic_task,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
-UnitAttachment g_attach_repair_bay          = { MobdId_Surv_RepairBay,       TURRET_cosmetic_task,  0,   0,   0,  0,  320,  320, nullptr,                        0 };
-UnitAttachment g_attach_drillrig_surv       = { MobdId_Surv_Drillrig,        TURRET_cosmetic_task,  0,   0,   0,  0,  236,  236, nullptr,                        0 };
-UnitAttachment g_attach_drillrig_mute       = { MobdId_Mute_Drillrig,        TURRET_cosmetic_task,  0,   0,   0,  0,  200,  200, nullptr,                        0 };
-UnitAttachment g_attach_research_lab        = { MobdId_Surv_ResearchLab,     TURRET_cosmetic_task,  0,   0,   0,  0,  224,  224, nullptr,                        0 };
-UnitAttachment g_attach_tech_bunker         = { MobdId_TechBunker,           TURRET_cosmetic_task,  0,   0,   0,  0,  220,  220, nullptr,                        0 };
-UnitAttachment g_attach_tech_alchemy_hall   = { MobdId_Mute_AlchemyHall,     TURRET_cosmetic_task,  0,   0,   0,  0,  224,  224, nullptr,                        0 };
-UnitAttachment g_attach_blacksmith          = { MobdId_Mute_Blacksmith,      TURRET_cosmetic_task,  0,   0,   0,  0,  224,  224, nullptr,                        0 };
-UnitAttachment g_attach_mobile_derrick_mute = { MobdId_Mute_MobileDerrick,   TURRET_cosmetic_task, 20,   0,   0,  0,  576,  576, nullptr,                        0 };
-UnitAttachment g_attach_clanhall            = { MobdId_Mute_Clanhall,        TURRET_cosmetic_task,  0,   0,   0,  0,  776,  776, nullptr,                        0 };
+UnitAttachment g_turret_anaconda_cannon     = { MobdId_Surv_AnacondaTank,    TURRET_combat_tick,    3, 105, 105,  1,  960,  960, &g_proj_shell_anaconda,         0 };
+UnitAttachment g_turret_plasma_cannon       = { MobdId_PlasmaTank,           TURRET_combat_tick,    3,  10,  60,  3,  920,  920, &g_proj_plasma_cannon,          0 };
+UnitAttachment g_turret_sentinel_droid      = { MobdId_SentinelDroid,        TURRET_combat_tick,    3,  30, 120,  2, 1664, 1664, &g_proj_laser_cannon,           0 };
+UnitAttachment g_turret_mech                = { MobdId_Mech,                 TURRET_combat_tick,    3,  20, 120,  3, 1304, 1304, &g_proj_mech,                   0 };
+UnitAttachment g_turret_atv                 = { MobdId_Surv_Atv,             TURRET_combat_tick,    8,  30,  90, 10,  768,  768, &g_proj_machinegun,             0 };
+UnitAttachment g_turret_atv_flamethrower    = { MobdId_Surv_AtvFlamethrower, TURRET_combat_tick,    8, 120, 120,  1,  768,  768, &g_proj_flamethrower,           0 };
+UnitAttachment g_turret_monster_truck       = { MobdId_Mute_MonsterTruck,    TURRET_combat_tick,    8,  30,  90, 10,  704,  704, &g_proj_machinegun,             0 };
+UnitAttachment g_turret_4x4_pickup          = { MobdId_Mute_MonsterTruck,    TURRET_combat_tick,    8,  45,  60, 10,  704,  704, &g_proj_machinegun,             0 };
+UnitAttachment g_turret_bike_and_sidecar    = { MobdId_Mute_BikeAndSidecar,  TURRET_combat_tick,    8,  45,  60, 10,  768,  768, &g_proj_machinegun,             0 };
+UnitAttachment g_turret_war_mastadont       = { MobdId_Mute_WarMastadont,    TURRET_combat_tick,    8,  10, 160,  4, 1472, 1472, &g_proj_shell_war_mastadont,    0 };
+UnitAttachment g_turret_barrage_craft       = { MobdId_Surv_BarrageCraft,    TURRET_combat_tick,    8,  20, 420,  6,  704,  704, &g_proj_rocket_barrage_craft,   0 };
+UnitAttachment g_turret_autocannon_tank     = { MobdId_Surv_AutocannonTank,  TURRET_combat_tick,    8,   5,   5,  1, 1152, 1088, &g_proj_machinegun,             0 };
+UnitAttachment g_turret_missile_crab        = { MobdId_Mute_MissileCrab,     TURRET_combat_tick,    8,  30,  90,  2, 1472, 1472, &g_proj_rocket_missile_crab,    0 };
+UnitAttachment g_turret_cannon_tower        = { MobdId_Surv_CannonTower,     TURRET_combat_tick,    8,  10, 125,  2,  700,  636, &g_proj_shell_cannon_tower,     0 };
+UnitAttachment g_turret_guard_tower         = { MobdId_Surv_GuardTower,      TURRET_combat_tick,    8,  15,  90, 10,  416,  416, &g_proj_machinegun,             0 };
+UnitAttachment g_turret_machinegun_nest     = { MobdId_Mute_MachinegunNest,  TURRET_combat_tick,    8,  15,  90, 10,  380,  380, &g_proj_machinegun,             0 };
+UnitAttachment g_turrent_grapeshot_cannon   = { MobdId_Mute_GrapeshotTower,  TURRET_combat_tick,    8,   0, 120, 10,  572,  572, &g_proj_grapeshot,              0 };
+UnitAttachment g_turret_missile_battery     = { MobdId_Surv_MissileBattery,  TURRET_combat_tick,    2,  30, 120,  3,  436,  372, &g_proj_rocket_missile_battery, 0 };
+UnitAttachment g_turret_rotary_cannon       = { MobdId_Mute_RotaryCannon,    TURRET_combat_tick,    8,   6,  10, 10,  764,  700, &g_proj_machinegun,             0 };
+UnitAttachment g_attach_bomber              = { MobdId_Surv_Bomber,          TURRET_cosmetic_tick,  0,   0,   0,  0,  508,  508, nullptr,                        0 };
+UnitAttachment g_attach_wasp                = { MobdId_Mute_Wasp,            TURRET_cosmetic_tick,  0,   0,   0,  0,  576,  576, nullptr,                        0 };
+UnitAttachment g_attach_power_station_surv  = { MobdId_Surv_PowerStation,    TURRET_cosmetic_tick,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
+UnitAttachment g_attach_power_station_mute  = { MobdId_Mute_PowerStation,    TURRET_cosmetic_tick,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
+UnitAttachment g_attach_outpost             = { MobdId_Surv_Outpost,         TURRET_cosmetic_tick,  0,   0,   0,  0, 1040, 1040, nullptr,                        0 };
+UnitAttachment g_attach_machine_shop        = { MobdId_Surv_MachineShop,     TURRET_cosmetic_tick,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
+UnitAttachment g_attach_beast_enclosure     = { MobdId_Mute_BeastEnclosure,  TURRET_cosmetic_tick,  0,   0,   0,  0,  260,  260, nullptr,                        0 };
+UnitAttachment g_attach_repair_bay          = { MobdId_Surv_RepairBay,       TURRET_cosmetic_tick,  0,   0,   0,  0,  320,  320, nullptr,                        0 };
+UnitAttachment g_attach_drillrig_surv       = { MobdId_Surv_Drillrig,        TURRET_cosmetic_tick,  0,   0,   0,  0,  236,  236, nullptr,                        0 };
+UnitAttachment g_attach_drillrig_mute       = { MobdId_Mute_Drillrig,        TURRET_cosmetic_tick,  0,   0,   0,  0,  200,  200, nullptr,                        0 };
+UnitAttachment g_attach_research_lab        = { MobdId_Surv_ResearchLab,     TURRET_cosmetic_tick,  0,   0,   0,  0,  224,  224, nullptr,                        0 };
+UnitAttachment g_attach_tech_bunker         = { MobdId_TechBunker,           TURRET_cosmetic_tick,  0,   0,   0,  0,  220,  220, nullptr,                        0 };
+UnitAttachment g_attach_tech_alchemy_hall   = { MobdId_Mute_AlchemyHall,     TURRET_cosmetic_tick,  0,   0,   0,  0,  224,  224, nullptr,                        0 };
+UnitAttachment g_attach_blacksmith          = { MobdId_Mute_Blacksmith,      TURRET_cosmetic_tick,  0,   0,   0,  0,  224,  224, nullptr,                        0 };
+UnitAttachment g_attach_mobile_derrick_mute = { MobdId_Mute_MobileDerrick,   TURRET_cosmetic_tick, 20,   0,   0,  0,  576,  576, nullptr,                        0 };
+UnitAttachment g_attach_clanhall            = { MobdId_Mute_Clanhall,        TURRET_cosmetic_tick,  0,   0,   0,  0,  776,  776, nullptr,                        0 };
 
 UnitStats g_unit_stats[89] =
 {
@@ -5113,6 +5113,7 @@ void *g_coroutine_esp = NULL;
 void *g_coroutine_current_stack = NULL;
 int g_coroutine_nesting_depth = 0;
 Coroutine *g_coroutine_free_head = NULL;
+#define MAX_COROUTINES 2000
 Coroutine *g_coroutine_pool = NULL;
 int g_dbg_mode_sentinel = 0; // weak
 BuildLimits *g_build_limits_head = NULL;
@@ -5199,6 +5200,7 @@ int g_cplc_despawn_z; // weak
 CplcEntityInViewport *g_cplc_viewport_active_head;
 int g_cplc_despawn_x; // weak
 CplcEntity *g_cplc_camera;
+#define CPLC_VIEWPORT_POOL_SIZE 2000
 CplcEntityInViewport *g_cplc_viewport_pool;
 int g_cplc_despawn_y; // weak
 CplcEntity *g_current_lvl_cplc_layer_y_sorted_top;
@@ -5228,7 +5230,6 @@ RenderViewport *g_fade_draw_ctx;
 int g_fade_timer;
 int g_num_ai_players;
 Task *g_ai_players_tasks[7];
-_UNKNOWN unk_4778EC; // weak
 AiController *g_ai_controllers[7];
 File g_file_head;
 File *g_file_pool;
@@ -5321,7 +5322,6 @@ MobdImageData *g_healthbar_by_veterancy_wide[MAX_VETERANCY_LEVELS][28];
 MobdImageData *g_healthbar_by_veterancy_short[MAX_VETERANCY_LEVELS][12];
 struct tagRECT g_window_rect; // idb
 void *g_dd_pixels;
-_UNKNOWN unk_4797E8; // weak
 DWORD g_window_style; // idb
 int g_window_bpp; // weak
 __int16 g_dd_stride; // idb
@@ -5364,7 +5364,7 @@ BOOL g_input_unk_device_initialized;
 int g_ui_string_initialized; // weak
 BOOL g_render_nodes_initialized;
 LevelHunkSection *g_current_lvl_sections;
-BOOL g_cplc_initialized;
+bool g_cplc_initialized;
 BOOL g_mobd_initialized;
 BOOL g_timer_initialized;
 BOOL g_input_initialized;
@@ -5641,7 +5641,6 @@ SidebarButton *g_sidebar_button_minimap;
 SidebarButton *g_production_buttons[5];
 BOOL g_aircraft_unlocked;
 char g_47CA30_buf_static[67]; // idb
-_UNKNOWN unk_47CA73; // weak
 NetzGameEvent g_netz_game_events[7];
 GameEvent g_currently_processed_event;
 Task *g_per_player_dispatch_tasks[7];
@@ -5725,6 +5724,9 @@ _UNKNOWN unk_468560; // weak
 _UNKNOWN unk_468620; // weak
 _UNKNOWN unk_4686E0; // weak
 _UNKNOWN unk_4687D0; // weak
+_UNKNOWN unk_47CA73; // weak
+_UNKNOWN unk_4797E8; // weak
+_UNKNOWN unk_4778EC; // weak
 
 
 //----- (00401000) --------------------------------------------------------
@@ -5776,9 +5778,10 @@ void __fastcall UNIT_bomber_add(Unit *unit)
 }
 
 //----- (004010B0) --------------------------------------------------------
-void __cdecl __noreturn TURRET_cosmetic_task(Task *task)
+void __cdecl TURRET_cosmetic_tick(Task *task)
 {
-  (*((void (**)(void))task->ctx + 4))();        // task->ctx->mode(task->ctx);
+  Turret *turret = (Turret *)task->ctx;
+  turret->mode(turret);
 }
 
 //----- (004010C0) --------------------------------------------------------
@@ -5818,7 +5821,7 @@ void __fastcall TURRET_bomber_init(Unit *unit)
       turret_entity = ENT_create_ex(
                         unit->stats->attachment->mobd_id,
                         unit->entity,
-                        TURRET_cosmetic_task,
+                        TURRET_cosmetic_tick,
                         TaskKind_Callback,
                         unit->mobd_anchors.turret);
       turret->entity = turret_entity;
@@ -5849,6 +5852,8 @@ void __fastcall MSG_bomber(
         TaskMessageType message,
         void *payload)                  // void* actually, but Entity for ReceiveDmg message
 {
+  (void)sender;
+
   Unit *unit; // esi
   int hitpoints; // eax
   int new_hp; // eax
@@ -6068,25 +6073,16 @@ void __fastcall UNIT_bomber_initiate_end_sequence(Unit *unit, BOOL crash_or_depa
 //----- (00401600) --------------------------------------------------------
 void __fastcall UNIT_mode_bomber_cleanup(Unit *unit)
 {
-  Bomber *v1; // eax
-  UnitType type; // ecx
-
-  v1 = g_bomber_active_head;
-  type = unit->type;
-  if ( g_bomber_active_head != (Bomber *)&g_bomber_active_head )
-  {
-    while ( v1->unit->unit_id != type )
-    {
-      v1 = v1->next;
-      if ( v1 == (Bomber *)&g_bomber_active_head )
-        goto LABEL_6;
+  for (Bomber *i = g_bomber_active_head; i != END(g_bomber_active_head); i = i->next) {
+    if (i->unit->unit_id == unit->unit_id) {
+      i->next->prev = i->prev;
+      i->prev->next = i->next;
+      i->next = g_bomber_free_head;
+      g_bomber_free_head = i;
+      break;
     }
-    v1->next->prev = v1->prev;
-    v1->prev->next = v1->next;
-    v1->next = g_bomber_free_head;
-    g_bomber_free_head = v1;
   }
-LABEL_6:
+
   ENT_remove(unit->entity);
   TSK_schedule_self_destruct(unit->task);
   UNIT_remove(unit);
@@ -6149,8 +6145,8 @@ void __fastcall UNIT_mode_bomber_drop_bomb(Unit *unit)
       task = v6->task;
       v6->ctx1 = projectile;
       task->ctx = nullptr;
-      v6->ctx2.building_ctx.hitpoints = (int)unit;
-      v6->ctx2.building_ctx._unused = unit->unit_id;
+      v6->projectile_ctx.attacker = unit;
+      v6->projectile_ctx.attacker_unit_id = unit->unit_id;
       v6->infantry_damage = LOWORD(projectile->damage_to_infantry)
                           + ((projectile->damage_to_infantry * g_veterancy_damage_mod[unit->veterancy]) >> 8);
       v6->vehicle_damage = LOWORD(projectile->damage_to_vehicles)
@@ -6345,6 +6341,9 @@ void __fastcall MSG_airstrike_sidebar(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+  (void)payload;
+
   AirstrikeSidebar *ctx; // eax
   int v5; // ecx
   int num_airstrikes_available; // ecx
@@ -6384,7 +6383,7 @@ LABEL_6:
 }
 
 //----- (00401C30) --------------------------------------------------------
-void __cdecl __noreturn AIRSTRIKE_sidebar_task(Task *task)
+void __cdecl AIRSTRIKE_sidebar_task(Task *task)
 {
   AirstrikeSidebar *ctx; // edi
   Entity *entity; // esi
@@ -6541,16 +6540,17 @@ void __fastcall MSG_beast_enclosure(
         UNIT_destroy(unit, UNIT_mode_beast_enclosure_on_death);
         return;
       case TaskMessage_UnitReady:
+        UnitType type = (UnitType)(uintptr_t)payload;
         unit->entity->is_collidable = 1;
         if ( ENT_create_by_unit_type(
-               (UnitType)payload,
+               type,
                unit->mobd_anchors.rally->x + unit->entity->x,
                unit->mobd_anchors.rally->y + unit->entity->y,
                unit->player_num)
           && g_player_num == unit->player_num )
         {
           UI_show_notification_box(nullptr, "Unit Ready");
-          switch ( (unsigned int)payload )
+          switch (type)
           {
             case UnitType_Mute_DireWolf:
               SOUND_play(SoundId_Mute_DireWolf_Recall, 0, g_sfx_vol, 16, nullptr);
@@ -6696,7 +6696,7 @@ void __fastcall UNIT_mode_beast_enclosure_on_complete(Unit *unit)
     v4 = UI_sidebar_prod_enable_category(unit, ProductionType_Vehicles);
     state->prod = v4;
     v5 = g_current_lvl_id;
-    if ( (BYTE1(g_lvl_desc[g_current_lvl_id].disabled_units_mask) & 0x80u) == 0 )
+    if (~g_lvl_desc[g_current_lvl_id].disabled_units_mask & 0x8000)
     {
       UI_sidebar_prod_enable_unit(v4, UnitType_Mute_DireWolf, 2552);
       v5 = g_current_lvl_id;
@@ -6868,9 +6868,10 @@ void __fastcall MSG_blacksmith(Task *receiver, Task *sender, TaskMessageType mes
         UNIT_destroy(unit, UNIT_mode_blacksmith_on_death);
         break;
       case TaskMessage_UnitReady:
+        UnitType type = (UnitType)(uintptr_t)payload;
         unit->entity->is_collidable = 1;
         if ( ENT_create_by_unit_type(
-               (UnitType)payload,
+               type,
                unit->mobd_anchors.rally->x + unit->entity->x,
                unit->mobd_anchors.rally->y + unit->entity->y,
                unit->player_num) )
@@ -7011,65 +7012,47 @@ void __fastcall UNIT_mode_blacksmith_complete(Unit *unit)
 //----- (00402910) --------------------------------------------------------
 BOOL TSK_coroutine_init()
 {
-  Coroutine *result; // eax
-  int i; // ecx
-  Coroutine *c; // eax
-
-  result = (Coroutine *)malloc(0x7D00u);
-  g_coroutine_pool = result;
-  if ( result )
-  {
-    for ( i = 0; i < 1999; ++i )
-    {
-      c = &result[i];
-      c->yield_to = nullptr;
-      c->context = nullptr;
-      c->stack = nullptr;
-      c->next = nullptr;
-      g_coroutine_pool[i].next = &g_coroutine_pool[i + 1];
-      result = g_coroutine_pool;
-    }
-    g_coroutine_pool[1999].next = nullptr;
-    g_coroutine_list_head = g_coroutine_pool;
-    g_coroutine_free_head = g_coroutine_pool + 1;
-    return 1;
+  g_coroutine_pool = (Coroutine *)malloc(MAX_COROUTINES * sizeof(Coroutine));
+  if (nullptr == g_coroutine_pool) {
+    return false;
   }
-  return (BOOL)result;
+
+  for (int i = 0; i < MAX_COROUTINES; ++i) {
+    g_coroutine_pool[i].yield_to = nullptr;
+    g_coroutine_pool[i].context = nullptr;
+    g_coroutine_pool[i].stack = nullptr;
+    g_coroutine_pool[i].next = &g_coroutine_pool[i + 1];
+  }
+  g_coroutine_pool[MAX_COROUTINES - 1].next = nullptr;
+  g_coroutine_list_head = g_coroutine_pool;
+  g_coroutine_free_head = g_coroutine_pool + 1;
+
+  return true;
 }
 
 //----- (00402980) --------------------------------------------------------
-Coroutine *__fastcall TSK_coroutine_create(void (*starter)(), const size_t stack_size)
+Coroutine *__fastcall TSK_coroutine_create(void (__cdecl *starter)(), const size_t stack_size)
 {
-  Coroutine *v2; // edi
-  int *result; // eax
-  Coroutine **p_next; // ebx
-  int sp; // esi
-  int *v8; // ecx
-
-  v2 = g_coroutine_free_head;
-  if ( !g_coroutine_free_head )
+  Coroutine *co = g_coroutine_free_head;
+  if (nullptr == co)
     return nullptr;
-  p_next = &g_coroutine_free_head->next;
+    
+  void *stack = malloc(stack_size);
+  if (nullptr == stack) {
+    return nullptr;
+  }
+
   g_coroutine_free_head = g_coroutine_free_head->next;
-  result = (int *)malloc(stack_size);
-  v2->context = result;
-  if ( result )
-  {
-    sp = (int)stack_size >> 2;
-    result[sp - 1] = (int)TURRET_mode_null;
-    v2->context[sp - 2] = 0;
-    v2->context[sp - 3] = (int)starter;
-    v8 = &v2->context[sp - 4];
-    *v8 = (int)v8;
-    v2->stack = &v2->context[sp - 7];
-    return v2;
-  }
-  else
-  {
-    *p_next = g_coroutine_free_head;
-    g_coroutine_free_head = v2;
-  }
-  return (Coroutine *)result;
+  co->context = stack;
+
+  uintptr_t sp = (uintptr_t)(stack_size / sizeof(int));
+  co->context[sp - 1] = (uintptr_t)TURRET_mode_null;
+  co->context[sp - 2] = 0;
+  co->context[sp - 3] = (uintptr_t)(void *)starter;
+  co->context[sp - 4] = (uintptr_t)&co->context[sp - 4];
+  co->stack = &co->context[sp - 7];
+
+  return co;
 }
 
 //----- (00402A00) --------------------------------------------------------
@@ -7099,52 +7082,91 @@ void TSK_coroutine_cleanup()
 }
 
 //----- (00402A60) --------------------------------------------------------
-// //----- (00402A60) --------------------------------------------------------
-// __declspec(naked) int coroutine_yield_asm(Coroutine *self)
-// {
-//   __asm {
-//     push    ebp
-//     mov     ebp, esp
-//     push    ebx
-//     push    esi
-//     push    edi
-//     mov     coroutine_current_stack, esp
-//   }
-//   coroutine_current->stack = coroutine_current_stack;
-//   self->yield_to = coroutine_current;
-//   coroutine_current = self;
-//   coroutine_current_stack = self->stack;
-//   __asm {
-//     mov     esp, coroutine_current_stack
-//     xor     eax, eax
-//     pop     edi
-//     pop     esi
-//     pop     ebx
-//     pop     ebp
-//     retn
-//   }
-// }
-void __cdecl TSK_execute_async(Coroutine *coroutine)
+#if defined(_MSC_VER) && defined(_M_IX86)
+__declspec(naked)
+void __cdecl TSK_execute_async(Coroutine *next)
 {
-  Coroutine *volatile v1; // eax
-  Coroutine *v2; // edx
-  _BYTE v3[12]; // [esp+0h] [ebp-Ch] BYREF
+  __asm {
+    // [esp+4] : next
+    push    ebp
+    mov     ebp, esp
 
-  g_coroutine_current_stack = v3;
-  v1 = g_coroutine_current;
-  v1->stack = v3;
-  v2 = g_coroutine_current;
-  coroutine->yield_to = v2;
-  g_coroutine_current = coroutine;
-  g_coroutine_current_stack = coroutine->stack;
+    // preserve the registers
+    push    ebx
+    push    esi
+    push    edi
+
+    mov     g_coroutine_current_stack, esp
+  }
+
+  g_coroutine_current->stack = g_coroutine_current_stack;
+  next->yield_to = g_coroutine_current;
+  g_coroutine_current = next;
+  g_coroutine_current_stack = next->stack;
+
+  __asm {
+    mov     esp, g_coroutine_current_stack
+
+    pop     edi
+    pop     esi
+    pop     ebx
+
+    pop     ebp
+    retn
+  }
 }
+#elif (defined(__GNUC__) || defined(__clang__)) && defined(__i386)
+__attribute__((naked, noinline, cdecl))
+void TSK_execute_async(Coroutine *next)
+{
+  __asm__ volatile (
+    // [esp+4] : next
+    "pushl %ebp\n\t"
+    "movl %esp, %ebp\n\t"
+
+    // preserve the registers
+    "pushl %ebx\n\t"
+    "pushl %esi\n\t"
+    "pushl %edi\n\t"
+
+    "movl g_coroutine_current_stack, %esp\n\t"
+
+    // g_coroutine_current = eax
+    // g_coroutine_current->stack (eax[8]) = g_coroutine_current_stack (esp)
+    "movl g_coroutine_current, %eax\n\t"
+    "movl %esp, 8(%eax)\n\t"
+
+    // ecx = next
+    // next->yield_to (ecx[0]) = g_coroutine_current_stack (eax) 
+    "movl 8(%ebp), %ecx\n\t"
+    "movl %eax, 0(%ecx)\n\t"
+
+    // g_coroutine_current = next
+    // g_coroutine_current_stack = next->stack
+    "movl %ecx, g_coroutine_current\n\t"
+    "movl 8(%ecx), g_coroutine_current_stack\n\t"
+
+    "movl g_coroutine_current_stack, %esp\n\t"
+
+    "popl %edi\n\t"
+    "popl %esi\n\t"
+    "popl %ebx\n\t"
+    
+    "popl %ebp\n\t"
+    "ret\n\t"
+  );
+}
+#else
+  x64 inline asm version 
+#endif
 
 //----- (00402AB0) --------------------------------------------------------
 void __fastcall UNIT_mode_building_under_construction(Unit *unit)
 {
+  (void)unit;
+
   g_dbg_mode_sentinel = 76354;
 }
-// 477358: using guessed type int g_dbg_mode_sentinel;
 
 //----- (00402AC0) --------------------------------------------------------
 BOOL __fastcall UNIT_building_is_under_construction(Unit *unit)
@@ -7167,7 +7189,7 @@ void __fastcall TURRET_buiding_init(Unit *unit)
     turret_entity = ENT_create_ex(
                       unit->stats->attachment->mobd_id,
                       unit->entity,
-                      TURRET_cosmetic_task,
+                      TURRET_cosmetic_tick,
                       TaskKind_Callback,
                       unit->mobd_anchors.turret);
     turret->entity = turret_entity;
@@ -7351,10 +7373,10 @@ void __fastcall UNIT_apply_damage_ex(Unit *unit, Entity *attacker, UnitMode on_d
     {
       if ( unit->stats->ai_threat_weight )
       {
-        attacker_unit = attacker->ctx2.projectile_ctx.attacker;
+        attacker_unit = attacker->projectile_ctx.attacker;
         if ( attacker_unit )
         {
-          if ( attacker_unit->unit_id == attacker->ctx2.building_ctx._unused )
+          if ( attacker_unit->unit_id == attacker->building_ctx._unused )
           {
             task = attacker_unit->task;
             if ( task )
@@ -7491,9 +7513,11 @@ void __fastcall MSG_building_generic(
           if ( sender != receiver && unit2->player_num == unit->player_num )
             TSK_send_message(receiver, TaskMessage_BroadcastBuildingComplete, nullptr, sender);
           break;
-        case TaskMessage_BroadcastBuildingComplete:
-          ++*((_WORD *)unit->state + 6);
+        case TaskMessage_BroadcastBuildingComplete: {
+          BuildingState *state = (BuildingState *)unit->state;
+          state->same_building_count += 1;
           break;
+        }
         default:
           return;
       }
@@ -7502,7 +7526,7 @@ void __fastcall MSG_building_generic(
 }
 
 //----- (00403230) --------------------------------------------------------
-void __cdecl __noreturn SCHRAP_explosion_small_random_task(Task *task)
+void __cdecl SCHRAP_explosion_small_random_task(Task *task)
 {
   Entity *entity; // esi
   __int16 v2; // ax
@@ -7526,7 +7550,7 @@ void __cdecl __noreturn SCHRAP_explosion_small_random_task(Task *task)
 }
 
 //----- (004032F0) --------------------------------------------------------
-void __cdecl __noreturn SCHRAP_explosion_big_delayed_task(Task *task)
+void __cdecl SCHRAP_explosion_big_delayed_task(Task *task)
 {
   Entity *entity; // esi
   int v2; // ecx
@@ -7547,7 +7571,7 @@ void __cdecl __noreturn SCHRAP_explosion_big_delayed_task(Task *task)
 }
 
 //----- (00403380) --------------------------------------------------------
-void __cdecl __noreturn SCHRAP_explosion_building_task(Task *task)
+void __cdecl SCHRAP_explosion_building_task(Task *task)
 {
   Entity *v1; // esi
   int v2; // edi
@@ -8170,33 +8194,31 @@ void __fastcall MSG_clanhall(Task *receiver, Task *sender, TaskMessageType messa
 //----- (00404040) --------------------------------------------------------
 void __fastcall UNIT_mode_clanhall_set_default_prod(Unit *unit)
 {
-  BuildingState *state; // esi
+  if (g_player_num != unit->player_num)
+    return;
 
-  if ( g_player_num == unit->player_num )
+  BuildingState *state = (BuildingState *)unit->state;
+  state->same_building_count = 0;
+  TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Clanhall);
+  if ( !state->same_building_count )
   {
-    state = (BuildingState *)unit->state;
-    state->same_building_count = 0;
-    TSK_broadcast_message(unit->task, TaskMessage_BuildingComplete, nullptr, TaskChannel_Clanhall);
-    if ( !state->same_building_count )
+    if ( !g_buildings_suspended && !g_sidebar_buildings_prod )
+      g_sidebar_buildings_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Buildings);
+    if ( !g_sidebar_tower_prod )
     {
-      if ( !g_buildings_suspended && !g_sidebar_buildings_prod )
-        g_sidebar_buildings_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Buildings);
-      if ( !g_sidebar_tower_prod )
+      g_sidebar_tower_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Towers);
+      for (size_t i = 0; i < sizeof(g_mute_default_buildings)/sizeof(g_mute_default_buildings[0]); ++i)
       {
-        g_sidebar_tower_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Towers);
-        for (i = 0; i < sizeof(g_mute_default_buildings)/sizeof(g_mute_default_buildings[0]); ++i)
-        {
-          if ( (g_lvl_desc[g_current_lvl_id].disabled_units_mask & g_mute_default_buildings[i].mask) == 0 ) {
-            UI_sidebar_prod_enable_unit(
-              g_sidebar_buildings_prod,
-              g_mute_default_buildings[i].type,
-              g_mute_default_buildings[i].mobd_lookup);
-          }
+        if ( (g_lvl_desc[g_current_lvl_id].disabled_units_mask & g_mute_default_buildings[i].mask) == 0 ) {
+          UI_sidebar_prod_enable_unit(
+            g_sidebar_buildings_prod,
+            g_mute_default_buildings[i].type,
+            g_mute_default_buildings[i].mobd_lookup);
         }
-        if ( !g_sidebar_aircraft_prod )
-          g_sidebar_aircraft_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Aircraft);
-        TECHLVL_reset(&g_clanhall_levels);
       }
+      if ( !g_sidebar_aircraft_prod )
+        g_sidebar_aircraft_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Aircraft);
+      TECHLVL_reset(&g_clanhall_levels);
     }
   }
 }
@@ -8224,7 +8246,7 @@ void __cdecl UNIT_clanhall_tick(Task *task)
         unit->mode = UNIT_mode_clanhall_complete;
       else
         UNIT_building_construction_start(unit, UNIT_mode_clanhall_complete);
-      hp = task->entity->ctx2.building_ctx.hitpoints;
+      hp = task->entity->building_ctx.hitpoints;
       if ( hp )
       {
         unit->hitpoints = hp;
@@ -8255,10 +8277,10 @@ void __fastcall UNIT_mode_clanhall_on_complete(Unit *unit)
       UI_show_notification_box(nullptr, "Building completed");
 
     state->prod = UI_sidebar_prod_enable_category(unit, ProductionType_Infantry);;
-    for (int i = 0; i < sizeof(g_mute_default_infantry)/sizeof(*g_mute_default_infantry); ++i) {
-      if ( (g_lvl_desc[v6].disabled_units_mask & g_mute_default_infantry[i].mask) == 0 ) {
+    for (size_t i = 0; i < sizeof(g_mute_default_infantry)/sizeof(*g_mute_default_infantry); ++i) {
+      if (~g_lvl_desc[g_current_lvl_id].disabled_units_mask & g_mute_default_infantry[i].mask) {
         UI_sidebar_prod_enable_unit(
-          g_current_lvl_id,
+          state->prod,
           g_mute_default_infantry[i].type,
           g_mute_default_infantry[i].mobd_lookup);
       }
@@ -8299,7 +8321,7 @@ void __fastcall UNIT_mode_clanhall_downgrade_production(Unit *unit)
   int upgrade_level; // esi
   LevelId v5; // ecx
   UnitType v6; // edx
-  BuildLimits *v7; // eax
+  int num_buildings_this_level; // eax
 
   v1 = unit;
   player_num = unit->player_num;
@@ -8318,12 +8340,12 @@ void __fastcall UNIT_mode_clanhall_downgrade_production(Unit *unit)
     switch ( upgrade_level )
     {
       case 2:
-        if ( (g_lvl_desc[v5].disabled_units_mask & 0x800) != 0 )
+        if (g_lvl_desc[v5].disabled_units_mask & 0x800)
           break;
         v6 = UnitType_Mute_MachinegunNest;
         goto LABEL_16;
       case 3:
-        if ( (g_lvl_desc[v5].disabled_units_mask & 0x200) != 0 )
+        if (g_lvl_desc[v5].disabled_units_mask & 0x200)
           break;
         v6 = UnitType_Mute_GrapeshotTower;
 LABEL_16:
@@ -8332,14 +8354,14 @@ LABEL_17:
         v5 = g_current_lvl_id;
         break;
       case 4:
-        if ( (g_lvl_desc[v5].disabled_units_mask & 0x1000) == 0 )
+        if (~g_lvl_desc[v5].disabled_units_mask & 0x1000)
           UI_sidebar_disable_production(g_sidebar_tower_prod, UnitType_Mute_RotaryCannon);
         AIRCRAFT_revoke_prod_option();
         goto LABEL_17;
     }
-    v7 = g_clanhall_levels.num_buildings_by_level[upgrade_level--];
+    num_buildings_this_level = g_clanhall_levels.num_buildings_by_level[upgrade_level--];
   }
-  while ( !v7 && upgrade_level > 0 );
+  while ( !num_buildings_this_level && upgrade_level > 0 );
   v1 = unit;
 LABEL_21:
   g_clanhall_levels.max_level = upgrade_level;
@@ -8412,23 +8434,10 @@ void __fastcall UNIT_mode_clanhall_on_death(Unit *unit)
 }
 
 //----- (00404510) --------------------------------------------------------
-void __fastcall PAL_copy(unsigned __int8 *dst, unsigned __int8 *src)
+void PAL_copy(uint8_t *dst, uint8_t *src)
 {
-  unsigned __int8 *v2; // eax
-  int v3; // edx
-  int v4; // eax
-
-  v2 = src + 255;
-  LOBYTE(v2) = 0;
-  v3 = 64;
-  v4 = v2 - dst;
-  do
-  {
-    *(int *)&dst[v4] = *(int *)dst;
-    dst += 4;
-    --v3;
-  }
-  while ( v3 );
+  uint8_t *src_aligned_up = (uint8_t *)(((uintptr_t)src + 256) & ~(uintptr_t)255);
+  memcpy(dst, src_aligned_up, 256);
 }
 
 //----- (00404530) --------------------------------------------------------
@@ -8439,6 +8448,8 @@ BOOL __fastcall BOXD_collide_solid(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int min_x; // eax
   BOOL result; // eax
   int max_x; // edx
@@ -8625,6 +8636,8 @@ BOOL __fastcall BOXD_collide_floor(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int x; // edx
   int min_y; // edx
   int max_y; // esi
@@ -8662,6 +8675,8 @@ BOOL __fastcall BOXD_collide_ramp_ltr(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int x; // edx
   int max_x; // esi
   int min_x; // edi
@@ -8703,6 +8718,8 @@ BOOL __fastcall BOXD_collide_ramp_rtl(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int x; // edx
   int max_x; // edi
   int min_x; // esi
@@ -8744,6 +8761,8 @@ BOOL __fastcall BOXD_collide_slope_left(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int min_y; // edi
   int v6; // eax
   int min_x; // edx
@@ -8796,6 +8815,8 @@ BOOL __fastcall BOXD_collide_slope_right(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int min_y; // edi
   int v6; // eax
   int max_x; // edx
@@ -8848,6 +8869,8 @@ BOOL __fastcall BOXD_collide_corner_right(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int min_y; // eax
   Task *task; // eax
   int max_x; // eax
@@ -8902,6 +8925,8 @@ BOOL __fastcall BOXD_collide_corner_left(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)obstacle;
+
   int min_y; // eax
   Task *task; // eax
   int min_x; // eax
@@ -8956,10 +8981,13 @@ BOOL __fastcall BOXD_collide_cursor(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)axis;
+  (void)mover_aabb;
+  (void)obstacle_aabb;
   Task *task; // eax
 
   task = mover->task;
-  if ( task && (task->wait_flags & 0x40000000) != 0 )
+  if ( task && (task->wait_flags & TaskWait_Message) != 0 )
     TSK_send_message(nullptr, TaskMessage_MouseHover, obstacle, mover->task);
   return 0;
 }
@@ -9114,11 +9142,11 @@ LABEL_16:
                     v22 = v14 + 1;
                     do
                     {
-                      ++v21;
                       g_tile_collisions_head->shape = v25;
                       g_tile_collisions_head->entity = entity;
-                      g_tile_collisions_head->next = *(v21 - 1);
-                      *(v21 - 1) = g_tile_collisions_head;
+                      g_tile_collisions_head->next = *v21;
+                      *v21 = g_tile_collisions_head;
+                      ++v21;
                       --v22;
                       ++g_tile_collisions_head;
                     }
@@ -9143,17 +9171,12 @@ LABEL_16:
     }
   }
 }
-// 4773A0: using guessed type int g_tile_collisions_pool_size;
-// 4773AC: using guessed type int g_world_to_cgrid_x;
-// 4773B4: using guessed type int g_collision_grid_height;
-// 4773B8: using guessed type int g_world_to_cgrid_y;
-// 4773BC: using guessed type int g_boxd_active;
-// 4773C8: using guessed type int g_collision_grid_width;
-// 47C764: using guessed type __int16 g_netz_sync_pause;
 
 //----- (00404F40) --------------------------------------------------------
 void __fastcall BOXD_collide_entity(Entity *entity, BoxdCollisionAxis direction, BOOL bump)
 {
+  (void)bump;
+
   Task *task; // eax
   __int16 v5; // ax
   BoxdCollisionShape *shape; // ecx
@@ -9196,7 +9219,7 @@ void __fastcall BOXD_collide_entity(Entity *entity, BoxdCollisionAxis direction,
   BoxdSpatialHashEntry **v43; // [esp+2Ch] [ebp-70h]
   int collides_with_categories; // [esp+30h] [ebp-6Ch]
   int v45; // [esp+34h] [ebp-68h]
-  BoxdAabb **v46; // [esp+38h] [ebp-64h]
+  //BoxdAabb **v46; // [esp+38h] [ebp-64h]
   int v48; // [esp+40h] [ebp-5Ch]
   BoxdAabb v49; // [esp+44h] [ebp-58h] BYREF
   BoxdCollisionType v50; // [esp+60h] [ebp-3Ch]
@@ -9258,7 +9281,7 @@ void __fastcall BOXD_collide_entity(Entity *entity, BoxdCollisionAxis direction,
         else
           v14 = g_collision_grid_height - v13 - 1;
         v15 = v39 + g_collision_grid_width * v13;
-        v46 = &g_collision_grid[v15];
+        //v46 = &g_collision_grid[v15];
         v40 = &g_tile_collisions[v15];
         if ( v14 >= 0 )
         {
@@ -9420,7 +9443,7 @@ void __fastcall BOXD_collide_entity(Entity *entity, BoxdCollisionAxis direction,
               }
               while ( !v30 );
             }
-            v46 += g_collision_grid_width;
+            //v46 += g_collision_grid_width;
             v30 = v38 == 1;
             v40 += g_collision_grid_width;
             --v38;
@@ -9522,6 +9545,8 @@ void __fastcall MSG_tanker_convoy(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+
   Unit *unit; // esi
 
   unit = (Unit *)receiver->ctx;
@@ -9560,6 +9585,8 @@ void __fastcall MSG_tanker_convoy(
 //----- (00405680) --------------------------------------------------------
 void __fastcall UNIT_mode_convoy_escaped(Unit *unit)
 {
+  (void)unit;
+
   g_dbg_mode_sentinel = 2371645;
 }
 // 477358: using guessed type int g_dbg_mode_sentinel;
@@ -10048,227 +10075,121 @@ void __cdecl GAME_mission_briefing_or_credits(Task *task)
 }
 
 //----- (00405E60) --------------------------------------------------------
-BOOL LVL_cplc_init()
+bool CPLC_init()
 {
-  BOOL result; // eax
-  LevelCplcSurface *v1; // eax
-  LevelCplcSurface *v2; // esi
-  char v3; // dl
-  size_t v4; // ecx
-  int *v5; // edi
-  int *v6; // esi
-  int v7; // edx
-  CplcEntityInViewport *v8; // eax
-  CplcEntity *next_y_sorted; // eax
-  CplcEntity *prev_y_sorted; // ecx
-  int v11; // eax
-
-  g_cplc_active = 0;
+  g_cplc_active = false;
   g_current_lvl_cplc = (LevelCplc *)LVL_find_section("CPLC");
-  if ( g_current_lvl_cplc )
-  {
-    result = (BOOL)malloc(0x5DC0u);             // 2000
-    g_cplc_viewport_pool = (CplcEntityInViewport *)result;
-    if ( !result )
-      return result;
-    g_current_lvl_cplc_backup = nullptr;
-    g_current_lvl_cplc_layer = g_current_lvl_cplc->layers;
-    g_current_lvl_cplc_layer_size = g_current_lvl_cplc_layer->size + 4;
-    v1 = (LevelCplcSurface *)malloc(g_current_lvl_cplc_layer_size);
-    g_current_lvl_cplc_backup = v1;
-    if ( !v1 )
-      goto LABEL_9;
-    v2 = g_current_lvl_cplc_layer;
-    v3 = g_current_lvl_cplc_layer_size;
-    v4 = g_current_lvl_cplc_layer_size >> 2;
-    qmemcpy(v1, g_current_lvl_cplc_layer, 4 * (g_current_lvl_cplc_layer_size >> 2));
-    v6 = &v2->size + v4;
-    v5 = &v1->size + v4;
-    LOBYTE(v4) = v3;
-    v7 = 1999;
-    qmemcpy(v5, v6, v4 & 3);
-    v8 = g_cplc_viewport_pool;
-    g_cplc_viewport_active_head = g_cplc_viewport_pool;
-    do
-    {
-      --v7;
-      v8->next = v8 + 1;
-      ++v8;
-    }
-    while ( v7 );
-    v8->next = nullptr;
-    g_cplc_viewport_active_head2 = nullptr;
-    g_current_lvl_cplc_layer_x_sorted_base = g_current_lvl_cplc_layer->next_x_sorted;
-    g_current_lvl_cplc_layer_x_sorted_right = g_current_lvl_cplc_layer_x_sorted_base;
-    g_current_lvl_cplc_layer_x_sorted_left = g_current_lvl_cplc_layer->prev_x_sorted;
-    next_y_sorted = g_current_lvl_cplc_layer->next_y_sorted;
-    g_current_lvl_cplc_layer_y_sorted_bottom = next_y_sorted;
-    g_current_lvl_cplc_layer_y_sorted_base = next_y_sorted;
-    prev_y_sorted = g_current_lvl_cplc_layer->prev_y_sorted;
-    g_cplc_camera = next_y_sorted;
-    g_current_lvl_cplc_layer_y_sorted_top = prev_y_sorted;
-    if ( next_y_sorted )
-    {
-      while ( next_y_sorted->task_type != TaskType_Camera )
-      {
-        next_y_sorted = next_y_sorted->next_y_sorted;
-        g_cplc_camera = next_y_sorted;
-        if ( !next_y_sorted )
-          goto LABEL_9;
-      }
-      g_mapd_camera = *(MapdCamera *)&next_y_sorted->x;
-      g_cplc_spawn_x = g_mapd_camera.x - 0x3FFF;// 4000 = 0.25, 3FFF = 0.25-epsilon (allow units to spawn slighly off-screen)
-      g_cplc_spawn_y = g_mapd_camera.y - 0x3FFF;
-      v11 = 1;
-    }
-    else
-    {
-LABEL_9:
-      v11 = 0;
-    }
-    if ( !v11 )
-    {
-      free(g_cplc_viewport_pool);
-      return 0;
-    }
-    g_cplc_active = 1;
+  if (nullptr == g_current_lvl_cplc) {
+    return true;
   }
-  return 1;
+
+  g_cplc_viewport_pool = (CplcEntityInViewport *)malloc(CPLC_VIEWPORT_POOL_SIZE * sizeof(CplcEntityInViewport));
+  if (nullptr == g_cplc_viewport_pool) {
+    g_current_lvl_cplc = nullptr;
+
+    return false;
+  }
+
+  if ((g_cplc_active = CPLC_select(0))) {
+    return true;
+  }
+
+  if (g_cplc_viewport_pool) {
+    free(g_cplc_viewport_pool);
+    g_cplc_viewport_pool = nullptr;
+  }
+
+  if (g_current_lvl_cplc_backup) {
+    free(g_current_lvl_cplc_backup);
+    g_current_lvl_cplc_backup = nullptr;
+  }
+
+  g_current_lvl_cplc_layer_x_sorted_base = nullptr;
+  g_current_lvl_cplc_layer_x_sorted_right = nullptr;
+  g_current_lvl_cplc_layer_x_sorted_left = nullptr;
+
+  g_current_lvl_cplc_layer_y_sorted_base = nullptr;
+  g_current_lvl_cplc_layer_y_sorted_bottom = nullptr;
+  g_current_lvl_cplc_layer_y_sorted_top = nullptr;
+
+  g_cplc_camera = nullptr;
+
+  g_current_lvl_cplc = nullptr;
+  g_current_lvl_cplc_layer = nullptr;
+  g_current_lvl_cplc_layer_size = 0;
+  g_cplc_active = false;
+
+  return false;
 }
-// 477428: using guessed type int g_cplc_spawn_x;
-// 477434: using guessed type int g_cplc_spawn_y;
+
+bool CPLC_build() {
+  g_cplc_viewport_active_head = g_cplc_viewport_pool;
+  for (size_t i = 0; i < CPLC_VIEWPORT_POOL_SIZE - 1; ++i) {
+    g_cplc_viewport_pool[i].next = &g_cplc_viewport_pool[i + 1];
+  }
+  g_cplc_viewport_pool[CPLC_VIEWPORT_POOL_SIZE - 1].next = nullptr;
+  g_cplc_viewport_active_head2 = nullptr;
+
+  CplcEntity *x_head = g_current_lvl_cplc_layer->next_x_sorted;
+  g_current_lvl_cplc_layer_x_sorted_base = x_head;
+  g_current_lvl_cplc_layer_x_sorted_right = x_head;
+  g_current_lvl_cplc_layer_x_sorted_left = g_current_lvl_cplc_layer->prev_x_sorted;
+
+  CplcEntity *y_head = g_current_lvl_cplc_layer->next_y_sorted;
+  g_current_lvl_cplc_layer_y_sorted_base = y_head;
+  g_current_lvl_cplc_layer_y_sorted_bottom = y_head;
+  g_current_lvl_cplc_layer_y_sorted_top = g_current_lvl_cplc_layer->prev_y_sorted;
+
+  CplcEntity *cam = y_head;
+  while (cam && cam->task_type != TaskType_Camera) {
+    cam = cam->next_y_sorted;
+  }
+
+  g_cplc_camera = cam;
+  if (cam) {
+    g_mapd_camera.x = cam->x;
+    g_mapd_camera.y = cam->y;
+    g_mapd_camera.z = cam->z;
+
+    g_cplc_spawn_x = g_mapd_camera.x - 0x3FFF; // 0x4000 = 0.25 tiles; 0x3FFF = 0.25-epsilon
+    g_cplc_spawn_y = g_mapd_camera.y - 0x3FFF;
+
+    return true;
+  }
+
+  return false;
+}
 
 //----- (00405FD0) --------------------------------------------------------
-BOOL __fastcall CPLC_select(int id)
+bool CPLC_select(int id)
 {
-  int v1; // eax
-  LevelCplcSurface *v2; // eax
-  LevelCplcSurface *v3; // esi
-  char v4; // dl
-  size_t v5; // ecx
-  int *v6; // edi
-  int *v7; // esi
-  int v8; // edx
-  CplcEntityInViewport *v9; // eax
-  CplcEntity *result; // eax
-  CplcEntity *prev_y_sorted; // ecx
-
   g_current_lvl_cplc_layer = g_current_lvl_cplc[id].layers;
-  v1 = g_current_lvl_cplc_layer->size + 4;
-  g_current_lvl_cplc_layer_size = v1;
-  if ( g_current_lvl_cplc_backup )
-  {
+  g_current_lvl_cplc_layer_size = g_current_lvl_cplc_layer->size + 4;
+
+  if (g_current_lvl_cplc_backup) {
     free(g_current_lvl_cplc_backup);
-    v1 = g_current_lvl_cplc_layer_size;
+    g_current_lvl_cplc_backup = nullptr;
   }
-  v2 = (LevelCplcSurface *)malloc(v1);
-  g_current_lvl_cplc_backup = v2;
-  if ( !v2 )
-    return 0;
-  v3 = g_current_lvl_cplc_layer;
-  v4 = g_current_lvl_cplc_layer_size;
-  v5 = g_current_lvl_cplc_layer_size >> 2;
-  qmemcpy(v2, g_current_lvl_cplc_layer, 4 * (g_current_lvl_cplc_layer_size >> 2));
-  v7 = &v3->size + v5;
-  v6 = &v2->size + v5;
-  LOBYTE(v5) = v4;
-  v8 = 1999;
-  qmemcpy(v6, v7, v5 & 3);
-  v9 = g_cplc_viewport_pool;
-  g_cplc_viewport_active_head = g_cplc_viewport_pool;
-  do
-  {
-    --v8;
-    v9->next = v9 + 1;
-    ++v9;
+
+  g_current_lvl_cplc_backup = (LevelCplcSurface *)malloc(g_current_lvl_cplc_layer_size);
+  if (nullptr == g_current_lvl_cplc_backup) {
+    return false;
   }
-  while ( v8 );
-  v9->next = nullptr;
-  g_cplc_viewport_active_head2 = nullptr;
-  g_current_lvl_cplc_layer_x_sorted_base = g_current_lvl_cplc_layer->next_x_sorted;
-  g_current_lvl_cplc_layer_x_sorted_right = g_current_lvl_cplc_layer_x_sorted_base;
-  g_current_lvl_cplc_layer_x_sorted_left = g_current_lvl_cplc_layer->prev_x_sorted;
-  result = g_current_lvl_cplc_layer->next_y_sorted;
-  g_current_lvl_cplc_layer_y_sorted_bottom = result;
-  g_current_lvl_cplc_layer_y_sorted_base = result;
-  prev_y_sorted = g_current_lvl_cplc_layer->prev_y_sorted;
-  g_cplc_camera = result;
-  g_current_lvl_cplc_layer_y_sorted_top = prev_y_sorted;
-  if ( !result )
-    return 0;
-  while ( result->task_type != TaskType_Camera )
-  {
-    result = result->next_y_sorted;
-    g_cplc_camera = result;
-    if ( !result )
-      return (BOOL)result;
-  }
-  g_mapd_camera = *(MapdCamera *)&result->x;
-  g_cplc_spawn_x = g_mapd_camera.x - 0x3FFF;
-  g_cplc_spawn_y = g_mapd_camera.y - 0x3FFF;
-  return 1;
+
+  memcpy(g_current_lvl_cplc_backup, g_current_lvl_cplc_layer, g_current_lvl_cplc_layer_size);
+  return CPLC_build();
 }
-// 477428: using guessed type int g_cplc_spawn_x;
-// 477434: using guessed type int g_cplc_spawn_y;
 
 //----- (004060F0) --------------------------------------------------------
-void CPLC_restore_from_backup()
+bool CPLC_restore()
 {
-  LevelCplcSurface *v0; // esi
-  LevelCplcSurface *v1; // edi
-  char v2; // al
-  int v3; // edx
-  size_t v4; // ecx
-  CplcEntityInViewport *v5; // eax
-  CplcEntity *next_y_sorted; // eax
-  CplcEntity *prev_y_sorted; // ecx
-
-  v0 = g_current_lvl_cplc_backup;
-  if ( g_current_lvl_cplc_backup )
-  {
-    v1 = g_current_lvl_cplc_layer;
-    v2 = g_current_lvl_cplc_layer_size;
-    v3 = 1999;
-    v4 = g_current_lvl_cplc_layer_size >> 2;
-    qmemcpy(g_current_lvl_cplc_layer, g_current_lvl_cplc_backup, 4 * (g_current_lvl_cplc_layer_size >> 2));
-    qmemcpy(&v1->size + v4, &v0->size + v4, v2 & 3);
-    v5 = g_cplc_viewport_pool;
-    g_cplc_viewport_active_head = g_cplc_viewport_pool;
-    do
-    {
-      --v3;
-      v5->next = v5 + 1;
-      ++v5;
-    }
-    while ( v3 );
-    v5->next = nullptr;
-    g_cplc_viewport_active_head2 = nullptr;
-    g_current_lvl_cplc_layer_x_sorted_base = g_current_lvl_cplc_layer->next_x_sorted;
-    g_current_lvl_cplc_layer_x_sorted_right = g_current_lvl_cplc_layer_x_sorted_base;
-    g_current_lvl_cplc_layer_x_sorted_left = g_current_lvl_cplc_layer->prev_x_sorted;
-    next_y_sorted = g_current_lvl_cplc_layer->next_y_sorted;
-    g_current_lvl_cplc_layer_y_sorted_bottom = next_y_sorted;
-    g_current_lvl_cplc_layer_y_sorted_base = next_y_sorted;
-    prev_y_sorted = g_current_lvl_cplc_layer->prev_y_sorted;
-    g_cplc_camera = next_y_sorted;
-    g_current_lvl_cplc_layer_y_sorted_top = prev_y_sorted;
-    if ( next_y_sorted )
-    {
-      while ( next_y_sorted->task_type != TaskType_Camera )
-      {
-        next_y_sorted = next_y_sorted->next_y_sorted;
-        g_cplc_camera = next_y_sorted;
-        if ( !next_y_sorted )
-          return;
-      }
-      g_mapd_camera = *(MapdCamera *)&next_y_sorted->x;
-      g_cplc_spawn_x = g_mapd_camera.x - 0x3FFF;
-      g_cplc_spawn_y = g_mapd_camera.y - 0x3FFF;
-    }
+  if (!g_current_lvl_cplc_backup) {
+    return false;
   }
+
+  memcpy(g_current_lvl_cplc_layer, g_current_lvl_cplc_backup, g_current_lvl_cplc_layer_size);
+  return CPLC_build();
 }
-// 477428: using guessed type int g_cplc_spawn_x;
-// 477434: using guessed type int g_cplc_spawn_y;
 
 //----- (004061D0) --------------------------------------------------------
 void __fastcall CPLC_entity_spawn(CplcEntity *cplc)
@@ -10772,13 +10693,13 @@ void CPLC_viewport_update()
 // 477460: using guessed type int g_cplc_spawn_w;
 
 //----- (004068B0) --------------------------------------------------------
-void __fastcall CPLC_init_with_objects(TaskType type)
+void __fastcall CPLC_exec_with_objects(TaskType type)
 {
-  CPLC_init(type, 1);
+  CPLC_exec(type, 1);
 }
 
 //----- (004068C0) --------------------------------------------------------
-void __fastcall CPLC_init(TaskType type, BOOL create_objects)
+void __fastcall CPLC_exec(TaskType type, BOOL create_objects)
 {
   CplcEntity *v3; // esi
   CplcEntity *v4; // edx
@@ -10848,9 +10769,9 @@ void __fastcall CPLC_init(TaskType type, BOOL create_objects)
 }
 
 //----- (004069A0) --------------------------------------------------------
-void __fastcall CPLC_init_without_objects(TaskType type)
+void __fastcall CPLC_exec_without_objects(TaskType type)
 {
-  CPLC_init(type, 0);
+  CPLC_exec(type, 0);
 }
 
 //----- (004069B0) --------------------------------------------------------
@@ -11013,6 +10934,8 @@ void __fastcall MSG_mobile_derrick(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+
   Unit *unit; // esi
 
   unit = (Unit *)receiver->ctx;
@@ -11116,7 +11039,7 @@ void __fastcall UNIT_mode_mobile_derrick_deploy(Unit *unit)
   else
     v3 = ENT_create_by_unit_type(UnitType_Mute_Drillrig, entity->x, entity->y, player_num);
   if ( v3 )
-    v3->ctx2.building_ctx.hitpoints = unit->hitpoints;
+    v3->building_ctx.hitpoints = unit->hitpoints;
   task = unit->task;
   unit->mode = UNIT_mode_mobile_base_despawn;
   TSK_yield(task, TaskWait_Interval, 5);
@@ -11279,7 +11202,7 @@ int __fastcall OIL_extract(OilPatch *patch, int amount)
 }
 
 //----- (00407160) --------------------------------------------------------
-void __cdecl __noreturn UNIT_oil_patch_tick(Task *task)
+void __cdecl UNIT_oil_patch_tick(Task *task)
 {
   Entity *entity; // esi
   CplcEntity *cplc_meta; // eax
@@ -11473,9 +11396,9 @@ void __fastcall UNIT_mode_prison_on_death_surv_09(Unit *unit)
 //----- (00407560) --------------------------------------------------------
 void __fastcall MSG_tech_bunker(Task *receiver, Task *sender, TaskMessageType message, void *payload)
 {
-  Unit *ctx; // esi
+  (void)sender;
 
-  ctx = (Unit *)receiver->ctx;
+  Unit *ctx = (Unit *)receiver->ctx;
   if ( !ctx->destroyed )
   {
     switch ( message )
@@ -11881,9 +11804,9 @@ void __fastcall UNIT_mode_hut_idle(Unit *unit)
 //----- (00407DE0) --------------------------------------------------------
 void __fastcall MSG_hut(Task *receiver, Task *sender, TaskMessageType message, void *payload)
 {
-  Unit *unit; // esi
+  (void)sender;
 
-  unit = (Unit *)receiver->ctx;
+  Unit *unit = (Unit *)receiver->ctx;
   if ( !unit->destroyed )
   {
     switch ( message )
@@ -12028,17 +11951,19 @@ void __cdecl UNIT_drillrig_tick(Task *task)
       patch = OIL_find_nearest_patch(unit->entity->x, unit->entity->y);
       if ( patch )
       {
-        unit->entity->x = (patch->entity->x & 0xFFFFE000) + 4096;
-        unit->entity->y = (patch->entity->y & 0xFFFFE000) + 4096;
+        unit->entity->x = (patch->entity->x & 0xFFFFE000) + 0x1000;
+        unit->entity->y = (patch->entity->y & 0xFFFFE000) + 0x1000;
       }
       unit->_u1.oil_patch = patch;
       unit->entity->is_collidable = 1;
-      *(int *)unit->state = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
+
+      BuildingState *state = (BuildingState *)unit->state;
+      state->ctx = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
       if ( unit->entity->cplc_spawn_params )
         unit->mode = UNIT_mode_drillrig_place_without_deployment;// if pre-placed -> skip deployment animation
       else
         unit->mode = UNIT_mode_drillrig_deploy;
-      hp = task->entity->ctx2.building_ctx.hitpoints;
+      hp = task->entity->building_ctx.hitpoints;
       if ( hp )
       {
         unit->hitpoints = hp;
@@ -12098,8 +12023,8 @@ void __fastcall UNIT_mode_drillrig_adjust_to_oil_patch_position(Unit *unit)
     nearest_patch = OIL_find_nearest_patch(unit->entity->x, unit->entity->y);
     if ( nearest_patch )
     {
-      unit->entity->x = (nearest_patch->entity->x & 0xFFFFE000) + 4096;
-      unit->entity->y = (nearest_patch->entity->y & 0xFFFFE000) + 4096;
+      unit->entity->x = (nearest_patch->entity->x & 0xFFFFE000) + 0x1000; // BUG repeated accross drillrig code
+      unit->entity->y = (nearest_patch->entity->y & 0xFFFFE000) + 0x1000;
     }
   }
   turret = unit->turret;
@@ -12115,9 +12040,14 @@ void __fastcall UNIT_mode_drillrig_adjust_to_oil_patch_position(Unit *unit)
     BOXD_building_claim_area(unit);
   }
   unit->entity->is_collidable = 1;
-  *(int *)unit->state = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
-  *(int *)(*(int *)unit->state + 16) = unit;
-  *(int *)(*(int *)unit->state + 20) = unit->unit_id;
+  
+  OilPatch *patch = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
+  patch->drillrig = unit;
+  patch->drillrig_unit_id = unit->unit_id;
+
+  BuildingState *state = (BuildingState *)unit->state;
+  state->ctx = patch;
+
   UNIT_mode_building_idle_tick(unit);
 }
 
@@ -12134,7 +12064,7 @@ void __fastcall UNIT_mode_drillrig_on_death(Unit *unit)
 }
 
 //----- (00408370) --------------------------------------------------------
-void __cdecl __noreturn GAME_camera_shake_task(Task *task)
+void __cdecl GAME_camera_shake_task(Task *task)
 {
   int v1; // eax
   int *v2; // esi
@@ -12237,93 +12167,61 @@ void __fastcall FADE_in(Task *task)
 //----- (00408550) --------------------------------------------------------
 void PAL_multi_apply()
 {
-  FILE *v0; // edi
-  int i; // esi
-  char v2; // al
-  char v3; // cl
-  char v4; // bl
-  int v5; // ebp
-  int v6; // eax
-  FILE *v7; // edi
-  int j; // esi
-  char v9; // dl
-  char v10; // al
-  int v11; // ebp
-  PaletteEntry *v12; // ebx
-  int *v14; // eax
-  int v15; // ecx
-  char v16; // [esp+10h] [ebp-45Ch] BYREF
-  char v17; // [esp+14h] [ebp-458h] BYREF
-  char v18; // [esp+18h] [ebp-454h] BYREF
-  char Buffer[80]; // [esp+1Ch] [ebp-450h] BYREF
-  _BYTE v20[1024]; // [esp+6Ch] [ebp-400h] BYREF
+  PaletteEntry tmp[256];
+  PaletteEntry multi[256];
+  char pal_path[80];
 
   g_level_palette = PAL_get_selected();
-  if ( g_is_kaos_mode )
-  {
-    sprintf(Buffer, "%s\\LEVELS\\multi.pal", g_game_path);
-    v0 = fopen(Buffer, "r");
-    if ( v0 )
-    {
-      for ( i = 0; i < 1024; i += 4 )
-      {
-        fscanf(v0, "%d %d %d\n", &v17, &v18, &v16);
-        v2 = v18;
-        v3 = v16;
-        v20[i] = v17;
-        v20[i + 1] = v2;
-        v20[i + 2] = v3;
-        v20[i + 3] = 0;
-      }
-      fclose(v0);
-    }
-    v4 = g_current_multi_pal;
-    qmemcpy(g_working_pal, g_level_palette, sizeof(g_working_pal));
-    v5 = g_palette_idx_per_player[g_player_num];
-    v6 = g_current_multi_pal << 6;
-    qmemcpy(&g_working_pal[16 * v5], &v20[v6], 0x40u);
-    if ( v4 < 7 && v4 != v5 )
-      qmemcpy((char *)g_working_pal + v6, &v20[448], 0x40u);
+  if (!g_is_kaos_mode && g_is_single_player) {
+    return;
   }
-  else
-  {
-    if ( g_is_single_player )
-      return;
-    sprintf(Buffer, "%s\\LEVELS\\multi.pal", g_game_path);
-    v7 = fopen(Buffer, "r");
-    if ( v7 )
-    {
-      for ( j = 0; j < 1024; j += 4 )
-      {
-        fscanf(v7, "%d %d %d\n", &v16, &v18, &v17);
-        v9 = v18;
-        v10 = v17;
-        v20[j] = v16;
-        v20[j + 1] = v9;
-        v20[j + 2] = v10;
-        v20[j + 3] = 0;
-      }
-      fclose(v7);
-    }
-    v11 = 0;
-    qmemcpy(g_working_pal, g_level_palette, sizeof(g_working_pal));
-    v12 = g_working_pal;
 
+  snprintf(pal_path, sizeof(pal_path), "%s\\LEVELS\\multi.pal", g_game_path);
+  FILE *f = fopen(pal_path, "r");
+  if (f) {
+    for (int i = 0; i < 256; ++i) {
+      int r, g, b;
+      fscanf(f, "%d %d %d\n", &r, &g, &b);
+      multi[i].r = (uint8_t)r;
+      multi[i].g = (uint8_t)g;
+      multi[i].b = (uint8_t)b;
+      multi[i].flags = 0;
+    }
+    fclose(f);
+  }
+
+  memcpy(tmp, g_level_palette, sizeof(tmp));
+
+  if (g_is_kaos_mode) {
+    int player_pal = g_palette_idx_per_player[g_player_num];
+    memcpy(
+      &tmp[16 * player_pal],
+      &multi[16 * g_current_multi_pal],
+      16 * sizeof(PaletteEntry));
+
+      if (g_current_multi_pal < PLAYERS_MAX && g_current_multi_pal != player_pal) {
+        memcpy(
+          &tmp[16 * g_current_multi_pal],
+          &multi[16 * 7],
+          16 * sizeof(PaletteEntry));
+      }
+  } else {
+    // multiplayer
     for (int i = 1; i < PLAYERS_MAX; ++i) {
       if (NetzConnection_None != g_netz_players[i].connection_status) {
-        v15 = ADJ(player)->palette_idx << 6;
-        *v14 = v11;
-        qmemcpy(v12, &v20[v15], 0x40u);
+        int player_pal = g_netz_players[i].palette_idx;
+        memcpy(
+          &tmp[16 * i],
+          &multi[16 * player_pal],
+          16 * sizeof(PaletteEntry));
+        g_palette_idx_per_player[i] = i;
       }
-      ++v14;
-      ++v11;
-      v12 += 16;
     }
+  }
 
-  qmemcpy(g_level_palette, g_working_pal, 0x400u);
-  PAL_apply(g_working_pal);
+  memcpy(g_level_palette, tmp, sizeof(tmp));
+  PAL_apply(g_level_palette);
 }
-// 47C654: using guessed type char g_current_multi_pal;
 
 //----- (00408780) --------------------------------------------------------
 BOOL FADE_init()
@@ -12463,6 +12361,8 @@ void __fastcall MSG_ai_controller(
         TaskMessageType message,
         Unit *payload)                    // BUG void* but typing is easier this way
 {
+  (void)sender;
+
   AiController *ai; // esi
   Unit *v5; // ebp
   AiEnemyNode *m; // edi
@@ -13300,7 +13200,7 @@ void __fastcall AI_pair_drillrigs_with_powerplants(AiController *ai)
 }
 
 //----- (00409770) --------------------------------------------------------
-void __cdecl __noreturn AI_controller_tick_impl(Task *task)
+void __cdecl AI_controller_tick_impl(Task *task)
 {
   AiController *ai; // esi
   int v2; // ebx
@@ -15133,7 +15033,7 @@ BOOL __fastcall AI_find_nuke_target(AiController *ai, UnitType type, int *out_x,
 // 478FF0: using guessed type int g_map_height;
 
 //----- (0040B700) --------------------------------------------------------
-void __cdecl __noreturn AI_controller_tick(Task *task)
+void __cdecl AI_controller_tick(Task *task)
 {
   task->entry_point = AI_controller_tick_impl;
   TSK_yield(task, TaskWait_Interval, 60);
@@ -17492,7 +17392,7 @@ const char *__cdecl REND_get_resource_resolution()
 // 478AA0: using guessed type int g_display_width;
 
 //----- (0040E400) --------------------------------------------------------
-void __fastcall PAL_apply(PaletteEntry *pal)
+void PAL_apply(PaletteEntry *pal)
 {
   g_brightness_adjusted_pal = pal;
   g_selected_pal = pal;
@@ -18472,7 +18372,7 @@ BOOL UI_sidebar_init()
 // 4795D4: using guessed type int g_sidebar_default_h_spacing;
 
 //----- (0040F460) --------------------------------------------------------
-void __cdecl __noreturn UI_sidebar_task(Task *task)
+void __cdecl UI_sidebar_task(Task *task)
 {
   while ( 1 )
   {
@@ -18533,7 +18433,7 @@ Sidebar *__fastcall UI_sidebar_create(
 // 4795D4: using guessed type int g_sidebar_default_h_spacing;
 
 //----- (0040F5D0) --------------------------------------------------------
-void __cdecl __noreturn UI_sidebar_buttons_task(Task *task)
+void __cdecl UI_sidebar_buttons_task(Task *task)
 {
   int v2; // esi
   int v3; // edi
@@ -18730,7 +18630,7 @@ LABEL_61:
 // 40F89C: conditional instruction was optimized away because ebp.4==1
 
 //----- (0040F8F0) --------------------------------------------------------
-void __cdecl __noreturn UI_sidebar_buttons_cancellable_task(Task *task)
+void __cdecl UI_sidebar_buttons_cancellable_task(Task *task)
 {
   int v2; // esi
   int v3; // edi
@@ -18919,7 +18819,7 @@ LABEL_69:
 // 40FBB9: conditional instruction was optimized away because ebx.4==1
 
 //----- (0040FC10) --------------------------------------------------------
-void __cdecl __noreturn UI_sidebar_buttons_production_task(Task *task)
+void __cdecl UI_sidebar_buttons_production_task(Task *task)
 {
   Task *v1; // ebp
   Entity *v2; // edi
@@ -21734,7 +21634,7 @@ void __fastcall TURRET_vehicle_init(Unit *unit)
       v3 = ENT_create_ex(
              unit->stats->attachment->mobd_id,
              unit->entity,
-             TURRET_combat_task,
+             TURRET_combat_tick,
              TaskKind_Callback,
              unit->mobd_anchors.turret);
       v2->entity = v3;
@@ -25974,8 +25874,8 @@ LABEL_23:
     v9->ctx1 = projectile;
     v9->z = z + 256;
     task->ctx = unit->locked_target;
-    v9->ctx2.projectile_ctx.attacker = unit;
-    v9->ctx2.projectile_ctx.attacker_unit_id = unit->unit_id;
+    v9->projectile_ctx.attacker = unit;
+    v9->projectile_ctx.attacker_unit_id = unit->unit_id;
     v9->infantry_damage = LOWORD(projectile->damage_to_infantry)
                         + ((projectile->damage_to_infantry * g_veterancy_damage_mod[unit->veterancy]) >> 8);
     v9->vehicle_damage = LOWORD(projectile->damage_to_vehicles)
@@ -26047,7 +25947,7 @@ void __fastcall UNIT_mode_walk_into_building(Unit *unit)
 
 //----- (004188F0) --------------------------------------------------------
 // General technician code relies on BuildingState which towers lack - hence a separate function
-void __cdecl __noreturn UNIT_technician_repairing_tower_task(Task *task)
+void __cdecl UNIT_technician_repairing_tower_task(Task *task)
 {
   Unit *unit; // esi
   int v2; // ebp
@@ -26126,7 +26026,7 @@ LABEL_10:
 }
 
 //----- (00418A10) --------------------------------------------------------
-void __cdecl __noreturn UNIT_technician_repairing_building_task(Task *task)
+void __cdecl UNIT_technician_repairing_building_task(Task *task)
 {
   Unit *unit; // esi
   int v2; // ebx
@@ -27424,10 +27324,10 @@ void __fastcall UNIT_on_damage_in_repairbay(Unit *victim, Entity *proj)
       damage = stats->speed ? proj->vehicle_damage : proj->building_damage;
     if ( victim->hitpoints > 0 )
     {
-      attacker = proj->ctx2.projectile_ctx.attacker;
+      attacker = proj->projectile_ctx.attacker;
       if ( attacker )
       {
-        if ( attacker->unit_id == proj->ctx2.projectile_ctx.attacker_unit_id )
+        if ( attacker->unit_id == proj->projectile_ctx.attacker_unit_id )
         {
           task = attacker->task;
           if ( task )
@@ -27476,10 +27376,10 @@ void __fastcall UNIT_on_damage(Unit *unit, Entity *proj)
       damage = stats->speed ? proj->vehicle_damage : proj->building_damage;
     if ( unit->hitpoints > 0 )
     {
-      attacker_unit = proj->ctx2.projectile_ctx.attacker;
+      attacker_unit = proj->projectile_ctx.attacker;
       if ( attacker_unit )
       {
-        if ( attacker_unit->unit_id == proj->ctx2.projectile_ctx.attacker_unit_id )
+        if ( attacker_unit->unit_id == proj->projectile_ctx.attacker_unit_id )
         {
           task = attacker_unit->task;
           if ( task )
@@ -28075,7 +27975,7 @@ BOOL __fastcall LVL_run(LevelHunk *lvl)
 
   result = 0;
   g_boxd_collisions_initialized = 0;
-  g_cplc_initialized = 0;
+  g_cplc_initialized = false;
   g_ui_string_initialized = 0;
   g_fade_initialized = 0;
   g_input_initialized = 0;
@@ -28124,10 +28024,8 @@ BOOL __fastcall LVL_run(LevelHunk *lvl)
                   if ( result )
                   {
                     g_boxd_collisions_initialized = 1;
-                    result = LVL_cplc_init();
-                    if ( result )
+                    if ((g_cplc_initialized = CPLC_init()))
                     {
-                      g_cplc_initialized = 1;
                       result = UI_str_init();
                       if ( result )
                       {
@@ -28188,7 +28086,7 @@ void LVL_cleanup()
   if ( g_tasks_initialized )
     TSK_cleanup();
   g_boxd_collisions_initialized = 0;
-  g_cplc_initialized = 0;
+  g_cplc_initialized = false;
   g_ui_string_initialized = 0;
   g_fade_initialized = 0;
   g_input_initialized = 0;
@@ -35543,7 +35441,7 @@ void GAME_mission_load()
   if ( GAME_is_loading() )
   {
     g_last_loaded_level_id = LevelId_Invalid;
-    CPLC_init_subset();
+    CPLC_exec_subset();
     if ( !GAME_load() )
     {
       LVL_cleanup();
@@ -35557,7 +35455,7 @@ void GAME_mission_load()
   }
   else
   {
-    CPLC_init_all();
+    CPLC_exec_all();
   }
 }
 // 47A008: using guessed type char g_game_path_drive_letter;
@@ -35595,7 +35493,7 @@ BOOL GAME_post_campaign_mission()
     && ((int)g_current_lvl_id < (int)LevelId_Surv_16 || (int)g_current_lvl_id > (int)LevelId_Mute_25) )
   {
     g_last_loaded_level_id = g_current_lvl_id;
-    CPLC_restore_from_backup();
+    CPLC_restore();
     LVL_cleanup();
     SOUND_unload_bank();
   }
@@ -36179,19 +36077,19 @@ LABEL_23:
 // 47A1B0: using guessed type int g_briefing_scroll_ticks;
 
 //----- (00423DD0) --------------------------------------------------------
-void CPLC_init_all()
+void CPLC_exec_all()
 {
   TaskType i; // esi
 
   for ( i = 0; i < TaskType_Max; ++i )
   {
     if ( i != TaskType_Camera )
-      CPLC_init_with_objects(i);
+      CPLC_exec_with_objects(i);
   }
 }
 
 //----- (00423DF0) --------------------------------------------------------
-void CPLC_init_subset()
+void CPLC_exec_subset()
 {
   TaskType i; // esi
 
@@ -36211,11 +36109,11 @@ void CPLC_init_subset()
         || i == TaskType_SidebarTooltip
         || i == TaskType_FontItalic )
       {
-        CPLC_init_with_objects(i);
+        CPLC_exec_with_objects(i);
       }
       else
       {
-        CPLC_init_without_objects(i);
+        CPLC_exec_without_objects(i);
       }
     }
   }
@@ -36940,7 +36838,7 @@ void MISSION_signal_victory()
 }
 
 //----- (00424CE0) --------------------------------------------------------
-void __cdecl __noreturn MISSION_outcome_sequence_play(Task *task)
+void __cdecl MISSION_outcome_sequence_play(Task *task)
 {
   Task *v1; // esi
   int bits; // eax
@@ -38519,7 +38417,7 @@ LABEL_85:
 // 47A3E8: using guessed type int g_multi_num_bunker_spawn_positions;
 
 //----- (00426680) --------------------------------------------------------
-void __cdecl __noreturn MISSION_x_mark_blink_task(Task *task)
+void __cdecl MISSION_x_mark_blink_task(Task *task)
 {
   Entity *entity; // esi
   int v2; // ecx
@@ -38540,7 +38438,7 @@ void __cdecl __noreturn MISSION_x_mark_blink_task(Task *task)
 }
 
 //----- (00426710) --------------------------------------------------------
-void __cdecl __noreturn MISSION_x_mark_task(Task *task)
+void __cdecl MISSION_x_mark_task(Task *task)
 {
   XMark *x_mark; // edi
   XMark *v2; // eax
@@ -39897,7 +39795,7 @@ void __fastcall UNIT_mobile_base_post_plant(Unit *unit)
       v4->cplc_spawn_params = &g_outpost_spawn_params;
     else
       v4->cplc_spawn_params = &g_clanhall_spawn_params;
-    v4->ctx2.building_ctx.hitpoints = unit->hitpoints;
+    v4->building_ctx.hitpoints = unit->hitpoints;
   }
   task = unit->task;
   unit->mode = UNIT_mode_mobile_base_despawn;
@@ -40655,7 +40553,7 @@ BOOL __fastcall PROD_is_building_or_tower_available(UnitType type)
 }
 
 //----- (00428940) --------------------------------------------------------
-void __cdecl __noreturn CURSOR_loop_and_game_events(Task *task)
+void __cdecl CURSOR_loop_and_game_events(Task *task)
 {
   GameEventNode *v1; // eax
   int i; // ecx
@@ -44241,7 +44139,7 @@ LABEL_57:
 // 468984: using guessed type int g_last_assigned_control_group;
 
 //----- (0042D030) --------------------------------------------------------
-void __cdecl __noreturn UI_sidebar_tooltip(Task *task)
+void __cdecl UI_sidebar_tooltip(Task *task)
 {
   const char *name; // edi
   int v2; // esi
@@ -44941,7 +44839,7 @@ LABEL_22:
 }
 
 //----- (0042DA90) --------------------------------------------------------
-void __cdecl __noreturn AI_controller_tick_mute08_smash_the_convoy_impl(Task *task)
+void __cdecl AI_controller_tick_mute08_smash_the_convoy_impl(Task *task)
 {
   AiController *ai; // ebx
   AiAttackerNode *convoy_escort_head; // edi
@@ -45062,7 +44960,7 @@ void __cdecl __noreturn AI_controller_tick_mute08_smash_the_convoy_impl(Task *ta
 }
 
 //----- (0042DC70) --------------------------------------------------------
-void __cdecl __noreturn AI_controller_tick_mute08_smash_the_convoy(Task *task)
+void __cdecl AI_controller_tick_mute08_smash_the_convoy(Task *task)
 {
   task->entry_point = AI_controller_tick_mute08_smash_the_convoy_impl;
   TSK_yield(task, TaskWait_Interval, 60);
@@ -45214,7 +45112,7 @@ void __fastcall MSG_ai_controller_mute05_ambush(
 // 42DE06: conditional instruction was optimized away because ecx.4!=0
 
 //----- (0042DE80) --------------------------------------------------------
-void __cdecl __noreturn AI_controller_tick_mute05_ambush_impl(Task *task)
+void __cdecl AI_controller_tick_mute05_ambush_impl(Task *task)
 {
   AiController *ai; // ebx
   AiAttackerNode *unassigned_attacker_head; // eax
@@ -45255,7 +45153,7 @@ void __cdecl __noreturn AI_controller_tick_mute05_ambush_impl(Task *task)
 }
 
 //----- (0042DF20) --------------------------------------------------------
-void __cdecl __noreturn AI_controller_tick_mute05_ambush(Task *task)
+void __cdecl AI_controller_tick_mute05_ambush(Task *task)
 {
   task->entry_point = AI_controller_tick_mute05_ambush_impl;
   TSK_yield(task, TaskWait_Interval, 60);
@@ -48261,7 +48159,7 @@ LABEL_9:
         unit->mode = UNIT_mode_outpost_complete;
       else
         UNIT_building_construction_start(unit, UNIT_mode_outpost_complete);
-      hp = task->entity->ctx2.building_ctx.hitpoints;
+      hp = task->entity->building_ctx.hitpoints;
       if ( hp )
       {
         unit->hitpoints = hp;
@@ -51735,7 +51633,7 @@ void __cdecl PROJ_mode_grenade(Task *task)
 }
 
 //----- (00435CF0) --------------------------------------------------------
-void __cdecl __noreturn PROJ_rocket_hit(Task *task)
+void __cdecl PROJ_rocket_hit(Task *task)
 {
   Entity *entity; // esi
 
@@ -51923,7 +51821,7 @@ void __cdecl PROJ_mode_rocket(Task *task)
 }
 
 //----- (00436140) --------------------------------------------------------
-void __cdecl __noreturn PROJ_flamethrower_hit(Task *task)
+void __cdecl PROJ_flamethrower_hit(Task *task)
 {
   Entity *entity; // esi
   Unit *unit; // eax
@@ -52001,8 +51899,8 @@ void __cdecl PROJ_mode_flamethrower(Task *task)
     v7->parent = volley->parent;
     v8->ctx = v9;
     v7->ctx1 = proj;
-    v7->ctx2.building_ctx.hitpoints = (int)shooter;
-    v7->ctx2.building_ctx._unused = shooter->unit_id;
+    v7->projectile_ctx.attacker = shooter;
+    v7->projectile_ctx.attacker_unit_id = shooter->unit_id;
     v7->infantry_damage = LOWORD(proj->damage_to_infantry)
                         + ((proj->damage_to_infantry * g_veterancy_damage_mod[shooter->veterancy]) >> 8);
     v7->vehicle_damage = LOWORD(proj->damage_to_vehicles)
@@ -52020,7 +51918,7 @@ void __cdecl PROJ_mode_flamethrower(Task *task)
 }
 
 //----- (004363C0) --------------------------------------------------------
-void __cdecl __noreturn PROJ_giant_beetle_hit(Task *task)
+void __cdecl PROJ_giant_beetle_hit(Task *task)
 {
   Unit *unit; // ebx
   Entity *entity; // esi
@@ -52202,8 +52100,8 @@ void __cdecl PROJ_mode_giant_beetle(Task *task)
         v12->parent = volley->parent;
         v13->ctx = target;
         v12->ctx1 = proj;
-        v12->ctx2.building_ctx.hitpoints = (int)shooter;
-        v12->ctx2.building_ctx._unused = shooter->unit_id;
+        v12->projectile_ctx.attacker = shooter;
+        v12->projectile_ctx.attacker_unit_id = shooter->unit_id;
         v12->infantry_damage = LOWORD(proj->damage_to_infantry)
                              + ((proj->damage_to_infantry * g_veterancy_damage_mod[shooter->veterancy]) >> 8);
         v12->vehicle_damage = LOWORD(proj->damage_to_vehicles)
@@ -52520,7 +52418,7 @@ void __cdecl PROJ_436FB0_hit(Task *task)
 }
 
 //----- (00436FF0) --------------------------------------------------------
-void __cdecl __noreturn PROJ_machinegun_hit(Task *task)
+void __cdecl PROJ_machinegun_hit(Task *task)
 {
   Entity *volley; // edi
   Unit *shooter; // esi
@@ -53327,7 +53225,7 @@ void __fastcall UPG_mode_idle(UpgradeProcess *upg)
 }
 
 //----- (004381A0) --------------------------------------------------------
-void __cdecl __noreturn UPG_tick(Task *task)
+void __cdecl UPG_tick(Task *task)
 {
   UpgradeProcess *state; // eax
   Entity *parent; // edx
@@ -53800,7 +53698,7 @@ void SCHRAP_explosion_release()
 // 47C354: using guessed type int g_num_explosions;
 
 //----- (00438B80) --------------------------------------------------------
-void __cdecl __noreturn SCHRAP_gore(Task *task)
+void __cdecl SCHRAP_gore(Task *task)
 {
   Entity *entity; // esi
   int v2; // eax
@@ -53970,7 +53868,7 @@ void __cdecl SCHRAP_nuke_flak(Task *task)
 // 47C350: using guessed type int g_num_gore_and_debris;
 
 //----- (00439050) --------------------------------------------------------
-void __cdecl __noreturn SCHRAP_bomber_fire_trail(Task *task)
+void __cdecl SCHRAP_bomber_fire_trail(Task *task)
 {
   Entity *entity; // esi
   int v2[9]; // [esp+Ch] [ebp-24h] BYREF
@@ -57751,7 +57649,7 @@ LABEL_21:
 }
 
 //----- (0043BBA0) --------------------------------------------------------
-void __cdecl __noreturn UI_menu_controller(Task *task)
+void __cdecl UI_menu_controller(Task *task)
 {
   Entity *entity; // edi
   MenuWidget *v3; // eax
@@ -58054,7 +57952,7 @@ void __cdecl UI_main_menu_campaign(Task *task)
   v2->parent = nullptr;
   v2->z = entity->z - 1;
   task->channel = TaskChannel_MainMenu;
-  entity->ctx2.widget = UI_widget_register(entity, nullptr, 0, 1, 1);
+  entity->widget = UI_widget_register(entity, nullptr, 0, 1, 1);
   while ( !UI_main_menu_msg_loop(task, 464, 0) )
   {
     v3 = task->entity;
@@ -58112,7 +58010,7 @@ LABEL_8:
 }
 
 //----- (0043C310) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_load(Task *task)
+void __cdecl UI_main_menu_load(Task *task)
 {
   Entity *entity; // esi
   Entity *v2; // eax
@@ -58131,7 +58029,7 @@ void __cdecl __noreturn UI_main_menu_load(Task *task)
   v2->parent = nullptr;
   v2->z = entity->z - 1;
   task->channel = TaskChannel_MainMenuLoad;
-  entity->ctx2.widget = UI_widget_register(entity, nullptr, 0, 1, 1);
+  entity->widget = UI_widget_register(entity, nullptr, 0, 1, 1);
   while ( 1 )
   {
     while ( !UI_main_menu_msg_loop(task, 448, 0) )
@@ -58183,7 +58081,7 @@ void __cdecl UI_main_menu_play_mission(Task *task)
   v2->parent = nullptr;
   v2->z = entity->z - 1;
   task->channel = TaskChannel_MainMenu;
-  entity->ctx2.widget = UI_widget_register(entity, nullptr, 0, 1, 1);
+  entity->widget = UI_widget_register(entity, nullptr, 0, 1, 1);
   while ( !UI_main_menu_msg_loop(task, 416, 0) )
   {
     v3 = task->entity;
@@ -58262,7 +58160,7 @@ void __cdecl UI_main_menu_new_missions(Task *task)
   v2->parent = nullptr;
   v2->z = entity->z - 1;
   task->channel = TaskChannel_MainMenu;
-  entity->ctx2.widget = UI_widget_register(entity, nullptr, 0, 1, 1);
+  entity->widget = UI_widget_register(entity, nullptr, 0, 1, 1);
   while ( !UI_main_menu_msg_loop(task, 388, 0) )
   {
     v3 = task->entity;
@@ -58340,7 +58238,7 @@ void __cdecl UI_main_menu_kaos(Task *task)
   v2->parent = nullptr;
   v2->z = entity->z - 1;
   task->channel = TaskChannel_MainMenu;
-  entity->ctx2.widget = UI_widget_register(entity, nullptr, 0, 1, 1);
+  entity->widget = UI_widget_register(entity, nullptr, 0, 1, 1);
   while ( !UI_main_menu_msg_loop(task, 372, 0) )
   {
     v3 = task->entity;
@@ -58418,7 +58316,7 @@ void __cdecl UI_main_menu_multi(Task *task)
   v2->parent = nullptr;
   v2->z = entity->z - 1;
   task->channel = TaskChannel_MainMenu;
-  entity->ctx2.widget = UI_widget_register(entity, nullptr, 1, 1, 0);
+  entity->widget = UI_widget_register(entity, nullptr, 1, 1, 0);
   while ( !UI_main_menu_msg_loop(task, 432, 0) )
   {
     v3 = task->entity;
@@ -58493,7 +58391,7 @@ void __cdecl UI_main_menu_quit(Task *task)
   v2->parent = nullptr;
   v2->z = entity->z - 1;
   task->channel = TaskChannel_MainMenu;
-  entity->ctx2.building_ctx.hitpoints = (int)UI_widget_register(entity, nullptr, 0, 1, 0);
+  entity->widget = UI_widget_register(entity, nullptr, 0, 1, 0);
   while ( !UI_main_menu_msg_loop(task, 404, 0) )
   {
     v3 = task->entity;
@@ -58786,21 +58684,17 @@ void __cdecl UI_main_menu_multi_ipx(Task *task)
 // 46E404: using guessed type int dword_46E404;
 
 //----- (0043D270) --------------------------------------------------------
-void __fastcall UI_main_menu_multi_serial(Task *task)
+void __cdecl UI_main_menu_multi_serial(Task *task)
 {
   ;                                             // BUG there's actually code here but it's hidden behind early return - see asm
                                                 // MAPD 5 [5]
-                                                //
-                                                // it's actually cdecl but the argument was optimized out due to early return; retaining the argument using __fastcall to flag it's existance without creating stack mismatch
 }
 
 //----- (0043D430) --------------------------------------------------------
-void __fastcall UI_main_menu_multi_modem(Task *task)
+void __cdecl UI_main_menu_multi_modem(Task *task)
 {
   ;                                             // BUG there's actually code here but it's hidden behind early return - see asm
                                                 // MAPD 6 [6]
-                                                //
-                                                // it's actually cdecl but the argument was optimized out due to early return; retaining the argument using __fastcall to flag it's existance without creating stack mismatch
 }
 
 //----- (0043D5F0) --------------------------------------------------------
@@ -58990,7 +58884,7 @@ void __fastcall UI_main_menu_multi_player_name_input_cb(char *text, int cursor_p
 }
 
 //----- (0043DA80) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_player_name_input(Task *task)
+void __cdecl UI_main_menu_multi_player_name_input(Task *task)
 {
   Entity *entity; // esi
   NetzMobemPhonebook *phonebook; // ebx
@@ -59126,7 +59020,7 @@ void __fastcall UI_main_menu_multi_phone_number_input_cb(char *text, int cursor_
 }
 
 //----- (0043DD90) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_phone_number_input(Task *task)
+void __cdecl UI_main_menu_multi_phone_number_input(Task *task)
 {
   NetzMobemPhonebook *ctx; // edi
   Entity *entity; // esi
@@ -59253,7 +59147,7 @@ LABEL_16:
 }
 
 //----- (0043E010) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_modem_baud_selector(Task *task)
+void __cdecl UI_main_menu_multi_modem_baud_selector(Task *task)
 {
   NetzMobemPhonebook *phonebook; // ebp
   Entity *entity; // esi
@@ -59760,7 +59654,7 @@ LABEL_21:
 // 47C6CC: using guessed type int g_netz_modem_selected;
 
 //----- (0043EA90) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_modem_up(Task *task)
+void __cdecl UI_main_menu_multi_modem_up(Task *task)
 {
   Entity *entity; // eax
   Entity *v2; // esi
@@ -59818,7 +59712,7 @@ LABEL_14:
 }
 
 //----- (0043EB80) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_modem_down(Task *task)
+void __cdecl UI_main_menu_multi_modem_down(Task *task)
 {
   Entity *entity; // eax
   Entity *v2; // esi
@@ -59880,7 +59774,7 @@ LABEL_14:
 }
 
 //----- (0043EC70) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_modem_list_select(Task *task)
+void __cdecl UI_main_menu_multi_modem_list_select(Task *task)
 {
   Task *v1; // edi
   Entity *entity; // ecx
@@ -60366,7 +60260,7 @@ void __cdecl UI_main_menu_multi_serial_cancel(Task *task)
 }
 
 //----- (0043F7C0) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_lobby_list(Task *task)
+void __cdecl UI_main_menu_multi_lobby_list(Task *task)
 {
   Task *v1; // ebx
   Entity *v2; // esi
@@ -60464,7 +60358,7 @@ void __cdecl __noreturn UI_main_menu_multi_lobby_list(Task *task)
 // 47C700: using guessed type int g_lobby_list_guard_unused;
 
 //----- (0043F9E0) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_session_slot(Task *task)
+void __cdecl UI_main_menu_multi_session_slot(Task *task)
 {
   Task *v1; // edi
   Entity *entity; // ecx
@@ -60524,7 +60418,7 @@ LABEL_14:
 }
 
 //----- (0043FAD0) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_multi_session_list(Task *task)
+void __cdecl UI_main_menu_multi_session_list(Task *task)
 {
   char *v1; // edi
   Entity *v2; // esi
@@ -61106,7 +61000,7 @@ void __fastcall UI_main_menu_game_player_name_cb(char *text, int cursor_pos)
 }
 
 //----- (00440810) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_player_name(Task *task)
+void __cdecl UI_main_menu_game_player_name(Task *task)
 {
   Task *v1; // edi
   Entity *entity; // ebx
@@ -61297,7 +61191,7 @@ LABEL_29:
 // 468CE8: using guessed type int g_netz_player_flags;
 
 //----- (00440CA0) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_palette(Task *task)
+void __cdecl UI_main_menu_game_palette(Task *task)
 {
   UiStr *v1; // edi
   Entity *entity; // esi
@@ -61404,7 +61298,7 @@ LABEL_22:
 // 47C654: using guessed type char g_current_multi_pal;
 
 //----- (00440ED0) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_faction(Task *task)
+void __cdecl UI_main_menu_game_faction(Task *task)
 {
   UiStr *v1; // ebp
   Entity *entity; // edi
@@ -61471,7 +61365,7 @@ LABEL_12:
 // 468B58: using guessed type int g_netz_local_player_slot;
 
 //----- (00441050) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_map(Task *task)
+void __cdecl UI_main_menu_game_map(Task *task)
 {
   UiStr *v1; // edi
   Entity *entity; // esi
@@ -61508,7 +61402,7 @@ void __cdecl __noreturn UI_main_menu_game_map(Task *task)
 }
 
 //----- (00441150) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_map_display(Task *task)
+void __cdecl UI_main_menu_game_map_display(Task *task)
 {
   int settings_high; // ebx
   UiStr *v2; // esi
@@ -61569,7 +61463,7 @@ BOOL MISSION_are_tech_bunkers_enabled()
 }
 
 //----- (00441260) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_tech_bunkers(Task *task)
+void __cdecl UI_main_menu_game_tech_bunkers(Task *task)
 {
   UiStr *v1; // ebp
   Entity *entity; // esi
@@ -61605,7 +61499,7 @@ void __cdecl __noreturn UI_main_menu_game_tech_bunkers(Task *task)
 }
 
 //----- (00441340) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_tech_bunkers_display(Task *task)
+void __cdecl UI_main_menu_game_tech_bunkers_display(Task *task)
 {
   UiStr *v1; // edi
   Entity *entity; // esi
@@ -61663,7 +61557,7 @@ int MISSION_get_starting_cash()
 }
 
 //----- (00441470) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_starting_cash(Task *task)
+void __cdecl UI_main_menu_game_starting_cash(Task *task)
 {
   UiStr *v1; // ebp
   Entity *entity; // esi
@@ -61695,7 +61589,7 @@ void __cdecl __noreturn UI_main_menu_game_starting_cash(Task *task)
 }
 
 //----- (00441550) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_starting_cash_display(Task *task)
+void __cdecl UI_main_menu_game_starting_cash_display(Task *task)
 {
   int settings_low; // ebp
   UiStr *v2; // edi
@@ -61768,7 +61662,7 @@ int __fastcall GAME_get_max_upgrade_level(UnitType type)
 }
 
 //----- (00441680) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_tech(Task *task)
+void __cdecl UI_main_menu_game_tech(Task *task)
 {
   UiStr *v1; // ebx
   Entity *entity; // esi
@@ -61804,7 +61698,7 @@ void __cdecl __noreturn UI_main_menu_game_tech(Task *task)
 }
 
 //----- (00441780) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_enemy_count_tech_level_str(Task *task)
+void __cdecl UI_main_menu_game_enemy_count_tech_level_str(Task *task)
 {
   UiStr *v1; // ebp
   Entity *entity; // esi
@@ -62129,7 +62023,7 @@ void __fastcall GAME_settings_set(KaosSettings *settings)
 }
 
 //----- (00441F10) --------------------------------------------------------
-void __cdecl __noreturn UI_main_menu_game_start_signal_waiter(Task *task)
+void __cdecl UI_main_menu_game_start_signal_waiter(Task *task)
 {
   TaskEvents v1; // esi
   TaskMessage *i; // esi
@@ -62672,7 +62566,7 @@ void __cdecl UI_main_menu_multi_ipx_join(Task *task)
 // 4429D8: variable 'v9' is possibly undefined
 
 //----- (00442BB0) --------------------------------------------------------
-void __cdecl __noreturn GAME_new_missions_selection(Task *task)
+void __cdecl GAME_new_missions_selection(Task *task)
 {
   Entity *v2; // eax
   Task *cplc_spawn_params; // ecx
@@ -63156,7 +63050,7 @@ BOOL __fastcall UI_main_menu_msg_loop(Task *task, ptrdiff_t label_frame_anim, BO
     while ( 1 )
     {
       v7 = TSK_yield(task, TaskWait_Any, 1);
-      widget = task->entity->ctx2.widget;
+      widget = task->entity->widget;
       if ( widget && (widget->flags & 2) != 0 )
       {
         if ( !g_cdrom_is_available || g_unit_stats_override )
@@ -66756,7 +66650,7 @@ void UI_sidebar_cleanup_prod()
 }
 
 //----- (00446ED0) --------------------------------------------------------
-void __cdecl __noreturn UI_sidebar_refresh_loop(Task *task)
+void __cdecl UI_sidebar_refresh_loop(Task *task)
 {
   SidebarButton **v1; // esi
 
@@ -67259,7 +67153,7 @@ void __fastcall TURRET_tower_init(Unit *unit)
         v3 = ENT_create_ex(
                unit->stats->attachment->mobd_id,
                unit->entity,
-               TURRET_combat_task,
+               TURRET_combat_tick,
                TaskKind_Callback,
                unit->mobd_anchors.turret);
         v2->entity = v3;
@@ -67293,16 +67187,13 @@ void __fastcall TURRET_tower_init(Unit *unit)
 }
 
 //----- (004479D0) --------------------------------------------------------
-void __cdecl __noreturn TURRET_combat_task(Task *task)
+void __cdecl TURRET_combat_tick(Task *task)
 {
-  Turret *turret; // esi
-  int reload_timer; // eax
+  Turret *turret = (Turret *)task->ctx;
+  turret->mode(turret);
 
-  turret = (Turret *)task->ctx;
-  ((void (__thiscall *)(Turret *))turret->mode)(turret);
-  reload_timer = turret->reload_timer;
-  if ( reload_timer )
-    turret->reload_timer = reload_timer - 1;
+  if (turret->reload_timer > 0)
+    turret->reload_timer -= 1;
 }
 
 //----- (004479F0) --------------------------------------------------------
@@ -67658,8 +67549,8 @@ void __fastcall TURRET_mode_attacking(Turret *turret)
     v5->ctx1 = projectile_type;
     v5->z = z + 768;
     task->ctx = turret->target;
-    v5->ctx2.building_ctx.hitpoints = (int)turret->parent;
-    v5->ctx2.building_ctx._unused = turret->parent->unit_id;
+    v5->projectile_ctx.attacker = turret->parent;
+    v5->projectile_ctx.attacker_unit_id = turret->parent->unit_id;
     v5->infantry_damage = LOWORD(projectile_type->damage_to_infantry)
                         + ((projectile_type->damage_to_infantry * g_veterancy_damage_mod[turret->parent->veterancy]) >> 8);
     v5->vehicle_damage = LOWORD(projectile_type->damage_to_vehicles)
@@ -68287,8 +68178,8 @@ void __fastcall TURRET_mode_vehicle_fire(Turret *turret)
       v7->ctx1 = projectile_type;
       v7->z = z + 768;
       task->ctx = turret->target;
-      v7->ctx2.building_ctx.hitpoints = (int)turret->parent;
-      v7->ctx2.building_ctx._unused = turret->parent->unit_id;
+      v7->projectile_ctx.attacker = turret->parent;
+      v7->projectile_ctx.attacker_unit_id = turret->parent->unit_id;
       v7->infantry_damage = LOWORD(projectile_type->damage_to_infantry)
                           + ((projectile_type->damage_to_infantry * g_veterancy_damage_mod[turret->parent->veterancy]) >> 8);
       v7->vehicle_damage = LOWORD(projectile_type->damage_to_vehicles)
@@ -69550,7 +69441,7 @@ void __fastcall NETZ_broadcast_mandatory_response(NetzPacketType pkt, void *data
 // 47CB10: using guessed type int g_netz_num_pending_acks;
 
 //----- (0044A500) --------------------------------------------------------
-void __cdecl __noreturn MINI_mouse_loop(Task *task)
+void __cdecl MINI_mouse_loop(Task *task)
 {
   Task *v1; // esi
   TaskMessage *i; // ebp
@@ -71048,7 +70939,7 @@ void __fastcall REND_transform_unit_turret(Entity *entity, RenderNode *node)
 }
 
 //----- (0044BE60) --------------------------------------------------------
-void __cdecl __noreturn SCHRAP_explosion_medium_task(Task *task)
+void __cdecl SCHRAP_explosion_medium_task(Task *task)
 {
   Entity *entity; // esi
   RenderNode *rn; // edx
@@ -71862,7 +71753,7 @@ ptrdiff_t __fastcall ENT_anim_advance_rotation(
 }
 
 //----- (0044CC40) --------------------------------------------------------
-void __cdecl __noreturn UI_show_notification_box_task(Task *task)
+void __cdecl UI_show_notification_box_task(Task *task)
 {
   unsigned __int32 v1; // ebx
   const char *text; // edi
@@ -71986,7 +71877,7 @@ BOOL __fastcall GAME_is_ally(int player_num, Unit *unit)
 }
 
 //----- (0044CE90) --------------------------------------------------------
-void __cdecl __noreturn UI_show_message_multi_chat_task(Task *task)
+void __cdecl UI_show_message_multi_chat_task(Task *task)
 {
   unsigned __int32 v1; // edi
   const char *text; // ebx

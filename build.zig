@@ -1,7 +1,12 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
-    const target = b.standardTargetOptions(.{});
+    const target = b.standardTargetOptions(.{
+        .default_target = .{
+            .cpu_arch = .x86,
+            .os_tag = .windows,
+        }
+    });
     const optimize = b.standardOptimizeOption(.{});
 
     const c_flags: []const []const u8 = &.{ "-std=c2x", "-Wall", "-Wextra" };

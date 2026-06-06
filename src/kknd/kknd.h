@@ -23,14 +23,16 @@ typedef struct {
   fixed y;
 } Vec2i;
 
-typedef struct {
-  struct OilPatch *next;
-  struct OilPatch *prev;
+typedef struct OilPatch OilPatch;
+
+struct OilPatch {
+  OilPatch *next;
+  OilPatch *prev;
   Entity *entity;
   int amount;
   Unit *drillrig;
   int drillrig_unit_id;
-} OilPatch;
+};
 
 typedef enum : unsigned int {
   UnitType_Surv_Rifleman = 0,
@@ -607,12 +609,6 @@ typedef struct {
   int flags;
 } MenuWidget;
 
-typedef union {
-  EntityBuildingContext building_ctx;
-  EntityProjectileContext projectile_ctx;
-  MenuWidget *widget;
-} EntityContext;
-
 typedef enum : unsigned int {
   BlitterMode_Render = 0,
   BlitterMode_GetWidth = 1,
@@ -791,31 +787,37 @@ typedef enum : unsigned int {
   TaskType_Invalid = (unsigned int)-1,
 } TaskType;
 
-typedef struct {
+typedef struct CplcEntity CplcEntity;
+
+struct CplcEntity {
   TaskType task_type;
   int x;
   int y;
   int z;
-  struct CplcEntity *next_x_sorted;
-  struct CplcEntity *prev_x_sorted;
-  struct CplcEntity *next_y_sorted;
-  struct CplcEntity *prev_y_sorted;
+  CplcEntity *next_x_sorted;
+  CplcEntity *prev_x_sorted;
+  CplcEntity *next_y_sorted;
+  CplcEntity *prev_y_sorted;
   CplcSpawnParams spawn_params;
-} CplcEntity;
+};
 
-typedef struct {
-  struct CplcEntityInViewport *next;
-  struct CplcEntityInViewport *prev;
+typedef struct CplcEntityInViewport CplcEntityInViewport;
+
+struct CplcEntityInViewport{
+  CplcEntityInViewport *next;
+  CplcEntityInViewport *prev;
   Entity *entity;
-} CplcEntityInViewport;
+};
 
-typedef struct {
+typedef struct LevelCplcSurface LevelCplcSurface;
+
+struct LevelCplcSurface {
   int size;
   CplcEntity *next_x_sorted;
   CplcEntity *prev_x_sorted;
   CplcEntity *next_y_sorted;
   CplcEntity *prev_y_sorted;
-} LevelCplcSurface;
+};
 
 typedef struct {
   LevelCplcSurface *layers;
@@ -881,7 +883,11 @@ struct Entity {
   CplcEntity *cplc_meta;
   CplcEntityInViewport *cplc_view;
   void *ctx1;
-  EntityContext ctx2;
+  union {
+    EntityBuildingContext building_ctx;
+    EntityProjectileContext projectile_ctx;
+    MenuWidget *widget;
+  };
   BOOL is_collidable;
   __int16 infantry_damage;
   __int16 vehicle_damage;
@@ -1020,7 +1026,7 @@ typedef struct {
 
 typedef struct {
   MobdId mobd_id;
-  void (__fastcall *mode_attach)(Task *task);
+  void (__cdecl *tick)(Task *task);
   int rotation_speed;
   int reload_time;                ///< fire -> fire delay -> fire -> fire delay -> ... end of volley -> wait reload_time
   int reload2_time;
@@ -1346,12 +1352,12 @@ typedef struct {
   LevelHunkSection *sections[];
 } LevelHunk;
 
-typedef struct
-{
+typedef struct BoxdSpatialHashEntry BoxdSpatialHashEntry; 
+struct BoxdSpatialHashEntry {
   BoxdCollisionShape *shape;
   Entity *entity;
-  struct BoxdSpatialHashEntry *next;
-} BoxdSpatialHashEntry;
+  BoxdSpatialHashEntry *next;
+};
 
 typedef struct {
   int max_collision_buckets;
@@ -1421,7 +1427,7 @@ typedef struct {
 } LevelMobdSurface;
 
 typedef struct {
-  LevelMobdSurface *layers[1];
+  LevelMobdSurface *layers[];
 } LevelMobd;
 
 typedef enum : unsigned int {
@@ -1443,12 +1449,14 @@ typedef enum : unsigned int {
   MenuId_Kaos = 15,
 } MenuId;
 
-typedef struct {
-  struct Coroutine *yield_to;
-  int *context;
+typedef struct Coroutine Coroutine;
+
+struct Coroutine {
+  Coroutine *yield_to;
+  uintptr_t *context;
   void *stack;
-  struct Coroutine *next;
-} Coroutine;
+  Coroutine *next;
+};
 
 typedef struct {
   struct RenderBatch *next;
@@ -1861,10 +1869,11 @@ typedef struct {
   Entity *entity;
 } SidebarButton;
 
+typedef struct SidebarFactoryProductionOption SidebarFactoryProductionOption;
 /// One per buildable unit type within SidebarFactoryProduction parent
-typedef struct {
-  struct SidebarFactoryProductionOption *next;
-  struct SidebarFactoryProductionOption *prev;
+struct SidebarFactoryProductionOption {
+  SidebarFactoryProductionOption *next;
+  SidebarFactoryProductionOption *prev;
   Unit *factory;                  ///< factory unit ptr
   UnitType product_type;          ///< type of unit being produced
   ptrdiff_t icon_mobd_frame;            ///< sidebar icon mobd offset
@@ -1872,7 +1881,7 @@ typedef struct {
   int base_cost;
   int production_time;                  ///< unit_stats.production_time x 60; bandwidth = (cost << 8) / production_time_x60
   int key;                              ///< Grouping key : slot_index + 16 * PRODUCTION_GROUP_ID. Used to match new jobs to existing factory. -1 = ungrouped (AI/building construction)14.
-} SidebarFactoryProductionOption;
+};
 
 /// One for each type of parent factory's production (tank, tanker, etc) - see FactoryProduction
 /// Player can enqueue more than one of the same unit, but it's managed in the sidebar logic
@@ -1979,11 +1988,13 @@ typedef struct {
   int num_active_repairs;               ///< e.g 2 technicians enter the building
 } BuildingState;
 
-typedef struct {
-  struct Bomber *next;
-  struct Bomber *prev;
+typedef struct Bomber Bomber;
+
+struct Bomber {
+  Bomber *next;
+  Bomber *prev;
   Unit *unit;
-} Bomber;
+};
 
 typedef struct {
   fixed x;
@@ -1996,12 +2007,14 @@ typedef struct {
   int y;
 } Vec2;
 
-typedef struct {
-  struct BuildLimits *next;
-  struct BuildLimits *prev;
+typedef struct BuildLimits BuildLimits;
+
+struct BuildLimits {
+  BuildLimits *next;
+  BuildLimits *prev;
   UnitType type;
   int num_buildings_of_this_type;
-} BuildLimits;
+};
 
 typedef struct {
   unsigned __int32 mask;
@@ -2097,10 +2110,11 @@ typedef enum {
   ScriptType_Outpost         = 6,
 } ScriptType;
 
-typedef struct {
-  struct Glyph *next;
+typedef struct Glyph Glyph;
+struct Glyph {
+  Glyph *next;
   RenderNode *rn;
-} Glyph;
+};
 
 typedef struct {
   int x;
@@ -2158,52 +2172,60 @@ typedef struct {
 } UnitOrderCtx;
 
 typedef struct AiSquadNode AiSquadNode;
+typedef struct AiUnitNode AiUnitNode;
+typedef struct AiWandererNode AiWandererNode;
+typedef struct AiAttackerNode AiAttackerNode;
+typedef struct AiBuildNode AiBuildNode;
+typedef struct AiDrillrigNode AiDrillrigNode;
+typedef struct AiTankerNode AiTankerNode;
+typedef struct AiPowerPlantNode AiPowerPlantNode;
+typedef struct AiEnemyNode AiEnemyNode;
+typedef struct AiBuildOrderNode AiBuildOrderNode;
+typedef struct AiBuildingPlacementNode AiBuildingPlacementNode;
 
-typedef struct {
-  struct AiUnitNode *next;
-  struct AiUnitNode *prev;
+struct AiUnitNode {
+  AiUnitNode *next;
+  AiUnitNode *prev;
   Unit *unit;
   AiSquadNode *squad;
-} AiUnitNode;
+};
 
-typedef struct {
-  struct AiWandererNode *next;
-  struct AiWandererNode *prev;
+struct AiWandererNode {
+  AiWandererNode *next;
+  AiWandererNode *prev;
   int _ai_wanderer_node_8;
   Unit *unit;
-} AiWandererNode;
+};
 
-typedef struct {
-  struct AiAttackerNode *next;
-  struct AiAttackerNode *prev;
+struct AiAttackerNode {
+  AiAttackerNode *next;
+  AiAttackerNode *prev;
   AiSquadNode *squad;
   Unit *unit;
-} AiAttackerNode;
+};
 
-typedef struct {
-  struct AiBuildNode *next;
-  struct AiBuildNode *prev;
+struct AiBuildNode {
+  AiBuildNode *next;
+  AiBuildNode *prev;
   Unit *unit;
   int remaining_cost;
   UnitType unit_type;
   int base_cost;
   int cost_per_tick;
-} AiBuildNode;
+};
 
-typedef struct AiDrillrigNode AiDrillrigNode;
-
-typedef struct {
-  struct AiTankerNode *next;
-  struct AiTankerNode *prev;
+struct AiTankerNode {
+  AiTankerNode *next;
+  AiTankerNode *prev;
   AiDrillrigNode *drillrig;
   Unit *unit;
-} AiTankerNode;
+};
 
-typedef struct {
-  struct AiPowerPlantNode *next;
-  struct AiPowerPlantNode *prev;
+struct AiPowerPlantNode {
+  AiPowerPlantNode *next;
+  AiPowerPlantNode *prev;
   Unit *unit;
-} AiPowerPlantNode;
+};
 
 struct AiDrillrigNode {
   AiDrillrigNode *next;
@@ -2222,21 +2244,21 @@ struct AiDrillrigNode {
   int desired_tanker_count;
 };
 
-typedef struct {
-  struct AiEnemyNode *next;
-  struct AiEnemyNode *prev;
+struct AiEnemyNode {
+  AiEnemyNode *next;
+  AiEnemyNode *prev;
   Unit *unit;
-} AiEnemyNode;
+};
 
-typedef struct {
-  struct AiBuildOrderNode *next;
-  struct AiBuildOrderNode *prev;
+struct AiBuildOrderNode {
+  AiBuildOrderNode *next;
+  AiBuildOrderNode *prev;
   int _ai_stru26C_node_8;
-} AiBuildOrderNode;
+};
 
-typedef struct {
-  struct AiBuildingPlacementNode *next;
-  struct AiBuildingPlacementNode *prev;
+struct AiBuildingPlacementNode {
+  AiBuildingPlacementNode *next;
+  AiBuildingPlacementNode *prev;
   Unit *unit;
   UnitType unit_type;
   int unit_x;
@@ -2244,9 +2266,9 @@ typedef struct {
   int grid_anchor_x;
   int grid_anchor_y;
   int strategic_value;
-} AiBuildingPlacementNode;
+};
 
-struct SquadNode {
+struct AiSquadNode {
   AiSquadNode *next;
   AiSquadNode *prev;
   AiSquadNode *merge_target_squad;
