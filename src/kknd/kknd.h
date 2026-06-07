@@ -639,9 +639,11 @@ typedef enum : unsigned int {
   RenderCommand_PaletteOverride = 0x10000000,
 } RenderCommandFlags;
 
-typedef struct {
-  struct RenderViewport *next;
-  struct RenderViewport *prev;
+typedef struct RenderViewport RenderViewport;
+
+struct RenderViewport {
+  RenderViewport *next;
+  RenderViewport *prev;
   int flags;
   int brightness;                       ///< Seemingly uses 8.23 format - brightness factor actually used is (brightness >> 23)
   int clip_x;
@@ -649,7 +651,7 @@ typedef struct {
   int clip_w;
   int clip_h;
   int _render_viewport_20;
-} RenderViewport;
+};
 
 struct RenderCommand {
   RenderCommandFlags flags;
@@ -1479,8 +1481,8 @@ struct Coroutine {
 };
 
 typedef struct {
-  struct RenderBatch *next;
-  struct RenderBatch *prev;
+  RenderNode *next;
+  RenderNode *prev;
 } RenderBatch;
 
 /// The game does NOT use a traditional switch-based game state dispatcher. Instead, three nested `do/while` loops share a single guard variable `g_game_loop`. Value `0` means "keep ticking current loop.

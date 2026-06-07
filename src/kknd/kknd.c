@@ -293,8 +293,8 @@ void __fastcall UNIT_bomber_status_bar_init(Unit *unit);
 void __fastcall UNIT_rendering_default(Unit *unit);
 void __fastcall UNIT_building_status_bar_init(Unit *unit);
 void __fastcall UNIT_tanker_status_bar_init(Unit *unit);
-BOOL UNIT_status_bar_short_sprites_init();
-BOOL UNIT_status_bar_wide_sprites_init();
+void UNIT_status_bar_short_sprites_init();
+void UNIT_status_bar_wide_sprites_init();
 void UNIT_status_bar_sprites_cleanup();
 LRESULT __stdcall WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 BOOL __fastcall REND_create_window(int width, int height, int bpp, BOOL limit_render_rate, BOOL fullscreen);
@@ -5319,8 +5319,10 @@ RenderBlitter *g_blitter_active_tail;
 RenderBlitter *g_blitter_active_head;
 RenderBlitter *g_blitter_free_head;
 RenderBlitter *g_blitter_pool;
-MobdImageData *g_healthbar_by_veterancy_wide[MAX_VETERANCY_LEVELS][28];
-MobdImageData *g_healthbar_by_veterancy_short[MAX_VETERANCY_LEVELS][12];
+#define NUM_VEHICLES_HP_BAR_FRAMES 28
+#define NUM_INFANTRY_HP_BAR_FRAMES 12
+MobdImageData *g_healthbar_by_veterancy_wide[MAX_VETERANCY_LEVELS][NUM_VEHICLES_HP_BAR_FRAMES];
+MobdImageData *g_healthbar_by_veterancy_short[MAX_VETERANCY_LEVELS][NUM_INFANTRY_HP_BAR_FRAMES];
 struct tagRECT g_window_rect; // idb
 void *g_dd_pixels;
 DWORD g_window_style; // idb
@@ -5721,12 +5723,11 @@ HINSTANCE g_hinstance; // idb
 int g_cmd_show; // idb
 BOOL g_os_quit_signal_received;
 MovieFrame *g_movie_frame;
+DDPIXELFORMAT g_4797E8;
 _UNKNOWN unk_468560; // weak
 _UNKNOWN unk_468620; // weak
 _UNKNOWN unk_4686E0; // weak
 _UNKNOWN unk_4687D0; // weak
-_UNKNOWN unk_47CA73; // weak
-_UNKNOWN unk_4797E8; // weak
 _UNKNOWN unk_4778EC; // weak
 
 
@@ -19351,9 +19352,17 @@ void REND_blitter_cleanup()
 const size_t hp_building_width = 59;
 const size_t hp_building_stride = 66;
 
-const size_t hp_tanker_width = 28;
+const size_t hp_infantry_width = 12;
+const size_t hp_infantry_height = 6;
+const size_t hp_infantry_stride = 16;
+
+const size_t hp_vehicle_width = 28;
+const size_t hp_vehicle_height = 6;
+const size_t hp_vehicle_stride = 32;
+
+const size_t hp_tanker_width = hp_vehicle_width;
 const size_t hp_tanker_height = 9;
-const size_t hp_tanker_stride = 32;
+const size_t hp_tanker_stride = hp_vehicle_stride;
 
 //----- (00410520) --------------------------------------------------------
 void __fastcall UNIT_building_status_bar_update_health(Unit *unit)
@@ -19984,251 +19993,101 @@ void __fastcall UNIT_tanker_status_bar_init(Unit *unit)
 }
 
 //----- (00411040) --------------------------------------------------------
-BOOL UNIT_status_bar_short_sprites_init()
+void UNIT_status_bar_short_sprites_init()
 {
-  int v0; // esi
-  MobdImageData **v1; // ebp
-  unsigned int v2; // ebx
-  MobdImageData *v3; // eax
-  int *pixels; // edx
-  unsigned __int16 v5; // cx
-  int v6; // eax
-  int *v7; // ecx
-  int *v8; // edi
-  int v9; // eax
-  _BYTE *v10; // edx
-  int v11; // edi
-  _BYTE *v12; // edx
-  int v13; // eax
-  bool v14; // cc
-  unsigned int v15; // ebx
-  unsigned __int8 *v16; // edi
-  unsigned __int8 *v17; // esi
-  unsigned int v18; // ecx
-  unsigned int v19; // edx
-  int v20; // eax
-  int v21; // eax
-  unsigned __int8 *v22; // edi
-  int v24; // [esp+10h] [ebp-18h]
-  int v25; // [esp+14h] [ebp-14h]
-  unsigned __int8 v26; // [esp+18h] [ebp-10h]
-  char v27; // [esp+1Ch] [ebp-Ch]
-  MobdImageData **v28; // [esp+20h] [ebp-8h]
+  for (int vet = 0; vet < MAX_VETERANCY_LEVELS; ++vet) {
+    uint8_t fill_top = 0xFF;
+    uint8_t fill_bot = 0xFF;
+    int color_idx = 0;
 
-  for (int i = 0; i < MAX_VETERANCY_LEVELS; ++i) {
-    for (int j = 0; j < 12; ++j) {
-      const size_t width = 16;
-      const size_t height = 6;
-      MobdImageData *img = malloc(sizeof(MobdImageData) + width * height);
+    for (int frame = 0; frame < NUM_INFANTRY_HP_BAR_FRAMES; ++frame) {
+      MobdImageData *img = malloc(sizeof(MobdImageData) + hp_infantry_stride * hp_infantry_height);
       assert(img);
 
-      img->width = width;
-      img->height = height;
+      img->width = hp_infantry_stride;
+      img->height = hp_infantry_height;
       img->format = Sprt_Raw;
-      g_healthbar_by_veterancy_short[i][j] = img;
+      g_healthbar_by_veterancy_short[vet][frame] = img;
 
-      
-      memset(img->pixels, 0x01, width * height);
+      memset(img->pixels, 0x01, hp_infantry_stride * hp_infantry_height);
 
       uint8_t *row0 = img->pixels;
-      uint8_t *row5 = img->pixels + 5 * width;
-      memset(row0, g_healthbar_border_color_top[i], width);
-      memset(row5, g_healthbar_border_color_bottom[i], width);
+      uint8_t *row5 = img->pixels + 5 * hp_infantry_stride;
+      memset(row0, g_healthbar_border_color_top[vet], hp_infantry_stride);
+      memset(row5, g_healthbar_border_color_bottom[vet], hp_infantry_stride);
 
-      for (int y = 1; y < 5; ++y) {
-        uint8_t *row = img->pixels + y * width;
-        row[0] = g_healthbar_border_color_top[i];
-        row[width - 1] = g_healthbar_border_color_bottom[i];
+      for (int y = 1; y <= 4; ++y) {
+        uint8_t *row = img->pixels + y * hp_infantry_stride;
+        row[0] = g_healthbar_border_color_top[vet];
+        row[hp_infantry_stride - 1] = g_healthbar_border_color_bottom[vet];
       }
 
-      uint8_t c = 0xFF;
-      if (j % 2 == 0) {
-        c = 
-
+      if (frame % 2 == 0) {
+        fill_top = g_healthbar_border_color_top[color_idx];
+        fill_bot = g_healthbar_border_color_bottom[color_idx];
+        if (color_idx < 4) {
+          color_idx++;
+        }
       }
 
+      int fill_w = frame + 1;  // frame 0 -> 1px bar (minimal), frame 11 -> 12px bar (full)
+      uint8_t *row_top = &img->pixels[2 * hp_infantry_stride + 2];
+      uint8_t *row_bot = &img->pixels[3 * hp_infantry_stride + 2];
+
+      memset(row_top,          fill_top,          fill_w);
+      memset(row_top + fill_w, HP_BAR_BORDER_TOP, hp_infantry_width - fill_w);
+      memset(row_bot,          fill_bot,          fill_w);
+      memset(row_bot + fill_w, HP_BAR_BORDER_BOT, hp_infantry_width - fill_w);
     }
   }
-
-      v11 = 4;
-      do
-      {
-        *v10 = g_healthbar_border_color_top[v0];
-        v12 = v10 + 15;
-        *v12 = g_healthbar_border_color_bottom[v0];
-        v10 = v12 + 1;
-        --v11;
-      }
-      while ( v11 );
-      if ( (int)v2 % 2 )
-      {
-        LOBYTE(v13) = v26;
-      }
-      else
-      {
-        v13 = g_healthbar_fill_color_top[v24];
-        v26 = g_healthbar_fill_color_top[v24];
-        v14 = v24 + 1 <= 4;
-        v27 = g_healthbar_fill_color_bottom[v24++];
-        if ( !v14 )
-          v24 = 4;
-      }
-      v15 = v2 + 1;
-      v16 = &(*v1)->pixels[34];
-      v17 = &(*v1)->pixels[50];
-      memset(v16, 166, 12);
-      ++v1;
-      v18 = v15;
-      LOBYTE(v15) = v13;
-      v19 = v18;
-      BYTE1(v15) = v13;
-      v20 = v15 << 16;
-      LOWORD(v20) = v15;
-      v2 = v18;
-      v18 >>= 2;
-      memset32(v16, v20, v18);
-      memset(&v16[4 * v18], v20, v19 & 3);
-      memset(v17, 160, 12);
-      LOBYTE(v19) = v27;
-      BYTE1(v19) = v27;
-      v21 = v19 << 16;
-      LOWORD(v21) = v19;
-      memset32(v17, v21, v2 >> 2);
-      v22 = &v17[4 * (v2 >> 2)];
-      v0 = v25;
-      memset(v22, v27, v2 & 3);
-    }
-    while ( v2 != 12 );
-    v0 = v25 + 1;
-    v1 = v28 + 12;
-    ++v25;
-    v28 += 12;
-    if ( v28 != (MobdImageData **)&g_window_rect )  // BUG
-      continue;
-    break;
-  }
-  return 1;
 }
 
 //----- (00411200) --------------------------------------------------------
-BOOL UNIT_status_bar_wide_sprites_init()
+void UNIT_status_bar_wide_sprites_init()
 {
-  MobdImageData **v0; // ebp
-  unsigned int v1; // ebx
-  MobdImageData *v2; // eax
-  int v3; // edx
-  unsigned __int8 *pixels; // esi
-  int v5; // eax
-  void *v6; // edi
-  int v7; // eax
-  char *v8; // esi
-  int v9; // eax
-  int v10; // edx
-  bool v11; // cc
-  unsigned __int8 *v12; // esi
-  unsigned int v13; // ebx
-  unsigned int v14; // ecx
-  unsigned int v15; // edx
-  unsigned __int8 *v16; // edi
-  int v17; // eax
-  int v18; // eax
-  bool v19; // zf
-  int v21; // [esp+10h] [ebp-18h]
-  int v22; // [esp+14h] [ebp-14h]
-  unsigned __int8 v23; // [esp+18h] [ebp-10h]
-  char v24; // [esp+1Ch] [ebp-Ch]
-  MobdImageData **v25; // [esp+20h] [ebp-8h]
+  for (int vet = 0; vet < MAX_VETERANCY_LEVELS; ++vet) {
+    uint8_t fill_top = 0xFF;
+    uint8_t fill_bot = 0xFF;
+    int color_idx = 0;
 
-  v0 = g_healthbar_by_veterancy_wide[0];
-  v23 = -1;
-  v24 = -1;
-  v21 = 0;
-  v25 = g_healthbar_by_veterancy_wide[0];
-  while ( 2 )
-  {
-    v1 = 0;
-    v22 = 0;
-    do
-    {
-      v2 = (MobdImageData *)malloc(0xCCu);
-      *v0 = v2;
-      if ( !v2 )
-        return 0;
-      v2->width = 32;
-      HIWORD(v3) = HIWORD(v21);
-      (*v0)->height = 6;
-      (*v0)->format = 0;
-      pixels = (*v0)->pixels;
-      memset(pixels, 1u, 0xC0u);
-      LOBYTE(v3) = g_healthbar_border_color_top[v21];
-      BYTE1(v3) = v3;
-      v5 = v3 << 16;
-      LOWORD(v5) = v3;
-      HIWORD(v3) = HIWORD(v21);
-      memset32(pixels, v5, 8u);
-      v6 = pixels + 160;
-      LOBYTE(v3) = g_healthbar_border_color_bottom[v21];
-      BYTE1(v3) = v3;
-      v7 = v3 << 16;
-      LOWORD(v7) = v3;
-      v8 = (char *)(pixels + 32);
-      memset32(v6, v7, 8u);
-      v9 = 4;
-      do
-      {
-        v8 += 32;
-        --v9;
-        *(v8 - 32) = g_healthbar_border_color_top[v21];
-        *(v8 - 1) = g_healthbar_border_color_bottom[v21];
+    for (int frame = 0; frame < NUM_VEHICLES_HP_BAR_FRAMES; ++frame) {
+      MobdImageData *img = malloc(sizeof(MobdImageData) + hp_vehicle_stride * hp_vehicle_height);
+      assert(img);
+
+      img->width = hp_vehicle_stride;
+      img->height = hp_vehicle_height;
+      img->format = Sprt_Raw;
+      g_healthbar_by_veterancy_wide[vet][frame] = img;
+
+      memset(img->pixels, 0x01, hp_vehicle_stride * hp_vehicle_height);
+
+      memset(&img->pixels[0 * hp_vehicle_stride], g_healthbar_border_color_top[vet], hp_vehicle_stride);
+      memset(&img->pixels[5 * hp_vehicle_stride], g_healthbar_border_color_bottom[vet], hp_vehicle_stride);
+
+      for (int y = 1; y <= 4; ++y) {
+        uint8_t *row = img->pixels + y * hp_vehicle_stride;
+        row[0] = g_healthbar_border_color_top[vet];
+        row[hp_vehicle_stride - 1] = g_healthbar_border_color_bottom[vet];
       }
-      while ( v9 );
-      if ( (int)v1 % 5 )
-      {
-        LOBYTE(v10) = v23;
+
+      if (frame % 5 == 0) {
+        fill_top = g_healthbar_border_color_top[color_idx];
+        fill_bot = g_healthbar_border_color_bottom[color_idx];
+        if (color_idx < 4) {
+          color_idx++;
+        }
       }
-      else
-      {
-        v10 = g_healthbar_fill_color_top[v22];
-        v23 = g_healthbar_fill_color_top[v22];
-        v11 = v22 + 1 <= 4;
-        v24 = g_healthbar_fill_color_bottom[v22++];
-        if ( !v11 )
-          v22 = 4;
-      }
-      v12 = &(*v0)->pixels[66];
-      v13 = v1 + 1;
-      memset(v12, 0xA6u, 0x1Cu);
-      v14 = v13;
-      LOBYTE(v13) = v10;
-      BYTE1(v13) = v10;
-      v15 = v14;
-      v16 = v12;
-      v17 = v13 << 16;
-      LOWORD(v17) = v13;
-      v12 += 32;
-      v14 >>= 2;
-      memset32(v16, v17, v14);
-      v1 = v15;
-      ++v0;
-      memset(&v16[4 * v14], v17, v15 & 3);
-      memset(v12, 0xA0u, 0x1Cu);
-      LOBYTE(v15) = v24;
-      BYTE1(v15) = v24;
-      v18 = v15 << 16;
-      LOWORD(v18) = v15;
-      memset32(v12, v18, v1 >> 2);
-      memset(&v12[4 * (v1 >> 2)], v24, v1 & 3);
+
+      int fill_w = frame + 1;  // frame 0 -> 1px bar (minimal), frame 27 -> 28px bar (full)
+      uint8_t *row_top = &img->pixels[2 * hp_vehicle_stride + 2];
+      uint8_t *row_bot = &img->pixels[3 * hp_vehicle_stride + 2];
+
+      memset(row_top,          fill_top,          fill_w);
+      memset(row_top + fill_w, HP_BAR_BORDER_TOP, hp_vehicle_width - fill_w);
+      memset(row_bot,          fill_bot,          fill_w);
+      memset(row_bot + fill_w, HP_BAR_BORDER_BOT, hp_vehicle_width - fill_w);
     }
-    while ( v1 != 28 );
-    v0 = v25 + 28;
-    v19 = v25 + 28 == (MobdImageData **)g_healthbar_by_veterancy_short;
-    ++v21;
-    v25 += 28;
-    if ( !v19 )
-      continue;
-    break;
   }
-  return 1;
 }
 
 //----- (004113D0) --------------------------------------------------------
@@ -20502,7 +20361,7 @@ BOOL REND_direct_draw_init()
             g_window_ex_style = 0x40008;
             SetWindowLongA(g_hwnd, GWL_STYLE, 0x90080000);
             SetWindowLongA(g_hwnd, GWL_EXSTYLE, g_window_ex_style);
-            SetWindowPos(g_hwnd, HWND_MESSAGE|0x2, 0, 0, g_window_width, g_window_height, 0x60u);
+            SetWindowPos(g_hwnd, HWND_TOPMOST, 0, 0, g_window_width, g_window_height, 0x60u);
             InvalidateRect(g_hwnd, nullptr, 1);
             UpdateWindow(g_hwnd);
             if ( !g_pdd->lpVtbl->SetCooperativeLevel(g_pdd, g_hwnd, 0x17)
@@ -20568,20 +20427,21 @@ BOOL REND_direct_draw_init()
                 if ( v3 )
                 {
 LABEL_50:
+                  DDSCAPS caps;
                   if ( g_pdds2
-                    || (v8 = (IDirectDrawSurface *)4,
-                        !g_pdds->lpVtbl->GetAttachedSurface(g_pdds, (LPDDSCAPS)&v8, &g_pdds2)) )
+                    || (caps.dwCaps = DDSCAPS_BACKBUFFER,
+                        !g_pdds->lpVtbl->GetAttachedSurface(g_pdds, &caps, &g_pdds2)) )
                   {
 LABEL_38:
                     if ( (!g_fullscreen
-                       || !g_pdd->lpVtbl->CreatePalette(g_pdd, 68, g_dd_palette, &g_ddpal, nullptr)
-                       && !g_pdds->lpVtbl->SetPalette(g_pdds, g_ddpal))
+                       || (!g_pdd->lpVtbl->CreatePalette(g_pdd, 68, g_dd_palette, &g_ddpal, nullptr)
+                       && !g_pdds->lpVtbl->SetPalette(g_pdds, g_ddpal)))
                       && !g_pdd->lpVtbl->CreateClipper(g_pdd, 0, &g_clipper, nullptr)
                       && !g_clipper->lpVtbl->SetHWnd(g_clipper, 0, g_hwnd)
                       && !g_pdds->lpVtbl->SetClipper(g_pdds, g_clipper)
                       && !g_pdds->lpVtbl->GetSurfaceDesc(g_pdds, &g_dd_backbuffer_desc) )
                     {
-                      qmemcpy(&unk_4797E8, &g_dd_backbuffer_desc.ddpfPixelFormat, 0x20u);
+                      memcpy(&g_4797E8, &g_dd_backbuffer_desc.ddpfPixelFormat, sizeof(DDPIXELFORMAT));
                       ShowWindow(g_hwnd, g_cmd_show);
                       g_ddraw_initialized = 0;
                       REND_clear_impl(1);
@@ -20754,7 +20614,9 @@ BOOL REND_should_render()
 {
   if ( !g_rend_limit_rate )
     return 1;
-  if ( g_time_next_tick_time < timeGetTime() )
+
+  int time = (int)timeGetTime();
+  if (g_time_next_tick_time < time)
   {
     if ( ++g_render_num_frames_skipped < 4 )
     {
@@ -20762,7 +20624,7 @@ BOOL REND_should_render()
     }
     else
     {
-      g_time_next_tick_time = timeGetTime();
+      g_time_next_tick_time = time;
       g_render_num_frames_skipped = 0;
       return 1;
     }
@@ -20773,8 +20635,6 @@ BOOL REND_should_render()
     return 1;
   }
 }
-// 478104: using guessed type int g_time_next_tick_time;
-// 4798F0: using guessed type int g_render_num_frames_skipped;
 
 //----- (004121F0) --------------------------------------------------------
 RenderViewport *__fastcall REND_viewport_create(int flags, int x, int y, int w, int h)
@@ -21000,7 +20860,6 @@ int __fastcall REND_mode_sprt_draw(RenderCommand *cmd, BlitterMode mode)
   int height; // ebp
   int y; // edx
   int width_; // ecx
-  char blitter; // bl
   int _x; // edx
   unsigned __int8 *pixels; // ecx
   int _y; // [esp-Ch] [ebp-20h]
@@ -21010,9 +20869,9 @@ int __fastcall REND_mode_sprt_draw(RenderCommand *cmd, BlitterMode mode)
   int _height; // [esp-4h] [ebp-18h]
   unsigned __int8 format; // [esp+10h] [ebp-4h]
 
-  MobdSprtImage *img = (MobdSprtImage *)cmd->image;
+  MobdSprtImage *img = cmd->image;
   MobdImageData *sprt = img->bitmap;
-  if ( mode )
+  if (mode != BlitterMode_Render)
   {
     if ( mode == BlitterMode_GetWidth )
       return sprt->width;
@@ -21046,7 +20905,7 @@ int __fastcall REND_mode_sprt_draw(RenderCommand *cmd, BlitterMode mode)
     _y = cmd->y;
     _x = cmd->x;
     pixels = sprt->pixels;
-    if ( ((int)cmd->image[1].blitter & 1) != 0 )
+    if (img->flags & 1)
     {
       REND_blt_sprt_mirrored(pixels, _x, _y, _width, _height);
       g_is_first_blt = 0;
@@ -21064,7 +20923,7 @@ LABEL_31:
   if ( (cmd->flags & RenderCommand_PaletteOverride) == RenderCommand_PaletteOverride )
   {
     v16 = sprt->height;
-    if ( (img->flags & 1) != 0 )
+    if (img->flags & 1)
       REND_blt_rle_override_palette_mirrored(sprt->pixels, cmd->palette_override, cmd->x, cmd->y, width_, v16);
     else
       REND_blt_rle_override_palette(sprt->pixels, cmd->palette_override, cmd->x, cmd->y, width_, v16);
@@ -21074,7 +20933,7 @@ LABEL_31:
   else
   {
     v17 = sprt->height;
-    if ( (img->flags & 1) != 0 )
+    if (img->flags & 1)
       REND_blt_rle_mirrored(sprt->pixels, cmd->x, cmd->y, width_, v17);
     else
       REND_blt_rle(sprt->pixels, cmd->x, cmd->y, width_, v17);
@@ -23304,7 +23163,7 @@ BOOL __fastcall UNIT_tanker_check_dock_proximity(Unit *unit)
   int v19; // ecx
 
   type = unit->type;
-  if ( type != UnitType_Surv_Tanker && type != UnitType_Mute_Tanker || unit->order != UnitOrder_TankerDock )
+  if ( (type != UnitType_Surv_Tanker && type != UnitType_Mute_Tanker) || unit->order != UnitOrder_TankerDock )
     return 0;
   state = (TankerState *)unit->state;
   current_destination = state->current_destination;
@@ -23645,8 +23504,8 @@ void __fastcall UNIT_mode_build_path(Unit *unit)
   int v19; // ecx
 
   type = unit->type;
-  if ( type != UnitType_Surv_Tanker && type != UnitType_Mute_Tanker
-    || (entity = unit->entity, entity->x >> 13 == unit->map_x) && entity->y >> 13 == unit->map_y )
+  if ( (type != UnitType_Surv_Tanker && type != UnitType_Mute_Tanker)
+    || ((entity = unit->entity, entity->x >> 13 == unit->map_x) && entity->y >> 13 == unit->map_y ))
   {
     unit->entity->x_speed = 0;
     unit->entity->y_speed = 0;
@@ -23668,7 +23527,7 @@ void __fastcall UNIT_mode_build_path(Unit *unit)
           goto LABEL_36;
         case BoxdRaycastResult_UnitObstacle:
           path_flags = unit->path_flags;
-          LOBYTE(path_flags) = path_flags & 0xF9;
+          path_flags &= 0xFFFFFFF9;
           unit->path_flags = path_flags;
           UNIT_path_ray_stack_pop(unit);
           return;
@@ -68194,9 +68053,11 @@ void __cdecl UNIT_order_dispatcher(Task *task)
   ctx = (UnitOrderCtx *)task->ctx;
   if ( g_is_single_player )
     event = &g_currently_processed_event;
-  else
-    event = (GameEvent *)((char *)&unk_47CA73 + 13 * ctx->player_num);// BUG - g_netz_game_events[player_num -1]
-                                                // NetzGameEvent and GameEvetn are binary compatible in the first 13 bytes so the pointer cast is ok - but should be refactored
+  else {
+    // NetzGameEvent and GameEvetn are binary compatible in the first 13 bytes so the pointer cast is ok - but should be refactored
+    event = (GameEvent *)&g_netz_game_events[player_num -1];
+  }
+
   switch ( event->type )
   {
     case GameEvent_SelectedBox:
@@ -71117,20 +70978,15 @@ LABEL_18:
         result = GAME_oil_patches_init();
         if ( result )
         {
-          result = UNIT_status_bar_wide_sprites_init();
+          UNIT_status_bar_wide_sprites_init();
+          UNIT_status_bar_short_sprites_init();
+
+          result = SCAR_init();
           if ( result )
           {
-            result = UNIT_status_bar_short_sprites_init();
-            if ( result )
-            {
-              result = SCAR_init();
-              if ( result )
-              {
-                if ( !CONSTR_init() )
-                  return 0;
-                return MINI_init();
-              }
-            }
+            if ( !CONSTR_init() )
+              return 0;
+            return MINI_init();
           }
         }
       }
