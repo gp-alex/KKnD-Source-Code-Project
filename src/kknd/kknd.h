@@ -7,6 +7,7 @@
 
 #include <stdint.h>
 #include <stdio.h> // File
+#include <assert.h>
 
 #include <windows.h>
 #include <math.h>
@@ -678,13 +679,17 @@ struct RenderNode {
   int _render_node_field_38;
 };
 
+typedef enum : uint8_t {
+  Sprt_Raw = 0,
+  Sprt_RLE = 2,
+} SprtFormat;
+
 // Comes from the game files so padding/type sizes are important
 typedef struct {
-  int32_t width;
-  int32_t height;
-  uint8_t format;               ///< pixel format: 0=raw, 2=RLE compressed
-                                ///< raw: one byte per pixel (palette index). Zero bytes are transparent
-  uint8_t pixels[];
+  int32_t    width;
+  int32_t    height;
+  SprtFormat format;
+  uint8_t    pixels[];  // raw : one byte per pixel (palette index). Zero bytes are transparent
 } __attribute__((packed)) MobdImageData;
 
 typedef struct {

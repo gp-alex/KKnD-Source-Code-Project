@@ -19343,11 +19343,17 @@ void REND_blitter_cleanup()
 
 #define HP_BAR_BORDER_TOP 0xA6
 #define HP_BAR_BORDER_BOT 0xA0
+#define HP_BAR_BORDER_LFT 0xA6
+#define HP_BAR_BORDER_RGT 0xA4
 #define HP_BAR_OIL_TOP    0xAA
 #define HP_BAR_OIL_BOT    0xA9
 
 const size_t hp_building_width = 59;
 const size_t hp_building_stride = 66;
+
+const size_t hp_tanker_width = 28;
+const size_t hp_tanker_height = 9;
+const size_t hp_tanker_stride = 32;
 
 //----- (00410520) --------------------------------------------------------
 void __fastcall UNIT_building_status_bar_update_health(Unit *unit)
@@ -19384,23 +19390,20 @@ void __fastcall UNIT_tanker_status_bar_update_health(Unit *unit)
     return;
   }
 
-  const size_t bar_width = 28;
-  const size_t bar_stride = 32;
-
   uint8_t *row1 = &state->img->pixels[66];
-  uint8_t *row2 = row1 + bar_stride;
+  uint8_t *row2 = row1 + hp_tanker_stride;
   
-  int hp_width = bar_width * unit->hitpoints / unit->stats->hitpoints;
-  int color_idx = 4 * hp_width / bar_width;
+  int hp_width = hp_tanker_width * unit->hitpoints / unit->stats->hitpoints;
+  int color_idx = 4 * hp_width / hp_tanker_width;
 
   uint8_t c1 = g_healthbar_fill_color_top[color_idx];
   uint8_t c2 = g_healthbar_fill_color_bottom[color_idx];
 
   memset(row1, c1, hp_width);
-  memset(row1 + hp_width, HP_BAR_BORDER_TOP, bar_width - hp_width);
+  memset(row1 + hp_width, HP_BAR_BORDER_TOP, hp_tanker_width - hp_width);
   
   memset(row2, c2, hp_width);
-  memset(row2 + hp_width, HP_BAR_BORDER_BOT, bar_width - hp_width);
+  memset(row2 + hp_width, HP_BAR_BORDER_BOT, hp_tanker_width - hp_width);
 }
 
 //----- (00410710) --------------------------------------------------------
@@ -19441,19 +19444,16 @@ void __fastcall UNIT_tanker_status_bar_update_oil(Unit *unit)
     return;
   }
 
-  const size_t bar_width = 28;
-  const size_t bar_stride = 32;
-
   uint8_t *row1 = &state->img->pixels[162];
-  uint8_t *row2 = row1 + bar_stride;
+  uint8_t *row2 = row1 + hp_tanker_stride;
   
   int fill_width = 28 * state->oil_loaded / 500;
 
   memset(row1,              HP_BAR_OIL_TOP,    fill_width);
-  memset(row1 + fill_width, HP_BAR_BORDER_TOP, bar_width - fill_width);
+  memset(row1 + fill_width, HP_BAR_BORDER_TOP, hp_tanker_width - fill_width);
   
   memset(row2,              HP_BAR_OIL_BOT,    fill_width);
-  memset(row2 + fill_width, HP_BAR_BORDER_BOT, bar_width - fill_width);
+  memset(row2 + fill_width, HP_BAR_BORDER_BOT, hp_tanker_width - fill_width);
 }
 
 //----- (00410840) --------------------------------------------------------
@@ -19922,87 +19922,65 @@ void __fastcall UNIT_building_status_bar_init(Unit *unit)
 //----- (00410E40) --------------------------------------------------------
 void __fastcall UNIT_tanker_status_bar_init(Unit *unit)
 {
-  TankerState *state; // edi
-  MobdImageData *v3; // eax
-  MobdImageData *img; // eax
-  Entity *entity; // ecx
-  RenderNode *v6; // eax
-  uint8_t *v7; // edx
-  void *v8; // edi
-  uint8_t *v9; // edx
-  int v10; // eax
-  TankerState *v11; // ebp
-  unsigned __int8 *v12; // edx
-  unsigned __int8 *v13; // ebx
-  unsigned int v14; // ebp
-  void *v15; // ebx
-  int v16; // edx
-  int v17; // ebp
-  int v18; // eax
-  int v19; // eax
-  unsigned int v20; // [esp+8h] [ebp-8h]
-  int v21; // [esp+Ch] [ebp-4h]
-
-  state = (TankerState *)unit->state;
-  v3 = (MobdImageData *)TSK_alloc(unit->task, 0x12Cu);
-  state->img = v3;
-  if ( v3 )
-  {
-    v3->width = 32;
-    state->img->height = 9;
-    state->img->format = 0;
-    img = state->img;
-    unit->overlay_sprt.flags = 0;
-    entity = unit->entity;
-    unit->overlay_sprt.bitmap = img;
-    unit->overlay_sprt.blitter = REND_mode_sprt_draw;
-    v6 = REND_node_add(entity, (RenderTransform)REND_transform_tanker_overlay);
-    unit->overlay_rn = v6;
-    v6->payload = unit;
-    v7 = (uint8_t *)(*((int *)unit->state + 28) + 9);
-    memset(v7, 1u, 0x120u);
-    memset(v7, 0xA6u, 0x20u);
-    v8 = v7 + 256;
-    v9 = v7 + 32;
-    memset(v8, 0xA4u, 0x20u);
-    v10 = 7;
-    do
-    {
-      *v9 = -90;
-      v9[31] = -92;
-      v9 += 32;
-      --v10;
-    }
-    while ( v10 );
-    v11 = (TankerState *)unit->state;
-    v12 = &v11->img->pixels[162];
-    memset(v12, 0xA6u, 0x1Cu);
-    memset(v12 + 32, 0xA0u, 0x1Cu);
-    v13 = &v11->img->pixels[162];
-    v14 = 28 * v11->oil_loaded / 500;
-    memset(v13, 0xAAu, v14);
-    memset(v13 + 32, 0xA9u, v14);
-    v15 = unit->state;
-    v16 = *((int *)v15 + 28) + 75;
-    memset((void *)v16, 0xA6u, 0x1Cu);
-    memset((void *)(v16 + 32), 0xA0u, 0x1Cu);
-    v17 = *((int *)v15 + 28) + 75;
-    v20 = 28 * unit->hitpoints / unit->stats->hitpoints;
-    v21 = (int)(4 * v20) / 28;
-    LOBYTE(v15) = g_healthbar_fill_color_top[v21];
-    BYTE1(v15) = (_BYTE)v15;
-    v18 = (int)v15 << 16;
-    LOWORD(v18) = (_WORD)v15;
-    memset32((void *)v17, v18, v20 >> 2);
-    memset((void *)(v17 + 4 * (v20 >> 2)), (char)v15, v20 & 3);
-    LOBYTE(v15) = g_healthbar_fill_color_bottom[v21];
-    BYTE1(v15) = (_BYTE)v15;
-    v19 = (int)v15 << 16;
-    LOWORD(v19) = (_WORD)v15;
-    memset32((void *)(v17 + 32), v19, v20 >> 2);
-    memset((void *)(v17 + 32 + 4 * (v20 >> 2)), (char)v15, v20 & 3);
-    unit->overlay_rn->flags |= 0x40000000u;
+  TankerState *state = unit->state;
+  if (!state) {
+    return;
   }
+
+  // 297 bytes (9 for the struct + 288 for the pixels)
+  // the original had 300: +3 - alignment? was probably a macro to align MobdImageData to the upper aligned bound
+  // not sure it's still worth doing it - let the memory allocator figure it out
+  MobdImageData *img = TSK_alloc(unit->task, sizeof(MobdImageData) + hp_tanker_stride * hp_tanker_height);
+  if (!img) {
+    return;
+  }
+
+  img->width = hp_tanker_stride;
+  img->height = hp_tanker_height;
+  img->format = Sprt_Raw;
+  state->img = img;
+
+  unit->overlay_sprt.flags = 0;
+  unit->overlay_sprt.bitmap = img;
+  unit->overlay_sprt.blitter = REND_mode_sprt_draw;
+  unit->overlay_rn = REND_node_add(unit->entity, (RenderTransform)REND_transform_tanker_overlay);
+  unit->overlay_rn->payload = unit;
+
+  memset(img->pixels, 0x01, hp_tanker_stride * hp_tanker_height);
+
+  uint8_t *row1 = img->pixels;
+  uint8_t *row8 = img->pixels + 8 * hp_tanker_stride;
+  memset(row1, HP_BAR_BORDER_TOP, hp_tanker_stride);
+  memset(row8, HP_BAR_OIL_TOP, hp_tanker_stride);
+
+  for (int y = 1; y < 8; ++y) {
+    uint8_t *row = img->pixels + y * hp_tanker_stride;
+    row[0] = HP_BAR_BORDER_LFT;
+    row[hp_tanker_stride - 1] = HP_BAR_BORDER_RGT;
+  }
+
+  uint8_t *row5 = img->pixels + 5 * hp_tanker_stride + 2; // +2 for borders on each side
+  uint8_t *row6 = row5 + hp_tanker_stride;
+  int oil_fill_width = hp_tanker_width * state->oil_loaded / 500;
+
+  memset(row5,                  HP_BAR_OIL_TOP,    oil_fill_width);
+  memset(row5 + oil_fill_width, HP_BAR_BORDER_TOP, hp_tanker_width - oil_fill_width);
+  memset(row6,                  HP_BAR_OIL_BOT,    oil_fill_width);
+  memset(row6 + oil_fill_width, HP_BAR_BORDER_BOT, hp_tanker_width - oil_fill_width);
+
+  uint8_t *row2 = img->pixels + 2 * hp_tanker_stride + 2; // +2 for borders on each side
+  uint8_t *row3 = row2 + hp_tanker_stride;
+  int hp_fill_width = hp_tanker_width * unit->hitpoints / unit->stats->hitpoints;
+  int hp_color_idx = 4 * hp_fill_width / hp_tanker_width;
+  uint8_t c1 = g_healthbar_fill_color_top[hp_color_idx];
+  uint8_t c2 = g_healthbar_fill_color_bottom[hp_color_idx];
+
+  memset(row2,                 c1,                hp_fill_width);
+  memset(row2 + hp_fill_width, HP_BAR_BORDER_TOP, hp_tanker_width - hp_fill_width);
+  memset(row3,                 c2,                hp_fill_width);
+  memset(row3 + hp_fill_width, HP_BAR_BORDER_BOT, hp_tanker_width - hp_fill_width);
+
+  unit->overlay_rn->flags |= RenderNode_Skip;
 }
 
 //----- (00411040) --------------------------------------------------------
@@ -20037,46 +20015,41 @@ BOOL UNIT_status_bar_short_sprites_init()
   char v27; // [esp+1Ch] [ebp-Ch]
   MobdImageData **v28; // [esp+20h] [ebp-8h]
 
-  v0 = 0;
-  v1 = g_healthbar_by_veterancy_short[0];
-  v26 = -1;
-  v27 = -1;
-  v25 = 0;
-  v28 = g_healthbar_by_veterancy_short[0];
-  while ( 2 )
-  {
-    v2 = 0;
-    v24 = 0;
-    do
-    {
-      v3 = (MobdImageData *)malloc(0x6Cu);
-      *v1 = v3;
-      if ( !v3 )
-        return 0;
-      v3->width = 16;
-      (*v1)->height = 6;
-      (*v1)->format = 0;
-      pixels = (*v1)->pixels;
-      memset(pixels, 1u, 0x60u);
-      LOBYTE(v5) = g_healthbar_border_color_top[v0];
-      HIBYTE(v5) = v5;
-      v6 = v5 << 16;
-      LOWORD(v6) = v5;
-      v7 = pixels + 20;
-      *pixels = v6;
-      pixels[1] = v6;
-      pixels[2] = v6;
-      pixels[3] = v6;
-      v8 = pixels + 20;
-      LOBYTE(v7) = g_healthbar_border_color_bottom[v0];
-      BYTE1(v7) = (_BYTE)v7;
-      v9 = (int)v7 << 16;
-      LOWORD(v9) = (_WORD)v7;
-      v10 = pixels + 4;
-      *v8 = v9;
-      v8[1] = v9;
-      v8[2] = v9;
-      v8[3] = v9;
+  for (int i = 0; i < MAX_VETERANCY_LEVELS; ++i) {
+    for (int j = 0; j < 12; ++j) {
+      const size_t width = 16;
+      const size_t height = 6;
+      MobdImageData *img = malloc(sizeof(MobdImageData) + width * height);
+      assert(img);
+
+      img->width = width;
+      img->height = height;
+      img->format = Sprt_Raw;
+      g_healthbar_by_veterancy_short[i][j] = img;
+
+      
+      memset(img->pixels, 0x01, width * height);
+
+      uint8_t *row0 = img->pixels;
+      uint8_t *row5 = img->pixels + 5 * width;
+      memset(row0, g_healthbar_border_color_top[i], width);
+      memset(row5, g_healthbar_border_color_bottom[i], width);
+
+      for (int y = 1; y < 5; ++y) {
+        uint8_t *row = img->pixels + y * width;
+        row[0] = g_healthbar_border_color_top[i];
+        row[width - 1] = g_healthbar_border_color_bottom[i];
+      }
+
+      uint8_t c = 0xFF;
+      if (j % 2 == 0) {
+        c = 
+
+      }
+
+    }
+  }
+
       v11 = 4;
       do
       {
@@ -20130,7 +20103,7 @@ BOOL UNIT_status_bar_short_sprites_init()
     v1 = v28 + 12;
     ++v25;
     v28 += 12;
-    if ( v28 != (MobdImageData **)&g_window_rect )
+    if ( v28 != (MobdImageData **)&g_window_rect )  // BUG
       continue;
     break;
   }
