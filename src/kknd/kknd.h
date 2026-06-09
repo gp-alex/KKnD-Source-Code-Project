@@ -1124,12 +1124,13 @@ typedef struct {
   MobdPoint *dock_point;
 } UnitMobdAnchors;
 
-typedef struct
-{
-  struct UnitEscortNode *next;
-  struct UnitEscortNode *prev;
+
+typedef struct UnitEscortNode UnitEscortNode;
+struct UnitEscortNode {
+  UnitEscortNode *next;
+  UnitEscortNode *prev;
   Unit *escort;
-} UnitEscortNode;
+};
 
 typedef union {
   Vec2i infantry_return;
@@ -1367,12 +1368,24 @@ struct LevelHunkHeader {
 
 typedef struct {
   char name[4];
-  void *ptr;
+  void *data;
 } LevelHunkSection;
 
 typedef struct {
-  LevelHunkSection *sections[];
+  LevelHunkSection *sections;  // section with data=NULL serves as the terminator
 } LevelHunk;
+
+typedef struct {
+  uint32_t num_fixups;
+  uint32_t fixups[];
+} RllcHunk;
+
+typedef enum
+{
+  HunkFixup_Pointer      =        0x0,
+  HunkFixup_PointerArray = 0x40000000,
+  HunkFixup_Renderer     = 0x80000000,
+} HunkFixupType;
 
 typedef struct BoxdSpatialHashEntry BoxdSpatialHashEntry; 
 struct BoxdSpatialHashEntry {
@@ -1596,10 +1609,10 @@ typedef struct {
 } MissionDiplomacyTable;
 
 typedef struct {
-  __int32 amount;
-  __int32 x;
-  __int32 y;
-  __int32 drillrig_entity_id;
+  int32_t amount;
+  int32_t x;
+  int32_t y;
+  uint32_t drillrig_unit_id;
 } OilPatchSaveStruct;
 
 typedef enum : unsigned __int8
@@ -2859,13 +2872,6 @@ typedef struct {
   char _movie_780[131016];
   char data[1];
 } __attribute__((packed)) Movie;
-
-typedef enum : unsigned __int32
-{
-  HunkFixup_SimplePointer =        0x0,
-  HunkFixup_BatchPointer  = 0x40000000,
-  HunkFixup_Renderer      = 0x80000000,
-} HunkFixupType;
 
 typedef enum : unsigned __int32
 {

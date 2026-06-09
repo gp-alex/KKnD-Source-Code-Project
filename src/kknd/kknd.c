@@ -404,7 +404,7 @@ void __fastcall UNIT_on_escort_end(Unit *unit, Unit *a2);
 void __fastcall UNIT_enqueue_move_order(Unit *unit, MoveOrderPayload *order);
 BOOL INPUT_unk_device_init();
 void INPUT_keyboard_update();
-BOOL __fastcall INPUT_get_keyboard_state(KeyboardState *state);
+bool __fastcall INPUT_get_keyboard_state(KeyboardState *state);
 bool16_t __fastcall INPUT_text_edit(char *out_buf, unsigned __int16 max_len, void (__fastcall *updater)(char *, int), int unused, Task *task);
 BOOL __fastcall BOXD_collide_ui_hover_always(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
 BOOL __fastcall BOXD_collide_ui_hover_if_waiting(Entity *mover, Entity *obstacle, BoxdCollisionAxis axis, BoxdAabb *mover_aabb, BoxdAabb *obstacle_aabb);
@@ -416,7 +416,7 @@ void LVL_cleanup();
 // void __fastcall free_(void *p);
 void SYS_shutdown();
 void *__fastcall LVL_find_section(const char *name);
-BOOL __fastcall LVL_subst_hunk(LevelHunk *dst, LevelHunk *src, const char *name);
+bool __fastcall LVL_subst_hunk(LevelHunk *dst, LevelHunk *src, const char *name);
 BOOL __fastcall BOXD_is_in_line_of_sight(Unit *a, Unit *b);
 BoxdRaycastResult __fastcall BOXD_build_path_to(Unit *unit, int target_x, int target_y);
 BoxdRaycastResult __fastcall BOXD_path_builder_raycast_x_major(int ray_start_x, int ray_start_y, int abs_dx, int abs_dy, int x_step, int y_step, Unit *unit);
@@ -434,7 +434,7 @@ BOOL __fastcall GAME_load_init(const char *filename, LevelId level_id);
 BOOL __fastcall GAME_save_init(const char *filename, LevelId level_id);
 LevelId SAVE_level();
 OilPatchSaveStruct *__fastcall SAVE_pack_oil(size_t *out_buf_size);
-BOOL __fastcall SAVE_unpack_oil(OilPatchSaveStruct *oil);
+bool __fastcall SAVE_unpack_oil(OilPatchSaveStruct *oil);
 BOOL __fastcall SAVE_pack_unit(Unit *unit, UnitSaveStruct *data, size_t data_size);
 BOOL __fastcall SAVE_pack_entity(Entity *entity, EntitySaveStruct *data);
 BOOL __fastcall SAVE_unpack_unit(Unit *unit, const UnitSaveStruct *data);
@@ -752,7 +752,7 @@ void __cdecl PROJ_mode_machinegun(Task *task);
 void __cdecl PROJ_mode_437690(Task *task);
 void __cdecl PROJ_mode_bow(Task *task);
 void __cdecl PROJ_mode_generic(Task *task);
-BOOL __fastcall HUNK_fix_pointers(LevelHunk *data, LevelHunk *rllc);
+bool __fastcall HUNK_fix_pointers(void *data, LevelHunk *rllc);
 void __fastcall MSG_repair_bay(Task *receiver, Task *sender, TaskMessageType message, void *payload);
 void __cdecl UNIT_repair_bay_tick(Task *task);
 void __fastcall UNIT_mode_repair_bay_on_complete(Unit *unit);
@@ -5352,7 +5352,6 @@ RenderViewport *g_rend_current_viewport;
 char g_479B00_buf_static[88];
 KeyboardState g_work_keyboard_state_static;
 int g_keyboard_direction_bits;
-int g_async_key_result_static;
 int g_wm_keydown;
 KeyboardState g_prev_keyboard_state;
 int g_bingings_iter_static;
@@ -7038,7 +7037,7 @@ Coroutine *__fastcall TSK_coroutine_create(void (__cdecl *starter)(), const size
   Coroutine *co = g_coroutine_free_head;
   if (nullptr == co)
     return nullptr;
-    
+
   void *stack = malloc(stack_size);
   if (nullptr == stack) {
     return nullptr;
@@ -7139,7 +7138,7 @@ void TSK_execute_async(Coroutine *next)
     "movl %esp, 8(%eax)\n\t"
 
     // ecx = next
-    // next->yield_to (ecx[0]) = g_coroutine_current_stack (eax) 
+    // next->yield_to (ecx[0]) = g_coroutine_current_stack (eax)
     "movl 8(%ebp), %ecx\n\t"
     "movl %eax, 0(%ecx)\n\t"
 
@@ -7153,13 +7152,13 @@ void TSK_execute_async(Coroutine *next)
     "popl %edi\n\t"
     "popl %esi\n\t"
     "popl %ebx\n\t"
-    
+
     "popl %ebp\n\t"
     "ret\n\t"
   );
 }
 #else
-  x64 inline asm version 
+  x64 inline asm version
 #endif
 
 //----- (00402AB0) --------------------------------------------------------
@@ -12042,7 +12041,7 @@ void __fastcall UNIT_mode_drillrig_adjust_to_oil_patch_position(Unit *unit)
     BOXD_building_claim_area(unit);
   }
   unit->entity->is_collidable = 1;
-  
+
   OilPatch *patch = OIL_find_patch_at_tile(unit->entity->x, unit->entity->y);
   patch->drillrig = unit;
   patch->drillrig_unit_id = unit->unit_id;
@@ -13733,7 +13732,7 @@ LABEL_125:
         if ( v63 )
         {
           if ( v63->task->message_handler != MSG_non_interruptable )
-          { 
+          {
             MoveOrderPayload move = {ai->player_num, v62->unit_x, v62->unit_y};
             TSK_send_message(nullptr, TaskMessage_MoveOrder_or_SoundSettings_or_DoSaveGame, &move, v63->task);
             v62->next->prev = v62->prev;
@@ -19401,7 +19400,7 @@ void __fastcall UNIT_tanker_status_bar_update_health(Unit *unit)
 
   uint8_t *row1 = &state->img->pixels[66];
   uint8_t *row2 = row1 + hp_tanker_stride;
-  
+
   int hp_width = hp_tanker_width * unit->hitpoints / unit->stats->hitpoints;
   int color_idx = 4 * hp_width / hp_tanker_width;
 
@@ -19410,7 +19409,7 @@ void __fastcall UNIT_tanker_status_bar_update_health(Unit *unit)
 
   memset(row1, c1, hp_width);
   memset(row1 + hp_width, HP_BAR_BORDER_TOP, hp_tanker_width - hp_width);
-  
+
   memset(row2, c2, hp_width);
   memset(row2 + hp_width, HP_BAR_BORDER_BOT, hp_tanker_width - hp_width);
 }
@@ -19455,12 +19454,12 @@ void __fastcall UNIT_tanker_status_bar_update_oil(Unit *unit)
 
   uint8_t *row1 = &state->img->pixels[162];
   uint8_t *row2 = row1 + hp_tanker_stride;
-  
+
   int fill_width = 28 * state->oil_loaded / 500;
 
   memset(row1,              HP_BAR_OIL_TOP,    fill_width);
   memset(row1 + fill_width, HP_BAR_BORDER_TOP, hp_tanker_width - fill_width);
-  
+
   memset(row2,              HP_BAR_OIL_BOT,    fill_width);
   memset(row2 + fill_width, HP_BAR_BORDER_BOT, hp_tanker_width - fill_width);
 }
@@ -20869,7 +20868,7 @@ int __fastcall REND_mode_sprt_draw(RenderCommand *cmd, BlitterMode mode)
   int _height; // [esp-4h] [ebp-18h]
   unsigned __int8 format; // [esp+10h] [ebp-4h]
 
-  MobdSprtImage *img = cmd->image;
+  MobdSprtImage *img = (MobdSprtImage *)cmd->image;
   MobdImageData *sprt = img->bitmap;
   if (mode != BlitterMode_Render)
   {
@@ -20970,7 +20969,7 @@ int __fastcall REND_mode_scrl_draw(RenderCommand *cmd, BlitterMode mode)
   unsigned int v19; // eax
   int x_; // esi
   MapdScrlImageTile *v21; // eax
-  unsigned int v22; // [esp+10h] [ebp-10h]
+  int v22; // [esp+10h] [ebp-10h]
   int v23; // [esp+14h] [ebp-Ch]
   unsigned int v24; // [esp+14h] [ebp-Ch]
   int v25; // [esp+18h] [ebp-8h]
@@ -21019,7 +21018,7 @@ int __fastcall REND_mode_scrl_draw(RenderCommand *cmd, BlitterMode mode)
       {
         x = v6;
         v25 = 0;
-        v22 = (unsigned int)(image->tile_x_size - v6 + viewport->clip_w - 1) / image->tile_x_size + 1;
+        v22 = (image->tile_x_size - v6 + viewport->clip_w - 1) / image->tile_x_size + 1;
         if ( v22 > image->num_x_tiles )
           v22 = image->num_x_tiles;
       }
@@ -21042,7 +21041,7 @@ LABEL_26:
       {
         v12 = 0;
         v13 = image->num_y_tiles;
-        v14 = (unsigned int)(image->tile_y_size - v23 + viewport->clip_h - 1) / image->tile_y_size + 1;
+        v14 = (image->tile_y_size - v23 + viewport->clip_h - 1) / image->tile_y_size + 1;
         if ( v14 > v13 )
           goto LABEL_26;
       }
@@ -21538,16 +21537,16 @@ void __fastcall UNIT_on_target_lost(Unit *unit)
   int order_target_y; // eax
   Task *task; // ecx
 
-  order_target = unit->order_target;
   unit->locked_target = nullptr;
-  if ( order_target
+  // double duplicated condition
+  if ( ((order_target = unit->order_target) != nullptr
     && (unit_id = order_target->unit_id) != 0
     && unit_id == unit->order_target_id
-    && !order_target->destroyed
-    || (escort_target = unit->escort_target) != nullptr
+    && !order_target->destroyed)
+    || ((escort_target = unit->escort_target) != nullptr
     && (v5 = escort_target->unit_id) != 0
     && v5 == unit->escort_target_id
-    && !escort_target->destroyed )
+    && !escort_target->destroyed ))
   {
 LABEL_21:
     UNIT_mode_build_path(unit);
@@ -21911,8 +21910,6 @@ void __fastcall UNIT_adjust_orientation_to_nav_around_obstacle(Unit *unit)
   int x; // ecx
   int y; // eax
   int v5; // ebp
-  MobdOrientation v6; // ebx
-  int v7; // esi
   char v8; // bl
   int v9; // [esp+10h] [ebp-Ch]
   int v10; // [esp+14h] [ebp-8h]
@@ -21924,8 +21921,8 @@ void __fastcall UNIT_adjust_orientation_to_nav_around_obstacle(Unit *unit)
   v9 = y >> 13;
   v5 = x >> 13;
   v10 = MATH_direction_to_orientation(unit->order_next_waypoint_x - x, unit->order_next_waypoint_y - y);
-  v6 = ((unsigned __int8)unit->orientation + 16) & 0xE0;
-  v7 = (int)v6 >> 5;
+  uint8_t v6 = ((uint8_t)unit->orientation + 16) & 0xE0;
+  uint8_t v7 = v6 >> 5;
   v11 = &g_terrain[v5 + g_map_num_tiles_x * v9];
   if ( BOXD_classify_tile_for_pathing(
          unit,
@@ -21937,12 +21934,12 @@ void __fastcall UNIT_adjust_orientation_to_nav_around_obstacle(Unit *unit)
     {
       if ( v10 <= (int)v6 )
         goto LABEL_7;
-      v7 = ((_BYTE)v7 + 1) & 7;
+      v7 = (v7 + 1) & 7;
       v8 = v6 + 32;
     }
     else
     {
-      v7 = ((_BYTE)v7 - 1) & 7;
+      v7 = (v7 - 1) & 7;
       v8 = v6 - 32;
     }
     v6 = v8 & 0xE0;
@@ -22770,7 +22767,7 @@ BOOL __fastcall UNIT_path_look_ahead(Unit *unit)
     return 0;
   entity = unit->entity;
   v3 = (int)unit->orientation >> 4;
-  v4 = (entity->y + g_terrain_adjacent_tile_offset_by_16_direction[((_BYTE)v3 - 4) & 0xF]) >> 13;
+  v4 = (entity->y + g_terrain_adjacent_tile_offset_by_16_direction[(v3 - 4) & 0xF]) >> 13;
   v5 = (entity->x + g_terrain_adjacent_tile_offset_by_16_direction[v3]) >> 13;
   v6 = &g_terrain[v5 + g_map_num_tiles_x * v4];
   v7 = BOXD_classify_tile_for_pathing(unit, v5, v4, v6);
@@ -22931,7 +22928,6 @@ void __fastcall UNIT_path_reroute_diagonal_movement_to_cardinal(Unit *unit)
   UnitStats *stats; // ecx
   MobdOrientation orientation; // ebp
   Entity *entity; // ecx
-  int v8; // eax
   int v9; // edx
   int v10; // eax
   BoxdPathingClassification v11; // eax
@@ -23015,9 +23011,9 @@ LABEL_18:
   if ( stats->size == UnitSize_Regular )
   {
     entity = unit->entity;
-    v8 = (int)v3 >> 4;
+    uint8_t v8 = v3 >> 4;
     v9 = entity->x + g_terrain_adjacent_tile_offset_by_16_direction[v8];
-    v10 = (entity->y + g_terrain_adjacent_tile_offset_by_16_direction[((_BYTE)v8 - 4) & 0xF]) >> 13;
+    v10 = (entity->y + g_terrain_adjacent_tile_offset_by_16_direction[(v8 - 4) & 0xF]) >> 13;
     v11 = BOXD_classify_tile_for_pathing(unit, v9 >> 13, v10, &g_terrain[(v9 >> 13) + g_map_num_tiles_x * v10]);
   }
   else
@@ -23289,7 +23285,7 @@ void __fastcall UNIT_mode_combatant_idle_tick(Unit *unit)
     if ( unit->idle_fidget_timer > 50 )
     {
       g_rand_seed_infantry = (unsigned __int16)(3141 * g_rand_seed_infantry + 13867);
-      if ( !(_BYTE)g_rand_seed_infantry )
+      if ((g_rand_seed_infantry & 0xFF) == 0 )
         unit->mode = UNIT_mode_infantry_fidget;
     }
   }
@@ -23497,7 +23493,6 @@ void __fastcall UNIT_mode_build_path(Unit *unit)
   UnitOrderType order; // eax
   int v13; // ecx
   int *ray_unit_obstacle_map_xs; // eax
-  UnitPathFlags v15; // eax
   UnitPathFlags path_flags; // eax
   UnitStats *v17; // eax
   int v18; // eax
@@ -23559,9 +23554,7 @@ void __fastcall UNIT_mode_build_path(Unit *unit)
             }
             while ( v13 < unit->scan_pathing.ray_stack );
           }
-          v15 = unit->path_flags;
-          LOBYTE(v15) = v15 | 6;
-          unit->path_flags = v15;
+          unit->path_flags |= 6;
           UNIT_path_ray_stack_pop(unit);
           return;
         case BoxdRaycastResult_ClearStraightLine:
@@ -23622,9 +23615,6 @@ void __fastcall UNIT_path_ray_stack_pop(Unit *unit)
   int v10; // edx
   UnitStats *v11; // eax
   int v12; // eax
-  int v13; // eax
-  Direction v14; // edx
-  UnitPathFlags path_flags; // eax
   UnitStats *stats; // eax
   int v17; // eax
   int v18; // ecx
@@ -23716,24 +23706,20 @@ void __fastcall UNIT_path_ray_stack_pop(Unit *unit)
     }
     else
     {
-      LOWORD(v13) = MATH_direction_to_orientation(
+      char v13 = (char)MATH_direction_to_orientation(
                       unit->ray_unit_obstacle_map_xs[unit->scan_pathing.ray_stack]
                     - unit->ray_exit_map_xs[unit->scan_pathing.ray_stack],
                       unit->ray_unit_obstacle_map_ys[unit->scan_pathing.ray_stack]
                     - unit->ray_exit_map_ys[unit->scan_pathing.ray_stack]);
-      LOBYTE(v13) = ((v13 + 16) >> 5) & 7;
+      v13 = ((v13 + 16) >> 5) & 7;
       unit->path_scan_iteration = 0;
       unit->mode = UNIT_mode_path_around_obstacles;
-      v14 = ((_BYTE)v13 + 2) & 7;
-      unit->scan_pathing.ccw_heading = ((_BYTE)v13 - 2) & 7;
-      path_flags = unit->path_flags;
-      unit->scan_pathing.cw_heading = v14;
-      LOBYTE(path_flags) = path_flags & 0xC7 | 0x18;
-      unit->path_flags = path_flags;
+      unit->scan_pathing.ccw_heading = (v13 - 2) & 7;
+      unit->scan_pathing.cw_heading = (v13 + 2) & 7;
+      unit->path_flags = (unit->path_flags & 0xC7) | 0x18;
     }
   }
 }
-// 415F52: variable 'v13' is possibly undefined
 
 //----- (00416060) --------------------------------------------------------
 void __fastcall UNIT_mode_path_around_obstacles(Unit *unit)
@@ -23749,7 +23735,6 @@ void __fastcall UNIT_mode_path_around_obstacles(Unit *unit)
   int v10; // eax
   int ccw_scan_x; // ecx
   Direction ccw_heading; // edx
-  UnitPathFlags path_flags; // eax
   int v14; // eax
   int *p_ccw_scan_y; // ebp
   int *p_ccw_scan_x; // ebx
@@ -23761,12 +23746,9 @@ void __fastcall UNIT_mode_path_around_obstacles(Unit *unit)
   int v22; // eax
   int v23; // ecx
   Direction cw_heading; // edx
-  UnitPathFlags v25; // eax
   Unit *v26; // ecx
   Unit *v27; // edi
-  UnitPathFlags v28; // eax
   int path_scan_iteration; // edx
-  UnitPathFlags v30; // eax
   int v31; // eax
   UnitStats *v32; // eax
   int v33; // eax
@@ -23778,7 +23760,6 @@ void __fastcall UNIT_mode_path_around_obstacles(Unit *unit)
   int v39; // eax
   int v40; // ecx
   UnitStats *v41; // eax
-  UnitPathFlags v42; // eax
   int a1; // [esp+10h] [ebp-18h] BYREF
   int a2; // [esp+14h] [ebp-14h] BYREF
   Direction a5; // [esp+18h] [ebp-10h] BYREF
@@ -23877,12 +23858,10 @@ LABEL_63:
       }
       else
       {
-        path_flags = unit->path_flags;
-        LOBYTE(path_flags) = path_flags & 0xF7;
-        unit->path_flags = path_flags;
+        unit->path_flags &= ~0x8;
       }
     }
-    if ( (unit->path_flags & 0x10) != 0 )
+    if (unit->path_flags & 0x10)
     {
       v14 = unit->scan_pathing.ccw_scan_x;
       p_ccw_scan_y = &unit->scan_pathing.ccw_scan_y;
@@ -23961,29 +23940,23 @@ LABEL_71:
       }
       else
       {
-        v25 = unit->path_flags;
-        LOBYTE(v25) = v25 & 0xEF;
-        unit->path_flags = v25;
+        unit->path_flags &= ~0x10;
       }
     }
     v26 = (Unit *)unit->scan_pathing.cw_scan_x;
     v27 = (Unit *)unit->scan_pathing.ccw_scan_x;
     if ( v26 != v27 || unit->scan_pathing.cw_scan_y != unit->scan_pathing.ccw_scan_y )
     {
-      v28 = unit->path_flags;
-      LOBYTE(v28) = v28 | 0x20;
-      unit->path_flags = v28;
+      unit->path_flags |= 0x20;
     }
     path_scan_iteration = unit->path_scan_iteration;
-    if ( path_scan_iteration > 20 && (unit->path_flags & 0x20) == 0 )
+    if ( path_scan_iteration > 20 && (unit->path_flags & 0x20))
       break;
     if ( v26 == (Unit *)unit->ray_exit_map_xs && (int *)unit->scan_pathing.cw_scan_y == unit->ray_exit_map_ys )
       unit->path_flags &= ~8u;
     if ( v27 == (Unit *)unit->ray_exit_map_xs && (int *)unit->scan_pathing.ccw_scan_y == unit->ray_exit_map_ys )
     {
-      v30 = unit->path_flags;
-      LOBYTE(v30) = v30 & 0xEF;
-      unit->path_flags = v30;
+      unit->path_flags &= 0x10;
     }
     if ( (unit->path_flags & 0x18) == 0 || path_scan_iteration > 350 )
       break;
@@ -23993,9 +23966,7 @@ LABEL_71:
     if ( v31 >= 4 )
       return;
   }
-  v42 = unit->path_flags;
-  LOBYTE(v42) = v42 & 0xF9;
-  unit->path_flags = v42;
+  unit->path_flags &= ~(0x04 | 0x02);
   UNIT_path_ray_stack_pop(unit);
 }
 
@@ -24062,7 +24033,6 @@ void __fastcall UNIT_mode_walk_waypoints_tick(Unit *unit)
   int v4; // eax
   int order_next_waypoint_y; // eax
   int v6; // eax
-  UnitPathFlags path_flags; // eax
   Entity *v8; // edi
   int v9; // eax
   int v10; // eax
@@ -24076,13 +24046,8 @@ void __fastcall UNIT_mode_walk_waypoints_tick(Unit *unit)
   MobdOrientation direction_to_target_snap_to_16_directions; // eax
   MobdOrientation v19; // ecx
   MobdOrientation v20; // edx
-  UnitPathFlags v21; // eax
   UnitStats *v22; // eax
   BoxdPathingClassification updated; // eax
-  MobdOrientation orientation; // ecx
-  UnitStats *stats; // eax
-  Entity *v26; // eax
-  UnitPathFlags v27; // eax
   Entity *v28; // ecx
 
   unit->entity->anim_speed = unit->base_anim_speed;
@@ -24099,9 +24064,7 @@ void __fastcall UNIT_mode_walk_waypoints_tick(Unit *unit)
          : entity->y - order_next_waypoint_y;
       if ( v6 < 1792 )
       {
-        path_flags = unit->path_flags;
-        LOBYTE(path_flags) = path_flags | 1;
-        unit->path_flags = path_flags;
+        unit->path_flags |= 1;
       }
     }
   }
@@ -24147,7 +24110,7 @@ LABEL_46:
                                                        512)),
         (v19 = direction_to_target_snap_to_16_directions,
          unit->target_orientation = direction_to_target_snap_to_16_directions,
-         direction_to_target_snap_to_16_directions == -1)
+         (int)direction_to_target_snap_to_16_directions == -1)
      || (v20 = unit->orientation, v20 == direction_to_target_snap_to_16_directions)) )
   {
 LABEL_37:
@@ -24168,20 +24131,8 @@ LABEL_37:
 LABEL_42:
         if ( updated == Boxd_FullyOccupied )
         {
-          orientation = unit->orientation;
-          stats = unit->stats;
           unit->mode_return = UNIT_mode_walk_waypoints_init;
-          ENT_anim_set_frame(unit->entity, stats->mobd_lookup_offset_idle, g_angle_to_orientation[orientation]);// INLINED 417F60
-          v26 = unit->entity;
-          unit->scan_pathing.cw_scan_x = v26->x_speed;
-          unit->scan_pathing.cw_scan_y = v26->y_speed;
-          v26->x_speed = 0;
-          unit->entity->y_speed = 0;
-          v27 = unit->path_flags;
-          LOBYTE(v27) = v27 & 0xBF;
-          unit->multi_purpose_field_1 = 60;
-          unit->path_flags = v27;
-          unit->mode = UNIT_mode_blocked_nudge;
+          UNIT_blocked_nudge_init(unit);
           return;
         }
       }
@@ -24196,9 +24147,7 @@ LABEL_42:
     UNIT_path_look_ahead(unit);
     return;
   }
-  v21 = unit->path_flags;
-  LOBYTE(v21) = v21 | 1;
-  unit->path_flags = v21;
+  unit->path_flags |= 1;
   v22 = unit->stats;
   if ( v22->is_infantry )
   {
@@ -24307,7 +24256,7 @@ LABEL_24:
   {
     v21 = MATH_direction_to_orientation(order_next_waypoint_x - x, unit->order_next_waypoint_y - entity->y);
     v22 = unit->stats;
-    if ( v22->is_infantry || (orientation = unit->orientation, orientation == v21) )
+    if ( v22->is_infantry || (orientation = unit->orientation, (int)orientation == v21) )
     {
       unit->orientation = v21;
       ENT_anim_set_frame(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v21]);
@@ -24502,7 +24451,7 @@ LABEL_24:
   {
     v21 = MATH_direction_to_orientation(order_next_waypoint_x - x, unit->order_next_waypoint_y - entity->y);
     v22 = unit->stats;
-    if ( v22->is_infantry || (orientation = unit->orientation, orientation == v21) )
+    if ( v22->is_infantry || (orientation = unit->orientation, (int)orientation == v21) )
     {
       unit->orientation = v21;
       ENT_anim_set_frame(unit->entity, v22->mobd_lookup_offset_move, g_angle_to_orientation[v21]);
@@ -24720,9 +24669,7 @@ void __fastcall UNIT_obstacle_scan_begin(Unit *unit)
   int v3; // eax
   int v4; // ecx
   int v5; // edi
-  int v6; // edx
   int path_scan_origin_tile_y; // edi
-  int v8; // eax
   int path_next_waypoint_tile_x; // edx
   int path_scan_origin_tile_x; // ecx
   int v11; // eax
@@ -24741,18 +24688,17 @@ void __fastcall UNIT_obstacle_scan_begin(Unit *unit)
   v5 = entity->x >> 13;
   unit->path_scan_origin_tile_x = v5;
   unit->path_scan_origin_tile_y = entity->y >> 13;
-  v6 = v5;
   path_scan_origin_tile_y = unit->path_scan_origin_tile_y;
-  unit->scan_pathing.ccw_scan_x = v6;
-  unit->scan_pathing.cw_scan_x = v6;
+  unit->scan_pathing.ccw_scan_x = v5;
+  unit->scan_pathing.cw_scan_x = v5;
   unit->scan_pathing.ccw_scan_y = path_scan_origin_tile_y;
   unit->scan_pathing.cw_scan_y = path_scan_origin_tile_y;
-  LOWORD(v8) = MATH_direction_to_orientation(v3 - v6, v4 - path_scan_origin_tile_y);
+  short v8 = MATH_direction_to_orientation(v3 - v5, v4 - path_scan_origin_tile_y);
   path_next_waypoint_tile_x = unit->path_next_waypoint_tile_x;
-  LOBYTE(v8) = ((v8 + 16) >> 5) & 7;
-  unit->scan_pathing.cw_heading = ((_BYTE)v8 + 2) & 7;
+  char _v8 = (char)(((v8 + 16) >> 5) & 7);
+  unit->scan_pathing.cw_heading = (_v8 + 2) & 7;
   path_scan_origin_tile_x = unit->path_scan_origin_tile_x;
-  unit->scan_pathing.ccw_heading = ((_BYTE)v8 - 2) & 7;
+  unit->scan_pathing.ccw_heading = (_v8 - 2) & 7;
   v11 = path_next_waypoint_tile_x - path_scan_origin_tile_x;
   if ( path_next_waypoint_tile_x - path_scan_origin_tile_x <= 0 )
     v11 = path_scan_origin_tile_x - path_next_waypoint_tile_x;
@@ -24893,7 +24839,6 @@ void __fastcall UNIT_obstacle_scan_finalize(Unit *unit)
   int v10; // eax
   Entity *v11; // ecx
   MobdOrientation orientation; // edx
-  UnitPathFlags path_flags; // eax
 
   entity = unit->entity;
   path_scan_best_tile_x = unit->path_scan_best_tile_x;
@@ -24925,11 +24870,9 @@ void __fastcall UNIT_obstacle_scan_finalize(Unit *unit)
     unit->order_next_waypoint_y = v10 + (unit->path_next_waypoint_tile_y << 13);
     orientation = unit->orientation;
     unit->scan_pathing.cw_scan_x = v11->anim_speed;
-    path_flags = unit->path_flags;
     unit->multi_purpose_field_1 = 0;            // INLINED 417980 UNIT_scan_walk_restart
-    LOBYTE(path_flags) = path_flags & 0xFE;
     unit->mode = UNIT_mode_scan_walk_tick;
-    unit->path_flags = path_flags;
+    unit->path_flags &= ~1;
     ENT_anim_set_frame(v11, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
     unit->entity->x_speed = 0;
     unit->entity->y_speed = 0;
@@ -24947,17 +24890,14 @@ void __fastcall UNIT_scan_walk_restart(Unit *unit)
   Entity *entity; // ecx
   MobdOrientation orientation; // edx
   int anim_speed; // eax
-  UnitPathFlags path_flags; // eax
 
   entity = unit->entity;
   orientation = unit->orientation;
   anim_speed = entity->anim_speed;
   unit->multi_purpose_field_1 = 0;
   unit->scan_pathing.cw_scan_x = anim_speed;
-  path_flags = unit->path_flags;
-  LOBYTE(path_flags) = path_flags & 0xFE;
   unit->mode = UNIT_mode_scan_walk_tick;
-  unit->path_flags = path_flags;
+  unit->path_flags &= ~1;
   ENT_anim_set_frame(entity, unit->stats->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);
   unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
@@ -25028,7 +24968,7 @@ LABEL_5:
              unit->order_next_waypoint_y - unit->entity->y);
       unit->path_scan_orientation = v8;
       v9 = unit->stats;
-      unit->target_orientation = ((_BYTE)v8 + 8) & 0xF0;
+      unit->target_orientation = ((char)v8 + 8) & 0xF0;
       orientation = unit->orientation;
       unit->mode_turn_return = UNIT_mode_scan_walk_tick;
       ENT_anim_set_frame(unit->entity, v9->mobd_lookup_offset_move, g_angle_to_orientation[orientation]);// INLINED 415A20 UNIT_vehicle_turn_init
@@ -25051,7 +24991,6 @@ void __fastcall UNIT_mode_scan_walk_tick(Unit *unit)
   int v4; // eax
   int order_next_waypoint_y; // eax
   int v6; // eax
-  UnitPathFlags path_flags; // eax
   Entity *v8; // edi
   int v9; // eax
   int v10; // eax
@@ -25060,13 +24999,8 @@ void __fastcall UNIT_mode_scan_walk_tick(Unit *unit)
   MobdOrientation v13; // eax
   MobdOrientation v14; // ecx
   MobdOrientation orientation; // edx
-  UnitPathFlags v16; // eax
   UnitStats *stats; // eax
   BoxdPathingClassification updated; // eax
-  MobdOrientation v19; // ecx
-  UnitStats *v20; // eax
-  Entity *v21; // eax
-  UnitPathFlags v22; // eax
   Entity *v23; // ecx
 
   unit->entity->anim_speed = unit->scan_pathing.cw_scan_x;
@@ -25083,9 +25017,7 @@ void __fastcall UNIT_mode_scan_walk_tick(Unit *unit)
          : entity->y - order_next_waypoint_y;
       if ( v6 < 1792 )
       {
-        path_flags = unit->path_flags;
-        LOBYTE(path_flags) = path_flags | 1;
-        unit->path_flags = path_flags;
+        unit->path_flags |= 1;
       }
     }
   }
@@ -25122,14 +25054,12 @@ void __fastcall UNIT_mode_scan_walk_tick(Unit *unit)
               512);
       v14 = v13;
       unit->target_orientation = v13;
-      if ( v13 != -1 )
+      if ( (int)v13 != -1 )
       {
         orientation = unit->orientation;
         if ( orientation != v13 )
         {
-          v16 = unit->path_flags;
-          LOBYTE(v16) = v16 | 1;
-          unit->path_flags = v16;
+          unit->path_flags |= 1;
           stats = unit->stats;
           if ( !stats->is_infantry )
           {
@@ -25163,20 +25093,8 @@ void __fastcall UNIT_mode_scan_walk_tick(Unit *unit)
 LABEL_34:
         if ( updated == Boxd_FullyOccupied )
         {
-          v19 = unit->orientation;
-          v20 = unit->stats;
           unit->mode_return = UNIT_mode_walk_waypoints_init;
-          ENT_anim_set_frame(unit->entity, v20->mobd_lookup_offset_idle, g_angle_to_orientation[v19]);// INLINED 417F60
-          v21 = unit->entity;
-          unit->scan_pathing.cw_scan_x = v21->x_speed;
-          unit->scan_pathing.cw_scan_y = v21->y_speed;
-          v21->x_speed = 0;
-          unit->entity->y_speed = 0;
-          v22 = unit->path_flags;
-          LOBYTE(v22) = v22 & 0xBF;
-          unit->multi_purpose_field_1 = 60;
-          unit->path_flags = v22;
-          unit->mode = UNIT_mode_blocked_nudge;
+          UNIT_blocked_nudge_init(unit);
           return;
         }
       }
@@ -25207,7 +25125,7 @@ void __fastcall UNIT_mode_arrival_or_stuck(Unit *unit)
     entity = unit->entity;
     v3 = entity->x >> 13;
     v4 = entity->y >> 13;
-    if ( (_WORD)v3 == unit->last_stuck_tile_x && (_WORD)v4 == unit->last_stuck_tile_y )
+    if ( v3 == (int)unit->last_stuck_tile_x && v4 == (int)unit->last_stuck_tile_y )
     {
       ++unit->stuck_timer;
     }
@@ -25238,19 +25156,13 @@ void __fastcall UNIT_mode_arrival_or_stuck(Unit *unit)
 //----- (00417F60) --------------------------------------------------------
 void __fastcall UNIT_blocked_nudge_init(Unit *unit)
 {
-  Entity *entity; // eax
-  UnitPathFlags path_flags; // eax
-
   ENT_anim_set_frame(unit->entity, unit->stats->mobd_lookup_offset_idle, g_angle_to_orientation[unit->orientation]);
-  entity = unit->entity;
-  unit->scan_pathing.cw_scan_x = entity->x_speed;
-  unit->scan_pathing.cw_scan_y = entity->y_speed;
-  entity->x_speed = 0;
+  unit->scan_pathing.cw_scan_x = unit->entity->x_speed;
+  unit->scan_pathing.cw_scan_y = unit->entity->y_speed;
+  unit->entity->x_speed = 0;
   unit->entity->y_speed = 0;
-  path_flags = unit->path_flags;
-  LOBYTE(path_flags) = path_flags & 0xBF;
   unit->multi_purpose_field_1 = 60;
-  unit->path_flags = path_flags;
+  unit->path_flags &= 0x40;
   unit->mode = UNIT_mode_blocked_nudge;
 }
 
@@ -25265,7 +25177,6 @@ void __fastcall UNIT_mode_blocked_nudge(Unit *unit)
   int unit_id; // eax
   MobdOrientation orientation; // eax
   int v8; // eax
-  UnitPathFlags path_flags; // eax
 
   unit->entity->x_speed = unit->scan_pathing.cw_scan_x;
   unit->entity->y_speed = unit->scan_pathing.cw_scan_y;
@@ -25321,14 +25232,12 @@ void __fastcall UNIT_mode_blocked_nudge(Unit *unit)
         }
         else
         {
-          path_flags = unit->path_flags;
-          LOBYTE(path_flags) = path_flags | 0x40;
-          unit->path_flags = path_flags;
+          unit->path_flags |= 0x40;
         }
       }
     }
   }
-  if ( (unit->path_flags & 0x40) != 0 )
+  if (unit->path_flags & 0x40)
     BOXD_pathing_set_friendly_mask(unit, 0);
   TSK_yield(unit->task, TaskWait_Interval, 3);
 }
@@ -25440,7 +25349,7 @@ void __fastcall UNIT_begin_attack(Unit *unit)
   unit->entity->y_speed = 0;
   if ( !unit->stats->is_infantry )
   {
-    if ( unit->orientation != MATH_direction_to_orientation(
+    if ( (int)unit->orientation != (int)MATH_direction_to_orientation(
                                 unit->locked_target->entity->x - unit->entity->x,
                                 unit->locked_target->entity->y - unit->entity->y) )
     {
@@ -25690,7 +25599,7 @@ void __cdecl UNIT_technician_repairing_tower_task(Task *task)
   }
   else
   {
-    v5 = ENT_create(MobdId_Cursors, nullptr, unit->entity);
+    v5 = ENT_create(MobdId_Cursors, nullptr, unit->entity); // INLINED #1 see UNIT_technician_repairing_building_task
     parent = v5;
     if ( v5 )
     {
@@ -25708,7 +25617,7 @@ void __cdecl UNIT_technician_repairing_tower_task(Task *task)
     {
       rn = parent->rn;
       v3 = 0;
-      v7 = rn->flags & (RenderNodeFlags)~RenderNode_Skip;
+      v7 = rn->flags & ~RenderNode_Skip;
       goto LABEL_10;
     }
     if ( ++v3 == 5 )
@@ -25732,7 +25641,7 @@ LABEL_10:
   destroyed = unit->destroyed;
   v12 = unit->multi_purpose_field_1 - 1;
   unit->multi_purpose_field_1 = v12;
-  if ( destroyed || parent && !v12 )
+  if ( destroyed || (parent && !v12) )
   {
     if ( parent )
     {
@@ -25771,7 +25680,7 @@ void __cdecl UNIT_technician_repairing_building_task(Task *task)
   }
   else
   {
-    v5 = ENT_create(MobdId_Cursors, nullptr, unit->entity);
+    v5 = ENT_create(MobdId_Cursors, nullptr, unit->entity); // INLINED #1 see UNIT_technician_repairing_tower_task
     repair_anim = v5;
     if ( v5 )
     {
@@ -25790,7 +25699,7 @@ void __cdecl UNIT_technician_repairing_building_task(Task *task)
     {
       rn = repair_anim->rn;
       v2 = 0;
-      v8 = rn->flags & (RenderNodeFlags)~RenderNode_Skip;
+      v8 = rn->flags & ~RenderNode_Skip;
       goto LABEL_11;
     }
     if ( ++v2 == 5 )
@@ -25813,7 +25722,7 @@ LABEL_11:
   }
   v12 = v13->num_active_repairs - 1;
   v13->num_active_repairs = v12;
-  if ( unit->destroyed || repair_anim && !v12 )
+  if ( unit->destroyed || (repair_anim && !v12))
   {
     if ( repair_anim )
     {
@@ -26246,7 +26155,7 @@ void __fastcall UNIT_mode_tanker_wait_for_dock_to_clear(Unit *unit)
   {
     v4 = (BuildingState *)current_destination->state;
     BOXD_pathing_set_friendly_mask(unit, 0);
-    if ( !v4 || (docked_tanker = v4->docked_tanker) != nullptr && docked_tanker->unit_id == v4->docked_tanker_unit_id )
+    if ( !v4 || ((docked_tanker = v4->docked_tanker) != nullptr && docked_tanker->unit_id == v4->docked_tanker_unit_id))
     {
       TSK_yield(unit->task, TaskWait_Interval, 30);
     }
@@ -26471,6 +26380,8 @@ void __fastcall MSG_unit_default(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+
   Unit *unit; // esi
   Unit *v5; // eax
   Task *task; // ecx
@@ -26642,9 +26553,9 @@ void __fastcall MSG_unit_default(
 //  - only takes splash damage (no direct targeting)
 void __fastcall MSG_intangible(Task *receiver, Task *sender, TaskMessageType message, void *payload)
 {
-  Unit *unit; // ecx
+  (void)sender;
 
-  unit = (Unit *)receiver->ctx;
+  Unit *unit = receiver->ctx;
   if ( !unit->destroyed )
   {
     switch ( message )
@@ -26677,6 +26588,8 @@ void __fastcall MSG_non_interruptable(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+
   Unit *unit; // esi
   Unit *v5; // eax
 
@@ -26720,6 +26633,8 @@ void __fastcall MSG_repair_bay_healing(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+
   Unit *unit; // ecx
 
   unit = (Unit *)receiver->ctx;
@@ -26756,6 +26671,8 @@ void __fastcall MSG_repair_bay_dock_undock(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+
   Unit *unit; // ecx
 
   unit = (Unit *)receiver->ctx;
@@ -27134,10 +27051,10 @@ void __fastcall UNIT_on_attacked_default(Unit *unit, Unit *attacker)
     || type == UnitType_Mute_ClanhallWagon
     || type == UnitType_Surv_MobileDerrick
     || type == UnitType_Mute_MobileDerrick
-    || type == UnitType_Surv_Saboteur && unit->order == UnitOrder_RepairInfiltrate
-    || type == UnitType_Mute_Vandal && unit->order == UnitOrder_RepairInfiltrate
-    || type == UnitType_Surv_Technician && unit->order == UnitOrder_RepairInfiltrate
-    || type == UnitType_Mute_Makanik && unit->order == UnitOrder_RepairInfiltrate
+    || (type == UnitType_Surv_Saboteur && unit->order == UnitOrder_RepairInfiltrate)
+    || (type == UnitType_Mute_Vandal && unit->order == UnitOrder_RepairInfiltrate)
+    || (type == UnitType_Surv_Technician && unit->order == UnitOrder_RepairInfiltrate)
+    || (type == UnitType_Mute_Makanik && unit->order == UnitOrder_RepairInfiltrate)
     || unit->order > UnitOrder_Move
     || (entity = unit->entity, ((entity->x ^ unit->order_target_x) & 0xFFFFE000) != 0)
     || ((entity->y ^ unit->order_target_y) & 0xFFFFE000) != 0 )
@@ -27362,9 +27279,9 @@ void INPUT_keyboard_update()
     {
       do
       {
-        LOWORD(g_async_key_result_static) = GetAsyncKeyState(g_scancode_to_vk[g_key_bindings[i].scancode]);
+        bool is_pressed = 0x8000 & GetAsyncKeyState(g_scancode_to_vk[g_key_bindings[i].scancode]);
         action = g_key_bindings[g_bingings_iter_static].action;
-        if ( (g_async_key_result_static & 0x8000) != 0 )
+        if (is_pressed)
         {
           g_work_keyboard_state_static.held_actions_mask |= action;
           if ( (g_prev_keyboard_state.held_actions_mask & action) == 0 )
@@ -27402,15 +27319,15 @@ void INPUT_keyboard_update()
     g_wm_keydown = 0;
   }
   g_work_keyboard_state_static.direction = g_direction_bits_to_direction[g_keyboard_direction_bits];
-  qmemcpy(&g_prev_keyboard_state, &g_work_keyboard_state_static, sizeof(g_prev_keyboard_state));
-  qmemcpy(&g_keyboard_state, &g_work_keyboard_state_static, sizeof(g_keyboard_state));
+  memcpy(&g_prev_keyboard_state, &g_work_keyboard_state_static, sizeof(g_prev_keyboard_state));
+  memcpy(&g_keyboard_state, &g_work_keyboard_state_static, sizeof(g_keyboard_state));
 }
 
 //----- (0041AC30) --------------------------------------------------------
-BOOL __fastcall INPUT_get_keyboard_state(KeyboardState *state)
+bool __fastcall INPUT_get_keyboard_state(KeyboardState *state)
 {
-  qmemcpy(state, &g_keyboard_state, sizeof(KeyboardState));
-  return 1;
+  memcpy(state, &g_keyboard_state, sizeof(KeyboardState));
+  return true;
 }
 
 //----- (0041AC50) --------------------------------------------------------
@@ -27424,21 +27341,20 @@ bool16_t __fastcall INPUT_text_edit(
         int unused,
         Task *task)
 {
-  int v5; // ebx
-  void (__fastcall *render_mode_)(char *, int); // edi
+  (void)unused;
+
   bool v8; // zf
   unsigned int v10; // [esp+10h] [ebp-10h]
   int v11; // [esp+14h] [ebp-Ch]
   char *Block; // [esp+18h] [ebp-8h]
 
-  v5 = 0;
+  int cursor_pos = 0;
   v10 = max_len;
   v11 = 1;
   g_last_vk = 0;
   Block = (char *)malloc(max_len + 1);
   strcpy(Block, out_buf);
-  render_mode_ = updater;
-  updater(out_buf, 0);
+  updater(out_buf, cursor_pos);
   while ( 1 )
   {
     g_last_vk = 0;
@@ -27461,10 +27377,10 @@ bool16_t __fastcall INPUT_text_edit(
     switch ( g_last_vk )
     {
       case VK_BACK:
-        if ( strlen(out_buf) && (_WORD)v5 )
+        if (cursor_pos > 0 && strlen(out_buf))
         {
-          strcpy(&out_buf[(unsigned __int16)v5 - 1], &out_buf[(unsigned __int16)v5]);
-          v5 += 0xFFFF;
+          strcpy(&out_buf[cursor_pos - 1], &out_buf[cursor_pos]);
+          cursor_pos -= 1;
           break;
         }
         goto LABEL_41;
@@ -27478,63 +27394,62 @@ LABEL_19:
       case VK_END:
         if ( !strlen(out_buf) )
           goto LABEL_41;
-        v5 = strlen(out_buf) - 1;
+        cursor_pos = strlen(out_buf) - 1;
         break;
       case VK_HOME:
-        v5 = 0;
-        render_mode_(out_buf, 0);
+        cursor_pos = 0;
+        updater(out_buf, cursor_pos);
         goto LABEL_41;
       case VK_LEFT:
-        if ( (_WORD)v5 )
+        if (cursor_pos > 0)
         {
-          v5 += -1;
-          render_mode_(out_buf, v5);
+          cursor_pos -= 1;
+          updater(out_buf, cursor_pos);
         }
         goto LABEL_41;
       case VK_RIGHT:
-        if ( !strlen(out_buf) || (unsigned __int16)v5 >= (int)(v10 - 1) || (unsigned __int16)v5 >= strlen(out_buf) - 1 )
+        if (cursor_pos >= (int)(v10 - 1) || cursor_pos >= (int)strlen(out_buf) - 1 || 0 == strlen(out_buf))
           goto LABEL_41;
-        ++v5;
+        ++cursor_pos;
         break;
       case VK_INSERT:
         if ( strlen(out_buf) >= v10 )
           goto LABEL_41;
         memcpy(
-          &out_buf[(unsigned __int16)v5 + 1],
-          &out_buf[(unsigned __int16)v5],
-          strlen(out_buf) - (unsigned __int16)v5);
-        out_buf[(unsigned __int16)v5] = 32;
+          &out_buf[cursor_pos + 1],
+          &out_buf[cursor_pos],
+          strlen(out_buf) - cursor_pos);
+        out_buf[cursor_pos] = ' ';
         break;
       case VK_DELETE:
         if ( !strlen(out_buf) )
           goto LABEL_41;
-        strcpy(&out_buf[(unsigned __int16)v5], &out_buf[(unsigned __int16)v5 + 1]);
-        if ( (unsigned __int16)v5 >= strlen(out_buf) && (_WORD)v5 )
-          v5 += 0xFFFF;
+        strcpy(&out_buf[cursor_pos], &out_buf[cursor_pos + 1]);
+        if (cursor_pos > 0 && cursor_pos >= (int)strlen(out_buf))
+          cursor_pos -= 1;
         break;
       default:
         if ( (g_last_vk < 'A' || g_last_vk > 'Z') && (g_last_vk < '0' || g_last_vk > '9') && g_last_vk != VK_SPACE )
           goto LABEL_41;
-        out_buf[(unsigned __int16)v5] = g_last_vk;
-        if ( (unsigned __int16)v5 < (int)(v10 - 1) )
+        out_buf[cursor_pos] = g_last_vk;
+        if (cursor_pos < (int)(v10 - 1) )
         {
-          if ( (unsigned __int16)v5 >= strlen(out_buf) - 1 )
+          if (cursor_pos >= (int)strlen(out_buf) - 1 )
           {
-            if ( (unsigned __int16)v5 < (int)(v10 - 1) && (unsigned __int16)v5 == strlen(out_buf) - 1 )
-              out_buf[(unsigned __int16)++v5] = 0;
+            if (cursor_pos < (int)(v10 - 1) && cursor_pos == (int)strlen(out_buf) - 1 )
+              out_buf[++cursor_pos] = 0;
           }
           else
           {
-            ++v5;
+            ++cursor_pos;
           }
         }
         break;
     }
-    updater(out_buf, v5);
+    updater(out_buf, cursor_pos);
 LABEL_41:
     if ( !v11 )
       break;
-    render_mode_ = updater;
   }
   free(Block);
   g_keyboard_state.held_actions_mask = 0;
@@ -27555,6 +27470,10 @@ BOOL __fastcall BOXD_collide_ui_hover_always(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)axis;
+  (void)mover_aabb;
+  (void)obstacle_aabb;
+
   if ( mover->task )
     TSK_send_message(nullptr, TaskMessage_MouseHover, obstacle->task, mover->task);
   return 0;
@@ -27568,6 +27487,10 @@ BOOL __fastcall BOXD_collide_ui_hover_if_waiting(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)axis;
+  (void)mover_aabb;
+  (void)obstacle_aabb;
+
   Task *obstacle_task; // eax
   Task *mover_task; // eax
 
@@ -27594,6 +27517,10 @@ BOOL __fastcall BOXD_collide_projectile(
         BoxdAabb *mover_aabb,
         BoxdAabb *obstacle_aabb)
 {
+  (void)axis;
+  (void)mover_aabb;
+  (void)obstacle_aabb;
+
   Task *obstacle_task; // ecx
   Unit *obstacle_unit; // edi
   Entity *parent; // eax
@@ -27613,8 +27540,8 @@ BOOL __fastcall BOXD_collide_projectile(
         if ( mover_unit )
         {
           if ( mover_unit->player_num != obstacle_unit->player_num
-            || (type = obstacle_unit->type, (int)type >= (int)UnitType_Surv_Drillrig)// buildings
-            && (int)type <= (int)UnitType_Wall4 )
+            || ((type = obstacle_unit->type, (int)type >= (int)UnitType_Surv_Drillrig)// buildings
+            && (int)type <= (int)UnitType_Wall4))
           {
             TSK_send_message(nullptr, TaskMessage_ReceiveDamage, mover, obstacle_task);
             mover->task->transient_events |= TaskEvent_ProjectileHit;
@@ -27689,7 +27616,6 @@ LevelHunk *__fastcall LVL_load(const char *filename)
 BOOL __fastcall LVL_run(LevelHunk *lvl)
 {
   BOOL result; // eax
-  LevelHunkSection *v2; // eax
 
   result = 0;
   g_boxd_collisions_initialized = 0;
@@ -27707,9 +27633,8 @@ BOOL __fastcall LVL_run(LevelHunk *lvl)
   g_input_unk_device_initialized = 0;
   if ( !g_current_lvl_sections )
   {
-    v2 = lvl->sections[0];
     g_current_lvl = lvl;
-    g_current_lvl_sections = v2;
+    g_current_lvl_sections = lvl->sections;
     result = TSK_init(0);
     if ( result )
     {
@@ -27840,68 +27765,39 @@ void SYS_shutdown()
 //----- (0041B420) --------------------------------------------------------
 void *__fastcall LVL_find_section(const char *name)
 {
-  LevelHunkSection *v1; // eax
-  int i; // esi
-
-  v1 = g_current_lvl_sections;
-  i = 0;
-  if ( !g_current_lvl_sections->ptr )
-    return nullptr;
-  while ( strncmp(name, v1[i].name, 4u) )
-  {
-    v1 = g_current_lvl_sections;
-    if ( !g_current_lvl_sections[++i].ptr )
-      return nullptr;
+  for (LevelHunkSection *s = g_current_lvl_sections; g_current_lvl_sections->data; ++s) {
+    if (!strncmp(name, s->name, 4)) {
+      return s->data;
+    }
   }
-  return g_current_lvl_sections[i].ptr;
+
+  return nullptr;
 }
 
 //----- (0041B470) --------------------------------------------------------
-BOOL __fastcall LVL_subst_hunk(LevelHunk *dst, LevelHunk *src, const char *name)
+bool __fastcall LVL_subst_hunk(LevelHunk *dst, LevelHunk *src, const char *name)
 {
-  LevelHunkSection *src_hunk_name; // eax
-  LevelHunkSection *dst_hunk_name; // ecx MAPDST
-  LevelHunkSection *__shifted(LevelHunkSection,4) src_hunk_ptr; // esi
-  void *src_hunk_items; // ebp
-  void *ptr; // ecx
-  int v8; // edi
-  const char *v9; // eax
-  LevelHunkSection *v10; // esi
-  void *v11; // ecx
+  void *subst_data = nullptr;
 
-  src_hunk_name = src->sections[0];
-  dst_hunk_name = dst->sections[0];
-  src_hunk_ptr = (LevelHunkSection *__shifted(LevelHunkSection,4))&src->sections[0]->ptr;
-  src_hunk_items = nullptr;
-  if ( ADJ(src_hunk_ptr)->ptr )
-  {
-    do
-    {
-      if ( !strncmp(name, src_hunk_name->name, 4u) )
-        src_hunk_items = ADJ(src_hunk_ptr)->ptr;
-      ptr = ADJ(src_hunk_ptr++)[1].ptr;
-      src_hunk_name = ADJ(src_hunk_ptr);
+  // find section data in src (scan all - last match wins)
+  for (LevelHunkSection *s = src->sections; s->data; ++s) {
+    if (!strncmp(name, s->name, 4)) {
+      subst_data = s->data;
     }
-    while ( ptr );
   }
-  if ( !src_hunk_items )
-    return 0;
-  v8 = 0;
-  if ( !dst_hunk_name->ptr )
-    return 0;
-  v9 = (const char *)dst_hunk_name;
-  v10 = dst_hunk_name;
-  while ( strncmp(name, v9, 4u) )
-  {
-    v11 = v10[1].ptr;
-    ++v10;
-    ++v8;
-    v9 = (const char *)v10;
-    if ( !v11 )
-      return 0;
+
+  if (!subst_data) {
+    return false;
   }
-  dst_hunk_name[v8].ptr = src_hunk_items;
-  return 1;
+
+  for (LevelHunkSection *d = dst->sections; d->data; ++d) {
+    if (!strncmp(name, d->name, 4)) {
+      d->data = subst_data;
+      return true;
+    }
+  }
+
+  return false;
 }
 
 //----- (0041B510) --------------------------------------------------------
@@ -29304,67 +29200,47 @@ OilPatchSaveStruct *__fastcall SAVE_pack_oil(size_t *out_buf_size)
 }
 
 //----- (0041CC20) --------------------------------------------------------
-BOOL __fastcall SAVE_unpack_oil(OilPatchSaveStruct *oil)
+bool __fastcall SAVE_unpack_oil(OilPatchSaveStruct *data)
 {
-  OilPatchSaveStruct *__shifted(OilPatchSaveStruct,0xC) i; // edi
-  OilPatch *v2; // esi
-  Entity *v3; // eax
-  OilPatchSaveStruct *__shifted(OilPatchSaveStruct,4) v4; // edi
-  __int32 amount; // eax
-  __int32 x; // edx
-  OilPatchSaveStruct *__shifted(OilPatchSaveStruct,8) p_y; // edi
-  __int32 y; // ecx
-  __int32 v9; // edx
-  OilPatch *v10; // eax
-  OilPatch *next; // ecx
+  for (OilPatchSaveStruct *oil = data; oil->amount != -1; ++oil) {
+    OilPatch *patch = g_oil_patch_free_head;
+    if (!patch) {
+      return false;
+    }
+    g_oil_patch_free_head = patch->next;
 
-  i = oil;
-  if ( oil->amount == -1 )
-    return 1;
-  while ( 1 )
-  {
-    v2 = g_oil_patch_free_head;
-    if ( g_oil_patch_free_head )
-      g_oil_patch_free_head = g_oil_patch_free_head->next;
-    else
-      v2 = nullptr;
-    if ( !v2 )
-      break;
-    v3 = ENT_create_ex(MobdId_OilPatch, nullptr, UNIT_oil_patch_tick, TaskKind_Coroutine, nullptr);
-    v2->entity = v3;
-    if ( !v3 )
-      break;
-    v4 = ADJ(i) + 1;
-    v3->task->ctx = v2;
-    amount = ADJ(v4)->amount;
-    v2->amount = amount;
-    if ( amount <= 0 )
-      v2->entity->rn->flags |= RenderNode_Skip;
-    x = ADJ(v4)->x;
-    p_y = (OilPatchSaveStruct *__shifted(OilPatchSaveStruct,8))&ADJ(v4)->y;
-    v2->entity->x = x;
-    y = ADJ(p_y)->y;
-    p_y = (OilPatchSaveStruct *__shifted(OilPatchSaveStruct,8))((char *)p_y + 4);
-    v2->entity->y = y;
-    v9 = ADJ(p_y)->y;
-    i = (OilPatchSaveStruct *__shifted(OilPatchSaveStruct,0xC))&ADJ(p_y)->drillrig_entity_id;
-    v2->drillrig_unit_id = v9;
-    v10 = g_oil_patch_tail;
-    next = g_oil_patch_tail->next;
-    v2->prev = g_oil_patch_tail;
-    v2->next = next;
-    v10->next->prev = v2;
-    v10->next = v2;
-    if ( ADJ(i)->drillrig_entity_id == -1 )     // BUG i is reused as a different shift
-                                                // here its (i+1)->amount==-1  - terminating value
-      return 1;
+    Entity *e = ENT_create_ex(MobdId_OilPatch, nullptr, UNIT_oil_patch_tick, TaskKind_Coroutine, nullptr);
+    if (!e) {
+      g_oil_patch_free_head = patch;
+      return false;
+    }
+    e->task->ctx = patch;
+    e->x = oil->x;
+    e->y = oil->y;
+    
+    patch->entity = e;
+    patch->amount = oil->amount;
+    if (patch->amount <= 0) {
+      e->rn->flags |= RenderNode_Skip;
+    }
+    patch->drillrig_unit_id = oil->drillrig_unit_id;
+
+    // circular
+    OilPatch *tail = g_oil_patch_tail;
+    OilPatch *after_tail = tail->next;
+    patch->prev = tail;
+    patch->next = after_tail;
+    after_tail->prev = patch;
+    tail->next = patch;
   }
-  return 0;
+  return true;
 }
 
 //----- (0041CCE0) --------------------------------------------------------
 BOOL __fastcall SAVE_pack_unit(Unit *unit, UnitSaveStruct *data, size_t data_size)
 {
+  (void)data_size;
+
   Unit *locked_target; // eax
   int active_target_id; // edx
   __int32 v7; // eax
@@ -29624,7 +29500,7 @@ LABEL_9:
     target = v127->target;
     target_unit_id = v127->target_unit_id;
     if ( !target
-      || (v31 = target->unit_id, target_unit_id != -1) && (!v31 || v31 != target_unit_id || target->destroyed) )
+      || ((v31 = target->unit_id, target_unit_id != -1) && (!v31 || v31 != target_unit_id || target->destroyed) ))
     {
       v31 = -1;
     }
@@ -29944,12 +29820,12 @@ LABEL_148:
   data->path_scan_best_tile_y = unit->path_scan_best_tile_y;
   data->path_scan_best_iteration = unit->path_scan_best_iteration;
   data->path_scan_cur_distance = unit->path_scan_cur_distance;
-  qmemcpy(data->ray_exit_map_xs, unit->ray_exit_map_xs, sizeof(data->ray_exit_map_xs));
-  qmemcpy(data->ray_exit_map_ys, unit->ray_exit_map_ys, sizeof(data->ray_exit_map_ys));
-  qmemcpy(data->ray_unit_obstacle_map_xs, unit->ray_unit_obstacle_map_xs, sizeof(data->ray_unit_obstacle_map_xs));
-  qmemcpy(data->ray_unit_obstacle_map_ys, unit->ray_unit_obstacle_map_ys, sizeof(data->ray_unit_obstacle_map_ys));
-  qmemcpy(data->ray_terrain_obstacle_xs, unit->ray_terrain_obstacle_xs, sizeof(data->ray_terrain_obstacle_xs));
-  qmemcpy(data->ray_terrain_obstacle_ys, unit->ray_terrain_obstacle_ys, 0x58u);// BUG- this reads into further fields
+  memcpy(data->ray_exit_map_xs, unit->ray_exit_map_xs, sizeof(data->ray_exit_map_xs));
+  memcpy(data->ray_exit_map_ys, unit->ray_exit_map_ys, sizeof(data->ray_exit_map_ys));
+  memcpy(data->ray_unit_obstacle_map_xs, unit->ray_unit_obstacle_map_xs, sizeof(data->ray_unit_obstacle_map_xs));
+  memcpy(data->ray_unit_obstacle_map_ys, unit->ray_unit_obstacle_map_ys, sizeof(data->ray_unit_obstacle_map_ys));
+  memcpy(data->ray_terrain_obstacle_xs, unit->ray_terrain_obstacle_xs, sizeof(data->ray_terrain_obstacle_xs));
+  memcpy(data->ray_terrain_obstacle_ys, unit->ray_terrain_obstacle_ys, 0x58u);// BUG- this reads into further fields
   nav_obstacle = unit->nav_obstacle;
   nav_obstacle_id = unit->nav_obstacle_id;
   if ( !nav_obstacle )
@@ -30135,7 +30011,7 @@ LABEL_206:
       data[1].task_sleep = v103->docked_tanker_unit_id;
       data[1].task_global_events = v103->num_active_repairs;
       v110 = unit->type;
-      if ( v110 != UnitType_Surv_ResearchLab && v110 != UnitType_Surv_AlchemyHall || !v103->upgrade_timer )
+      if ( (v110 != UnitType_Surv_ResearchLab && v110 != UnitType_Surv_AlchemyHall) || !v103->upgrade_timer )
         return 1;
       v111 = g_script_handlers[0];
       v112 = 0;
@@ -30633,12 +30509,12 @@ LABEL_94:
       unit->path_scan_best_tile_y = data->path_scan_best_tile_y;
       unit->path_scan_best_iteration = data->path_scan_best_iteration;
       unit->path_scan_cur_distance = data->path_scan_cur_distance;
-      qmemcpy(unit->ray_exit_map_xs, data->ray_exit_map_xs, sizeof(unit->ray_exit_map_xs));
-      qmemcpy(unit->ray_exit_map_ys, data->ray_exit_map_ys, sizeof(unit->ray_exit_map_ys));
-      qmemcpy(unit->ray_unit_obstacle_map_xs, data->ray_unit_obstacle_map_xs, sizeof(unit->ray_unit_obstacle_map_xs));
-      qmemcpy(unit->ray_unit_obstacle_map_ys, data->ray_unit_obstacle_map_ys, sizeof(unit->ray_unit_obstacle_map_ys));
-      qmemcpy(unit->ray_terrain_obstacle_xs, data->ray_terrain_obstacle_xs, sizeof(unit->ray_terrain_obstacle_xs));
-      qmemcpy(unit->ray_terrain_obstacle_ys, data->ray_terrain_obstacle_ys, 0x58u);// BUG reading extra fields here
+      memcpy(unit->ray_exit_map_xs, data->ray_exit_map_xs, sizeof(unit->ray_exit_map_xs));
+      memcpy(unit->ray_exit_map_ys, data->ray_exit_map_ys, sizeof(unit->ray_exit_map_ys));
+      memcpy(unit->ray_unit_obstacle_map_xs, data->ray_unit_obstacle_map_xs, sizeof(unit->ray_unit_obstacle_map_xs));
+      memcpy(unit->ray_unit_obstacle_map_ys, data->ray_unit_obstacle_map_ys, sizeof(unit->ray_unit_obstacle_map_ys));
+      memcpy(unit->ray_terrain_obstacle_xs, data->ray_terrain_obstacle_xs, sizeof(unit->ray_terrain_obstacle_xs));
+      memcpy(unit->ray_terrain_obstacle_ys, data->ray_terrain_obstacle_ys, 0x58u);// BUG reading extra fields here
       nav_obstacle_unit_id = data->nav_obstacle_unit_id;
       if ( nav_obstacle_unit_id == -1 || (v39 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
       {
@@ -52648,112 +52524,53 @@ void __cdecl PROJ_mode_generic(Task *task)
 }
 
 //----- (00437DA0) --------------------------------------------------------
-// BOOL HUNK_FixPointers(void *data, void *rllc_section) {
-//     uint32_t num_entries = *(uint32_t*)rllc_section;  // first DWORD = count
-//     uint32_t *entries = (uint32_t*)rllc_section + 1;  // fixup array follows
-//
-//     for (uint32_t i = 0; i < num_entries; ) {
-//         uint32_t entry = entries[i++];
-//         if (entry & 0x80000000) {
-//             // Mode 3: renderer fixup
-//             uint32_t offset = entry & 0x7FFFFFFF;
-//             int hunk_id = *(int*)((char*)data + offset);
-//             stru2 *cached = BlitterCache_Lookup(hunk_id);
-//             if (!cached) return FALSE;
-//             *(Blitter*)((char*)data + offset) = cached->mode_render;
-//         } else if (entry & 0x40000000) {
-//             // Mode 2: batch pointer fixup
-//             uint32_t offset = entry & 0xBFFFFFFF;
-//             uint32_t count = entries[i++];  // next entry is count
-//             uint32_t *ptrs = (uint32_t*)((char*)data + offset);
-//             for (uint32_t j = 0; j < count; j++)
-//                 ptrs[j] += (uint32_t)data;
-//         } else {
-//             // Mode 1: simple pointer fixup
-//             uint32_t offset = entry;
-//             *(uint32_t*)((char*)data + offset) += (uint32_t)data;
-//         }
-//     }
-//     return TRUE;
-// }
-BOOL __fastcall HUNK_fix_pointers(LevelHunk *data, LevelHunk *rllc)
+bool __fastcall HUNK_fix_pointers(void *data, RllcHunk *rllc)
 {
-  unsigned int v3; // eax
-  LevelHunkSection **i; // ebx
-  int v5; // ecx
-  int *v6; // ebp
-  int v7; // edi
-  RenderBlitter *v8; // eax
-  Blitter mode_render; // ecx
-  LevelHunkSection *v10; // edx
-  int *v11; // ecx
-  char *v12; // edx
-  int v13; // edi
-  int v15; // [esp+10h] [ebp-10h]
-  unsigned int v16; // [esp+14h] [ebp-Ch]
-  RenderBlitter *v17; // [esp+18h] [ebp-8h]
-  LevelHunkSection *v18; // [esp+1Ch] [ebp-4h]
+  unsigned int num_fixups = rllc->num_fixups;
+  if (!num_fixups) {
+    return true;
+  }
 
-  v3 = 0;
-  v18 = rllc->sections[0];
-  v15 = 0;
-  v16 = 0;
-  if ( rllc->sections[0] )
-  {
-    for ( i = &rllc->sections[1]; ; ++i )
-    {
-      v5 = (int)*i;
-      if ( (int)*i >= 0 )
-      {
-        if ( (v5 & HunkFixup_BatchPointer) != 0 )
-        {
-          v10 = i[1];
-          ++i;
-          v11 = (int *)((char *)data + (v5 & 0xBFFFFFFF));
-          ++v3;
-          v12 = &v10->name[1];
-          do
-          {
-            v13 = *v11++;
-            --v12;
-            *(v11 - 1) = (int)data + v13;
-          }
-          while ( v12 );
-        }
-        else
-        {
-          *(LevelHunkSection **)((char *)data->sections + v5) = (LevelHunkSection *)(*(char **)((char *)data->sections + v5)
-                                                                                               + (unsigned int)data);
+  unsigned int cached_blitter_id = (unsigned int)-1;
+  RenderBlitter *cached_blitter = nullptr;
+
+  for (unsigned int i = 0; i < num_fixups; ++i) {
+    unsigned int entry = rllc->fixups[i];
+
+    if (entry & HunkFixup_Renderer) {
+      uintptr_t offset = entry & 0x3FFFFFFF;
+      uint32_t *patch = (uint32_t *)((uint8_t *)data + offset);
+      unsigned int blitter_id = *patch;
+
+      if (blitter_id != cached_blitter_id) {
+        cached_blitter_id = blitter_id;
+        cached_blitter = REND_blitter_get(blitter_id);
+        if (!cached_blitter) {
+          return false;
         }
       }
-      else
-      {
-        v6 = (int *)((char *)data + (v5 & 0x7FFFFFFF));// #define FIXUP_OFFSET_MASK  0x3FFFFFFF
-        v7 = *v6;
-        if ( *v6 == v15 )
-        {
-          *v6 = (int)v17->mode_render;
-        }
-        else
-        {
-          v8 = REND_blitter_get(*v6);
-          v17 = v8;
-          if ( !v8 )
-            return 0;
-          mode_render = v8->mode_render;
-          v3 = v16;
-          v15 = v7;
-          *v6 = (int)mode_render;
-        }
+      // x64 concern
+      *patch = (uint32_t)cached_blitter->mode_render;
+    } else if (entry & HunkFixup_PointerArray) {
+      uintptr_t offset = entry & 0x3FFFFFFF;
+      unsigned int count = rllc->fixups[++i];
+      uint32_t *ptrs = (uint32_t *)((uint8_t *)data + offset);
+
+      for (unsigned int j = 0; j < count; ++j) {
+        // x64 concern
+        ptrs[j] += (uint32_t)data;
       }
-      v16 = ++v3;
-      if ( v3 >= (unsigned int)v18 )
-        return 1;
+    } else {
+      // single pointer
+      uintptr_t offset = entry;  // no flags so the entire value is offset
+      uint32_t *patch = (uint32_t *)((uint8_t *)data + offset);
+      // x64 concern
+      *patch += (uint32_t)data;
     }
   }
-  return 1;
+
+  return true;
 }
-// 437E08: variable 'v17' is possibly undefined
 
 //----- (00437E80) --------------------------------------------------------
 void __fastcall MSG_repair_bay(Task *receiver, Task *sender, TaskMessageType message, void *payload)
