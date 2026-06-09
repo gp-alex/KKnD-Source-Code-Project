@@ -30141,31 +30141,9 @@ BOOL __fastcall SAVE_unpack_unit(Unit *unit, const UnitSaveStruct *data)
   Unit *v4; // eax
   unsigned __int32 creature_id; // eax
   BOOL result; // eax
-  unsigned __int32 message_handler_id; // ecx
-  int v8; // ecx
-  int player_num; // eax
-  Turret *v10; // edi
-  unsigned __int32 turret_creature_id; // eax
-  unsigned __int32 turret_message_handler; // ecx
-  int v13; // ecx
   UnitType type; // eax
   __int32 turret_target_unit_id; // ecx
   Unit *v16; // eax
-  unsigned __int32 turret_mode; // eax
-  unsigned __int32 unit_mode; // eax
-  void (__fastcall *v19)(Unit *); // eax
-  unsigned __int32 unit_mode_idle; // eax
-  void (__fastcall *v21)(Unit *); // eax
-  unsigned __int32 unit_mode_arrive; // eax
-  void (__fastcall *v23)(Unit *); // eax
-  unsigned __int32 unit_mode_attacked; // eax
-  void (__fastcall *v25)(Unit *); // eax
-  unsigned __int32 unit_mode_return; // eax
-  void (__fastcall *v27)(Unit *); // eax
-  unsigned __int32 unit_mode_turn_return; // eax
-  void (__fastcall *v29)(Unit *); // eax
-  unsigned __int32 unit_message_handler; // eax
-  void (__fastcall *v31)(Task *, Task *, TaskMessageType, void *); // eax
   __int32 order_target_unit_id; // ecx
   Unit *v33; // eax
   __int32 opportunity_target_unit_id; // ecx
@@ -30175,8 +30153,6 @@ BOOL __fastcall SAVE_unpack_unit(Unit *unit, const UnitSaveStruct *data)
   __int32 nav_obstacle_unit_id; // ecx
   Unit *v39; // eax
   int v40; // eax
-  __int32 *control_groups; // esi
-  unsigned __int8 v42; // dl
   TankerSaveStruct *v43; // esi
   __int32 task_channel; // edx
   Unit *v45; // ecx
@@ -30237,96 +30213,95 @@ LABEL_5:
   }
   unit->locked_target = v4;
   creature_id = data->creature_id;
-  if ( creature_id && creature_id <= g_script_handlers_num )
-    result = g_script_handlers[creature_id - 1];
-  else
-    result = 0;
-  if ( result )
+
+  TaskFn unit_tick = nullptr;
+  if ( creature_id && creature_id <= (int)g_script_handlers_num )
+    unit_tick = (TaskFn)g_script_handlers[creature_id - 1];
+  assert(unit_tick);
+
+  Task *unit_task = TSK_callback((TaskChannel)data->task_channel, unit_tick);
+  assert(unit_task);
+
+  unit->task = unit_task;
+
+  int message_handler_id = data->message_handler_id;
+  MessageHandler unit_task_msg = nullptr;
+  if ( message_handler_id && message_handler_id <= (int)g_script_handlers_num )
+    unit_task_msg = (MessageHandler)g_script_handlers[message_handler_id - 1];
+
+  unit_task->message_handler = unit_task_msg;
+  unit_task->transient_events = data->task_transient_events;
+  unit_task->sleep = data->task_sleep;
+  unit_task->sticky_events = data->task_global_events;
+  unit_task->wait_flags = data->task_wait_flags;
+  unit_task->wait_filter = data->task_field_2C;
+
+  if (unit_task)
   {
-    result = (BOOL)TSK_callback((TaskChannel)data->task_channel, (TaskFn)result);
-    if ( result )
+    Entity *unit_entity = SAVE_unpack_entity(&data->entity);
+    unit->entity = unit_entity;
+    if (unit_entity)
     {
-      message_handler_id = data->message_handler_id;
-      if ( message_handler_id && message_handler_id <= g_script_handlers_num )
-        v8 = g_script_handlers[message_handler_id - 1];
-      else
-        v8 = 0;
-      *(int *)(result + 52) = v8;
-      *(int *)(result + 32) = data->task_transient_events;
-      *(int *)(result + 20) = data->task_sleep;
-      *(int *)(result + 36) = data->task_global_events;
-      *(int *)(result + 40) = data->task_wait_flags;
-      *(int *)(result + 44) = data->task_field_2C;
-    }
-  }
-  unit->task = (Task *)result;
-  if ( result )
-  {
-    result = (BOOL)SAVE_unpack_entity(&data->entity);
-    unit->entity = (Entity *)result;
-    if ( result )
-    {
-      unit->task->entity = (Entity *)result;
+      unit->task->entity = unit_entity;
       unit->entity->task = unit->task;
       unit->entity->ctx1 = unit;
       unit->task->ctx = unit;
       unit->type = data->type;
-      player_num = data->player_num;
-      unit->player_num = player_num;
-      unit->entity->rn->cmd.palette_override = g_tint_palettes_per_player[g_palette_idx_per_player[player_num]];
+      unit->player_num = data->player_num;
+      unit->entity->rn->cmd.palette_override = g_tint_palettes_per_player[g_palette_idx_per_player[data->player_num]];
       unit->entity->rn->flags |= RenderNode_PaletteOverride;
       unit->stats = &g_unit_stats[unit->type];
       if ( data->turret_creature_id )
       {
-        result = (BOOL)TSK_alloc(unit->task, 0x38u);
-        v10 = (Turret *)result;
-        if ( !result )
-          return result;
-        unit->turret = (Turret *)result;
-        *(int *)(result + 8) = unit;
-        *(int *)(result + 40) = unit->stats->attachment;
-        turret_creature_id = data->turret_creature_id;
-        if ( turret_creature_id && turret_creature_id <= g_script_handlers_num )
-          result = g_script_handlers[turret_creature_id - 1];
+        Turret *turret = TSK_alloc(unit->task, sizeof(Turret));
+        assert(turret);
+
+        unit->turret = turret;
+        turret->parent = unit;
+        turret->attachment = unit->stats->attachment;
+
+        int turret_creature_id = data->turret_creature_id;
+        TaskFn turret_tick = nullptr;
+        if ( turret_creature_id && turret_creature_id <= (int)g_script_handlers_num )
+          turret_tick = (TaskFn)g_script_handlers[turret_creature_id - 1];
         else
-          result = 0;
-        if ( result )
+          turret->task = nullptr;
+        if (turret_tick)
         {
-          result = (BOOL)TSK_callback((TaskChannel)data->turret_task_channel, (TaskFn)result);
-          if ( result )
-          {
-            turret_message_handler = data->turret_message_handler;
-            if ( turret_message_handler && turret_message_handler <= g_script_handlers_num )
-              v13 = g_script_handlers[turret_message_handler - 1];
-            else
-              v13 = 0;
-            *(int *)(result + 52) = v13;
-            *(int *)(result + 32) = data->turret_task_transient_events;
-            *(int *)(result + 20) = data->turret_task_sleep;
-            *(int *)(result + 36) = data->turret_task_global_events;
-            *(int *)(result + 40) = data->turret_task_wait_flags;
-            *(int *)(result + 44) = data->turret_task_field_2C;
-          }
+          Task *turret_task = TSK_callback((TaskChannel)data->turret_task_channel, turret_tick);
+          assert(turret_task);
+
+          int turret_message_handler = data->turret_message_handler;
+          MessageHandler turret_msg = nullptr;
+          if ( turret_message_handler && turret_message_handler <= (int)g_script_handlers_num )
+            turret_msg = (MessageHandler)g_script_handlers[turret_message_handler - 1];
+
+          turret_task->message_handler = turret_msg;
+          turret_task->transient_events = data->turret_task_transient_events;
+          turret_task->sleep = data->turret_task_sleep;
+          turret_task->sticky_events = data->turret_task_global_events;
+          turret_task->wait_flags = data->turret_task_wait_flags;
+          turret_task->wait_filter = data->turret_task_field_2C;
+
+          turret->task = turret_task;
         }
-        v10->task = (Task *)result;
-        if ( !result )
-          return result;
-        result = (BOOL)SAVE_unpack_entity(&data->turret);
-        v10->entity = (Entity *)result;
-        if ( !result )
-          return result;
-        v10->task->entity = (Entity *)result;
-        v10->entity->task = v10->task;
-        v10->task->ctx = v10;
-        v10->entity->ctx1 = v10;
-        v10->entity->rn->cmd.palette_override = g_tint_palettes_per_player[g_palette_idx_per_player[unit->player_num]];
-        v10->entity->rn->flags |= RenderNode_PaletteOverride;
+
+        Entity *turret_entity = SAVE_unpack_entity(&data->turret);
+        assert(turret_entity);
+
+        turret->entity = turret_entity;
+        turret->task->entity = turret_entity;
+        turret->entity->task = turret->task;
+        turret->task->ctx = turret;
+        turret->entity->ctx1 = turret;
+        turret->entity->rn->cmd.palette_override = g_tint_palettes_per_player[g_palette_idx_per_player[unit->player_num]];
+        turret->entity->rn->flags |= RenderNode_PaletteOverride;
         type = unit->type;
         if ( type == UnitType_Surv_Bomber || type == UnitType_Mute_Wasp )
-          v10->entity->rn->transform = (RenderTransform)REND_transform_aircraft_turret;
+          turret->entity->rn->transform = (RenderTransform)REND_transform_aircraft_turret;
         else
-          v10->entity->rn->transform = (RenderTransform)REND_transform_unit_turret;
-        v10->entity->parent = unit->entity;
+          turret->entity->rn->transform = (RenderTransform)REND_transform_unit_turret;
+        turret->entity->parent = unit->entity;
         turret_target_unit_id = data->turret_target_unit_id;
         if ( turret_target_unit_id == -1
           || (v16 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
@@ -30343,73 +30318,72 @@ LABEL_42:
               goto LABEL_42;
           }
         }
-        v10->target = v16;
-        turret_mode = data->turret_mode;
-        if ( turret_mode && turret_mode <= g_script_handlers_num )
-          result = g_script_handlers[turret_mode - 1];
+        turret->target = v16;
+        int turret_mode_idx = data->turret_mode;
+        if ( turret_mode_idx && turret_mode_idx <= (int)g_script_handlers_num )
+          turret->mode = (TurretMode)g_script_handlers[turret_mode_idx - 1];
         else
-          result = 0;
-        v10->mode = (TurretMode)result;
-        if ( !result )
-          return result;
-        v10->current_mobd_frame = data->turret_mobd_lookup_id;
-        v10->reload_timer = data->turret_reload_timer;
-        v10->volley_remaining = data->turret_volley_remaining;
-        v10->volley_reload_time = data->turret_volley_reload_time;
-        v10->_turret_field_2C_unused = data->turret_field_2C;
-        v10->target_unit_id = data->turret_target_unit_id_2;
-        v10->_turret_field_34_unused = data->turret_field_34;
+          turret->mode = nullptr;
+        assert(turret->mode);
+
+        turret->current_mobd_frame = data->turret_mobd_lookup_id;
+        turret->reload_timer = data->turret_reload_timer;
+        turret->volley_remaining = data->turret_volley_remaining;
+        turret->volley_reload_time = data->turret_volley_reload_time;
+        turret->_turret_field_2C_unused = data->turret_field_2C;
+        turret->target_unit_id = data->turret_target_unit_id_2;
+        turret->_turret_field_34_unused = data->turret_field_34;
       }
       else
       {
         unit->turret = nullptr;
       }
-      unit_mode = data->unit_mode;
-      if ( unit_mode && unit_mode <= g_script_handlers_num )
-        v19 = g_script_handlers[unit_mode - 1];
+
+      int unit_mode = data->unit_mode;
+      if ( unit_mode && unit_mode <= (int)g_script_handlers_num )
+        unit->mode = g_script_handlers[unit_mode - 1];
       else
-        v19 = nullptr;
-      unit->mode = v19;
-      if ( !v19 )
-        return 0;
-      unit_mode_idle = data->unit_mode_idle;
-      if ( unit_mode_idle && unit_mode_idle <= g_script_handlers_num )
-        v21 = g_script_handlers[unit_mode_idle - 1];
+        unit->mode = nullptr;
+      assert(unit->mode);
+
+      int unit_mode_idle = data->unit_mode_idle;
+      if ( unit_mode_idle && unit_mode_idle <= (int)g_script_handlers_num )
+        unit->mode_idle = g_script_handlers[unit_mode_idle - 1];
       else
-        v21 = nullptr;
-      unit->mode_idle = v21;
-      unit_mode_arrive = data->unit_mode_arrive;
-      if ( unit_mode_arrive && unit_mode_arrive <= g_script_handlers_num )
-        v23 = g_script_handlers[unit_mode_arrive - 1];
+        unit->mode_idle = nullptr;
+
+      int unit_mode_arrive = data->unit_mode_arrive;
+      if ( unit_mode_arrive && unit_mode_arrive <= (int)g_script_handlers_num )
+        unit->mode_arrive = g_script_handlers[unit_mode_arrive - 1];
       else
-        v23 = nullptr;
-      unit->mode_arrive = v23;
-      unit_mode_attacked = data->unit_mode_attacked;
-      if ( unit_mode_attacked && unit_mode_attacked <= g_script_handlers_num )
-        v25 = g_script_handlers[unit_mode_attacked - 1];
+        unit->mode_arrive = nullptr;
+
+      int unit_mode_attacked = data->unit_mode_attacked;
+      if ( unit_mode_attacked && unit_mode_attacked <= (int)g_script_handlers_num )
+        unit->mode_attacked = g_script_handlers[unit_mode_attacked - 1];
       else
-        v25 = nullptr;
-      unit->mode_attacked = v25;
-      unit_mode_return = data->unit_mode_return;
-      if ( unit_mode_return && unit_mode_return <= g_script_handlers_num )
-        v27 = g_script_handlers[unit_mode_return - 1];
+        unit->mode_attacked = nullptr;
+
+      int unit_mode_return = data->unit_mode_return;
+      if ( unit_mode_return && unit_mode_return <= (int)g_script_handlers_num )
+        unit->mode_return = g_script_handlers[unit_mode_return - 1];
       else
-        v27 = nullptr;
-      unit->mode_return = v27;
-      unit_mode_turn_return = data->unit_mode_turn_return;
-      if ( unit_mode_turn_return && unit_mode_turn_return <= g_script_handlers_num )
-        v29 = g_script_handlers[unit_mode_turn_return - 1];
+        unit->mode_return = nullptr;
+
+      int unit_mode_turn_return = data->unit_mode_turn_return;
+      if ( unit_mode_turn_return && unit_mode_turn_return <= (int)g_script_handlers_num )
+        unit->mode_turn_return = g_script_handlers[unit_mode_turn_return - 1];
       else
-        v29 = nullptr;
-      unit->mode_turn_return = v29;
-      unit_message_handler = data->unit_message_handler;
-      if ( unit_message_handler && unit_message_handler <= g_script_handlers_num )
-        v31 = g_script_handlers[unit_message_handler - 1];
+        unit->mode_turn_return = nullptr;
+
+      int unit_message_handler = data->unit_message_handler;
+      if ( unit_message_handler && unit_message_handler <= (int)g_script_handlers_num )
+        unit->message_handler = (MessageHandler)g_script_handlers[unit_message_handler - 1];
       else
-        v31 = nullptr;
-      unit->message_handler = v31;
+        unit->message_handler = nullptr;
+
       memset(unit->ai_node_per_side, 0, sizeof(unit->ai_node_per_side));
-      memset32(&unit->mobd_anchors, (int)g_mobd_anchors_default, 6u);// BUG only 4, 6 would corrupt memory
+      memset(&unit->mobd_anchors, (int)g_mobd_anchors_default, 6u);// BUG only 4, 6 would corrupt memory
       unit->_unit_field_78_unused = data->unit_field_78;
       unit->orientation = data->orientation;
       unit->_unit_field_80_unused = data->unit_field_80;
@@ -30495,7 +30469,7 @@ LABEL_94:
         }
       }
       unit->last_attacker = v37;
-      unit->_u1 = *(UnitUnion1 *)&data->entity_field_11C;
+      memcpy(&unit->_u1, &data->entity_field_11C, sizeof(unit->_u1));
       unit->path_flags = data->path_flags;
       unit->multi_purpose_field_1 = data->multi_purpose_field_1;
       unit->cplc_spawn_param = data->cplc_spawn_param;
@@ -30536,8 +30510,7 @@ LABEL_99:
       control_groups = data->control_groups;
       do
       {
-        v42 = *(_BYTE *)control_groups++;
-        unit->control_groups[v40++] = v42;
+        unit->control_groups[v40++] = data->control_groups[v40];
       }
       while ( v40 < 7 );
       unit->idle_fidget_timer = data->idle_fidget_timer;
@@ -30547,15 +30520,15 @@ LABEL_99:
       switch ( unit->type )
       {
         case UnitType_Surv_Tanker:
-        case UnitType_Mute_Tanker:
+        case UnitType_Mute_Tanker: {
           v43 = (TankerSaveStruct *)&data[1];
           if ( data[1].locked_target_unit_id == 0xFC000000 )
             goto LABEL_206;
-          result = (BOOL)TSK_alloc(unit->task, 0x74u);
-          if ( !result )
-            return result;
-          unit->state = (void *)result;
-          *(int *)result = v43->oil_loaded;
+          TankerState *tanker_state = TSK_alloc(unit->task, sizeof(TankerState));
+          assert(tanker_state);
+
+          unit->state = tanker_state;
+          tanker_state->oil_loaded = v43->oil_loaded;
           task_channel = data[1].task_channel;
           if ( task_channel == -1 )
             goto LABEL_109;
@@ -30572,7 +30545,7 @@ LABEL_99:
 LABEL_109:
           v45 = nullptr;
 LABEL_110:
-          *(int *)(result + 4) = v45;
+          tanker_state->current_destination = v45;
           v46 = data[1].creature_id;
           if ( v46 == -1 || (v47 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
           {
@@ -30588,7 +30561,7 @@ LABEL_114:
                 goto LABEL_114;
             }
           }
-          *(int *)(result + 8) = v47;
+          tanker_state->powerplant = v47;
           v48 = data[1].message_handler_id;
           if ( v48 == -1 || (v49 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
           {
@@ -30604,12 +30577,12 @@ LABEL_119:
                 goto LABEL_119;
             }
           }
-          *(int *)(result + 12) = v49;
-          *(int *)(result + 16) = data[1].task_transient_events;
-          *(int *)(result + 20) = data[1].task_sleep;
-          *(int *)(result + 24) = data[1].task_global_events;
-          *(int *)(result + 28) = data[1].task_wait_flags;
-          v50 = (Unit **)(result + 32);
+          tanker_state->drillrig = v49;
+          tanker_state->drillrig_unit_id = data[1].task_transient_events;
+          tanker_state->powerplant_unit_id = data[1].task_sleep;
+          tanker_state->current_destination_unit_id = data[1].task_global_events;
+          tanker_state->num_destinations = data[1].task_wait_flags;
+          v50 = tanker_state->destinations;
           v51 = (char *)v43 - result;
           v52 = 20;
           while ( 1 )
@@ -30636,19 +30609,20 @@ LABEL_125:
               goto LABEL_131;
             }
           }
-        case UnitType_TankerConvoy:
-          result = (BOOL)TSK_alloc(unit->task, 0xCu);
-          if ( !result )
-            return result;
-          unit->state = (void *)result;
-          *(int *)result = data[1].locked_target_unit_id;
-          *(int *)(result + 4) = data[1].task_channel;
-          *(int *)(result + 8) = data[1].creature_id;
+        }
+        case UnitType_TankerConvoy: {
+          TankerConvoyState *state = TSK_alloc(unit->task, sizeof(TankerConvoyState));
+          assert(state);
+          unit->state = state;
+          state->x = data[1].locked_target_unit_id;
+          state->y = data[1].task_channel;
+          state->checkpoint = data[1].creature_id;
           UNIT_rendering_default(unit);
 LABEL_131:
           unit->entity->is_collidable = 1;
           BOXD_place_unit_world_coords(unit, unit->entity->x, unit->entity->y, UnitPosition_Slot0);
           goto LABEL_207;
+        }
         case UnitType_Mute_Wasp:
         case UnitType_Surv_Bomber:
           unit->entity->rn->transform = (RenderTransform)REND_transform_airborne;
@@ -30671,9 +30645,8 @@ LABEL_131:
         case UnitType_Mute_Menagerie:
         case UnitType_Surv_ResearchLab:
         case UnitType_Surv_AlchemyHall:
-          v55 = (BuildingState *)TSK_alloc(unit->task, 0x28u);
-          if ( !v55 )
-            return 0;
+          v55 = (BuildingState *)TSK_alloc(unit->task, sizeof(BuildingState));
+          assert(v55);
           v56 = unit->type;
           unit->state = v55;
           if ( v56 != UnitType_Surv_Drillrig && v56 != UnitType_Mute_Drillrig )
@@ -30691,7 +30664,7 @@ LABEL_131:
         case UnitType_Mute_RotaryCannon:
           unit->state = nullptr;
           UNIT_rendering_default(unit);
-          id = (MobdPoint *)unit->entity->anim_current_frame->points[0].id;
+          id = (MobdPoint *)unit->entity->anim_current_frame->points[0].id; // BUG
           if ( id )
           {
             for ( i = id->id; i != -1; ++id )
