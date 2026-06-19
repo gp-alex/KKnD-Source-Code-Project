@@ -522,12 +522,13 @@ typedef enum : unsigned int {
 
 typedef struct Task Task;
 
-typedef struct {
-  struct TaskMessage *next;
+typedef struct TaskMessage TaskMessage;
+struct TaskMessage {
+  TaskMessage *next;
   Task *task;
   TaskMessageType type;
   void *payload;
-} TaskMessage;
+};
 
 typedef enum : unsigned int {
   TaskKind_Coroutine = 0,

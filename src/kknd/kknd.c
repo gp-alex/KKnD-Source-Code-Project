@@ -31981,7 +31981,7 @@ BOOL __fastcall SAVE_unpack_ai_players(const AiPlayersSaveStruct *data)
   Task *v3; // ecx
   AiController *ai; // ebx
   const AiPlayersSaveStruct *v5; // ebp
-  const AiPlayersSaveStruct *p_unit_free_head_unit_id; // edi
+  const char *p_unit_free_head_unit_id; // edi
   unsigned int ai_task_handler_id; // eax
   void (__cdecl *v8)(Task *); // eax
   int player_num; // eax
@@ -31991,7 +31991,7 @@ BOOL __fastcall SAVE_unpack_ai_players(const AiPlayersSaveStruct *data)
   Unit *v13; // eax
   AiUnitNode *unit_free_head; // esi
   Unit *v15; // eax
-  const AiPlayersSaveStruct *p_squad_node; // ebp
+  const char *p_squad_node; // ebp
   AiSquadNode *squad_pool_free_head; // eax
   int v18; // edi
   AiAttackerNode *attacker_free_head; // eax
@@ -32027,11 +32027,11 @@ BOOL __fastcall SAVE_unpack_ai_players(const AiPlayersSaveStruct *data)
   Unit *v49; // ecx
   int v50; // eax
   AiDrillrigNode *drillrig_free_head; // esi
-  const AiPlayersSaveStruct *v52; // edi
+  const char *v52; // edi
   Unit *v53; // eax
   AiController *powerplant_head; // eax
-  const AiPlayersSaveStruct *p_ai_players_save_struct_14C; // ebp
-  const AiPlayersSaveStruct *p_ai_players_save_struct_184; // edi
+  const char *p_ai_players_save_struct_14C; // ebp
+  const char *p_ai_players_save_struct_184; // edi
   AiDrillrigNode *drillrig_head; // ecx
   AiSquadNode *v58; // eax
   AiAttackerNode *v59; // eax
@@ -32048,14 +32048,14 @@ BOOL __fastcall SAVE_unpack_ai_players(const AiPlayersSaveStruct *data)
   int v70; // edx
   Unit *v71; // ecx
   AiSquadNode *v72; // esi
-  const AiPlayersSaveStruct *v73; // edi
+  const char *v73; // edi
   int v74; // ebp
   AiAttackerNode *v75; // eax
   int v76; // edx
   Unit *v77; // ecx
   Unit *v78; // edx
   AiSquadNode *v79; // esi
-  const AiPlayersSaveStruct *v80; // edi
+  const char *v80; // edi
   int v81; // ebp
   AiAttackerNode *v82; // eax
   int v83; // edx
@@ -32063,24 +32063,24 @@ BOOL __fastcall SAVE_unpack_ai_players(const AiPlayersSaveStruct *data)
   Unit *v85; // edx
   AiSquadNode *v86; // eax
   AiSquadNode *staging_squad; // eax
-  int *p_ai_players_save_struct_38; // esi
+  const int *p_ai_players_save_struct_38; // esi
   int v89; // ebp
   AiAttackerNode *v90; // eax
   int v91; // edx
   Unit *v92; // ecx
   AiSquadNode *v93; // esi
-  const AiPlayersSaveStruct *v94; // edi
+  const char *v94; // edi
   int v95; // ebp
   AiAttackerNode *v96; // eax
   int v97; // edx
   Unit *v98; // ecx
   Unit *v99; // ecx
   int v100; // edx
-  const AiPlayersSaveStruct *v101; // edi
+  const char *v101; // edi
   AiBuildOrderNode *build_order_free_head; // eax
   int v103; // ecx
   int v104; // ecx
-  const AiPlayersSaveStruct *v105; // esi
+  const char *v105; // esi
   int v106; // edi
   int m; // ecx
   AiBuildingPlacementNode *building_replacement_free_head; // eax
@@ -32090,14 +32090,14 @@ BOOL __fastcall SAVE_unpack_ai_players(const AiPlayersSaveStruct *data)
   int ai_players_save_struct_100; // ecx
   UnitType ai_players_save_struct_108; // ecx
   Unit *v114; // eax
-  const AiPlayersSaveStruct *data_148_11C; // [esp+10h] [ebp-18h]
+  const char *data_148_11C; // [esp+10h] [ebp-18h]
   const AiPlayersSaveStruct *v117; // [esp+14h] [ebp-14h]
   int v118; // [esp+18h] [ebp-10h]
   int v119; // [esp+18h] [ebp-10h]
   int v120; // [esp+18h] [ebp-10h]
   int v121; // [esp+18h] [ebp-10h]
   int v122; // [esp+18h] [ebp-10h]
-  int *p_ai_players_save_struct_17C; // [esp+1Ch] [ebp-Ch]
+  const char *p_ai_players_save_struct_17C; // [esp+1Ch] [ebp-Ch]
   int v124; // [esp+20h] [ebp-8h]
   int v125; // [esp+24h] [ebp-4h]
 
@@ -32110,7 +32110,7 @@ BOOL __fastcall SAVE_unpack_ai_players(const AiPlayersSaveStruct *data)
       goto LABEL_316;
     ai = (AiController *)v3->ctx;
     v5 = data;
-    p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))&data->unit_free_head_unit_id;
+    p_unit_free_head_unit_id = (const char *)&data->unit_free_head_unit_id;
     v117 = v5;
     ai_task_handler_id = v5->ai_task_handler_id;
     data_148_11C = p_unit_free_head_unit_id;
@@ -32141,7 +32141,7 @@ LABEL_22:
           unit_free_head = nullptr;
         if ( !unit_free_head )
           return 0;
-        if ( ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id == -1
+        if ( *(const int *)p_unit_free_head_unit_id == -1
           || (v15 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
         {
 LABEL_31:
@@ -32149,7 +32149,7 @@ LABEL_31:
         }
         else
         {
-          while ( v15->unit_id != ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id )
+          while ( v15->unit_id != *(const int *)p_unit_free_head_unit_id)
           {
             v15 = v15->next;
             if ( v15 == (Unit *)&g_unit_list_head )
@@ -32157,10 +32157,11 @@ LABEL_31:
           }
         }
         unit_free_head->unit = v15;
-        p_squad_node = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x120))&ADJ(p_unit_free_head_unit_id)->squad_node;
+        p_squad_node = p_unit_free_head_unit_id + 4; // &squad_node
+        const AiSquadNodeSaveStruct *squad_node = (const AiSquadNodeSaveStruct *)p_squad_node;
         v15->ai_node_per_side[ai->player_num] = unit_free_head;
-        data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))&ADJ(p_unit_free_head_unit_id)->attacker_free_head_unit_id;
-        if ( ADJ(p_unit_free_head_unit_id)->squad_node.num_attacker_nodes )
+        data_148_11C = p_unit_free_head_unit_id + 44;  // &attacker_free_head_unit_id
+        if (squad_node->num_attacker_nodes > 0)
         {
           squad_pool_free_head = ai->squad_pool_free_head;
           if ( squad_pool_free_head )
@@ -32174,9 +32175,10 @@ LABEL_31:
           }
           if ( !unit_free_head->squad )
             return 0;
-          SAVE_unpack_squad_node(ai, &ADJ(p_squad_node)->squad_node, unit_free_head->squad);
+
+          SAVE_unpack_squad_node(ai, squad_node, unit_free_head->squad);
           v18 = 0;
-          if ( ADJ(p_squad_node)->squad_node.num_attacker_nodes > 0 )
+          if ( squad_node->num_attacker_nodes > 0 )
           {
             do
             {
@@ -32187,9 +32189,9 @@ LABEL_31:
                 attacker_free_head = nullptr;
               if ( !attacker_free_head )
                 return 0;
-              attacker_free_head_unit_id = ADJ(data_148_11C)->attacker_free_head_unit_id;
-              v21 = ADJ(data_148_11C)->attacker_free_head_unit_id == -1;
-              data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 4);
+              attacker_free_head_unit_id = *(const int *)data_148_11C;
+              v21 = attacker_free_head_unit_id == -1;
+              data_148_11C += 4;
               if ( v21 || (v22 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
               {
 LABEL_46:
@@ -32220,7 +32222,7 @@ LABEL_46:
                 ai->attacker_free_head = attacker_free_head;
               }
             }
-            while ( ++v18 < ADJ(p_squad_node)->squad_node.num_attacker_nodes );
+            while ( ++v18 < squad_node->num_attacker_nodes );
           }
           unit_free_head->squad->next = ai->attack_squad_head;
           unit_free_head->squad->prev = (AiSquadNode *)&ai->attack_squad_head;
@@ -32251,9 +32253,9 @@ LABEL_46:
           wanderer_free_head = nullptr;
         if ( !wanderer_free_head )
           return 0;
-        unit_free_head_unit_id = ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id;
-        p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))((char *)p_unit_free_head_unit_id + 4);// BUG ruins pointer arithmetic going forward
-        data_148_11C = p_unit_free_head_unit_id;// BUG ruins pointer arithmetic going forward
+        unit_free_head_unit_id = *(const int *)p_unit_free_head_unit_id;
+        p_unit_free_head_unit_id += 4;
+        data_148_11C = p_unit_free_head_unit_id;
         if ( unit_free_head_unit_id == -1
           || (v26 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
         {
@@ -32298,8 +32300,8 @@ LABEL_63:
           active_wanderer_free_head = nullptr;
         if ( !active_wanderer_free_head )
           return 0;
-        v29 = ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id;
-        p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))((char *)p_unit_free_head_unit_id + 4);
+        v29 = *(const int *)p_unit_free_head_unit_id;
+        p_unit_free_head_unit_id += 4;
         data_148_11C = p_unit_free_head_unit_id;
         if ( v29 == -1 || (v30 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
         {
@@ -32344,8 +32346,8 @@ LABEL_77:
           v32 = nullptr;
         if ( !v32 )
           return 0;
-        v33 = ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id;
-        p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))((char *)p_unit_free_head_unit_id + 4);
+        v33 = *(const int *)p_unit_free_head_unit_id;
+        p_unit_free_head_unit_id += 4;
         data_148_11C = p_unit_free_head_unit_id;
         if ( v33 == -1 || (v34 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
         {
@@ -32392,8 +32394,8 @@ LABEL_91:
           v37 = nullptr;
         if ( !v37 )
           return 0;
-        v38 = ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id;
-        p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))((char *)p_unit_free_head_unit_id + 4);
+        v38 = *(const int *)p_unit_free_head_unit_id;
+        p_unit_free_head_unit_id += 4;
         data_148_11C = p_unit_free_head_unit_id;
         if ( v38 == -1 || (v39 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
         {
@@ -32437,7 +32439,7 @@ LABEL_105:
         build_free_head = nullptr;
       if ( !build_free_head )
         return 0;
-      if ( ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id == -1
+      if ( *(const int *)p_unit_free_head_unit_id == -1
         || (v43 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
       {
 LABEL_119:
@@ -32445,7 +32447,7 @@ LABEL_119:
       }
       else
       {
-        while ( v43->unit_id != ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id )
+        while ( v43->unit_id != *(const int *)p_unit_free_head_unit_id )
         {
           v43 = v43->next;
           if ( v43 == (Unit *)&g_unit_list_head )
@@ -32454,11 +32456,11 @@ LABEL_119:
       }
       build_free_head->unit = v43;
       v43->ai_node_per_side[ai->player_num] = build_free_head;
-      build_free_head->base_cost = ADJ(p_unit_free_head_unit_id)->squad_node.enemy_target_unit_id;
-      build_free_head->cost_per_tick = ADJ(p_unit_free_head_unit_id)->squad_node.attacker_head_unit_id;
-      retarget_cooldown = (void *)ADJ(p_unit_free_head_unit_id)->squad_node.retarget_cooldown;
+      build_free_head->base_cost = *(const int *)(p_unit_free_head_unit_id + 8);
+      build_free_head->cost_per_tick = *(const int *)(p_unit_free_head_unit_id + 12);
+      retarget_cooldown = (void *)*(const int *)(p_unit_free_head_unit_id + 16);
       build_free_head->unit_type = (UnitType)retarget_cooldown;
-      num_attacker_nodes = ADJ(p_unit_free_head_unit_id)->squad_node.num_attacker_nodes;
+      num_attacker_nodes = *(const int *)(p_unit_free_head_unit_id + 4);
       build_free_head->remaining_cost = num_attacker_nodes;
       if ( num_attacker_nodes > 0 )
         PROD_enqueue_one_ex(
@@ -32471,7 +32473,7 @@ LABEL_119:
           -1);
       build_free_head->next = ai->build_head;
       build_free_head->prev = (AiBuildNode *)&ai->build_head;
-      p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))((char *)p_unit_free_head_unit_id + 20);
+      p_unit_free_head_unit_id = p_unit_free_head_unit_id + 20;
       ++i;
       ai->build_head->prev = build_free_head;
       ai->build_head = build_free_head;
@@ -32485,8 +32487,8 @@ LABEL_119:
         powerplant_free_head = nullptr;
       if ( !powerplant_free_head )
         return 0;
-      v48 = ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id;
-      p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))((char *)p_unit_free_head_unit_id + 4);
+      v48 = *(const int *)p_unit_free_head_unit_id;
+      p_unit_free_head_unit_id = p_unit_free_head_unit_id + 4;
       data_148_11C = p_unit_free_head_unit_id;
       if ( v48 == -1 || (v49 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
       {
@@ -32525,7 +32527,7 @@ LABEL_132:
         v125 = v50 + 1;
         if ( v117->_ai_players_save_struct_E4 == v50 + 1 )
           ai->preferred_drillrig = drillrig_free_head;
-        if ( ADJ(data_148_11C)->attacker_free_head_unit_id == -1
+        if ( *(const int *)data_148_11C == -1
           || (v53 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
         {
 LABEL_145:
@@ -32533,7 +32535,7 @@ LABEL_145:
         }
         else
         {
-          while ( v53->unit_id != ADJ(data_148_11C)->attacker_free_head_unit_id )
+          while ( v53->unit_id != *(const int *)data_148_11C )
           {
             v53 = v53->next;
             if ( v53 == (Unit *)&g_unit_list_head )
@@ -32546,7 +32548,7 @@ LABEL_145:
         powerplant_head = (AiController *)ai->powerplant_head;
         if ( powerplant_head != (AiController *)&ai->powerplant_head )
         {
-          while ( *((int *)powerplant_head->ctx1 + 76) != ADJ(data_148_11C)->_ai_players_save_struct_174 )
+          while ( *((int *)powerplant_head->ctx1 + 76) != *(const int *)(data_148_11C + 44) )
           {
             powerplant_head = powerplant_head->next;
             if ( powerplant_head == (AiController *)&ai->powerplant_head )
@@ -32556,19 +32558,19 @@ LABEL_145:
 LABEL_151:
           v52 = data_148_11C;
         }
-        p_ai_players_save_struct_14C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x14C))&ADJ(data_148_11C)->_ai_players_save_struct_14C;
-        drillrig_free_head->local_threat = ADJ(v52)->_ai_players_save_struct_178;
-        drillrig_free_head->current_tanker_count = ADJ(v52)->_ai_players_save_struct_17C;
-        p_ai_players_save_struct_17C = &ADJ(v52)->_ai_players_save_struct_17C;
-        drillrig_free_head->desired_tanker_count = ADJ(v52)->_ai_players_save_struct_180;
-        p_ai_players_save_struct_184 = (const AiPlayersSaveStruct *)&ADJ(v52)->_ai_players_save_struct_184;
+        p_ai_players_save_struct_14C = data_148_11C + 4;
+        drillrig_free_head->local_threat = *(const int *)(v52 + 48);  // _ai_players_save_struct_178
+        drillrig_free_head->current_tanker_count = *(const int *)(v52 + 52);  // _ai_players_save_struct_17C
+        p_ai_players_save_struct_17C = (const char *)(v52 + 52);
+        drillrig_free_head->desired_tanker_count = *(const int *)(v52 + 56);  // _ai_players_save_struct_180
+        p_ai_players_save_struct_184 = (const char *)(v52 + 60);  // _ai_players_save_struct_184;
         drillrig_head = ai->drillrig_head;
         drillrig_free_head->prev = (AiDrillrigNode *)&ai->drillrig_head;
         drillrig_free_head->next = drillrig_head;
         data_148_11C = p_ai_players_save_struct_184;
         ai->drillrig_head->prev = drillrig_free_head;
         ai->drillrig_head = drillrig_free_head;
-        if ( ADJ(p_ai_players_save_struct_14C)->_ai_players_save_struct_14C )
+        if ( *(const int *)p_ai_players_save_struct_14C )
         {
           v58 = ai->squad_pool_free_head;
           if ( v58 )
@@ -32584,10 +32586,10 @@ LABEL_151:
             return 0;
           SAVE_unpack_squad_node(
             ai,
-            (const AiSquadNodeSaveStruct *)&ADJ(p_ai_players_save_struct_14C)->_ai_players_save_struct_14C,
+            (const AiSquadNodeSaveStruct *)p_ai_players_save_struct_14C,
             drillrig_free_head->guard_squad);
           v119 = 0;
-          if ( ADJ(p_ai_players_save_struct_14C)->_ai_players_save_struct_14C > 0 )
+          if ( *(const int *)p_ai_players_save_struct_14C > 0 )
           {
             do
             {
@@ -32598,8 +32600,8 @@ LABEL_151:
                 v59 = nullptr;
               if ( !v59 )
                 return 0;
-              v60 = p_ai_players_save_struct_184->ai_task_handler_id;
-              p_ai_players_save_struct_184 = (const AiPlayersSaveStruct *)((char *)p_ai_players_save_struct_184 + 4);
+              v60 = *(const int *)p_ai_players_save_struct_184;
+              p_ai_players_save_struct_184 = p_ai_players_save_struct_184 + 4;
               data_148_11C = p_ai_players_save_struct_184;
               if ( v60 == -1 || (v61 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
               {
@@ -32631,7 +32633,7 @@ LABEL_166:
                 ai->attacker_free_head = v59;
               }
             }
-            while ( ++v119 < ADJ(p_ai_players_save_struct_14C)->_ai_players_save_struct_14C );
+            while ( ++v119 < *(const int *)p_ai_players_save_struct_14C );
           }
         }
         else
@@ -32653,9 +32655,9 @@ LABEL_166:
             tanker_free_head = nullptr;
           if ( !tanker_free_head )
             return 0;
-          v65 = ADJ(data_148_11C)->attacker_free_head_unit_id;
-          v21 = ADJ(data_148_11C)->attacker_free_head_unit_id == -1;
-          data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 4);
+          v65 = *(const int *)data_148_11C;
+          v21 = v65 == -1;
+          data_148_11C = data_148_11C + 4;
           if ( v21 || (v66 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
           {
 LABEL_182:
@@ -32692,10 +32694,9 @@ LABEL_182:
         v69 = nullptr;
       if ( !v69 )
         return 0;
-      v70 = ADJ(data_148_11C)->attacker_free_head_unit_id;
-      v21 = ADJ(data_148_11C)->attacker_free_head_unit_id == -1;
-      data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C
-                                                                                                 + 4);
+      v70 = *(const int *)data_148_11C;
+      v21 = v70 == -1;
+      data_148_11C = data_148_11C + 4;
       if ( v21 || (v71 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
       {
 LABEL_194:
@@ -32733,15 +32734,15 @@ LABEL_194:
           return 0;
         SAVE_unpack_squad_node(
           ai,
-          (const AiSquadNodeSaveStruct *)&ADJ(data_148_11C)->attacker_free_head_unit_id,
+          (const AiSquadNodeSaveStruct *)data_148_11C,
           v72);
         v72->next = ai->attack_squad_head;
         v72->prev = (AiSquadNode *)&ai->attack_squad_head;
-        data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 40);
+        data_148_11C = data_148_11C + 40;
         v74 = 0;
         ai->attack_squad_head->prev = v72;
         ai->attack_squad_head = v72;
-        if ( ADJ(v73)->attacker_free_head_unit_id > 0 )
+        if ( *(const int *)v73 > 0 )
         {
           do
           {
@@ -32752,9 +32753,9 @@ LABEL_194:
               v75 = nullptr;
             if ( !v75 )
               return 0;
-            v76 = ADJ(data_148_11C)->attacker_free_head_unit_id;
-            v21 = ADJ(data_148_11C)->attacker_free_head_unit_id == -1;
-            data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 4);
+            v76 = *(const int *)data_148_11C;
+            v21 = v76 == -1;
+            data_148_11C = data_148_11C + 4;
             if ( v21 || (v77 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
             {
 LABEL_210:
@@ -32786,7 +32787,7 @@ LABEL_210:
               ai->attacker_free_head = v75;
             }
           }
-          while ( ++v74 < ADJ(v73)->attacker_free_head_unit_id );
+          while ( ++v74 < *(const int *)v73 );
         }
         if ( ++v120 >= v117->_ai_players_save_struct_2C )
         {
@@ -32810,15 +32811,15 @@ LABEL_210:
           return 0;
         SAVE_unpack_squad_node(
           ai,
-          (const AiSquadNodeSaveStruct *)&ADJ(data_148_11C)->attacker_free_head_unit_id,
+          (const AiSquadNodeSaveStruct *)data_148_11C,
           v79);
         v79->next = ai->patrol_squad_head;
         v79->prev = (AiSquadNode *)&ai->patrol_squad_head;
-        data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 40);
+        data_148_11C = data_148_11C + 40;
         v81 = 0;
         ai->patrol_squad_head->prev = v79;
         ai->patrol_squad_head = v79;
-        if ( ADJ(v80)->attacker_free_head_unit_id > 0 )
+        if ( *(const int *)v80 > 0 )
         {
           do
           {
@@ -32829,9 +32830,9 @@ LABEL_210:
               v82 = nullptr;
             if ( !v82 )
               return 0;
-            v83 = ADJ(data_148_11C)->attacker_free_head_unit_id;
-            v21 = ADJ(data_148_11C)->attacker_free_head_unit_id == -1;
-            data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 4);
+            v83 = *(const int *)data_148_11C;
+            v21 = v83 == -1;
+            data_148_11C = data_148_11C + 4;
             if ( v21 || (v84 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
             {
 LABEL_231:
@@ -32863,7 +32864,7 @@ LABEL_231:
               ai->attacker_free_head = v82;
             }
           }
-          while ( ++v81 < ADJ(v80)->attacker_free_head_unit_id );
+          while ( ++v81 < *(const int *)v80 );
         }
       }
       while ( ++v121 < v117->_ai_players_save_struct_30 );
@@ -32900,9 +32901,9 @@ LABEL_231:
             v90 = nullptr;
           if ( !v90 )
             return 0;
-          v91 = ADJ(data_148_11C)->attacker_free_head_unit_id;
-          v21 = ADJ(data_148_11C)->attacker_free_head_unit_id == -1;
-          data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 4);
+          v91 = *(const int *)data_148_11C;
+          v21 = v91 == -1;
+          data_148_11C = data_148_11C + 4;
           if ( v21 || (v92 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
           {
 LABEL_251:
@@ -32960,15 +32961,15 @@ LABEL_251:
           return 0;
         SAVE_unpack_squad_node(
           ai,
-          (const AiSquadNodeSaveStruct *)&ADJ(data_148_11C)->attacker_free_head_unit_id,
+          (const AiSquadNodeSaveStruct *)data_148_11C,
           v93);
         v93->next = ai->retreat_squad_head;
         v93->prev = (AiSquadNode *)&ai->retreat_squad_head;
-        data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 40);
+        data_148_11C = data_148_11C + 40;
         v95 = 0;
         ai->retreat_squad_head->prev = v93;
         ai->retreat_squad_head = v93;
-        if ( ADJ(v94)->attacker_free_head_unit_id > 0 )
+        if ( *(const int *)v94 > 0 )
         {
           do
           {
@@ -32979,9 +32980,9 @@ LABEL_251:
               v96 = nullptr;
             if ( !v96 )
               return 0;
-            v97 = ADJ(data_148_11C)->attacker_free_head_unit_id;
-            v21 = ADJ(data_148_11C)->attacker_free_head_unit_id == -1;
-            data_148_11C = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)data_148_11C + 4);
+            v97 = *(const int *)data_148_11C;
+            v21 = v97 == -1;
+            data_148_11C = data_148_11C + 4;
             if ( v21 || (v98 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
             {
 LABEL_272:
@@ -33013,7 +33014,7 @@ LABEL_272:
               ai->attacker_free_head = v96;
             }
           }
-          while ( ++v95 < ADJ(v94)->attacker_free_head_unit_id );
+          while ( ++v95 < *(const int *)v94 );
         }
       }
       while ( ++v122 < v117->_ai_players_save_struct_34 );
@@ -33035,8 +33036,8 @@ LABEL_272:
           build_order_free_head = nullptr;
         if ( !build_order_free_head )
           return 0;
-        v103 = ADJ(v101)->attacker_free_head_unit_id;
-        v101 = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)v101 + 4);
+        v103 = *(const int *)v101;
+        v101 = v101 + 4;
         build_order_free_head->_ai_stru26C_node_8 = v103;
         build_order_free_head->next = ai->build_order_head;
         build_order_free_head->prev = (AiBuildOrderNode *)&ai->build_order_head;
@@ -33052,7 +33053,7 @@ LABEL_272:
     }
     ai->rally_x = v117->_ai_players_save_struct_78;
     ai->rally_y = v117->_ai_players_save_struct_7C;
-    qmemcpy(ai->patrol_waypoints, &v117->_ai_players_save_struct_80, sizeof(ai->patrol_waypoints));
+    memcpy(ai->patrol_waypoints, &v117->_ai_players_save_struct_80, sizeof(ai->patrol_waypoints));
     ai->player_race = v117->_ai_players_save_struct_A4;
     ai->attacker_count = v117->_ai_players_save_struct_A8;
     ai->max_units = v117->_ai_players_save_struct_AC;
@@ -33061,7 +33062,7 @@ LABEL_272:
     ai->base_threat = v117->_ai_players_save_struct_B8;
     ai->max_squad_threat = v117->_ai_players_save_struct_BC;
     ai->best_patrol_waypoint_idx = v117->_ai_players_save_struct_C0;
-    qmemcpy(ai->patrol_threat, &v117->_ai_players_save_struct_C4, sizeof(ai->patrol_threat));
+    memcpy(ai->patrol_threat, &v117->_ai_players_save_struct_C4, sizeof(ai->patrol_threat));
     v105 = data_148_11C;
     ai->last_unit_produced = v117->last_unit_produced;
     ai->last_unit_produced_factory = v117->_ai_players_save_struct_DC;
@@ -33077,13 +33078,13 @@ LABEL_272:
       if ( !building_replacement_free_head )
         return 0;
       building_replacement_free_head->unit = nullptr;
-      building_replacement_free_head->unit_type = ADJ(v105)->_ai_players_save_struct_14C;
-      building_replacement_free_head->unit_x = ADJ(v105)->_ai_players_save_struct_150;
-      building_replacement_free_head->unit_y = ADJ(v105)->_ai_players_save_struct_154;
-      building_replacement_free_head->grid_anchor_x = ADJ(v105)->_ai_players_save_struct_158;
-      building_replacement_free_head->grid_anchor_y = ADJ(v105)->_ai_players_save_struct_15C;
-      building_replacement_free_head->strategic_value = ADJ(v105)->_ai_players_save_struct_160;
-      v105 = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)v105 + 28);
+      building_replacement_free_head->unit_type = *(const int *)(v105 + 4);  // ->_ai_players_save_struct_14C;
+      building_replacement_free_head->unit_x = *(const int *)(v105 + 8);  // ->_ai_players_save_struct_150;
+      building_replacement_free_head->unit_y = *(const int *)(v105 + 12);  // ->_ai_players_save_struct_154;
+      building_replacement_free_head->grid_anchor_x = *(const int *)(v105 + 16);  // ->_ai_players_save_struct_158;
+      building_replacement_free_head->grid_anchor_y = *(const int *)(v105 + 20);  // ->_ai_players_save_struct_15C;
+      building_replacement_free_head->strategic_value = *(const int *)(v105 + 24);  // ->_ai_players_save_struct_160;
+      v105 = v105 + 28;
       ++m;
     }
     if ( v117->_ai_players_save_struct_EC > 0 )
@@ -33097,7 +33098,7 @@ LABEL_272:
           v109 = nullptr;
         if ( !v109 )
           return 0;
-        if ( ADJ(v105)->attacker_free_head_unit_id == -1
+        if ( *(const int *)v105 == -1
           || (v110 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
         {
 LABEL_302:
@@ -33105,7 +33106,7 @@ LABEL_302:
         }
         else
         {
-          while ( v110->unit_id != ADJ(v105)->attacker_free_head_unit_id )
+          while ( v110->unit_id != *(const int *)v105 )
           {
             v110 = v110->next;
             if ( v110 == (Unit *)&g_unit_list_head )
@@ -33113,13 +33114,13 @@ LABEL_302:
           }
         }
         v109->unit = v110;
-        v109->unit_type = ADJ(v105)->_ai_players_save_struct_14C;
-        v109->unit_x = ADJ(v105)->_ai_players_save_struct_150;
-        v109->unit_y = ADJ(v105)->_ai_players_save_struct_154;
-        v109->grid_anchor_x = ADJ(v105)->_ai_players_save_struct_158;
-        v109->grid_anchor_y = ADJ(v105)->_ai_players_save_struct_15C;
-        v109->strategic_value = ADJ(v105)->_ai_players_save_struct_160;
-        v105 = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x148))((char *)v105 + 28);
+        v109->unit_type = *(const int *)(v105 + 4); // ->_ai_players_save_struct_14C;
+        v109->unit_x = *(const int *)(v105 + 8); // ->_ai_players_save_struct_150;
+        v109->unit_y = *(const int *)(v105 + 12); // ->_ai_players_save_struct_154;
+        v109->grid_anchor_x = *(const int *)(v105 + 16); // ->_ai_players_save_struct_158;
+        v109->grid_anchor_y = *(const int *)(v105 + 20); // ->_ai_players_save_struct_15C;
+        v109->strategic_value = *(const int *)(v105 + 24); // ->_ai_players_save_struct_160;
+        v105 = v105 + 28;
         ++v106;
         data_148_11C = v105;
       }
@@ -33172,7 +33173,7 @@ LABEL_313:
       }
       ai->construction_task = v114->task;
     }
-    data = data_148_11C;
+    data = (const AiPlayersSaveStruct *)data_148_11C;
     ai->airstrike_interval = v117->_ai_players_save_struct_114;
     v1 = v124;
     ai->airstrike_count = v117->_ai_players_save_struct_118;
@@ -33190,8 +33191,8 @@ LABEL_316:
       enemy_free_head = nullptr;
     if ( !enemy_free_head )
       return 0;
-    v12 = ADJ(p_unit_free_head_unit_id)->unit_free_head_unit_id;
-    p_unit_free_head_unit_id = (const AiPlayersSaveStruct *__shifted(AiPlayersSaveStruct,0x11C))((char *)p_unit_free_head_unit_id + 4);
+    v12 = *(const int *)p_unit_free_head_unit_id;
+    p_unit_free_head_unit_id += 4;
     data_148_11C = p_unit_free_head_unit_id;
     if ( v12 == -1 || (v13 = g_unit_list_head, g_unit_list_head == (Unit *)&g_unit_list_head) )
     {
@@ -33308,17 +33309,17 @@ MetaSaveStruct *__fastcall SAVE_pack_meta(size_t *out_data_size)
   if ( result )
   {
     result->building_construction_byte_size = SAVE_constructs_get_pack_size();
-    qmemcpy(v5->num_units_in_group, g_num_units_in_group, sizeof(v5->num_units_in_group));
+    memcpy(v5->num_units_in_group, g_num_units_in_group, sizeof(v5->num_units_in_group));
     v5->is_building_suspended = g_buildings_suspended;
-    qmemcpy(&v5->outpost, &g_outpost_levels, 0x24u);
+    memcpy(&v5->outpost, &g_outpost_levels, 0x24u);
     v5->outpost.max_level = g_outpost_levels.max_level;
-    qmemcpy(&v5->clanhall, &g_clanhall_levels, 0x24u);
+    memcpy(&v5->clanhall, &g_clanhall_levels, 0x24u);
     v5->clanhall.max_level = g_clanhall_levels.max_level;
-    qmemcpy(&v5->machine_shop, &g_machineshop_levels, 0x24u);
+    memcpy(&v5->machine_shop, &g_machineshop_levels, 0x24u);
     v5->machine_shop.max_level = g_machineshop_levels.max_level;
-    qmemcpy(&v5->beast_enclosure, &g_beast_enclosure_levels, 0x24u);
+    memcpy(&v5->beast_enclosure, &g_beast_enclosure_levels, 0x24u);
     v5->beast_enclosure.max_level = g_beast_enclosure_levels.max_level;
-    qmemcpy(v5->sidebar_color_bars_used, g_sidebar_color_bars_used, sizeof(v5->sidebar_color_bars_used));
+    memcpy(v5->sidebar_color_bars_used, g_sidebar_color_bars_used, sizeof(v5->sidebar_color_bars_used));
     v5->num_player_units = g_num_player_units;
     v5->num_ai_units = g_num_ai_units;
     v5->num_towers = g_num_towers;
@@ -33465,18 +33466,18 @@ BOOL __fastcall SAVE_unpack_meta(MetaSaveStruct *data)
   void (__cdecl *v9)(Task *); // edx
   BOOL result; // eax
   unsigned __int32 aircraft_sidebar_task_message_handler; // ecx
-  int v12; // ecx
+  Task *v12; // ecx
   AirstrikeSidebar *v13; // esi
   unsigned __int32 aircraft_mode_id; // eax
   Task *task; // eax
 
-  qmemcpy(g_num_units_in_group, data->num_units_in_group, sizeof(g_num_units_in_group));
+  memcpy(g_num_units_in_group, data->num_units_in_group, sizeof(g_num_units_in_group));
   g_buildings_suspended = data->is_building_suspended;
-  qmemcpy(&g_outpost_levels, &data->outpost, sizeof(g_outpost_levels));
-  qmemcpy(&g_clanhall_levels, &data->clanhall, sizeof(g_clanhall_levels));
-  qmemcpy(&g_machineshop_levels, &data->machine_shop, sizeof(g_machineshop_levels));
-  qmemcpy(&g_beast_enclosure_levels, &data->beast_enclosure, sizeof(g_beast_enclosure_levels));
-  qmemcpy(g_sidebar_color_bars_used, data->sidebar_color_bars_used, sizeof(g_sidebar_color_bars_used));
+  memcpy(&g_outpost_levels, &data->outpost, sizeof(g_outpost_levels));
+  memcpy(&g_clanhall_levels, &data->clanhall, sizeof(g_clanhall_levels));
+  memcpy(&g_machineshop_levels, &data->machine_shop, sizeof(g_machineshop_levels));
+  memcpy(&g_beast_enclosure_levels, &data->beast_enclosure, sizeof(g_beast_enclosure_levels));
+  memcpy(g_sidebar_color_bars_used, data->sidebar_color_bars_used, sizeof(g_sidebar_color_bars_used));
   v2 = g_unit_list_head;
   g_num_player_units = data->num_player_units;
   g_num_ai_units = data->num_ai_units;
@@ -33544,7 +33545,7 @@ LABEL_13:
         v12 = g_script_handlers[aircraft_sidebar_task_message_handler - 1];
       else
         v12 = 0;
-      *(int *)(result + 52) = v12;
+      *(Task **)(result + 52) = v12;
       *(int *)(result + 32) = data->aircraft_sidebar_task_transient_events;
       *(int *)(result + 20) = data->aircraft_sidebar_task_sleep;
       *(int *)(result + 36) = data->aircraft_sidebar_task_global_events;
@@ -33563,10 +33564,10 @@ LABEL_13:
     v13 = (AirstrikeSidebar *)result;
     if ( result )
     {
-      *(int *)(result + 16) = g_sidebar_airstrike_task;
+      *(Task **)((int)result + 16) = g_sidebar_airstrike_task;
       aircraft_mode_id = data->aircraft_mode_id;
       if ( aircraft_mode_id && aircraft_mode_id <= g_script_handlers_num )
-        result = g_script_handlers[aircraft_mode_id - 1];
+        result = (BOOL)(int)g_script_handlers[aircraft_mode_id - 1];
       else
         result = 0;
       v13->mode = (void (__fastcall *)(AirstrikeSidebar *))result;
@@ -33621,7 +33622,7 @@ BOOL GAME_save()
   UnitSaveStruct *v7; // ebp
   Unit *v8; // esi
   UnitSaveStruct *v9; // edi
-  UnitSaveIndex *__shifted(UnitSaveIndex,4) p_size; // ebx
+  UnitSaveIndex * p_size; // ebx
   AiSquadNodeSaveStruct *v11; // esi
   void *v12; // edi
   unsigned __int8 *v13; // ebx
@@ -33740,12 +33741,12 @@ BOOL GAME_save()
   v9 = v6;
   if ( g_unit_list_head != (Unit *)&g_unit_list_head )
   {
-    p_size = (UnitSaveIndex *__shifted(UnitSaveIndex,4))&v28->size;
+    p_size = v28;
     do
     {
       if ( !v8->destroyed )
       {
-        if ( !SAVE_pack_unit(v8, v9, ADJ(p_size)->size) )
+        if ( !SAVE_pack_unit(v8, v9, p_size->size) )
         {
           free(v7);
           free(Block);
@@ -33753,11 +33754,12 @@ BOOL GAME_save()
           g_last_error = "Could not save unit information";
           return 0;
         }
-        v9 = (UnitSaveStruct *)((char *)v9 + ADJ(p_size++)->size);
+        p_size++;
+        v9++;
       }
       v8 = v8->next;
     }
-    while ( v8 != (Unit *)&g_unit_list_head );
+    while ( v8 != (Unit *)&g_unit_list_head ); // BUG
     v2 = Block;
   }
   v11 = SAVE_pack_ai_players(&v32);
@@ -34070,7 +34072,7 @@ LABEL_33:
                               if ( *v20 <= 0 || v22 >= 16 )
                                 v23 = nullptr;
                               else
-                                v23 = g_shroud_backup->tiles[v22];
+                                v23 = g_shroud_backup->tiles[(int)v22];
                               *v19++ = v23;
                               ++v20;
                               --v21;
@@ -34251,43 +34253,6 @@ LABEL_11:
           UNIT_apply_damage_ex(unit, (Entity *)payload, UNIT_mode_machine_shop_on_death);
           UNIT_building_status_bar_update_health(unit);
           break;
-        case 0x5E0u:
-        case TaskMessage_GainExperience:
-        case TaskMessage_EscortBegin_or_SaveGame:
-        case TaskMessage_EscortRetaliate:
-        case TaskMessage_EscortEnd_or_LoadGame:
-        case TaskMessage_RepairTick:
-        case TaskMessage_UnitSelected_or_UiLeftClick:
-        case TaskMessage_UnitDeselected_or_SaveLoadScrollDown_or_ShowNotificationBox:
-        case TaskMessage_SiderbarRightClick:
-        case TaskMessage_SidebarForceClose:
-        case TaskMessage_ShowHint_or_SaveLoadScrollUp:
-        case TaskMessage_HideHint:
-        case TaskMessage_1518:
-        case TaskMessage_AirstrikeSetTargetingMode:
-        case TaskMessage_AirstrikeClearTargetingMode:
-        case TaskMessage_UnitCreated:
-        case TaskMessage_BuildingPlacementModeBegin_or_BackToMenu:
-        case TaskMessage_AttackOrder_or_QuitGame:
-        case TaskMessage_MoveOrder_or_SoundSettings_or_DoSaveGame:
-        case TaskMessage_GuardAreaOrder:
-        case TaskMessage_Infiltrate_or_ShowBriefing:
-        case TaskMessage_Follow_or_RestartGame:
-        case TaskMessage_Retreat_or_CancelUi:
-        case TaskMessage_AdvanceConstructionStage:
-        case TaskMessage_ToggleIngameMenu:
-        case TaskMessage_MissionOutcomePopup:
-        case TaskMessage_PauseGame:
-        case TaskMessage_ResumeGame:
-        case TaskMessage_1534:
-        case 0x600u:
-        case TaskMessage_BuildingComplete:
-        case TaskMessage_BroadcastBuildingComplete:
-        case TaskMessage_PowerPlantDown:
-        case TaskMessage_DrillrigDown:
-        case TaskMessage_TankerAssignedNewPowerPlant:
-        case TaskMessage_TankerAssignedNewDrillrig:
-          goto LABEL_11;
         case TaskMessage_Sabotage:
           UNIT_sabotage(unit, (Unit *)payload, UNIT_mode_machine_shop_on_death);
           break;
@@ -34312,6 +34277,8 @@ LABEL_11:
         case TaskMessage_UpgradeComplete:
           MSG_machine_shop_upgrades(receiver, sender, message, payload);
           break;
+        default:
+          goto LABEL_11;
       }
     }
   }
@@ -34399,7 +34366,7 @@ void __fastcall UNIT_mode_machine_shop_on_complete(Unit *unit)
       UI_sidebar_prod_enable_unit(v4, UnitType_Surv_DirkBike, 2592);
       v5 = g_current_lvl_id;
     }
-    if ( (BYTE1(g_lvl_desc[v5].disabled_units_mask) & 0x80u) == 0 )
+    if ( (g_lvl_desc[v5].disabled_units_mask & 0x8000) == 0 )
     {
       UI_sidebar_prod_enable_unit(v4, UnitType_Surv_4x4Pickup, 2584);
       v5 = g_current_lvl_id;
@@ -34716,7 +34683,7 @@ void __fastcall GAME_prep_super_lvl(MenuId mapd_id)
     v7 = ~(_BYTE)v4;
     v8 = &v5[v4 + 1];
     v9 = (unsigned int)~v4 >> 2;
-    qmemcpy(g_level_base_path, v8, 4 * v9);
+    memcpy(g_level_base_path, v8, 4 * v9);
     v11 = &v8[4 * v9];
     v10 = &g_level_base_path[4 * v9];
     v12 = v7;
@@ -34734,12 +34701,12 @@ void __fastcall GAME_prep_super_lvl(MenuId mapd_id)
     v13 = ~(_BYTE)v4;
     v14 = &v5[v4 + 1];
     v15 = (unsigned int)~v4 >> 2;
-    qmemcpy(g_level_base_path, v14, 4 * v15);
+    memcpy(g_level_base_path, v14, 4 * v15);
     v11 = &v14[4 * v15];
     v10 = &g_level_base_path[4 * v15];
     v12 = v13;
   }
-  qmemcpy(v10, v11, v12 & 3);
+  memcpy(v10, v11, v12 & 3);
   v16 = REND_get_resource_resolution();
   sprintf(Buffer, "%s\\LEVELS\\%s\\%s", g_level_base_path, v16, "super.lvl");
   g_current_lvl_id = v3;
@@ -34921,7 +34888,7 @@ LABEL_42:
         v8 = *((PaletteEntry **)LVL_find_section("MAPD") + 1);
       }
       PAL_apply(v8 + 3);
-      qmemcpy(&g_movie_waveformat.cbSize, g_selected_pal, 0x400u);
+      memcpy(&g_movie_waveformat.cbSize, g_selected_pal, 0x400u);
       g_default_entity.collider = g_ui_collision_handlers;
       CPLC_select(0);
       CPLC_viewport_update();
@@ -35143,8 +35110,8 @@ BOOL GAME_post_campaign_mission()
   {
     LVL_cleanup();
     SOUND_unload_bank();
-    free_(g_level);
-    free_(g_supspr_lvl);
+    free(g_level);
+    free(g_supspr_lvl);
     g_supspr_lvl = nullptr;
     g_last_loaded_level_id = LevelId_Invalid;
   }
@@ -35243,8 +35210,8 @@ LABEL_5:
     while ( (int)v2 < (int)&dword_47A01C );     // BUG + duplicated in GAME_post_campaign_mission
     LVL_cleanup();
     g_mission_outcome = MissionOutcome_NotStarted;
-    free_(g_level);
-    free_(g_supspr_lvl);
+    free(g_level);
+    free(g_supspr_lvl);
     g_supspr_lvl = nullptr;
     if ( GAME_is_loading() )
     {
@@ -35295,8 +35262,8 @@ LABEL_5:
             while ( (int)v3 < (int)&dword_47A01C );// BUG
             LVL_cleanup();
             g_mission_outcome = MissionOutcome_NotStarted;
-            free_(g_level);
-            free_(g_supspr_lvl);
+            free(g_level);
+            free(g_supspr_lvl);
             g_supspr_lvl = nullptr;
             if ( GAME_is_loading() )
             {
@@ -35347,7 +35314,7 @@ LABEL_5:
     }
     NETZ_shutdown();
     g_468B60_unused = 1;
-    free_(g_splash_lvl);
+    free(g_splash_lvl);
     SOUND_unload_bank();
     SYS_shutdown();
     timeEndPeriod(1u);
@@ -35356,7 +35323,7 @@ LABEL_5:
   else
   {
     g_468B60_unused = 1;
-    free_(g_splash_lvl);
+    free(g_splash_lvl);
     SOUND_unload_bank();
     SYS_shutdown();
     return 1;
