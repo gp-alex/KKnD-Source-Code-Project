@@ -5,6 +5,7 @@
   #define stdc_byteswap32 __builtin_bswap32
 #endif
 
+#include <stddef.h> // offsetof
 #include <stdint.h>
 #include <stdio.h> // File
 #include <assert.h>
@@ -1391,7 +1392,7 @@ typedef enum
   HunkFixup_Renderer     = 0x80000000,
 } HunkFixupType;
 
-typedef struct BoxdSpatialHashEntry BoxdSpatialHashEntry; 
+typedef struct BoxdSpatialHashEntry BoxdSpatialHashEntry;
 struct BoxdSpatialHashEntry {
   BoxdCollisionShape *shape;
   Entity *entity;
@@ -1925,11 +1926,13 @@ struct SidebarFactoryProductionOption {
   int key;                              ///< Grouping key : slot_index + 16 * PRODUCTION_GROUP_ID. Used to match new jobs to existing factory. -1 = ungrouped (AI/building construction)14.
 };
 
+typedef struct FactoryProdJob FactoryProdJob;
+
 /// One for each type of parent factory's production (tank, tanker, etc) - see FactoryProduction
 /// Player can enqueue more than one of the same unit, but it's managed in the sidebar logic
-typedef struct {
-  struct FactoryProdJob *next;
-  struct FactoryProdJob *prev;
+struct FactoryProdJob {
+  FactoryProdJob *next;
+  FactoryProdJob *prev;
   int base_bandwidth;                   ///< max amount of money factory can spend per tick
   int effective_bandwidth;              ///< effective amount of money this production receives based on number of other concurrent productions
   int base_cost;                        ///< base total cost of the unit
@@ -1939,7 +1942,7 @@ typedef struct {
   int *num_orders;                      ///< num of the same unit ordered in sidebar; when production finishes, if num_orders > 1 - remaining_cost resets and production continues (actual value stored and managed in sidebar)
   SidebarFactoryProductionOption *notification_arg; ///< Param to send with Unit Ready msg. For sidebar units = ProductionOption *. For AI/buildings -> NULL
   Task *notification_task;        ///< Task that receives Unit Ready msg when cost hits 0. For sidebar = g_game_update_loop_task. For AI = entity script or 0
-} FactoryProdJob;
+};
 
 typedef enum : unsigned int {
   ProductionType_Infantry = 0,
@@ -1997,10 +2000,12 @@ struct SidebarFactoryProduction {
   Entity *icon_entity;
 };
 
+typedef struct FactoryProd FactoryProd;
+
 /// Production per individual factory
-typedef struct {
-  struct FactoryProd *next;
-  struct FactoryProd *prev;
+struct FactoryProd {
+  FactoryProd *next;
+  FactoryProd *prev;
   FactoryProdJob *jobs_head;
   FactoryProdJob *jobs_tail;
   int _factory_production_field_10_unused;
@@ -2016,7 +2021,7 @@ typedef struct {
   int _factory_production_field_38_unused;
   int key;                              ///< Grouping key : slot_index + 16 * PRODUCTION_GROUP_ID. Used to match new jobs to existing factory. -1 = ungrouped (AI/building construction)
   int num_active_productions;           ///< the length of the production list (production nodes get recycled on production complete)
-} FactoryProd;
+};
 
 typedef struct {
   void *ctx;                            ///< drillrig: OilPatch*
