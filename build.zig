@@ -35,6 +35,12 @@ pub fn build(b: *std.Build) void {
     kknd_mod.addIncludePath(raylib_dep.path("src"));
     kknd_mod.linkLibrary(raylib_lib);
 
+    // Windows/DirectX import libs. zig's bundled mingw ships .def files for these
+    // and synthesizes the import lib at link time, so nothing needs vendoring.
+    for ([_][]const u8{ "ddraw", "dsound", "dplayx", "version" }) |lib| {
+        kknd_mod.linkSystemLibrary(lib, .{});
+    }
+
     const kknd = b.addExecutable(.{
         .name = "kknd",
         .root_module = kknd_mod,

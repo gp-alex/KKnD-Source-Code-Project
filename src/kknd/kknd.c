@@ -310,7 +310,7 @@ int __fastcall REND_get_height(RenderCommand *cmd);
 void REND_cleanup();
 BOOL __fastcall REND_mode_sprt_setup();
 int __fastcall REND_mode_sprt_draw(RenderCommand *cmd, BlitterMode mode);
-BOOL REND_mode_scrl_setup();
+BOOL __fastcall REND_mode_scrl_setup();
 int __fastcall REND_mode_scrl_draw(RenderCommand *cmd, BlitterMode mode);
 int __fastcall REND_fmv_draw(RenderCommand *cmd, BlitterMode mode);
 void __cdecl UNIT_vehicle_tick(Task *task);
@@ -620,7 +620,7 @@ NetzError __fastcall NETZ_send(int player, NetzPacketType pkt, const void *data,
 NetzProtocol __fastcall NETZ_provider_find(const char *name);
 void __fastcall NETZ_resend_to_player(int slot, BOOL a2);
 void NETZ_disable_joining();
-void __fastcall NETZ_enable_joining(int _);
+void __fastcall NETZ_enable_joining();
 void __fastcall NETZ_session_set_name(const char *name);
 void NETZ_session_close();
 BOOL __fastcall NETZ_transport_select(NetzProtocol protocol);
@@ -632,7 +632,7 @@ NetzError __fastcall NETZ_prep_role_switch(BOOL is_host);
 int __fastcall DP_connect_to_player(int player);
 int DP_recv_loop();
 void DP_session_disable_new_players();
-void __fastcall DP_session_enable_new_players(int _);
+void __fastcall DP_session_enable_new_players();
 HRESULT __fastcall DP_session_set_name(const char *name);
 void DP_session_close();
 BOOL __stdcall DP_enum_providers(GUID *lpguidSP, LPSTR lpSPName, DWORD dwMajorVersion, DWORD dwMinorVersion, LPVOID lpContext);
@@ -752,7 +752,7 @@ void __cdecl PROJ_mode_machinegun(Task *task);
 void __cdecl PROJ_mode_437690(Task *task);
 void __cdecl PROJ_mode_bow(Task *task);
 void __cdecl PROJ_mode_generic(Task *task);
-bool __fastcall HUNK_fix_pointers(void *data, LevelHunk *rllc);
+bool __fastcall HUNK_fix_pointers(void *data, RllcHunk *rllc);
 void __fastcall MSG_repair_bay(Task *receiver, Task *sender, TaskMessageType message, void *payload);
 void __cdecl UNIT_repair_bay_tick(Task *task);
 void __fastcall UNIT_mode_repair_bay_on_complete(Unit *unit);
@@ -814,7 +814,7 @@ int REND_43B836();
 void __fastcall REND_batch_transform(RenderBatch *batch);
 void __fastcall REND_batch_sort(RenderBatch *list);
 void REND_flush_and_cleanup();
-int __fastcall UI_button_wait_for_click(Task *task, ptrdiff_t anim, BOOL (*is_enabled)(), ptrdiff_t frame);
+int __fastcall UI_button_wait_for_click(Task *task, ptrdiff_t anim, BOOL (__fastcall *is_enabled)(), ptrdiff_t frame);
 void __cdecl FADE_in_task(Task *task);
 void GAME_fade_into_mission_async();
 void UI_lock();
@@ -1087,7 +1087,6 @@ int __fastcall BOXD_scan_walk_find_next_tile(Unit *unit);
 void __fastcall BOXD_wall_trace_step_simple(int *scan_x, int *scan_y, BOOL cw, Unit *unit, Direction *heading);
 BOOL __fastcall BOXD_wall_trace_step_advanced(int *scan_x, int *scan_y, BOOL cw, Unit *unit, Direction *heading);
 void OS_message_pump();
-int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 Movie *__cdecl MOVIE_read_file(const char *filename);
 void __cdecl MOVIE_free_buffers(Movie *movie);
 __int16 __cdecl VBC_decode_next_frame(Movie *movie);
@@ -1843,7 +1842,11 @@ int g_direction_y_deltas[8] = { -1, -1, 0, 1, 1, 1, 0, -1 };
 int g_hinted_unit_id = -1; // weak
 
 void __fastcall REND_mode_null(){}
-BlitterDesc g_blitter_table = { 'SPRT', REND_mode_sprt_setup, REND_mode_sprt_draw, REND_mode_null };
+BlitterDesc g_blitter_table[] = {
+  { 'SPRT', REND_mode_sprt_setup, REND_mode_sprt_draw, REND_mode_null },
+  { 'SCRL', REND_mode_scrl_setup, REND_mode_scrl_draw, REND_mode_null },
+};
+
 uint8_t g_healthbar_fill_color_top[8] = { 145u, 146u, 173u, 172u, 175u, 0u, 0u, 0u };
 uint8_t g_healthbar_fill_color_bottom[8] = { 144u, 145u, 239u, 223u, 174u, 0u, 0u, 0u };
 uint8_t g_healthbar_border_color_top[4] = { 166u, 170u, 145u, 172u };
@@ -4267,9 +4270,9 @@ NetzProvider g_netz_providers[3] =
 char g_ui_multi_player_name[] = "PLAYER";
 char g_netz_player_palette = '\0'; // weak
 int g_netz_player_flags = 0; // weak
-const GUID DPSPGUID_IPX = { 1750844416u, 40236u, 4559u, { 169u, 205u, 0u, 170u, 0u, 104u, 134u, 227u } };
-const GUID DPSPGUID_MODEM = { 1156228960u, 52072u, 4559u, { 156u, 78u, 0u, 160u, 201u, 5u, 66u, 94u } };
-const GUID DPSPGUID_SERIAL = { 253585504u, 35033u, 4559u, { 156u, 78u, 0u, 160u, 201u, 5u, 66u, 94u } };
+// DPSPGUID_IPX / DPSPGUID_MODEM / DPSPGUID_SERIAL are declared by <dplay.h> and
+// defined in dxguid.lib (values verified identical to the decompiled ones), so we
+// no longer define them here (avoids duplicate-symbol at link).
 int g_netz_current_connecting_slot = -1; // weak
 const char aNoFreeLinks[14] = "no free links";
 BuildingStartingProduction g_surv_default_buildings[5] =
@@ -5383,7 +5386,7 @@ char static_479F38[128]; // idb
 LevelId g_saveload_level_id;
 BOOL g_is_game_loading;
 BOOL g_is_game_saving;
-int dword_479FC4[]; // weak
+int dword_479FC4[1]; // weak (tentative->1 elem)
 TechLevels g_machineshop_levels;
 char g_app_root[20]; // idb
 LevelHunk *g_level;
@@ -5420,7 +5423,7 @@ BOOL g_nocd;
 BOOL g_no_shroud;
 BOOL g_unit_stats_override;
 int g_num_enemy_waves_remaining;
-int _bug_47A2FC_neg1_index[]; // weak
+int _bug_47A2FC_neg1_index[1]; // weak (tentative->1 elem)
 Vec2 g_multi_bunker_spawn_positions[2];
 int g_num_ally_waves_remaining;
 CplcPlayerSpawn g_multi_player_spawn_positions[6];
@@ -5508,7 +5511,7 @@ Unit *g_player_bases[4];
 SidebarFactoryProduction *g_sidebar_buildings_prod; // idb
 SidebarFactoryProduction *g_sidebar_aircraft_prod; // idb
 BOOL g_buildings_suspended;
-int dword_47B3DC[]; // weak
+int dword_47B3DC[1]; // weak (tentative->1 elem)
 TechLevels g_outpost_levels;
 PaletteEntry g_pal_hw_buf[256];
 PALETTEENTRY g_dd_palette[256];
@@ -5687,9 +5690,9 @@ MapdScrlImageTile *g_fog_of_war_tile9;
 MapdScrlImageTile *g_fog_of_war_tile2;
 int dword_47CBC0[256];
 MapdScrlImageTile *g_shroud_clear;
-int dword_47CFC4[]; // weak
+int dword_47CFC4[1]; // weak (tentative->1 elem)
 int g_orientation_to_sin[256];
-int _47D3C4_bugged[]; // weak
+int _47D3C4_bugged[1]; // weak (tentative->1 elem)
 int g_angle_to_orientation[256];
 unsigned __int8 pal_47D7C8_static_prolly_unused[256];
 MissionDiplomacyTable g_diplomacy;
@@ -5807,6 +5810,41 @@ MultiUnitSpawn g_kaos_starting_units_surv[20] =
   { UnitType_Invalid, 0, 0 }
 };
 
+//----- (00402900) --------------------------------------------------------
+void __fastcall UNIT_mode_blacksmith_on_death(Unit *unit) {
+  UINT_mode_building_exploding(unit);
+}
+
+//----- (00448310) --------------------------------------------------------
+void __fastcall TURRET_mode_null(Turret *turret) {
+  (void)turret;
+  ;
+}
+
+//----- (00417F50) --------------------------------------------------------
+void __fastcall UNIT_mode_rebuild_path(Unit *unit) {
+  UNIT_mode_build_path(unit);
+}
+
+//----- (0042FB50) --------------------------------------------------------
+void NETZ_session_close() {
+  DP_session_close();
+}
+
+//----- (0042FB10) --------------------------------------------------------
+void NETZ_resend_to_player(int slot, BOOL a2) {
+  DP_send_to_player(slot, a2);
+}
+
+//----- (0042FB20) --------------------------------------------------------
+void NETZ_disable_joining() {
+  DP_session_disable_new_players();
+}
+
+//----- (0042FB40) --------------------------------------------------------
+void NETZ_session_set_name(const char *name) {
+  DP_session_set_name(name);
+}
 
 //----- (00401000) --------------------------------------------------------
 BOOL UNIT_bomber_init()
@@ -5828,6 +5866,10 @@ BOOL UNIT_bomber_init()
   g_bomber_active_head = (Bomber *)&g_bomber_active_head;
   g_bomber_active_tail = (Bomber *)&g_bomber_active_head;
   return 1;
+}
+
+void __cdecl mode_null(Task *task) {
+  (void)task;
 }
 
 //----- (00401060) --------------------------------------------------------
@@ -7198,6 +7240,13 @@ void __cdecl TSK_execute_async(Coroutine *next)
 __attribute__((naked, noinline, cdecl))
 void TSK_execute_async(Coroutine *next)
 {
+  // On 32-bit Windows, C globals are emitted with a leading underscore; decorate
+  // the symbol names referenced from asm so lld resolves them without a fixup warning.
+#if defined(_WIN32)
+#  define ASM_SYM(s) "_" s
+#else
+#  define ASM_SYM(s) s
+#endif
   __asm__ volatile (
     // [esp+4] : next
     "pushl %ebp\n\t"
@@ -7208,11 +7257,11 @@ void TSK_execute_async(Coroutine *next)
     "pushl %esi\n\t"
     "pushl %edi\n\t"
 
-    "movl g_coroutine_current_stack, %esp\n\t"
+    "movl " ASM_SYM("g_coroutine_current_stack") ", %esp\n\t"
 
     // g_coroutine_current = eax
     // g_coroutine_current->stack (eax[8]) = g_coroutine_current_stack (esp)
-    "movl g_coroutine_current, %eax\n\t"
+    "movl " ASM_SYM("g_coroutine_current") ", %eax\n\t"
     "movl %esp, 8(%eax)\n\t"
 
     // ecx = next
@@ -7221,11 +7270,14 @@ void TSK_execute_async(Coroutine *next)
     "movl %eax, 0(%ecx)\n\t"
 
     // g_coroutine_current = next
-    // g_coroutine_current_stack = next->stack
-    "movl %ecx, g_coroutine_current\n\t"
-    "movl 8(%ecx), g_coroutine_current_stack\n\t"
+    "movl $" ASM_SYM("g_coroutine_current") ", %edx\n\t"       // edx = &g_coroutine_current
+    "movl %ecx, (%edx)\n\t"                      // g_coroutine_current = next
+    // g_coroutine_current_stack = next->stack  (via reg; x86 has no mem->mem mov)
+    "movl 8(%ecx), %eax\n\t"                     // eax = next->stack
+    "movl $" ASM_SYM("g_coroutine_current_stack") ", %edx\n\t" // edx = &g_coroutine_current_stack
+    "movl %eax, (%edx)\n\t"                      // g_coroutine_current_stack = next->stack
 
-    "movl g_coroutine_current_stack, %esp\n\t"
+    "movl " ASM_SYM("g_coroutine_current_stack") ", %esp\n\t"
 
     "popl %edi\n\t"
     "popl %esi\n\t"
@@ -7234,6 +7286,7 @@ void TSK_execute_async(Coroutine *next)
     "popl %ebp\n\t"
     "ret\n\t"
   );
+#undef ASM_SYM
 }
 #else
   x64 inline asm version
@@ -19331,8 +19384,8 @@ RenderBlitter *__fastcall REND_blitter_get(int hunk)
   if ( g_blitter_active_tail == (RenderBlitter *)&g_blitter_active_tail )
   {
 LABEL_4:
-    v2 = &g_blitter_table;
-    if ( g_blitter_table.hunk == hunk )
+    v2 = g_blitter_table;
+    if ( v2->hunk == hunk )
     {
 LABEL_7:
       result = g_blitter_free_head;
@@ -21017,7 +21070,7 @@ LABEL_31:
 }
 
 //----- (00412850) --------------------------------------------------------
-BOOL REND_mode_scrl_setup()
+BOOL __fastcall REND_mode_scrl_setup()
 {
   return 1;
 }
@@ -27642,7 +27695,7 @@ BOOL SYS_init()
     result = FILE_init();
     if ( result )
     {
-      result = REND_create_window(640, 480, 8, 1, 1);
+      result = REND_create_window(640, 480, 8, 1, false);
       if ( result )
       {
         g_window_initialized = 1;
@@ -27660,7 +27713,7 @@ LevelHunk *__fastcall LVL_load(const char *filename)
   LevelHunk *result; // eax
   File *v2; // esi
   LevelHunk *data; // ebx
-  LevelHunk *rllc; // edi
+  RllcHunk *rllc; // edi
 
   result = (LevelHunk *)FILE_open(filename);
   v2 = (File *)result;
@@ -27671,7 +27724,7 @@ LevelHunk *__fastcall LVL_load(const char *filename)
     if ( result )
     {
       result = FILE_read_hunk(v2);
-      rllc = result;
+      rllc = (RllcHunk *)result;
       if ( result )
       {
         FILE_close(v2);
@@ -28579,7 +28632,7 @@ LABEL_22:
 }
 
 //----- (0041BE90) --------------------------------------------------------
-BoxdRaycastStepResult __fastcall BOXD_raycast_classify_step(
+BoxdRaycastStepResult __fastcall BOXD_path_builder_classify_step(
         BoxdRaycastPhase *phase,
         BoxdPathingClassification boxd_class,
         BOOL *is_tile_blocked,
@@ -29930,7 +29983,7 @@ LABEL_156:
   data->last_stuck_tile_y = unit->last_stuck_tile_y;
   data->stuck_timer = unit->stuck_timer;
   type = unit->type;
-  switch ( type )
+  switch ( (unsigned int)type )
   {
     case UnitType_Surv_Tanker:
     case UnitType_Mute_Tanker:
@@ -33684,7 +33737,7 @@ BOOL GAME_save()
       else
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case UnitType_Surv_Tanker:
           case UnitType_Mute_Tanker:
@@ -35166,7 +35219,7 @@ LABEL_5:
       {
         if ( g_netz_is_game_host )
         {
-          NETZ_enable_joining(0);
+          NETZ_enable_joining();
           v1 = MenuId_HostGame;
         }
         else
@@ -38120,7 +38173,7 @@ void __cdecl MISSION_reinforcements_task(Task *task)
   entity->is_collidable = 1;
   x = task->entity->x;
   cmd = &g_mapd_layers_rns[0]->rn->cmd;
-  if ( x < (REND_get_width(cmd) + 0xFFFFC0) << 8 )
+  if ( x < (unsigned int)((REND_get_width(cmd) + 0xFFFFC0) << 8) )
   {
     if ( x <= 0x40 )
       x = 0;
@@ -38129,7 +38182,7 @@ void __cdecl MISSION_reinforcements_task(Task *task)
   {
     x = (REND_get_width(cmd) << 8) - 64;
   }
-  if ( y < (unsigned int)((REND_get_height(cmd) + 0xFFFFC0) << 8) )
+  if ( (unsigned int)y < (unsigned int)((REND_get_height(cmd) + 0xFFFFC0) << 8) )
   {
     if ( (unsigned int)y <= 0x40 )
       y = 0;
@@ -38763,7 +38816,7 @@ void __fastcall ENT_anim_hot_swap(Entity *entity, ptrdiff_t anim)
   if ( anim_ )
   {
     v6 = (MobdAnimation *)((char *)g_mobd[entity->mobd_id].layers[0] + anim);
-    v7 = (MobdAnimation *)((char *)v6 + (char *)entity->anim_cursor - (char *)anim_);
+    v7 = (MobdAnimation *)((char *)v6 + ((char *)entity->anim_cursor - (char *)anim_));
     entity->anim = v6;
     entity->anim_cursor = v7;
     frame = (MobdAnimFrame *)v7->anim_speed;// BUG (????)
@@ -39114,6 +39167,8 @@ void __fastcall UNIT_mode_mobile_base_pre_idle(Unit *unit)
 //----- (004278D0) --------------------------------------------------------
 void __fastcall MSG_mobile_base(Task *receiver, Task *sender, TaskMessageType message, void *payload)
 {
+  (void)sender;
+
   Unit *unit; // esi
 
   unit = (Unit *)receiver->ctx;
@@ -39153,6 +39208,14 @@ void __fastcall MSG_mobile_base(Task *receiver, Task *sender, TaskMessageType me
         return;
     }
   }
+}
+
+//----- (004279D0) --------------------------------------------------------
+void __fastcall MSG_noop(Task *receiver, Task *sender, TaskMessageType message, void *payload) {
+  (void)receiver;
+  (void)sender;
+  (void)message;
+  (void)payload;
 }
 
 //----- (004279E0) --------------------------------------------------------
@@ -39947,20 +40010,20 @@ size_t SAVE_constructs_get_pack_size()
 BOOL __fastcall SAVE_pack_constructs(ConstructSaveStruct *data)
 {
   Construct *v1; // eax
-  ConstructSaveStruct *__shifted(ConstructSaveStruct,8) p; // ecx
+  ConstructSaveStruct * p; // ecx
 
   v1 = g_constructs_head;
   if ( g_constructs_head != (Construct *)&g_constructs_head )
   {
-    p = (ConstructSaveStruct *__shifted(ConstructSaveStruct,8))&data->stage;
+    p = data;
     do
     {
-      ADJ(p)->unit_id = v1->unit_id;
-      ADJ(p)->player_num = v1->player_num;
-      ADJ(p)->stage = v1->stage;
-      ADJ(p)->cost = v1->cost;
-      ADJ(p)->remaining_cost = v1->remaining_cost;
-      ADJ(p)->cost_per_tick = v1->cost_per_tick;
+      p->unit_id = v1->unit_id;
+      p->player_num = v1->player_num;
+      p->stage = v1->stage;
+      p->cost = v1->cost;
+      p->remaining_cost = v1->remaining_cost;
+      p->cost_per_tick = v1->cost_per_tick;
       v1 = v1->next;
       ++p;
     }
@@ -39973,7 +40036,7 @@ BOOL __fastcall SAVE_pack_constructs(ConstructSaveStruct *data)
 BOOL __fastcall SAVE_unpack_constructs(ConstructSaveStruct *constructs, size_t byte_size)
 {
   size_t v2; // ebx
-  ConstructSaveStruct *__shifted(ConstructSaveStruct,8) i; // esi
+  ConstructSaveStruct * i; // esi
   Construct *v4; // eax
   Construct *v5; // edx
   __int32 remaining_cost; // ecx
@@ -39981,7 +40044,7 @@ BOOL __fastcall SAVE_unpack_constructs(ConstructSaveStruct *constructs, size_t b
   v2 = byte_size;
   if ( !byte_size )
     return 1;
-  for ( i = (ConstructSaveStruct *__shifted(ConstructSaveStruct,8))&constructs->stage; ; ++i )
+  for ( i = constructs; ; ++i )
   {
     v4 = g_constructs_free_head;
     if ( g_constructs_free_head )
@@ -39995,12 +40058,12 @@ BOOL __fastcall SAVE_unpack_constructs(ConstructSaveStruct *constructs, size_t b
     v4->next = v5;
     g_constructs_head->prev = v4;
     g_constructs_head = v4;
-    v4->unit_id = ADJ(i)->unit_id;
-    v4->player_num = ADJ(i)->player_num;
-    v4->stage = ADJ(i)->stage;
-    v4->cost = ADJ(i)->cost;
-    v4->cost_per_tick = ADJ(i)->cost_per_tick;
-    remaining_cost = ADJ(i)->remaining_cost;
+    v4->unit_id = i->unit_id;
+    v4->player_num = i->player_num;
+    v4->stage = i->stage;
+    v4->cost = i->cost;
+    v4->cost_per_tick = i->cost_per_tick;
+    remaining_cost = i->remaining_cost;
     v4->remaining_cost = remaining_cost;
     if ( remaining_cost )
       PROD_enqueue_one_ex(
@@ -40187,11 +40250,11 @@ void __cdecl CURSOR_loop_and_game_events(Task *task)
     {
       last_key_scancode = g_game_keyboard_state.last_key_scancode;
       if ( g_key_modifier != Scancode_Ctrl
-        || g_game_keyboard_state.last_key_scancode != Scancode_Q
+        || (g_game_keyboard_state.last_key_scancode != Scancode_Q
         && g_game_keyboard_state.last_key_scancode != Scancode_W
         && g_game_keyboard_state.last_key_scancode != Scancode_T
-        && g_game_keyboard_state.last_key_scancode != Scancode_M
-        || g_game_keyboard_state.last_key_scancode == Scancode_M && g_is_single_player
+        && g_game_keyboard_state.last_key_scancode != Scancode_M)
+        || (g_game_keyboard_state.last_key_scancode == Scancode_M && g_is_single_player)
         || g_game_keyboard_state.last_key_scancode != Scancode_M
         || g_is_single_player )
       {
@@ -40252,7 +40315,7 @@ LABEL_165:
                       if ( g_game_event_free_head )
                       {
                         g_game_event_free_head = g_game_event_free_head->next;// INLINED (???) 429770 CURSOR_event_enqueue
-                        memcpy(&v53->evt, &g_game_event_queue.evt, sizeof(GameEvent))
+                        memcpy(&v53->evt, &g_game_event_queue.evt, sizeof(GameEvent));
                         v53->next = nullptr;
                         if ( g_game_event_queue.next )
                         {
@@ -40361,7 +40424,7 @@ LABEL_165:
                 }
               }
               else if ( !v7
-                     && (last_key_scancode - 2 != g_last_ctrl_group_key
+                     && (last_key_scancode - 2 != (unsigned int)g_last_ctrl_group_key
                       || (g_game_keyboard_state.new_actions_mask & Keyboard_Numeric) != 0) )
               {
                 CURSOR_select_control_group(&cursor, last_key_scancode - 1);
@@ -41154,7 +41217,7 @@ void __fastcall CURSOR_on_unit_selected(CursorState *cursor, Unit *unit)
       {
         v13 = g_sfx_vol;
         v7 = GAME_rand_local();
-        SOUND_play(g_futuristic_units_recall[(int)abs32(v7) % 2], 0, v13, 16, nullptr);
+        SOUND_play(g_futuristic_units_recall[(int)abs(v7) % 2], 0, v13, 16, nullptr);
         cursor->unit_type_to_voice_response = unit->type;
       }
       break;
@@ -41346,7 +41409,7 @@ void __fastcall CURSOR_unit_orders(CursorState *cursor)
   if ( g_game_keyboard_state.last_key_scancode >= Scancode_1
     && g_game_keyboard_state.last_key_scancode <= Scancode_0
     && g_key_modifier == Scancode_Ctrl
-    && g_game_keyboard_state.last_key_scancode - 2 != g_last_assigned_control_group )
+    && g_game_keyboard_state.last_key_scancode - 2 != (unsigned int)g_last_assigned_control_group )
   {
     selection_head = (CursorState *)cursor->selection_head;
     v4 = g_game_keyboard_state.last_key_scancode - 1;
@@ -41357,7 +41420,7 @@ void __fastcall CURSOR_unit_orders(CursorState *cursor)
       {
         v6 = *((_BYTE *)selection_head->_cursor_state_task_8->ctx + v5 + 660);
         if ( v6 > 0 && v6 < 11 )
-          --g_num_units_in_group[v6];
+          --g_num_units_in_group[(int)v6];
         ++g_num_units_in_group[v4];
         selection_head = (CursorState *)selection_head->selection_head;
       }
@@ -41473,10 +41536,10 @@ LABEL_234:
      && (unit->player_num != g_player_num || *((__int16 *)unit->state + 7) < 5);
   selection_executing_archetype = cursor->selection_executing_archetype;
   if ( selection_executing_archetype
-    && ((int)selection_executing_archetype >= (int)UnitCommandArchetype_Tanker
-     && (int)selection_executing_archetype <= (int)UnitCommandArchetype_Technician
-     || (int)selection_executing_archetype >= (int)UnitCommandArchetype_MobileBase
-     && (int)selection_executing_archetype <= (int)UnitCommandArchetype_MobileDerrick) )
+    && (((int)selection_executing_archetype >= (int)UnitCommandArchetype_Tanker
+     && (int)selection_executing_archetype <= (int)UnitCommandArchetype_Technician)
+     || ((int)selection_executing_archetype >= (int)UnitCommandArchetype_MobileBase
+     && (int)selection_executing_archetype <= (int)UnitCommandArchetype_MobileDerrick)) )
   {
     v11 = 0;
   }
@@ -41518,7 +41581,7 @@ LABEL_234:
             {
               do
               {
-                p_next = &v25->next;
+                p_next = (GameEventNode **)v25;
                 v25 = v25->next;
               }
               while ( v25 );
@@ -41720,7 +41783,7 @@ LABEL_108:
     {
       do
       {
-        v42 = &v41->next;
+        v42 = (GameEventNode **)v41;
         v41 = v41->next;
       }
       while ( v41 );
@@ -41766,7 +41829,7 @@ LABEL_108:
         {
           do
           {
-            v46 = &v45->next;
+            v46 = (GameEventNode **)v45;
             v45 = v45->next;
           }
           while ( v45 );
@@ -41815,7 +41878,7 @@ LABEL_149:
         {
           do
           {
-            v50 = &v49->next;
+            v50 = (GameEventNode **)v49;
             v49 = v49->next;
           }
           while ( v49 );
@@ -42161,10 +42224,10 @@ void __fastcall CURSOR_move_order(CursorState *cursor)
     type = selection_executing_representative->type;
     if ( (int)type < (int)UnitType_Surv_Drillrig || (int)type > (int)UnitType_Wall4 )
     {
-      if ( (int)type >= (int)UnitType_Gort && (int)type <= (int)UnitType_Mech
-        || (unit_type_to_voice_response = cursor->unit_type_to_voice_response,
+      if ( ((int)type >= (int)UnitType_Gort && (int)type <= (int)UnitType_Mech)
+        || ((unit_type_to_voice_response = cursor->unit_type_to_voice_response,
             (int)unit_type_to_voice_response >= (int)UnitType_Gort)
-        && (int)unit_type_to_voice_response <= (int)UnitType_Mech )
+        && (int)unit_type_to_voice_response <= (int)UnitType_Mech) )
       {
         v21 = g_sfx_vol;
         v9 = g_futuristic_units_move[GAME_rand_local() % 22];
@@ -42217,7 +42280,7 @@ void __fastcall CURSOR_move_order(CursorState *cursor)
               if ( v11->veterancy )
               {
                 v12 = GAME_rand_local();
-                SOUND_play(g_surv_generic_veteran_move[(int)abs32(v12) % 2], 0, v22, 16, nullptr);
+                SOUND_play(g_surv_generic_veteran_move[(int)abs(v12) % 2], 0, v22, 16, nullptr);
               }
               else
               {
@@ -42247,12 +42310,12 @@ void __fastcall CURSOR_move_order(CursorState *cursor)
 LABEL_46:
           v25 = g_sfx_vol;
           v16 = GAME_rand_local();
-          SOUND_play(g_mute_generic_veteran_move[(int)abs32(v16) % 2], 0, v25, 16, nullptr);
+          SOUND_play(g_mute_generic_veteran_move[(int)abs(v16) % 2], 0, v25, 16, nullptr);
           goto LABEL_53;
         }
         v26 = g_sfx_vol;
         v17 = GAME_rand_local();
-        SOUND_play(g_mute_generic_rookie_move[(int)abs32(v17) % 2], 0, v26, 16, nullptr);
+        SOUND_play(g_mute_generic_rookie_move[(int)abs(v17) % 2], 0, v26, 16, nullptr);
       }
 LABEL_53:
       v18 = ENT_create(MobdId_Cursors, nullptr, nullptr);
@@ -42509,7 +42572,7 @@ void __fastcall CURSOR_process_game_events(CursorState *cursor, BOOL process_ui_
           {
             do
             {
-              p_next = &v15->next;
+              p_next = (GameEventNode **)v15;
               v15 = v15->next;
             }
             while ( v15 );
@@ -42810,7 +42873,7 @@ LABEL_82:
     type = msg->type;
     if ( (int)type > (int)TaskMessage_RepairTick )// INLINED MSG_
     {
-      switch ( type )
+      switch ( (unsigned int)type )
       {
         case TaskMessage_UnitDeselected_or_SaveLoadScrollDown_or_ShowNotificationBox:
           v56 = g_constructs_head;
@@ -42956,7 +43019,7 @@ LABEL_169:
               goto LABEL_209;
             do
             {
-              v73 = &v72->next;
+              v73 = (GameEventNode **)v72;
               v72 = v72->next;
             }
             while ( v72 );
@@ -42983,7 +43046,7 @@ LABEL_169:
               goto LABEL_209;
             do
             {
-              v79 = &v78->next;
+              v79 = (GameEventNode **)v78;
               v78 = v78->next;
             }
             while ( v78 );
@@ -43015,7 +43078,7 @@ LABEL_169:
           v67 = (Unit *)msg->payload;
           *(int *)g_game_event_queue.evt.payload = v67->locked_target->unit_id;
           v45 = g_game_event_queue.next;
-          *(int *)&g_game_event_queue.evt.payload[4] = v67->task;
+          *(Task **)&g_game_event_queue.evt.payload[4] = v67->task;
           g_game_event_queue.evt.type = GameEvent_UnitProduced;// INLINED
           v46 = g_game_event_free_head;
           if ( g_game_event_free_head )
@@ -43034,7 +43097,7 @@ LABEL_169:
               goto LABEL_209;
             do
             {
-              v70 = &v69->next;
+              v70 = (GameEventNode **)v69;
               v69 = v69->next;
             }
             while ( v69 );
@@ -43044,7 +43107,7 @@ LABEL_169:
         case TaskMessage_UpgradeComplete:
           g_game_event_queue.evt.type = GameEvent_UpgradeCompleted;// INLINED
           v46 = g_game_event_free_head;
-          *(int *)g_game_event_queue.evt.payload = msg->payload;
+          *(int *)g_game_event_queue.evt.payload = (int)msg->payload;
           v45 = g_game_event_queue.next;
           if ( g_game_event_free_head )
           {
@@ -43062,7 +43125,7 @@ LABEL_169:
               goto LABEL_209;
             do
             {
-              v76 = &v75->next;
+              v76 = (GameEventNode **)v75;
               v75 = v75->next;
             }
             while ( v75 );
@@ -43096,7 +43159,7 @@ LABEL_169:
           {
             do
             {
-              v49 = &v48->next;
+              v49 = (GameEventNode **)v48;
               v48 = v48->next;
             }
             while ( v48 );
@@ -43119,7 +43182,7 @@ LABEL_210:
     {
       v43 = (Task *)msg->payload;
       channel = v43->channel;
-      if ( channel == TaskChannel_Units || channel >= TaskChannel_Outpost && channel < TaskChannel_unused_CA000014 )
+      if ( channel == TaskChannel_Units || (channel >= TaskChannel_Outpost && channel < TaskChannel_unused_CA000014))
       {
         cursor->hovered_unit_task = v43;
       }
@@ -43233,8 +43296,8 @@ int __fastcall CURSOR_building_planner_ghost(
             goto LABEL_15;
         }
         v15 = building_at_tile->type;
-        if ( v15 != UnitType_Surv_Drillrig && v15 != UnitType_Mute_Drillrig
-          || (int)type >= (int)UnitType_Surv_GuardTower && (int)type <= (int)UnitType_Mute_RotaryCannon )
+        if ( ((v15 != UnitType_Surv_Drillrig && v15 != UnitType_Mute_Drillrig)
+          || ((int)type >= (int)UnitType_Surv_GuardTower && (int)type <= (int)UnitType_Mute_RotaryCannon)) )
         {
           v21 = 1;
         }
@@ -43603,7 +43666,7 @@ LABEL_57:
   if ( g_game_event_free_head )
   {
     g_game_event_free_head = g_game_event_free_head->next;
-    memcpy(&v29->evt, &g_game_event_queue.evt, sizeof(GameEvent))
+    memcpy(&v29->evt, &g_game_event_queue.evt, sizeof(GameEvent));
     v29->next = nullptr;
     if ( g_game_event_queue.next )
     {
@@ -43742,6 +43805,8 @@ void __cdecl UI_sidebar_tooltip(Task *task)
 //----- (0042D220) --------------------------------------------------------
 void __fastcall NETZ_multi_chat_input_cb(const char *text, int cursor_pos)
 {
+  (void)cursor_pos;
+
   UI_str_clear(g_netz_multi_chat_message);
   g_netz_multi_chat_message->cursor_col = 0;
   g_netz_multi_chat_message->cursor_row = 0;
@@ -43810,7 +43875,7 @@ void __fastcall UI_render_string(UiStr *str, const char *text, void *_unused)
           if ( _unused )
             v13 = *((MobdAnimFrame **)_unused + *v4 + 1);
           else
-            v13 = (MobdAnimFrame *)str->font->glyphs[*v4];// BUG
+            v13 = (MobdAnimFrame *)str->font->glyphs[(int)*v4];// BUG
           glyphs->rn->cmd.image = (RenderImage *)v13->sprt;
           glyphs->rn->cmd.y = v17 - v13->y;
           glyphs->rn->cmd.x = x - v13->x;
@@ -43991,6 +44056,11 @@ __int16 __cdecl MATH_direction_to_orientation(int x, int y)
   }
 }
 
+//----- (0042D639) --------------------------------------------------------
+__int16 __fastcall MATH_atan_swapped(int minor, int major) {
+  return MATH_atan(major, minor);
+}
+
 //----- (0042D63B) --------------------------------------------------------
 __int16 __fastcall MATH_atan(int major, int minor)
 {
@@ -44008,7 +44078,7 @@ int __cdecl MATH_vec2_length(int x, int y)
 int __cdecl MATH_isqrt(unsigned int v)
 {
   int result; // eax
-  unsigned int v2; // ecx
+  unsigned long v2; // ecx
   int v3; // ecx
   unsigned int v4; // ebx
   int v5; // edx
@@ -44043,6 +44113,8 @@ void __fastcall MSG_ai_controller_mute08_mash_the_convoy(
         TaskMessageType message,
         Unit *payload)                    // BUG void* but typing is easier this way
 {
+  (void)sender;
+
   AiController *ai; // esi
   AiEnemyNode *enemy_free_head; // eax
   AiEnemyNode *enemy_head; // edx
@@ -44424,11 +44496,11 @@ void __cdecl AI_controller_tick_mute08_smash_the_convoy_impl(Task *task)
           if ( v18 )
           {
             v18->next = ai->attack_squad_head;
-            *((int *)v4->ctx2 + 1) = &ai->attack_squad_head;
+            *((int *)v4->ctx2 + 1) = (int)&ai->attack_squad_head;
             ai->attack_squad_head->prev = (AiSquadNode *)v4->ctx2;
             ai->attack_squad_head = (AiSquadNode *)v4->ctx2;
-            *((int *)v4->ctx2 + 3) = (char *)v4->ctx2 + 12;
-            *((int *)v4->ctx2 + 4) = (char *)v4->ctx2 + 12;
+            *((int *)v4->ctx2 + 3) = (int)((char *)v4->ctx2 + 12);
+            *((int *)v4->ctx2 + 4) = (int)((char *)v4->ctx2 + 12);
             *((int *)v4->ctx2 + 7) = 0;
           }
         }
@@ -44442,8 +44514,8 @@ void __cdecl AI_controller_tick_mute08_smash_the_convoy_impl(Task *task)
         convoy_escort_head->prev->next = convoy_escort_head->next;
         convoy_escort_head->next = *((AiAttackerNode **)v4->ctx2 + 3);
         convoy_escort_head->prev = (AiAttackerNode *)((char *)v4->ctx2 + 12);
-        *(int *)(*((int *)v4->ctx2 + 3) + 4) = convoy_escort_head;
-        *((int *)v4->ctx2 + 3) = convoy_escort_head;
+        *(int *)(*((int *)v4->ctx2 + 3) + 4) = (int)convoy_escort_head;
+        *((int *)v4->ctx2 + 3) = (int)convoy_escort_head;
         convoy_escort_head = prev;
       }
     }
@@ -44466,6 +44538,8 @@ void __fastcall MSG_ai_controller_mute05_ambush(
         TaskMessageType message,
         Unit *payload)                    // BUG void* but typing is easier this way
 {
+  (void)sender;
+
   AiController *ai; // esi
   AiEnemyNode *enemy_free_head; // eax
   AiEnemyNode *enemy_head; // edx
@@ -44793,7 +44867,7 @@ void __fastcall AI_process_wanderers(AiController *ai)
   for ( j = ai->active_wanderer_head; j != (AiWandererNode *)&ai->active_wanderer_head; j = j->next )
   {
     v9 = j->unit;
-    if ( !v9->locked_target && !v9->order_target || v9->mode == UNIT_mode_combatant_idle_tick )
+    if ( (!v9->locked_target && !v9->order_target) || v9->mode == UNIT_mode_combatant_idle_tick )
     {
       nearest_enemy = AI_find_nearest_enemy(ai, j->unit, &distance);// INLINED 42E030 AI_find_and_engage_nearest_enemy
       if ( nearest_enemy )
@@ -44811,12 +44885,12 @@ void __fastcall AI_process_wanderers(AiController *ai)
 //----- (0042E170) --------------------------------------------------------
 BOOL __fastcall NETZ_local_player_init(NetzProtocol protocol, const char *name)
 {
-  NetzPlayer *__shifted(NetzPlayer,0x18) player; // eax
+  NetzPlayer * player; // eax
   clock_t v3; // eax
   int v4; // esi
   int slot; // edx
   int v6; // ecx
-  NetzPlayer *__shifted(NetzPlayer,1) player_; // eax
+  NetzPlayer * player_; // eax
   int v8; // esi
   int v9; // edx
   char pal; // cl
@@ -44840,13 +44914,13 @@ BOOL __fastcall NETZ_local_player_init(NetzProtocol protocol, const char *name)
   g_netz_is_game_started = 0;
   g_netz_game_start_signal = 0;
   g_num_multi_players = 0;
-  player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+  player = &g_netz_players[1];
   do
   {
-    ADJ(player)->connection_status = NetzConnection_None;
-    ADJ(player++)->synced = 1;
+    player->connection_status = NetzConnection_None;
+    (player++)->synced = 1;
   }
-  while ( (int)player < (int)&g_join_pkt );     // BUG
+  while ( (int)player + 0x18 < (int)&g_join_pkt );     // BUG
   v3 = clock();
   srand(v3);
   v4 = 0;
@@ -44864,15 +44938,15 @@ BOOL __fastcall NETZ_local_player_init(NetzProtocol protocol, const char *name)
   g_netz_local_player_slot = slot;
   memset(v23, 0, sizeof(v23));
   v6 = 0;
-  player_ = (NetzPlayer *__shifted(NetzPlayer,1))&g_netz_players[1].palette_idx;
+  player_ = &g_netz_players[1];
   do
   {
-    if ( ADJ(player_)->connection_status && v6 != slot )
-      v23[ADJ(player_)->palette_idx] = NetzProtocol_IPX;
+    if ( player_->connection_status && v6 != slot )
+      v23[(int)player_->palette_idx] = NetzProtocol_IPX;
     ++player_;
     ++v6;
   }
-  while ( (int)player_ < (int)((char *)&g_netz_game_start_signal + 1) );// BUG
+  while ( (int)player_ + 1 < (int)((char *)&g_netz_game_start_signal + 1) );// BUG
   v8 = 0;
   v9 = rand() % 15;
   while ( v23[v9] )
@@ -44928,9 +45002,9 @@ void NETZ_disconnect()
 {
   UINT v0; // eax
   Coroutine *v1; // et1
-  UINT v2; // eax
+  UINT v2 = 0; // eax
   Coroutine *v3; // et1
-  _UNKNOWN *retaddr; // [esp+0h] [ebp+0h] BYREF
+  void *retaddr; // [esp+0h] [ebp+0h] BYREF
 
   g_coroutine_eax = v0;                         // BUG main thread guard
   v1 = g_coroutine_current;
@@ -44991,16 +45065,16 @@ BOOL __fastcall NETZ_session_exists(int player)
 //----- (0042E450) --------------------------------------------------------
 void __fastcall NETZ_send_roster(NetzPacketType pkt, bool wait_for_ack)
 {
-  UINT v2; // eax
+  UINT v2 = 0; // eax
   Coroutine *v3; // et1
   int v4; // eax
-  NetzRosterPlayer *__shifted(NetzRosterPlayer,0xD) i; // ebx
-  NetzPlayer *__shifted(NetzPlayer,0x18) player_; // edx
+  NetzRosterPlayer * i; // ebx
+  NetzPlayer * player_; // edx
   uint8_t *v7; // edi
   char *v8; // esi
   char v9; // cl
   unsigned __int32 v10; // edi
-  NetzPlayer *__shifted(NetzPlayer,0x10) player__; // esi
+  NetzPlayer * player__; // esi
   int player; // ecx
   unsigned __int32 v13; // ebx
   int v14; // edx
@@ -45028,47 +45102,47 @@ void __fastcall NETZ_send_roster(NetzPacketType pkt, bool wait_for_ack)
   if ( g_netz_is_game_host )
   {
     v4 = g_num_multi_players;
-    i = (NetzRosterPlayer *__shifted(NetzRosterPlayer,0xD))&roster.players[0].palette;
+    i = &roster.players[0];
     roster.num_players = g_num_multi_players;
-    player_ = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+    player_ = &g_netz_players[1];
     do
     {
-      if ( ADJ(player_)->connection_status && ADJ(player_)->synced )
+      if ( player_->connection_status && player_->synced )
       {
-        v4 = strlen(ADJ(player_)->name) + 1;
-        v23 = (int)ADJ(i)->name;
-        ADJ(i)->present = 1;
-        memcpy(ADJ(i)->name, ADJ(player_)->name, 4 * ((unsigned int)v4 >> 2));
-        v8 = &ADJ(player_)->name[4 * ((unsigned int)v4 >> 2)];
-        v7 = &ADJ(i)->name[4 * ((unsigned int)v4 >> 2)];
+        v4 = strlen(player_->name) + 1;
+        v23 = (int)i->name;
+        i->present = 1;
+        memcpy(i->name, player_->name, 4 * ((unsigned int)v4 >> 2));
+        v8 = &player_->name[4 * ((unsigned int)v4 >> 2)];
+        v7 = &i->name[4 * ((unsigned int)v4 >> 2)];
         v9 = v4;
-        LOBYTE(v4) = ADJ(player_)->faction;     // BUG
+        LOBYTE(v4) = player_->faction;     // BUG
         memcpy(v7, v8, v9 & 3);                // BUG 3 words = 12 memcpy
-        ADJ(i)->palette = ADJ(player_)->palette_idx;
-        ADJ(i)->faction = v4;
+        i->palette = player_->palette_idx;
+        i->faction = v4;
       }
       else
       {
-        ADJ(i)->present = 0;
+        i->present = 0;
       }
       ++player_;
       ++i;
     }
-    while ( (int)player_ < (int)&g_join_pkt );  // BUG
+    while ( (int)player_ + 0x18 < (int)&g_join_pkt );  // BUG
     v10 = 0;
-    player__ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+    player__ = &g_netz_players[1];
     do
     {
-      if ( ADJ(player__)->connection_status && v10 != g_netz_local_player_slot )
+      if ( player__->connection_status && v10 != (unsigned int)g_netz_local_player_slot )
       {
-        player = ADJ(player__)->slot;
+        player = player__->slot;
         roster.slot = v10;
         v4 = NETZ_send(player, pkt_, &roster, 0x64u, 1);
       }
       ++player__;
       ++v10;
     }
-    while ( (int)player__ < (int)&g_netz_msg_loop );// BUG
+    while ( (int)player__ + 0x10 < (int)&g_netz_msg_loop );// BUG
     LOBYTE(v4) = wait_for_ack_;
     if ( wait_for_ack_ )
     {
@@ -45128,21 +45202,21 @@ void __fastcall NETZ_send_roster(NetzPacketType pkt, bool wait_for_ack)
 //----- (0042E690) --------------------------------------------------------
 void __fastcall NETZ_broadcast_roster_on_game_start(NetzPacketType pkt)
 {
-  UINT v1; // eax
+  UINT v1 = 0; // eax
   Coroutine *v2; // et1
-  NetzRosterPlayer *__shifted(NetzRosterPlayer,0xD) i; // ebx
+  NetzRosterPlayer * i; // ebx
   unsigned int event_received_this_tick; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x18) player; // edx
+  NetzPlayer * player; // edx
   uint8_t *v6; // edi
   char *v7; // esi
   char v8; // cl
   unsigned __int32 v9; // edi
-  NetzPlayer *__shifted(NetzPlayer,0x18) player_; // esi
+  NetzPlayer * player_; // esi
   int slot; // ecx
   Coroutine *v12; // et1
   int v13; // [esp+0h] [ebp-78h] BYREF
   NetzRoster roster; // [esp+Ch] [ebp-6Ch] BYREF
-  uint8_t *name; // [esp+70h] [ebp-8h]
+  [[maybe_unused]] uint8_t *name; // [esp+70h] [ebp-8h]
   NetzPacketType pkta; // [esp+77h] [ebp-1h]
 
   pkta = pkt;
@@ -45150,48 +45224,48 @@ void __fastcall NETZ_broadcast_roster_on_game_start(NetzPacketType pkt)
   v2 = g_coroutine_current;
   if ( g_coroutine_list_head != v2 && ++g_coroutine_nesting_depth == 1 )
     g_coroutine_esp = &v13;
-  i = (NetzRosterPlayer *__shifted(NetzRosterPlayer,0xD))&roster.players[0].palette;
+  i = &roster.players[0];
   memset(&roster, 0, sizeof(roster));
   event_received_this_tick = g_num_multi_players;
-  player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+  player = &g_netz_players[1];
   roster.num_players = g_num_multi_players;
   do
   {
-    LOBYTE(event_received_this_tick) = ADJ(player)->connection_status;
-    if ( (_BYTE)event_received_this_tick && ADJ(player)->synced )
+    LOBYTE(event_received_this_tick) = player->connection_status;
+    if ( (_BYTE)event_received_this_tick && player->synced )
     {
-      event_received_this_tick = strlen(ADJ(player)->name) + 1;
-      name = ADJ(i)->name;
-      ADJ(i)->present = 1;
-      memcpy(ADJ(i)->name, ADJ(player)->name, 4 * (event_received_this_tick >> 2));
-      v7 = &ADJ(player)->name[4 * (event_received_this_tick >> 2)];
-      v6 = &ADJ(i)->name[4 * (event_received_this_tick >> 2)];
+      event_received_this_tick = strlen(player->name) + 1;
+      name = i->name;
+      i->present = 1;
+      memcpy(i->name, player->name, 4 * (event_received_this_tick >> 2));
+      v7 = &player->name[4 * (event_received_this_tick >> 2)];
+      v6 = &i->name[4 * (event_received_this_tick >> 2)];
       v8 = event_received_this_tick;
-      LOBYTE(event_received_this_tick) = ADJ(player)->faction;// BUG
+      LOBYTE(event_received_this_tick) = player->faction;// BUG
       memcpy(v6, v7, v8 & 3);                  // BUG 12 byte memcpy
-      ADJ(i)->palette = ADJ(player)->palette_idx;
-      ADJ(i)->faction = event_received_this_tick;
+      i->palette = player->palette_idx;
+      i->faction = event_received_this_tick;
     }
     else
     {
-      ADJ(i)->present = 0;
+      i->present = 0;
     }
     ++player;
     ++i;
   }
-  while ( (int)player < (int)&g_join_pkt );     // BUG
+  while ( (int)player + 0x18 < (int)&g_join_pkt );     // BUG
   v9 = 0;
-  player_ = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+  player_ = &g_netz_players[1];
   do
   {
-    if ( ADJ(player_)->connection_status == NetzConnection_Joined )
+    if ( player_->connection_status == NetzConnection_Joined )
     {
-      if ( ADJ(player_)->synced )
+      if ( player_->synced )
       {
-        event_received_this_tick = ADJ(player_)->event_received_this_tick;
+        event_received_this_tick = player_->event_received_this_tick;
         if ( !event_received_this_tick )
         {
-          slot = ADJ(player_)->slot;
+          slot = player_->slot;
           roster.slot = v9;
           event_received_this_tick = NETZ_send(slot, pkta, &roster, 0x64u, 1);
         }
@@ -45200,7 +45274,7 @@ void __fastcall NETZ_broadcast_roster_on_game_start(NetzPacketType pkt)
     ++player_;
     ++v9;
   }
-  while ( (int)player_ < (int)&g_join_pkt );    // BUG
+  while ( (int)player_ + 0x18 < (int)&g_join_pkt );    // BUG
   g_coroutine_eax = event_received_this_tick;
   v12 = g_coroutine_current;
   if ( g_coroutine_list_head != v12 )
@@ -45213,17 +45287,17 @@ void __fastcall NETZ_broadcast_roster_on_game_start(NetzPacketType pkt)
 BOOL NETZ_all_players_synced()
 {
   BOOL result; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x18) player; // ecx
+  NetzPlayer * player; // ecx
 
   result = 1;
   if ( g_netz_is_game_host && !g_is_single_player )
   {
     if ( g_num_multi_players != 1 )
     {
-      player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
-      while ( ADJ(player)->connection_status != NetzConnection_Joined || ADJ(player)->synced )
+      player = &g_netz_players[1];
+      while ( player->connection_status != NetzConnection_Joined || player->synced )
       {
-        if ( (int)++player >= (int)&g_join_pkt )// BUG
+        if ( (int)++player + 0x18 >= (int)&g_join_pkt )// BUG
           return result;
       }
     }
@@ -45248,31 +45322,31 @@ void NETZ_game_start()
 void __fastcall NETZ_msg_loop(NetzMessage *msg)
 {
   int v2; // edx
-  NetzPlayer *__shifted(NetzPlayer,0x18) player; // eax
+  NetzPlayer * player; // eax
   int v4; // ecx
-  NetzPlayer *__shifted(NetzPlayer,0x10) player_; // eax
+  NetzPlayer * player_; // eax
   int v6; // ebx
   const char *pkt_payload; // edi
   int v8; // ecx
-  NetzPlayer *__shifted(NetzPlayer,1) player__; // eax
+  NetzPlayer * player__; // eax
   int v10; // esi
   int v11; // edx
   int v12; // ecx
   int v13; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x14) _player; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x18) __player; // esi
+  NetzPlayer * _player; // eax
+  NetzPlayer * __player; // esi
   int v16; // eax
   int v17; // ebp
   int v18; // ebx
   unsigned int v19; // kr28_4
-  NetzPlayer *__shifted(NetzPlayer,0x10) player_4; // eax
+  NetzPlayer * player_4; // eax
   int v21; // ecx
   NetzMessage *v22; // edx
   int v23; // eax
   int v24; // ecx
-  NetzPlayer *__shifted(NetzPlayer,0x10) _player__; // eax
+  NetzPlayer * _player__; // eax
   int v26; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x18) __player_; // eax
+  NetzPlayer * __player_; // eax
   int *v28; // eax
   int v29; // edx
   int v30; // eax
@@ -45280,7 +45354,7 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
   BOOL v32; // esi
   int v33; // ebp
   int v34; // ebx
-  NetzPlayer *__shifted(NetzPlayer,0x10) _player_; // eax
+  NetzPlayer * _player_; // eax
   NetzMessage *synced; // edx
   int v37; // ecx
   int v38; // eax
@@ -45296,15 +45370,15 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
   char v48; // dl
   int v49; // esi
   int v50; // ecx
-  NetzPlayer *__shifted(NetzPlayer,0x18) player_5; // eax
+  NetzPlayer * player_5; // eax
   int v52; // ecx
-  NetzPlayer *__shifted(NetzPlayer,0x10) __player__; // eax
+  NetzPlayer * __player__; // eax
   int v54; // eax
   int v55; // ecx
   int v56; // edx
-  NetzPlayer *__shifted(NetzPlayer,0x10) player_1; // eax
+  NetzPlayer * player_1; // eax
   int v58; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x10) player_2; // esi
+  NetzPlayer * player_2; // esi
   int *v60; // edx
   int v61; // ecx
   int v62; // esi
@@ -45312,8 +45386,8 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
   int v64; // eax
   int v65; // ecx
   NetzMessage *v66; // edx
-  NetzPlayer *__shifted(NetzPlayer,0x10) player_7; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x10) player_6; // eax
+  NetzPlayer * player_7; // eax
+  NetzPlayer * player_6; // eax
   int v69; // eax
   int a3; // [esp+10h] [ebp-4Ch] BYREF
   int v71; // [esp+14h] [ebp-48h]
@@ -45331,22 +45405,22 @@ void __fastcall NETZ_msg_loop(NetzMessage *msg)
       {
         case NETZ_PKT_JOIN_REQ_WITH_VERSION:
           v2 = 0;
-          player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+          player = &g_netz_players[1];
           a3 = 6;
           do
           {
-            if ( ADJ(player)->connection_status && !ADJ(player)->synced )
+            if ( player->connection_status && !player->synced )
               ++v2;
             ++player;
           }
-          while ( (int)player < (int)&g_join_pkt );// BUG
+          while ( (int)player + 0x18 < (int)&g_join_pkt );// BUG
           v4 = 0;
-          player_ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
-          while ( ADJ(player_)->connection_status != NetzConnection_Joined || ADJ(player_)->slot != msg->player_slot )
+          player_ = &g_netz_players[1];
+          while ( player_->connection_status != NetzConnection_Joined || player_->slot != msg->player_slot )
           {
             ++player_;
             ++v4;
-            if ( (int)player_ >= (int)&g_netz_msg_loop )// BUG
+            if ( (int)player_ + 0x10 >= (int)&g_netz_msg_loop )// BUG
             {
               v6 = -1;
               goto LABEL_14;
@@ -45359,7 +45433,7 @@ LABEL_14:
           if ( v2 <= 1
             && g_netz_is_game_host
             && !g_netz_is_lobby_locked
-            && (!pkt_payload || !strcmp(pkt_payload + 12, "Oct 23 1997") && !strcmp(pkt_payload + 24, "17:00:00")) )
+            && (!pkt_payload || (!strcmp(pkt_payload + 12, "Oct 23 1997") && !strcmp(pkt_payload + 24, "17:00:00"))) )
           {
             if ( v6 != -1 )
             {
@@ -45368,15 +45442,15 @@ LABEL_14:
               g_netz_players[v6 + 1].palette_idx = g_netz_players[g_netz_local_player_slot + 1].palette_idx;
               memset(v74, 0, sizeof(v74));
               v8 = 0;
-              player__ = (NetzPlayer *__shifted(NetzPlayer,1))&g_netz_players[1].palette_idx;
+              player__ = &g_netz_players[1];
               do
               {
-                if ( ADJ(player__)->connection_status && v8 != v6 )
-                  v74[ADJ(player__)->palette_idx] = 1;
+                if ( player__->connection_status && v8 != v6 )
+                  v74[(int)player__->palette_idx] = 1;
                 ++player__;
                 ++v8;
               }
-              while ( (int)player__ < (int)((char *)&g_netz_game_start_signal + 1) );// bug
+              while ( (int)player__ + 1 < (int)((char *)&g_netz_game_start_signal + 1) );// bug
               v10 = 0;
               v11 = rand() % 15;                // INLINED (see local game init)
               while ( v74[v11] )
@@ -45394,15 +45468,15 @@ LABEL_14:
               v13 = v12;
               g_netz_players[v13 + 1].palette_idx = v11;
               g_netz_players[v13 + 1].faction = NetzFaction_Mute;
-              _player = (NetzPlayer *__shifted(NetzPlayer,0x14))&g_netz_players[1].event_received_this_tick;
+              _player = &g_netz_players[1];
               do
-                ADJ(_player++)->event_received_this_tick = 0;
-              while ( (int)_player < (int)&dword_47A83C );// BUG
-              __player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[v12 + 1].synced;
-              ADJ(__player)->synced = 1;
+                (_player++)->event_received_this_tick = 0;
+              while ( (int)_player + 0x14 < (int)&dword_47A83C );// BUG
+              __player = &g_netz_players[v12 + 1];
+              __player->synced = 1;
               NETZ_broadcast_roster_on_game_start(NETZ_PKT_LOBBY_SYNC);
               NETZ_broadcast_game_settings();
-              ADJ(__player)->synced = 0;
+              __player->synced = 0;
             }
           }
           else if ( g_netz_is_game_host )
@@ -45443,16 +45517,16 @@ LABEL_14:
           }
           return;
         case NETZ_PKT_CLIENT_EVENT:
-          _player_ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+          _player_ = &g_netz_players[1];
           msg->player_slot = msg->player_slot;
           synced = (NetzMessage *)g_netz_players[0].synced;
           v37 = 0;
-          while ( ADJ(_player_)->connection_status != NetzConnection_Joined
-               || ADJ(_player_)->slot != *(int *)(g_netz_players[0].synced + 44) )
+          while ( _player_->connection_status != NetzConnection_Joined
+               || _player_->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++_player_;
             ++v37;
-            if ( (int)_player_ >= (int)&g_netz_msg_loop )// BUG
+            if ( (int)_player_ + 0x10 >= (int)&g_netz_msg_loop )// BUG
             {
               v38 = -1;
               goto LABEL_90;
@@ -45482,12 +45556,12 @@ LABEL_90:
           return;
         case NETZ_PKT_CLIENT_ACK:
           v24 = 0;
-          _player__ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
-          while ( ADJ(_player__)->connection_status != NetzConnection_Joined || ADJ(_player__)->slot != msg->player_slot )
+          _player__ = &g_netz_players[1];
+          while ( _player__->connection_status != NetzConnection_Joined || _player__->slot != msg->player_slot )
           {
             ++_player__;
             ++v24;
-            if ( (int)_player__ >= (int)&g_netz_msg_loop )// BUG
+            if ( (int)_player__ + 0x10 >= (int)&g_netz_msg_loop )// BUG
             {
               v26 = -1;
               goto LABEL_69;
@@ -45497,8 +45571,8 @@ LABEL_90:
 LABEL_69:
           if ( v26 != -1 )
           {
-            __player_ = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[v26 + 1].synced;
-            if ( !ADJ(__player_)->synced )
+            __player_ = &g_netz_players[v26 + 1];
+            if ( !__player_->synced )
               goto LABEL_122;
           }
           goto LABEL_123;
@@ -45543,13 +45617,13 @@ LABEL_40:
             return;
           v52 = 0;
           msg->player_slot = msg->player_slot;
-          __player__ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
-          while ( ADJ(__player__)->connection_status != NetzConnection_Joined
-               || ADJ(__player__)->slot != *(int *)(g_netz_players[0].synced + 44) )
+          __player__ = &g_netz_players[1];
+          while ( __player__->connection_status != NetzConnection_Joined
+               || __player__->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++__player__;
             ++v52;
-            if ( (int)__player__ >= (int)&g_netz_msg_loop )// BUG
+            if ( (int)__player__ + 0x10 >= (int)&g_netz_msg_loop )// BUG
             {
               v54 = -1;
               goto LABEL_120;
@@ -45559,11 +45633,11 @@ LABEL_40:
 LABEL_120:
           if ( v54 != -1 )
           {
-            __player_ = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[v54 + 1].event_received_this_tick;// BUG - variable reuse - change of offset
-            if ( !ADJ(__player_)->synced )
+            __player_ = (NetzPlayer *)((char *)&g_netz_players[v54 + 1].event_received_this_tick - 0x18);// BUG - variable reuse - change of offset
+            if ( !__player_->synced )
             {
 LABEL_122:
-              ADJ(__player_)->synced = 1;
+              __player_->synced = 1;
 LABEL_123:
               --g_netz_num_pending_acks;
             }
@@ -45598,13 +45672,13 @@ LABEL_123:
           v55 = 0;
           msg->player_slot = msg->player_slot;
           v56 = g_netz_players[0].synced;
-          player_1 = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
-          while ( ADJ(player_1)->connection_status != NetzConnection_Joined
-               || ADJ(player_1)->slot != *(int *)(g_netz_players[0].synced + 44) )
+          player_1 = &g_netz_players[1];
+          while ( player_1->connection_status != NetzConnection_Joined
+               || player_1->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++player_1;
             ++v55;
-            if ( (int)player_1 >= (int)&g_netz_msg_loop )// BUG
+            if ( (int)player_1 + 0x10 >= (int)&g_netz_msg_loop )// BUG
             {
               v55 = -1;
               break;
@@ -45619,14 +45693,14 @@ LABEL_123:
             NETZ_player_release(*(int *)(v56 + 44));
             --g_num_multi_players;
             --g_netz_num_pending_packets;
-            player_2 = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+            player_2 = &g_netz_players[1];
             do
             {
-              if ( ADJ(player_2)->connection_status == NetzConnection_Joined )
-                NETZ_send(ADJ(player_2)->slot, NETZ_PKT_PLAYER_REMOVED_BROADCAST, &a3, 4u, 1);
+              if ( player_2->connection_status == NetzConnection_Joined )
+                NETZ_send(player_2->slot, NETZ_PKT_PLAYER_REMOVED_BROADCAST, &a3, 4u, 1);
               ++player_2;
             }
-            while ( (int)player_2 < (int)&g_netz_msg_loop );// BUG
+            while ( (int)player_2 + 0x10 < (int)&g_netz_msg_loop );// BUG
           }
           g_netz_has_player_departed = 1;
           g_netz_show_disconnect_ui = 1;
@@ -45694,15 +45768,15 @@ LABEL_123:
             TSK_broadcast_message(nullptr, TaskMessage_Infiltrate_or_ShowBriefing, nullptr, TaskChannel_MenuCancel);
           return;
         case NETZ_PKT_BROADCAST_PLAYER_KICKED:
-          player_4 = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+          player_4 = &g_netz_players[1];
           msg->player_slot = msg->player_slot;
           v21 = 0;
-          while ( ADJ(player_4)->connection_status != NetzConnection_Joined
-               || ADJ(player_4)->slot != *(int *)(g_netz_players[0].synced + 44) )
+          while ( player_4->connection_status != NetzConnection_Joined
+               || player_4->slot != *(int *)(g_netz_players[0].synced + 44) )
           {
             ++player_4;
             ++v21;
-            if ( (int)player_4 >= (int)&g_netz_msg_loop )// BUG
+            if ( (int)player_4 + 0x10 >= (int)&g_netz_msg_loop )// BUG
             {
               v21 = -1;
               break;
@@ -45729,7 +45803,7 @@ LABEL_123:
 LABEL_100:
           v49 = 0;
           v50 = 0;
-          player_5 = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+          player_5 = &g_netz_players[1];
           break;
         case NETZ_PKT_LOBBY_READY_TO_START:
           goto LABEL_62;
@@ -45766,13 +45840,13 @@ LABEL_62:
           return;
       }
       while ( v50 == v47
-           || ADJ(player_5)->connection_status == NetzConnection_None
-           || !ADJ(player_5)->synced
-           || ADJ(player_5)->palette_idx != v48 )
+           || player_5->connection_status == NetzConnection_None
+           || !player_5->synced
+           || player_5->palette_idx != v48 )
       {
         ++player_5;
         ++v50;
-        if ( (int)player_5 >= (int)&g_join_pkt )// BUG
+        if ( (int)player_5 + 0x18 >= (int)&g_join_pkt )// BUG
           goto LABEL_108;
       }
       v49 = 1;
@@ -45841,16 +45915,16 @@ LABEL_108:
     case NetzMessageType_Disconnected:
       if ( g_netz_is_game_host )
       {
-        player_6 = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+        player_6 = &g_netz_players[1];
         msg->player_slot = msg->player_slot;
         v66 = (NetzMessage *)g_netz_players[0].synced;
         v65 = 0;
-        while ( ADJ(player_6)->connection_status != NetzConnection_Joined
-             || ADJ(player_6)->slot != *(int *)(g_netz_players[0].synced + 44) )
+        while ( player_6->connection_status != NetzConnection_Joined
+             || player_6->slot != *(int *)(g_netz_players[0].synced + 44) )
         {
           ++player_6;
           ++v65;
-          if ( (int)player_6 >= (int)&g_netz_msg_loop )// BUG
+          if ( (int)player_6 + 0x10 >= (int)&g_netz_msg_loop )// BUG
             goto LABEL_177;
         }
         goto LABEL_178;
@@ -45864,18 +45938,18 @@ LABEL_108:
         v65 = 0;
         msg->player_slot = msg->player_slot;
         v66 = (NetzMessage *)g_netz_players[0].synced;
-        player_7 = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+        player_7 = &g_netz_players[1];
         do
         {
-          if ( ADJ(player_7)->connection_status == NetzConnection_Joined
-            && ADJ(player_7)->slot == *(int *)(g_netz_players[0].synced + 44) )
+          if ( player_7->connection_status == NetzConnection_Joined
+            && player_7->slot == *(int *)(g_netz_players[0].synced + 44) )
           {
             goto LABEL_178;
           }
           ++player_7;
           ++v65;
         }
-        while ( (int)player_7 < (int)&g_netz_msg_loop );// BUG
+        while ( (int)player_7 + 0x10 < (int)&g_netz_msg_loop );// BUG
 LABEL_177:
         v65 = -1;
 LABEL_178:
@@ -45928,16 +46002,16 @@ void NETZ_mission_victory()
 //----- (0042F650) --------------------------------------------------------
 void __fastcall NETZ_join_locally()
 {
-  UINT v0; // eax
+  UINT v0 = 0; // eax
   Coroutine *v1; // et1
   int v2; // edi
-  NetzPlayer *__shifted(NetzPlayer,0x18) player; // esi
+  NetzPlayer * player; // esi
   clock_t v4; // eax
   int v5; // esi
   int v6; // edx
   int v7; // ebx
   int v8; // ecx
-  NetzPlayer *__shifted(NetzPlayer,1) player_; // eax
+  NetzPlayer * player_; // eax
   int v10; // esi
   int v11; // edx
   char v12; // al
@@ -45959,16 +46033,16 @@ void __fastcall NETZ_join_locally()
   g_netz_game_start_signal = 0;
   g_num_multi_players = 0;
   v2 = 0;
-  player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+  player = &g_netz_players[1];
   do
   {
-    ADJ(player)->connection_status = NetzConnection_None;
-    ADJ(player)->synced = 1;
+    player->connection_status = NetzConnection_None;
+    player->synced = 1;
     NETZ_player_release(v2);
     ++player;
     ++v2;
   }
-  while ( (int)player < (int)&g_join_pkt );     // BUG
+  while ( (int)player + 0x18 < (int)&g_join_pkt );     // BUG
   v4 = clock();
   srand(v4);
   v5 = 0;
@@ -45987,15 +46061,15 @@ void __fastcall NETZ_join_locally()
 LABEL_12:
   memset(v19, 0, sizeof(v19));
   v8 = 0;
-  player_ = (NetzPlayer *__shifted(NetzPlayer,1))&g_netz_players[1].palette_idx;
+  player_ = &g_netz_players[1];
   do
   {
-    if ( ADJ(player_)->connection_status && v8 != v7 )
-      v19[ADJ(player_)->palette_idx] = 1;
+    if ( player_->connection_status && v8 != v7 )
+      v19[(int)player_->palette_idx] = 1;
     ++player_;
     ++v8;
   }
-  while ( (int)player_ < (int)((char *)&g_netz_game_start_signal + 1) );// BUG
+  while ( (int)player_ + 1 < (int)((char *)&g_netz_game_start_signal + 1) );// BUG
   v10 = 0;
   v11 = rand() % 15;                            // INLINED
   while ( v19[v11] )
@@ -46035,27 +46109,29 @@ LABEL_24:
 //----- (0042F820) --------------------------------------------------------
 int __stdcall sub_42F820(int a1, int a2)
 {
+  (void)a1;
+  (void)a2;
   return 0;
 }
 
 //----- (0042F830) --------------------------------------------------------
 NetzError __fastcall NETZ_init(
         NetzProtocol protocol,
-        int (__fastcall *a2)(int),
+        int (__fastcall *)(int),
         void (__fastcall *msg_loop)(NetzMessage *))
 {
   NetzError result; // eax
   int v5; // edi
-  NetzProvider *__shifted(NetzProvider,0x10) i; // esi
+  NetzProvider * i; // esi
 
   if ( !msg_loop )
     return NetzError_Failed;
   g_netz_msg_loop = msg_loop;
   v5 = 0;
-  i = (NetzProvider *__shifted(NetzProvider,0x10))&g_netz_providers[0]._netz_provider_field_10;
+  i = &g_netz_providers[0];
   do
-    ADJ(i++)->_netz_provider_field_10 = DP_providers_init(v5++) >= 0;
-  while ( (int)i < (int)"m" );                  // BUG
+    (i++)->_netz_provider_field_10 = DP_providers_init(v5++) >= 0;
+  while ( (int)i + 0x10 < (int)"m" );                  // BUG
   if ( (int)protocol < (int)NetzProtocol_TCP )
     return NetzError_Ok;
   if ( (int)protocol < (int)NetzProtocol_Count && g_netz_providers[protocol]._netz_provider_field_10 )
@@ -46100,11 +46176,11 @@ NetzError __fastcall NETZ_host_or_join(BOOL is_host)
     {
       if ( g_dp_pid )
       {
-        g_dp->vtbl->DestroyPlayer(g_dp, g_dp_pid);
+        g_dp->lpVtbl->DestroyPlayer(g_dp, g_dp_pid);
         v2 = g_dp;
         g_dp_pid = 0;
       }
-      v2->vtbl->Close(v2);
+      v2->lpVtbl->Close(v2);
     }
   }
   g_netz_should_enum_sessions = 0;
@@ -46242,12 +46318,12 @@ NetzError __fastcall NETZ_send(
 NetzProtocol __fastcall NETZ_provider_find(const char *name)
 {
   NetzProtocol i; // ebp
-  NetzProvider *__shifted(NetzProvider,8) v2; // ebx
+  NetzProvider * v2; // ebx
   int v3; // esi
   const char **v4; // edi
 
   i = NetzProtocol_TCP;
-  v2 = (NetzProvider *__shifted(NetzProvider,8))&g_netz_providers[0].names[1];// BUG
+  v2 = (NetzProvider *)&g_netz_providers[0].names[1];// BUG
   while ( 2 )
   {
     v3 = 0;
@@ -46355,12 +46431,12 @@ void NETZ_session_free()
   {
     if ( g_dp_pid )
     {
-      g_dp->vtbl->DestroyPlayer(g_dp, g_dp_pid);
+      g_dp->lpVtbl->DestroyPlayer(g_dp, g_dp_pid);
       v0 = g_dp;
       g_dp_pid = 0;
     }
-    v0->vtbl->Close(v0);
-    g_dp->vtbl->Release(g_dp);
+    v0->lpVtbl->Close(v0);
+    g_dp->lpVtbl->Release(g_dp);
     g_dp = nullptr;
   }
   v1 = g_dp_sessions;
@@ -46427,7 +46503,7 @@ void __fastcall NETZ_process_messages(BOOL drain_recv)
     g_netz_should_enum_sessions = 0;
     g_dp_sessions = nullptr;
     v15.dwSize = 80;
-    g_dp->vtbl->EnumSessions(g_dp, &v15, 0, DP_enum_sessions, nullptr, 2);
+    g_dp->lpVtbl->EnumSessions(g_dp, &v15, 0, DP_enum_sessions, nullptr, 2);
     v2 = g_dp_sessions;
     v3 = 0;
     for ( i = g_dp_sessions; i; ++v3 )
@@ -46519,7 +46595,7 @@ BOOL __fastcall NETZ_send_to(int player, NetzPacketType pkt, const void *data, s
     to = g_netz_links[player].dpid;
   g_netz_send_bufs[player]._netz_send_buffer_field_2 = g_netz_send_bufs[player].send_seq++;
   g_netz_send_bufs[player].last_send_size = data_size + 2;
-  return g_dp->vtbl->Send(
+  return g_dp->lpVtbl->Send(
            g_dp,
            from,
            to,
@@ -46537,7 +46613,7 @@ void __fastcall DP_send_to_player(int slot, BOOL guaranteed)
     dpid = 0;
   else
     dpid = g_netz_links[slot].dpid;
-  g_dp->vtbl->Send(
+  g_dp->lpVtbl->Send(
     g_dp,
     g_dp_pid,
     dpid,
@@ -46571,11 +46647,11 @@ LABEL_12:
   }
   if ( g_dp_pid )
   {
-    g_dp->vtbl->DestroyPlayer(g_dp, g_dp_pid);
+    g_dp->lpVtbl->DestroyPlayer(g_dp, g_dp_pid);
     v2 = g_dp;
     g_dp_pid = 0;
   }
-  v2->vtbl->Close(v2);
+  v2->lpVtbl->Close(v2);
   g_netz_should_enum_sessions = 0;
   return NetzError_Ok;
 }
@@ -46631,7 +46707,7 @@ int __fastcall DP_connect_to_player(int player)
       while ( v5 );
       g_dp_players = nullptr;
     }
-    g_dp->vtbl->EnumPlayers(g_dp, nullptr, DP_enum_players, nullptr, 0);
+    g_dp->lpVtbl->EnumPlayers(g_dp, nullptr, DP_enum_players, nullptr, 0);
     host = g_dp_players;
     if ( !g_dp_players )
       return -1;
@@ -46639,7 +46715,7 @@ int __fastcall DP_connect_to_player(int player)
     {
       v8 = g_47A938_unused;                     // BUG: never initialized + immediately overwritten by the call below
       v9 = 1;
-      g_dp->vtbl->GetPlayerData(g_dp, host->player_id, &v8, (LPDWORD)&v9, 0);// 0 == DPGET_REMOTE
+      g_dp->lpVtbl->GetPlayerData(g_dp, host->player_id, &v8, (LPDWORD)&v9, 0);// 0 == DPGET_REMOTE
       if ( v8 == 'S' )                          // seems to be a host marker
         break;
       host = host->next;
@@ -46674,7 +46750,7 @@ int DP_recv_loop()
   NetzLink *v6; // esi
   int v7; // ecx
   int v8; // edx
-  NetzLink *__shifted(NetzLink,0x24) link; // eax
+  NetzLink * link; // eax
   uint8_t recv_seq; // al
   int v11; // [esp+Ch] [ebp-1ECh] BYREF
   DPID v12; // [esp+18h] [ebp-1E0h] BYREF
@@ -46682,30 +46758,35 @@ int DP_recv_loop()
   DPID v14; // [esp+20h] [ebp-1D8h] BYREF
   NetzMessage v15; // [esp+24h] [ebp-1D4h] BYREF
   NetzMessage v16; // [esp+80h] [ebp-178h] BYREF
-  char v17; // [esp+DCh] [ebp-11Ch] BYREF
-  NetzPacketType v18; // [esp+DDh] [ebp-11Bh]
-  char v19[280]; // [esp+DEh] [ebp-11Ah] BYREF
+  // DirectPlay receive buffer. The decompiler split one contiguous 282-byte
+  // packet buffer into v17/v18/v19; Receive() fills all of it via &recv, so
+  // v18 (packet type) is written, not read uninitialized.
+  struct __attribute__((packed)) {
+    char v17;             // [ebp-11Ch] byte 0: sequence echo
+    NetzPacketType v18;   // [ebp-11Bh] byte 1: packet type (uint8_t enum)
+    char v19[280];        // [ebp-11Ah] byte 2+: payload
+  } recv; // BYREF
 
   v0 = 0;
   v13 = 280;
   if ( !g_dp )
     return 1;
   v14 = 0;
-  if ( g_dp->vtbl->Receive(g_dp, &v14, &v12, 1, &v17, (LPDWORD)&v13) || !v14 )
+  if ( g_dp->lpVtbl->Receive(g_dp, &v14, &v12, 1, &recv.v17, (LPDWORD)&v13) || !v14 )
     return 1;
   if ( &v11 != (int *)-12 )
     v0 = v14;
-  if ( v14 == g_dp_pid || v12 && v12 != g_dp_pid )
+  if ( v14 == g_dp_pid || (v12 && v12 != g_dp_pid) )
     return 1;
   v15.is_locally_generated = 0;
   v15.type = NetzMessageType_Data;
-  v15.pkt = (char)v18;                          // BUG: legit unitialzied local var read
-  v15.pkt_payload = v19;
+  v15.pkt = (char)recv.v18;                     // byte 1 of DirectPlay packet (written by Receive via &recv)
+  v15.pkt_payload = recv.v19;
   v15.pkt_payload_size = v13;
   v15.dpid = v0;
-  if ( (char)v18 < NETZ_PKT_GAME_START_LOBBY_STATE_BROADCAST && v18 )
+  if ( (char)recv.v18 < NETZ_PKT_GAME_START_LOBBY_STATE_BROADCAST && recv.v18 )
   {
-    if ( v18 == NETZ_PKT_1E )
+    if ( recv.v18 == NETZ_PKT_1E )
     {
       if ( !g_netz_is_game_host )
       {
@@ -46739,7 +46820,7 @@ int DP_recv_loop()
         g_netz_should_enum_sessions = 0;
       }
     }
-    else if ( v18 == NETZ_PKT_JOIN_REQ_WITH_VERSION && g_netz_is_game_host )
+    else if ( recv.v18 == NETZ_PKT_JOIN_REQ_WITH_VERSION && g_netz_is_game_host )
     {
       if ( g_netz_current_connecting_slot == -1 )
       {
@@ -46765,12 +46846,12 @@ int DP_recv_loop()
   v7 = 0;
   v8 = -1;
   v15.player_slot = -1;
-  link = (NetzLink *__shifted(NetzLink,0x24))&g_netz_links[0].dpid;
-  while ( !ADJ(link)->is_active || ADJ(link)->dpid != v0 )
+  link = &g_netz_links[0];
+  while ( !link->is_active || link->dpid != v0 )
   {
     ++link;
     ++v7;
-    if ( (int)link >= (int)&g_netz_send_bufs[0].buf[32] )// BUG
+    if ( (int)link + 0x24 >= (int)&g_netz_send_bufs[0].buf[32] )// BUG
       goto LABEL_36;
   }
   v8 = v7;
@@ -46779,7 +46860,7 @@ LABEL_36:
   if ( v8 == -1 )
     goto LABEL_39;
   recv_seq = g_netz_send_bufs[v8].recv_seq;
-  if ( recv_seq == v17 )
+  if ( recv_seq == recv.v17 )
   {
     g_netz_send_bufs[v8].recv_seq = recv_seq + 1;
 LABEL_39:
@@ -46800,19 +46881,23 @@ void DP_session_disable_new_players()
     g_dp_session_desc.dwFlags |= 0x21u;         // DPSESSION_NEWPLAYERSDISABLED | DPSESSION_JOINDISABLED
                                                 //
                                                 // https://scp.indiegames.us/fsodoc/vdplay_8h_source.html#l00178
-    g_dp->vtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
+    g_dp->lpVtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
   }
 }
 
+//----- (0042FB30) --------------------------------------------------------
+void __fastcall NETZ_enable_joining() {
+  DP_session_enable_new_players();
+}
+
 //----- (00430640) --------------------------------------------------------
-void __fastcall DP_session_enable_new_players(int _)
-{
+void __fastcall DP_session_enable_new_players() {
   if ( g_dp )
   {
     g_dp_session_desc.dwFlags &= 0xFFFFFFDE;    // ~(DPSESSION_NEWPLAYERSDISABLED | DPSESSION_JOINDISABLED)
                                                 //
                                                 // https://scp.indiegames.us/fsodoc/vdplay_8h_source.html#l00178
-    g_dp->vtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
+    g_dp->lpVtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
   }
 }
 
@@ -46825,7 +46910,7 @@ HRESULT __fastcall DP_session_set_name(const char *name)
   if ( g_dp )
   {
     g_dp_session_desc.lpszSessionNameA = (LPSTR)name;
-    return g_dp->vtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
+    return g_dp->lpVtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
   }
   return result;
 }
@@ -46840,11 +46925,11 @@ void DP_session_close()
   {
     if ( g_dp_pid )
     {
-      g_dp->vtbl->DestroyPlayer(g_dp, g_dp_pid);
+      g_dp->lpVtbl->DestroyPlayer(g_dp, g_dp_pid);
       v0 = g_dp;
       g_dp_pid = 0;
     }
-    v0->vtbl->Close(v0);
+    v0->lpVtbl->Close(v0);
   }
 }
 
@@ -46856,6 +46941,10 @@ BOOL __stdcall DP_enum_providers(
         DWORD dwMinorVersion,
         LPVOID lpContext)
 {
+  (void)dwMajorVersion;
+  (void)dwMinorVersion;
+  (void)lpContext;
+
   DpProvider *v5; // eax
   DpProvider *v6; // ebx
   char *v7; // edx
@@ -46904,7 +46993,7 @@ int __fastcall DP_providers_init(int type)
       do
       {
         v5 = nullptr;
-        if ( DirectPlayCreate(&v3->guid, (IUnknown *)&v5, nullptr) )
+        if ( DirectPlayCreate(&v3->guid, (LPDIRECTPLAY *)&v5, nullptr) )
         {
           v3->guid.Data1 = 0;
           *(int *)&v3->guid.Data2 = 0;
@@ -46995,7 +47084,7 @@ BOOL DP_create()
       if ( g_dp )
         return 1;
       p_guid = &v1->guid;
-      if ( !DirectPlayCreate(&v1->guid, (IUnknown *)&v3, nullptr) )
+      if ( !DirectPlayCreate(&v1->guid, (LPDIRECTPLAY *)&v3, nullptr) )
       {
         v3->lpVtbl->QueryInterface(v3, &IID_IDirectPlay2A, (void **)&g_dp);
         v3->lpVtbl->Release(v3);
@@ -47010,6 +47099,9 @@ BOOL DP_create()
 //----- (004309A0) --------------------------------------------------------
 BOOL __stdcall DP_enum_sessions(const DPSESSIONDESC2 *lpThisSd, LPDWORD lpdwTimeOut, DWORD dwFlags, LPVOID lpContext)
 {
+  (void)lpdwTimeOut;
+  (void)lpContext;
+
   DplaySession *v4; // eax
   DplaySession *v5; // esi
   DplaySession *v6; // ecx
@@ -47047,6 +47139,9 @@ BOOL __stdcall DP_enum_sessions(const DPSESSIONDESC2 *lpThisSd, LPDWORD lpdwTime
 //----- (00430A70) --------------------------------------------------------
 BOOL __stdcall DP_enum_players(DPID dpId, DWORD dwPlayerType, const DPNAME *lpName, DWORD dwFlags, LPVOID lpContext)
 {
+  (void)dwPlayerType;
+  (void)lpContext;
+
   DplayPlayer *v6; // esi
   DplayPlayer *v7; // ecx
   DplayPlayer *i; // eax
@@ -47075,10 +47170,10 @@ BOOL __stdcall DP_enum_players(DPID dpId, DWORD dwPlayerType, const DPNAME *lpNa
 }
 
 //----- (00430B10) --------------------------------------------------------
-BOOL __fastcall DP_session_open(BOOL is_server, GUID *guid_of_game_to_join)
+BOOL __fastcall DP_session_open([[maybe_unused]] BOOL is_server, GUID *guid_of_game_to_join)
 {
   DWORD v4; // esi
-  IDirectPlay2AVtbl *vtbl; // ecx
+  IDirectPlay2Vtbl *vtbl; // ecx
   int v6; // eax
   DWORD pcbBuffer; // [esp+Ch] [ebp-24h] BYREF
   DPNAME v8; // [esp+10h] [ebp-20h] BYREF
@@ -47105,13 +47200,13 @@ BOOL __fastcall DP_session_open(BOOL is_server, GUID *guid_of_game_to_join)
     g_dp_session_desc.dwMaxPlayers = 6;
     g_dp_session_desc.lpszSessionNameA = g_ui_multi_player_name;
   }
-  if ( g_dp->vtbl->Open(g_dp, &g_dp_session_desc, v4) )
+  if ( g_dp->lpVtbl->Open(g_dp, &g_dp_session_desc, v4) )
     return 0;
   v8.lpszShortNameA = Buffer;
   v8.dwSize = 16;
   v8.dwFlags = 0;
   v8.lpszLongNameA = Buffer;
-  vtbl = g_dp->vtbl;
+  vtbl = g_dp->lpVtbl;
   if ( guid_of_game_to_join )
     v6 = vtbl->CreatePlayer(g_dp, &g_dp_pid, &v8, nullptr, (LPVOID)"C", 1, 0);// client
   else
@@ -47121,20 +47216,20 @@ BOOL __fastcall DP_session_open(BOOL is_server, GUID *guid_of_game_to_join)
   if ( v4 == 2 )
   {
     g_dp_session_desc.dwUser1 = g_dp_pid;
-    g_dp->vtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
+    g_dp->lpVtbl->SetSessionDesc(g_dp, &g_dp_session_desc, 0);
   }
   return 1;
 }
 
 //----- (00430CE0) --------------------------------------------------------
-void DP_player_slots_reset()
+void NETZ_player_release_all()
 {
-  NetzLink *__shifted(NetzLink,0x28) i; // eax
+  NetzLink * i; // eax
 
-  i = (NetzLink *__shifted(NetzLink,0x28))&g_netz_links[0].is_active;
+  i = &g_netz_links[0];
   do
-    ADJ(i++)->is_active = 0;
-  while ( (int)i < (int)&g_netz_send_bufs[0].buf[36] );// BUG
+    (i++)->is_active = 0;
+  while ( (int)i + 0x28 < (int)&g_netz_send_bufs[0].buf[36] );// BUG
   g_netz_num_player_slots_allocated = 0;
 }
 // 47B3A0: using guessed type int dword_47B3A0;
@@ -47143,17 +47238,17 @@ void DP_player_slots_reset()
 int NETZ_player_alloc()
 {
   int v0; // ecx
-  NetzLink *__shifted(NetzLink,0x28) i; // eax
+  NetzLink * i; // eax
   int result; // eax
   int v3; // ecx
 
   v0 = 0;
-  i = (NetzLink *__shifted(NetzLink,0x28))&g_netz_links[0].is_active;
-  while ( ADJ(i)->is_active )
+  i = &g_netz_links[0];
+  while ( i->is_active )
   {
     ++i;
     ++v0;
-    if ( (int)i >= (int)&g_netz_send_bufs[0].buf[36] )// BUG
+    if ( (int)i + 0x28 >= (int)&g_netz_send_bufs[0].buf[36] )// BUG
     {
       result = -1;
       goto LABEL_5;
@@ -47191,7 +47286,7 @@ int __fastcall DP_tick(unsigned int time_threshold)
   NetzTimer *v2; // ecx
   NetzTimer *next; // esi
   int retries; // eax
-  void (*handler)(void); // eax
+  void (__fastcall *handler)(void); // eax
 
   v2 = g_netz_timers;
   if ( g_netz_timers )
@@ -47199,7 +47294,7 @@ int __fastcall DP_tick(unsigned int time_threshold)
     do
     {
       next = v2->next;
-      if ( v2->active && v2->fire_at <= time_threshold )
+      if ( v2->active && (unsigned int)v2->fire_at <= time_threshold )
       {
         retries = v2->retries;
         if ( retries )
@@ -47416,8 +47511,8 @@ void __fastcall MSG_outpost_upgrades(
   if ( unit->player_num == g_player_num )
   {
     v9 = 0;
-    ++g_outpost_levels.num_buildings_by_level[state->upgrade_level - 1] -= 1;
-    ++g_outpost_levels.num_buildings_by_level[state->upgrade_level] += 1;
+    g_outpost_levels.num_buildings_by_level[state->upgrade_level - 1] -= 1;
+    g_outpost_levels.num_buildings_by_level[state->upgrade_level] += 1;
     if ( state->upgrade_level > g_outpost_levels.max_level )
     {
       g_outpost_levels.max_level = state->upgrade_level;
@@ -47490,7 +47585,7 @@ LABEL_15:
     }
     else
     {
-      switch ( message )
+      switch ( (unsigned int)message )
       {
         case TaskMessage_ReceiveDamage:
           UNIT_apply_damage_ex(unit, (Entity *)payload, UNIT_mode_outpost_on_death);
@@ -47582,7 +47677,7 @@ void __fastcall UNIT_mode_outpost_set_default_prod(Unit *unit)
 {
   BuildingState *state; // esi
   LevelId v3; // eax
-  BuildingStartingProduction *__shifted(BuildingStartingProduction,8) opt; // esi
+  BuildingStartingProduction * opt; // esi
 
   if ( g_player_num == unit->player_num )
   {
@@ -47597,17 +47692,17 @@ void __fastcall UNIT_mode_outpost_set_default_prod(Unit *unit)
       {
         g_sidebar_tower_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Towers);
         v3 = g_current_lvl_id;
-        opt = (BuildingStartingProduction *__shifted(BuildingStartingProduction,8))&g_surv_default_buildings[0].mobd_lookup;// INLINED outpost prod - see other instances of this message
+        opt = g_surv_default_buildings;// INLINED outpost prod - see other instances of this message
         do
         {
-          if ( (g_lvl_desc[v3].disabled_units_mask & ADJ(opt)->mask) == 0 )
+          if ( (g_lvl_desc[v3].disabled_units_mask & opt->mask) == 0 )
           {
-            UI_sidebar_prod_enable_unit(g_sidebar_buildings_prod, ADJ(opt)->type, ADJ(opt)->mobd_lookup);
+            UI_sidebar_prod_enable_unit(g_sidebar_buildings_prod, opt->type, opt->mobd_lookup);
             v3 = g_current_lvl_id;
           }
           ++opt;
         }
-        while ( (int)opt < (int)&g_surv_default_infantry[0].type );// BUG
+        while ( (int)opt + 8 < (int)&g_surv_default_infantry[0].type );// BUG
         if ( !g_sidebar_aircraft_prod )
           g_sidebar_aircraft_prod = UI_sidebar_prod_enable_category(unit, ProductionType_Aircraft);
         TECHLVL_reset(&g_outpost_levels);
@@ -47669,7 +47764,7 @@ void __fastcall UNIT_mode_outpost_on_completed(Unit *unit)
   int player_num; // eax
   BuildingState *state; // ebx
   SidebarFactoryProduction *v4; // edi
-  BuildingStartingProduction *__shifted(BuildingStartingProduction,8) opt; // esi
+  BuildingStartingProduction * opt; // esi
   LevelId v6; // eax
 
   player_num = unit->player_num;
@@ -47685,19 +47780,19 @@ void __fastcall UNIT_mode_outpost_on_completed(Unit *unit)
     if ( !unit->entity->cplc_spawn_params )
       UI_show_notification_box(nullptr, "Building completed");
     v4 = UI_sidebar_prod_enable_category(unit, ProductionType_Infantry);
-    opt = (BuildingStartingProduction *__shifted(BuildingStartingProduction,8))&g_surv_default_infantry[0].mobd_lookup;// INLINED outpost prod - see other instances of this message
+    opt = g_surv_default_infantry;// INLINED outpost prod - see other instances of this message
     state->prod = v4;
     v6 = g_current_lvl_id;
     do
     {
-      if ( (g_lvl_desc[v6].disabled_units_mask & ADJ(opt)->mask) == 0 )
+      if ( (g_lvl_desc[v6].disabled_units_mask & opt->mask) == 0 )
       {
-        UI_sidebar_prod_enable_unit(v4, ADJ(opt)->type, ADJ(opt)->mobd_lookup);
+        UI_sidebar_prod_enable_unit(v4, opt->type, opt->mobd_lookup);
         v6 = g_current_lvl_id;
       }
       ++opt;
     }
-    while ( (int)opt < (int)&g_pal_bytes_per_color );// BUG loop range
+    while ( (int)opt + 8 < (int)&g_pal_bytes_per_color );// BUG loop range
     ++g_outpost_levels.num_buildings_by_level[1];
   }
   else if ( !player_num )
@@ -47989,7 +48084,9 @@ HPALETTE __fastcall PAL_gdi_palette_create(unsigned __int8 *pal, int size)
   unsigned __int8 *v11; // eax
   int v12; // edx
   int v14; // [esp+14h] [ebp-408h]
-  LOGPALETTE plpal; // [esp+18h] [ebp-404h] BYREF BUG - 256 PALETTEENTRY allocated on stack
+  // Real stack layout is a LOGPALETTE header + 256 PALETTEENTRY (0x404 bytes,
+  // matches [ebp-404h]); windows.h's LOGPALETTE only declares palPalEntry[1].
+  struct { WORD palVersion; WORD palNumEntries; PALETTEENTRY palPalEntry[256]; } plpal; // [esp+18h] [ebp-404h] BYREF
 
   plpal.palVersion = 0x300;
   plpal.palNumEntries = 256;
@@ -48038,13 +48135,13 @@ HPALETTE __fastcall PAL_gdi_palette_create(unsigned __int8 *pal, int size)
     --v12;
   }
   while ( v12 );
-  return CreatePalette(&plpal);
+  return CreatePalette((LOGPALETTE *)&plpal);
 }
 
 //----- (00431C40) --------------------------------------------------------
 int PAL_restore_on_win32_activate()
 {
-  int result; // eax
+  int result = 0; // eax
   int v1; // edx
   int i; // ecx
   Coroutine *v3; // et1
@@ -48067,7 +48164,7 @@ int PAL_restore_on_win32_activate()
     v1 = g_pal_bytes_per_color << 8;            // *256
     for ( i = 0; i < v1; ++i )
     {
-      if ( *(&g_pal_hw_buf[0].r + i) << 8 >= 0xFF00u )
+      if ( (unsigned int)(*(&g_pal_hw_buf[0].r + i) << 8) >= 0xFF00u )
         result = 255;
       else
         result = *(&g_pal_hw_buf[0].r + i);
@@ -48082,7 +48179,7 @@ int PAL_restore_on_win32_activate()
     g_pal_468FD4_unused = 1;
     g_pal_468FD8_unused = 2;
     g_pal_bytes_per_color = 4;
-    if ( g_47BC10 )
+    if ( 1 )
       memcpy(g_pal_hw_buf, g_47BC10, sizeof(g_pal_hw_buf));
     else
       v4 = g_pal_hw_buf;
@@ -48649,7 +48746,7 @@ void __cdecl UI_save_slot_row_main_menu(Task *task)
       for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             UI_widget_set_focus(v1->entity);
@@ -48799,7 +48896,7 @@ void __fastcall UI_save_load_dialog(Task *task, BOOL is_main_menu_mode, BOOL is_
         UI_str_clear(g_work_ui_str);
         g_work_ui_str->cursor_col = 0;
         g_work_ui_str->cursor_row = 0;
-        entity->x = '\xE8\0';
+        entity->x = 0xE800;
         entity->y = (16 * active_row + dialog_y + 14) << 8;
         ENT_anim_set(entity, 1064);
         v9 = first_visible_row;
@@ -50100,14 +50197,12 @@ void __fastcall REND_set_clip_impl(int clip_x, int clip_y, int clip_z, int clip_
   g_rend_clip_z = clip_z;
   g_rend_clip_w = clip_w;
 }
-// 47C034: using guessed type int g_rend_clip_w;
-// 47C038: using guessed type int g_rend_clip_z;
-// 47C03C: using guessed type int g_rend_clip_x;
-// 47C040: using guessed type int g_rend_clip_y;
 
 //----- (00434740) --------------------------------------------------------
-BOOL __stdcall REND_enum_surfaces(IDirectDrawSurface *lpDs, const DDSURFACEDESC *lpDdsd, LPVOID lpContext)
+BOOL __stdcall REND_enum_surfaces(IDirectDrawSurface *lpDs, [[maybe_unused]] const DDSURFACEDESC *lpDdsd, LPVOID lpContext)
 {
+  (void)lpContext;
+
   struct IDirectDrawSurfaceVtbl *lpVtbl; // eax
   DDBLTFX v5; // [esp+0h] [ebp-64h] BYREF
 
@@ -50125,7 +50220,7 @@ BOOL __stdcall REND_enum_surfaces(IDirectDrawSurface *lpDs, const DDSURFACEDESC 
 //----- (00434790) --------------------------------------------------------
 void __fastcall REND_clear_impl(BOOL front)
 {
-  UINT v1; // eax
+  UINT v1 = 0; // eax
   Coroutine *v3; // et1
   int v4; // eax
   struct IDirectDrawSurfaceVtbl *lpVtbl; // eax
@@ -50171,7 +50266,7 @@ void __fastcall REND_clear_impl(BOOL front)
 // __asm
 void REND_save_ds_selector()
 {
-  g_rend_ds_selector = (void *)(unsigned __int16)__DS__;
+  g_rend_ds_selector = (void *)(unsigned __int16)0;
 }
 
 //----- (004348B0) --------------------------------------------------------
@@ -50244,7 +50339,7 @@ void __fastcall REND_blt_rle_impl(unsigned __int8 *pixels, int x, int y, int wid
       src_y,
       width,
       height,
-      (__int16)g_rend_ds_selector,
+      (__int16)(uintptr_t)g_rend_ds_selector,
       (unsigned __int8 *)g_dd_pixels,
       g_rend_clip_x + dst_x,
       g_rend_clip_y + y,
@@ -50256,8 +50351,10 @@ void __fastcall REND_blt_rle_impl(unsigned __int8 *pixels, int x, int y, int wid
 //----- (00434A90) --------------------------------------------------------
 void __fastcall REND_434A90(unsigned __int8 *pixels, int x, int y, int width, int height, int a6)
 {
+  (void)a6;
+
   int dst_x; // [esp+0h] [ebp-10h] BYREF
-  unsigned __int8 *v7; // [esp+4h] [ebp-Ch]
+  [[maybe_unused]] unsigned __int8 *v7; // [esp+4h] [ebp-Ch]
   int src_y; // [esp+8h] [ebp-8h] BYREF
   int src_x; // [esp+Ch] [ebp-4h] BYREF
 
@@ -50289,7 +50386,7 @@ void __fastcall REND_blt_rle_mirrored_impl(unsigned __int8 *pixels, int x, int y
       src_y,
       width,
       height,
-      (__int16)g_rend_ds_selector,
+      (__int16)(uintptr_t)g_rend_ds_selector,
       (unsigned __int8 *)g_dd_pixels,
       g_rend_clip_x + dst_x,
       g_rend_clip_y + y,
@@ -50301,11 +50398,13 @@ void __fastcall REND_blt_rle_mirrored_impl(unsigned __int8 *pixels, int x, int y
 //----- (00434B70) --------------------------------------------------------
 void __fastcall REND_434B70(unsigned __int8 *pixels, int x, int y, int width, int height, int a6)
 {
+  (void)a6;
+
   int dst_x; // [esp+0h] [ebp-14h] BYREF
-  unsigned __int8 *v7; // [esp+4h] [ebp-10h]
+  [[maybe_unused]] unsigned __int8 *v7; // [esp+4h] [ebp-10h]
   int src_y; // [esp+8h] [ebp-Ch] BYREF
   int src_x; // [esp+Ch] [ebp-8h] BYREF
-  int v10; // [esp+10h] [ebp-4h]
+  [[maybe_unused]] int v10; // [esp+10h] [ebp-4h]
 
   dst_x = x;
   v7 = pixels;
@@ -50337,7 +50436,7 @@ void __fastcall REND_blit_rle_override_palette_impl(
       width,
       height,
       palette,
-      (__int16)g_rend_ds_selector,
+      (__int16)(uintptr_t)g_rend_ds_selector,
       (unsigned __int8 *)g_dd_pixels,
       g_rend_clip_x + x,
       g_rend_clip_y + y,
@@ -50370,7 +50469,7 @@ void __fastcall REND_blit_rle_override_palette_mirrored_impl(
       width,
       height,
       palette,
-      (__int16)g_rend_ds_selector,
+      (__int16)(uintptr_t)g_rend_ds_selector,
       (unsigned __int8 *)g_dd_pixels,
       g_rend_clip_x + x,
       g_rend_clip_y + y,
@@ -50457,9 +50556,9 @@ LABEL_17:
         if ( v7-- < 1 )
           return;
         v8 = v16;
-        if ( ((unsigned __int8)v6 & 1) == 0 || (*v6 = *v5, ++v5, ++v6, v8 = v16 - 1, v16 != 1) )
+        if ( ((unsigned __int8)(uintptr_t)v6 & 1) == 0 || (*v6 = *v5, ++v5, ++v6, v8 = v16 - 1, v16 != 1) )
         {
-          if ( ((unsigned __int8)v6 & 2) != 0 )
+          if ( ((unsigned __int8)(uintptr_t)v6 & 2) != 0 )
           {
             if ( v8 == 1 )
             {
@@ -50560,9 +50659,9 @@ void __fastcall REND_blt_opaque_interlaced_impl(unsigned __int8 *pixels, int x, 
   v8 = (unsigned __int8 *)g_dd_pixels + v13;
   while ( v10 )
   {
-    if ( ((unsigned __int8)v8 & 3) != 0 )
+    if ( ((unsigned __int8)(uintptr_t)v8 & 3) != 0 )
     {
-      if ( ((unsigned __int8)v8 & 3) == 3 || ((unsigned __int8)v8 & 1) != 0 )
+      if ( ((unsigned __int8)(uintptr_t)v8 & 3) == 3 || ((unsigned __int8)(uintptr_t)v8 & 1) != 0 )
       {
         *v8 = *v6;
         memcpy(v8 + 1, v6 + 1, v7 - 1);
@@ -50814,7 +50913,7 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
   while ( v11 )
   {
     v12 = v9;
-    if ( ((unsigned __int8)v10 & 1) != 0 )
+    if ( ((unsigned __int8)(uintptr_t)v10 & 1) != 0 )
     {
       if ( *v8 )
         *v10 = *v8;
@@ -52543,8 +52642,10 @@ void __fastcall UNIT_mode_repair_bay_on_complete(Unit *unit)
 }
 
 //----- (00437FE0) --------------------------------------------------------
-void __fastcall MSG_upg(Task *receiver, Task *sender, TaskMessageType message, void *payload)
+void __fastcall MSG_upg(Task *receiver, [[maybe_unused]] Task *sender, TaskMessageType message, void *payload)
 {
+  (void)payload;
+
   UpgradeProcess *state; // ecx
 
   state = (UpgradeProcess *)receiver->ctx;
@@ -52889,7 +52990,7 @@ void SAVE_read_save_list()
       while ( 1 )
       {
         memset(v9, 0, sizeof(v9));
-        v4 = fscanf(v0, "Slot %d = %s %d\n", &v6, v9, &v8);
+        v4 = fscanf(v0, "Slot %d = %s %d\n", &v6, (char *)v9, &v8);
         if ( !v4 || v4 == -1 )
           break;
         if ( v6 <= 19 )
@@ -53182,7 +53283,7 @@ void __cdecl SCHRAP_debris(Task *task)
   {
     entity->z_acceleration = -5;
     v5 = GAME_rand_sync("C:\\k\\Scripts\\Schrap.cpp", 187);
-    LOBYTE(v5) = abs32(v5);
+    LOBYTE(v5) = abs(v5);
     entity->anim_speed *= v5 % 2 + 1;
   }
   while ( entity->z >= 0 )
@@ -53466,18 +53567,18 @@ MapdRenderNode *__fastcall LVL_get_mapd(MenuId mapd_id, int image_id, int z)
 {
   MapdRenderNode *result; // eax
   MenuId v5; // edi
-  LevelHunk *layers; // eax
+  LevelMapdSurface *layers; // eax
   MapdRenderNode *v7; // esi
   RenderNode *rn; // ecx
   MapdScrlImage *v9; // eax
 
-  if ( mapd_id > g_current_lvl_mapd_num_layers )
+  if ( mapd_id > (unsigned int)g_current_lvl_mapd_num_layers )
     return nullptr;
   v5 = mapd_id;
-  layers = (LevelHunk *)g_mapd[mapd_id].layers;
-  if ( layers == g_current_lvl )
+  layers = g_mapd[mapd_id].layers;
+  if ( layers == (LevelMapdSurface *)g_current_lvl )
     return nullptr;
-  if ( (LevelHunkSection *)image_id > layers->sections[0] )
+  if ( (unsigned int)image_id > (unsigned int)layers->num_images )// preserves original off-by-one (== allowed through)
     return nullptr;
   if ( g_mapd_render_node_next_free == (MapdRenderNode *)&g_mapd_render_node_next_free )
     return nullptr;
@@ -53552,19 +53653,19 @@ BOOL SOUND_init()
   v0 = 0;
   v1 = g_sound_volumes;
   do
-    *v1++ = (__int64)(__FYL2X__((double)++v0 * dbl_4630F8, 0.6931471805599453094) * dbl_463100);
+    *v1++ = (__int64)(log((double)++v0 * dbl_4630F8) * dbl_463100);
   while ( (int)v1 <= (int)&g_sound_volumes[16] );// BUG
   v2 = 0;
   v3 = g_sound_pans;
   do
-    *v3++ = (__int64)(__FYL2X__((double)++v2 * dbl_4630F8, 0.6931471805599453094) * dbl_463100);
+    *v3++ = (__int64)(log((double)++v2 * dbl_4630F8) * dbl_463100);
   while ( (int)v3 < (int)&g_sound_pans[16] );   // BUG
   v4 = 17;
   v5 = &g_sound_pans[16];
   v9 = 17;
   do
   {
-    *v5 = (__int64)(__FYL2X__((double)v9 * dbl_4630F8, 0.6931471805599453094) * dbl_463108);
+    *v5 = (__int64)(log((double)v9 * dbl_4630F8) * dbl_463108);
     --v4;
     ++v5;
     v9 = v4;
@@ -53621,10 +53722,7 @@ BOOL SOUND_init()
 BOOL __fastcall SOUND_bank_load(const char *filename)
 {
   LevelHunk *v1; // eax
-  LevelHunk v2; // eax
   int *v3; // edx
-  void **p_ptr; // esi
-  void *v5; // ecx
   int v6; // ecx
   int *v7; // eax
   int v8; // edx
@@ -53636,21 +53734,19 @@ BOOL __fastcall SOUND_bank_load(const char *filename)
     g_sound_lvl = v1;
     if ( v1 || (v1 = LVL_load("sound.slv"), (g_sound_lvl = v1) != nullptr) )
     {
-      v2.sections[0] = v1->sections[0];
+      // Walk the section array; terminator is a section with data == NULL.
+      LevelHunkSection *sec = v1->sections;
       v3 = nullptr;
       g_sound_bank = nullptr;
-      p_ptr = &v2.sections[0]->ptr;             // BUG
-      if ( v2.sections[0]->ptr )
+      if ( sec->data )
       {
         do
         {
-          if ( !strncmp("SOUN", v2.sections[0]->name, 4u) )
-            g_sound_bank = *p_ptr;
-          v5 = p_ptr[2];
-          p_ptr += 2;
-          v2.sections[0] = (LevelHunkSection *)(p_ptr - 1);// BUG (????)
+          if ( !strncmp("SOUN", sec->name, 4u) )
+            g_sound_bank = sec->data;
+          ++sec;
         }
-        while ( v5 );
+        while ( sec->data );
         v3 = g_sound_bank;
       }
       v6 = 0;
@@ -53752,7 +53848,7 @@ int __fastcall SOUND_play(SoundId sound_id, BOOL loop, int volume, int pan, Task
           v11->volume = volume;
           v11->pan = pan;
           v11->playback_mode = SoundPlayback_Normal;
-          SOUND_wav_parse_in_memory(bank, &v30.lpwfxFormat, &out_pcm_data, &v30.dwBufferBytes);
+          SOUND_wav_parse_in_memory(bank, &v30.lpwfxFormat, &out_pcm_data, (unsigned int *)&v30.dwBufferBytes);
           p_dsb = &v11->dsb;
           v30.dwSize = 20;
           v30.dwFlags = 232;
@@ -53782,7 +53878,7 @@ int __fastcall SOUND_play(SoundId sound_id, BOOL loop, int volume, int pan, Task
             if ( v15
               || !out_pcm_data
               || !v30.dwBufferBytes
-              || v14->lpVtbl->Lock(v14, 0, v30.dwBufferBytes, &v33, (LPDWORD)&task, (LPVOID *)&v34, &v35, 0) )
+              || v14->lpVtbl->Lock(v14, 0, v30.dwBufferBytes, &v33, (LPDWORD)&task, (LPVOID *)&v34, (LPDWORD)&v35, 0) )
             {
               (*p_dsb)->lpVtbl->Release(*p_dsb);
               v25 = v11->next;
@@ -54002,7 +54098,7 @@ void __cdecl SOUND_thread(SoundStream *snd)
   {
     FILE_close(v1->file);
     next = v1->next;
-    v1->flags = v1->flags & ~0x48u | 0x40;
+    v1->flags = (v1->flags & ~0x48u) | 0x40;
     if ( next )
       next->prev = v1->prev;
     prev = v1->prev;
@@ -54022,7 +54118,7 @@ void __cdecl SOUND_thread(SoundStream *snd)
   {
     FILE_close(v1->file);
     v42 = v1->next;
-    v1->flags = v1->flags & ~0x48u | 0x40;
+    v1->flags = (v1->flags & ~0x48u) | 0x40;
     if ( v42 )
       v42->prev = v1->prev;
     v43 = v1->prev;
@@ -54039,16 +54135,16 @@ void __cdecl SOUND_thread(SoundStream *snd)
   v56.dwSize = 20;
   v1->flags = flags;
   (*p_dsb)->lpVtbl->GetCaps(*p_dsb, &v56);
-  (*p_dsb)->lpVtbl->GetCurrentPosition(*p_dsb, &v52, &v50);
+  (*p_dsb)->lpVtbl->GetCurrentPosition(*p_dsb, (LPDWORD)&v52, (LPDWORD)&v50);
   streaming_bytes_remaining = v1->streaming_bytes_remaining;
   if ( !v52 )
   {
     v7 = v56.dwBufferBytes - v50;
-    v8 = (*p_dsb)->lpVtbl->Lock(*p_dsb, v50, v56.dwBufferBytes - v50, &buffer, (LPDWORD)&snd, &v47, &size, 0);
+    v8 = (*p_dsb)->lpVtbl->Lock(*p_dsb, v50, v56.dwBufferBytes - v50, &buffer, (LPDWORD)&snd, &v47, (LPDWORD)&size, 0);
     if ( v8 == -2005401450 )
     {
       (*p_dsb)->lpVtbl->Restore(*p_dsb);
-      v8 = (*p_dsb)->lpVtbl->Lock(*p_dsb, v50, v7, &buffer, (LPDWORD)&snd, &v47, &size, 0);
+      v8 = (*p_dsb)->lpVtbl->Lock(*p_dsb, v50, v7, &buffer, (LPDWORD)&snd, &v47, (LPDWORD)&size, 0);
     }
     if ( v8 )
     {
@@ -54123,17 +54219,17 @@ void __cdecl SOUND_thread(SoundStream *snd)
       {
         LOBYTE(v19) = v19 | 8;
         v1->flags = v19;
-        v1->dsb->lpVtbl->GetCurrentPosition(v1->dsb, &v52, &v50);
+        v1->dsb->lpVtbl->GetCurrentPosition(v1->dsb, (LPDWORD)&v52, (LPDWORD)&v50);
         if ( v52 < (unsigned int)v2 )
           v20 = v56.dwBufferBytes + v52 - (int)v2;
         else
           v20 = v52 - (int)v2;
         v21 = v20;
-        v22 = v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v20, &buffer, (LPDWORD)&snd, &v47, &size, 0);
+        v22 = v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v20, &buffer, (LPDWORD)&snd, &v47, (LPDWORD)&size, 0);
         if ( v22 == -2005401450 )
         {
           v1->dsb->lpVtbl->Restore(v1->dsb);
-          v22 = v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v21, &buffer, (LPDWORD)&snd, &v47, &size, 0);
+          v22 = v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v21, &buffer, (LPDWORD)&snd, &v47, (LPDWORD)&size, 0);
         }
         if ( !v22 )
         {
@@ -54220,12 +54316,12 @@ void __cdecl SOUND_thread(SoundStream *snd)
         break;
       LOBYTE(v36) = v36 | 8;
       v1->flags = v36;
-      v1->dsb->lpVtbl->GetCurrentPosition(v1->dsb, &v52, &v50);
+      v1->dsb->lpVtbl->GetCurrentPosition(v1->dsb, (LPDWORD)&v52, (LPDWORD)&v50);
       if ( v52 < (unsigned int)v2 )
         v37 = v56.dwBufferBytes + v52 - (int)v2;
       else
         v37 = v52 - (int)v2;
-      if ( !v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v37, &buffer, (LPDWORD)&snd, &v47, &size, 0) )
+      if ( !v1->dsb->lpVtbl->Lock(v1->dsb, (DWORD)v2, v37, &buffer, (LPDWORD)&snd, &v47, (LPDWORD)&size, 0) )
       {
         if ( snd )
         {
@@ -54376,14 +54472,14 @@ void SOUND_tick()
             v3 = v0->dsb;
             p_volume = &v0->volume;
             --v0->vol_transition_remaining_ticks;
-            v3->lpVtbl->GetVolume(v3, &v0->volume);
+            v3->lpVtbl->GetVolume(v3, (LPLONG)&v0->volume);
             v5 = 100000;
             v6 = 0;
             v20 = 17;
             v7 = g_sound_volumes;
             while ( 1 )
             {
-              v8 = abs32(*v7 - *p_volume);
+              v8 = abs(*v7 - *p_volume);
               if ( !v8 )
                 break;
               if ( v5 > v8 )
@@ -54411,14 +54507,14 @@ void SOUND_tick()
             v11 = v0->dsb;
             p_pan = &v0->pan;
             --v0->pan_transition_remaining_ticks;
-            v11->lpVtbl->GetPan(v11, &v0->pan);
+            v11->lpVtbl->GetPan(v11, (LPLONG)&v0->pan);
             v13 = 100000;
             v14 = 0;
             v20 = 16;
             v15 = g_sound_pans;
             while ( 1 )
             {
-              v16 = abs32(*v15 - *p_pan);
+              v16 = abs(*v15 - *p_pan);
               if ( !v16 )
                 break;
               if ( v13 > v16 )
@@ -54569,7 +54665,7 @@ BOOL __fastcall SOUND_wav_parse_in_memory(
     *out_pcm_data = nullptr;
   if ( out_num_bytes )
     *out_num_bytes = 0;
-  v4 = (char *)bank + 12;
+  v4 = (int *)((char *)bank + 12);
   if ( *(int *)bank == 'FFIR' && *((int *)bank + 2) == 'EVAW' )
   {
     v5 = (unsigned int)v4 + *((int *)bank + 1) - 4;
@@ -54591,7 +54687,7 @@ BOOL __fastcall SOUND_wav_parse_in_memory(
               return 1;
           }
         }
-        else if ( v6 == 'atad' && (out_pcm_data && !*out_pcm_data || out_num_bytes && !*out_num_bytes) )
+        else if ( v6 == 'atad' && ((out_pcm_data && !*out_pcm_data) || (out_num_bytes && !*out_num_bytes)) )
         {
           if ( out_pcm_data )
             *out_pcm_data = v8;
@@ -54697,7 +54793,7 @@ void __cdecl REND_decode_rle(
         __int16 src_y,
         __int16 width,
         __int16 height,
-        __int16 ds,
+        [[maybe_unused]] __int16 ds,
         unsigned __int8 *dst,
         __int16 dst_x,
         __int16 dst_y,
@@ -54720,7 +54816,7 @@ void __cdecl REND_decode_rle(
   unsigned __int16 v29; // ax
   unsigned __int8 *v31; // [esp-1Ah] [ebp-22h]
 
-  __asm { pushfw }
+  /* __asm { pushfw } (vestigial x86 flags save) */
   v15 = (unsigned __int16)src_y;
   if ( src_y )
   {
@@ -54818,7 +54914,7 @@ LABEL_20:
     LOWORD(v15) = v15 - 1;
   }
   while ( (_WORD)v15 );
-  __asm { popfw }
+  /* __asm { popfw } (vestigial x86 flags restore) */
 }
 // 46BD04: using guessed type int g_blt_dst_stride_pad;
 
@@ -54868,7 +54964,7 @@ void __cdecl REND_decode_rle_mirrored(
   }
   v13 = &dst[(unsigned __int16)dst_stride * (unsigned __int16)dst_y + (unsigned __int16)(width + dst_x)];
   if ( ds != -1 )
-    __ES__ = ds;
+    (void)ds;
   g_blt_dst_stride_pad = (unsigned __int16)width + (unsigned __int16)dst_stride;
   v14 = 0;
   LOWORD(v11) = height;
@@ -54968,1430 +55064,6 @@ LABEL_26:
 }
 // 46BD04: using guessed type int g_blt_dst_stride_pad;
 
-//----- (0043AAD2) --------------------------------------------------------
-// __asm
-int __usercall _43AAD2_unused@<eax>(
-        unsigned int a1@<ebx>,
-        _BYTE *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        unsigned __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  _BYTE *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // eax
-  unsigned int v20; // ebx
-  char *v21; // esi
-  unsigned int v22; // ecx
-  unsigned int v23; // edx
-  _BYTE *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  char v29; // ah
-  int v30; // eax
-  bool v31; // cf
-  char v32; // al
-  _BYTE *v34; // [esp-18h] [ebp-20h]
-  int v35; // [esp+4h] [ebp-4h]
-
-  v13 = (_BYTE *)(a9 + a13 * a10 + a8);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  g_blt_dst_stride_pad = (unsigned __int16)(a13 - a11);
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  BYTE1(a1) = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  v17 = a12;
-  BYTE1(v18) = (a6 << 8) / (unsigned int)a12;
-  LOBYTE(v18) = 0;
-  v19 = 0;
-  while ( 1 )
-  {
-    v20 = _byteswap_ulong(v18);
-    LOBYTE(v20) = 0;
-    v34 = a2;
-    v21 = a2 + 1;
-    HIWORD(v22) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v22) = a11;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v19) = *v21;
-        v24 = v21 + 1;
-        v25 = v23 == v19;
-        v26 = v23 <= v19;
-        v27 = v23 - v19;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v30 = -v27;
-            goto LABEL_15;
-          }
-          goto LABEL_18;
-        }
-        LOBYTE(v19) = *v24;
-        v21 = &v24[v19 + 1];
-        v28 = v27 == v19;
-        v26 = v27 <= v19;
-        v23 = v27 - v19;
-      }
-      while ( !v26 );
-      if ( v28 )
-        goto LABEL_14;
-      v21 += v23;
-      v29 = -(char)v23;
-LABEL_19:
-      v32 = *v21++;
-      while ( 1 )
-      {
-        *v13++ = v32;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          if ( --v29 )
-            goto LABEL_19;
-          goto LABEL_14;
-        }
-      }
-    }
-    else
-    {
-LABEL_14:
-      while ( 1 )
-      {
-        LOBYTE(v30) = *v21;
-        v24 = v21 + 1;
-        if ( (_BYTE)v30 )
-          break;
-LABEL_18:
-        v29 = *v24;
-        v21 = v24 + 1;
-        if ( v29 )
-          goto LABEL_19;
-      }
-LABEL_15:
-      while ( 1 )
-      {
-        ++v13;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          LOBYTE(v30) = v30 - 1;
-          if ( !(_BYTE)v30 )
-            goto LABEL_18;
-        }
-      }
-    }
-    v19 = 0;
-    a2 = v34;
-    v17 = _byteswap_ulong(v22);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v35;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v20);
-    v31 = __CFADD__(BYTE1(v18), (_BYTE)v18);
-    LOBYTE(v18) = BYTE1(v18) + v18;
-    if ( v31 )
-    {
-      LOBYTE(v19) = *v34;
-      a2 = &v34[v19];
-    }
-  }
-}
-// 43ABDB: variable 'v35' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-
-//----- (0043ABDE) --------------------------------------------------------
-// __asm
-int __usercall _43ABDE_unused@<eax>(
-        unsigned int a1@<ebx>,
-        _BYTE *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        unsigned __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  _BYTE *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // eax
-  unsigned int v20; // ebx
-  char *v21; // esi
-  unsigned int v22; // ecx
-  unsigned int v23; // edx
-  _BYTE *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  char v29; // ah
-  int v30; // eax
-  bool v31; // cf
-  char v32; // al
-  _BYTE *v34; // [esp-18h] [ebp-20h]
-  int v35; // [esp+4h] [ebp-4h]
-
-  v13 = (_BYTE *)(a9 + a13 * a10 + a8);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  g_blt_dst_stride_pad = (unsigned __int16)(a13 - a11);
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  BYTE1(a1) = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  v17 = a12;
-  word_46BD0E = (a6 << 8) / (unsigned int)a12;
-  LOWORD(v18) = 0;
-  v19 = 0;
-  while ( 1 )
-  {
-    v20 = _byteswap_ulong(v18);
-    LOBYTE(v20) = 0;
-    v34 = a2;
-    v21 = a2 + 1;
-    HIWORD(v22) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v22) = a11;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v19) = *v21;
-        v24 = v21 + 1;
-        v25 = v23 == v19;
-        v26 = v23 <= v19;
-        v27 = v23 - v19;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v30 = -v27;
-            goto LABEL_15;
-          }
-          goto LABEL_18;
-        }
-        LOBYTE(v19) = *v24;
-        v21 = &v24[v19 + 1];
-        v28 = v27 == v19;
-        v26 = v27 <= v19;
-        v23 = v27 - v19;
-      }
-      while ( !v26 );
-      if ( v28 )
-        goto LABEL_14;
-      v21 += v23;
-      v29 = -(char)v23;
-LABEL_19:
-      v32 = *v21++;
-      while ( 1 )
-      {
-        *v13++ = v32;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          if ( --v29 )
-            goto LABEL_19;
-          goto LABEL_14;
-        }
-      }
-    }
-    else
-    {
-LABEL_14:
-      while ( 1 )
-      {
-        LOBYTE(v30) = *v21;
-        v24 = v21 + 1;
-        if ( (_BYTE)v30 )
-          break;
-LABEL_18:
-        v29 = *v24;
-        v21 = v24 + 1;
-        if ( v29 )
-          goto LABEL_19;
-      }
-LABEL_15:
-      while ( 1 )
-      {
-        ++v13;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          LOBYTE(v30) = v30 - 1;
-          if ( !(_BYTE)v30 )
-            goto LABEL_18;
-        }
-      }
-    }
-    v19 = 0;
-    a2 = v34;
-    v17 = _byteswap_ulong(v22);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v35;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v20);
-    LOWORD(v18) = word_46BD0E + v18;
-    do
-    {
-      LOBYTE(v19) = *a2;
-      a2 += v19;
-      --BYTE1(v18);
-    }
-    while ( BYTE1(v18) );
-  }
-}
-// 43ACF3: variable 'v35' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-// 46BD0E: using guessed type __int16 word_46BD0E;
-
-//----- (0043ACF6) --------------------------------------------------------
-// __asm
-int __usercall _43ACF6_unused@<eax>(
-        unsigned int a1@<ebx>,
-        _BYTE *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        unsigned __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  unsigned __int8 *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // ebx
-  unsigned __int8 *v20; // esi
-  unsigned int v21; // ecx
-  unsigned int v22; // eax
-  unsigned int v23; // edx
-  unsigned __int8 *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  unsigned __int8 *v29; // esi
-  unsigned __int8 v30; // ah
-  unsigned __int8 v31; // ah
-  unsigned __int8 v32; // ah
-  char v33; // ah
-  unsigned __int8 *v34; // esi
-  int v35; // eax
-  _BYTE *v37; // [esp-18h] [ebp-20h]
-  int v38; // [esp+4h] [ebp-4h]
-
-  v13 = (unsigned __int8 *)(a9 + a13 * a10 + a8);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  g_blt_dst_stride_pad = (unsigned __int16)(a13 - a11);
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  word_46BD08 = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  dword_46BD0A = 0;
-  v17 = a12;
-  word_46BD0E = (a6 << 8) / (unsigned int)a12;
-  LOWORD(v18) = 0;
-  while ( 1 )
-  {
-    HIWORD(v19) = _byteswap_ulong(v18) >> 16;
-    LOWORD(v19) = 0;
-    v37 = a2;
-    v20 = a2 + 1;
-    HIWORD(v21) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v21) = a11;
-    v22 = 0;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v22) = *v20;
-        v24 = v20 + 1;
-        v25 = v23 == v22;
-        v26 = v23 <= v22;
-        v27 = v23 - v22;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v31 = -(char)v27;
-            goto LABEL_17;
-          }
-          v30 = *v24;
-          v29 = v24 + 1;
-          if ( !v30 )
-            goto LABEL_24;
-          while ( 1 )
-          {
-LABEL_21:
-            LOBYTE(dword_46BD0A) = BYTE1(v19);
-            v29 += dword_46BD0A;
-LABEL_22:
-            *v13++ = *v29;
-            LOWORD(v21) = v21 - 1;
-            if ( !(_WORD)v21 )
-              goto LABEL_26;
-            LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-LABEL_24:
-            v26 = v30 <= BYTE1(v19);
-            v30 -= BYTE1(v19);
-            if ( v26 )
-              goto LABEL_25;
-          }
-        }
-        LOBYTE(v22) = *v24;
-        v20 = &v24[v22 + 1];
-        v28 = v27 == v22;
-        v26 = v27 <= v22;
-        v23 = v27 - v22;
-      }
-      while ( !v26 );
-      if ( !v28 )
-      {
-        v29 = &v20[v23];
-        v30 = -(char)v23;
-        goto LABEL_22;
-      }
-    }
-    v31 = *v20;
-    v24 = v20 + 1;
-    if ( !v31 )
-    {
-LABEL_19:
-      while ( 2 )
-      {
-        v26 = v31 <= BYTE1(v19);
-        v31 -= BYTE1(v19);
-        if ( v26 )
-        {
-          BYTE1(v19) = -v31;
-          v32 = *v24;
-          v29 = v24 + 1;
-          v26 = v32 <= BYTE1(v19);
-          v30 = v32 - BYTE1(v19);
-          if ( !v26 )
-            goto LABEL_21;
-LABEL_25:
-          v33 = BYTE1(v19) + v30;
-          BYTE1(v19) -= v33;
-          LOBYTE(dword_46BD0A) = v33;
-          v34 = &v29[dword_46BD0A];
-          v31 = *v34;
-          v24 = v34 + 1;
-          continue;
-        }
-        break;
-      }
-    }
-LABEL_17:
-    ++v13;
-    LOWORD(v21) = v21 - 1;
-    if ( (_WORD)v21 )
-    {
-      LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-      goto LABEL_19;
-    }
-LABEL_26:
-    v35 = 0;
-    a2 = v37;
-    v17 = _byteswap_ulong(v21);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v38;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v19);
-    LOWORD(v18) = word_46BD0E + v18;
-    do
-    {
-      LOBYTE(v35) = *a2;
-      a2 += v35;
-      --BYTE1(v18);
-    }
-    while ( BYTE1(v18) );
-  }
-}
-// 43AE50: variable 'v38' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-// 46BD08: using guessed type __int16 word_46BD08;
-// 46BD0A: using guessed type int dword_46BD0A;
-// 46BD0E: using guessed type __int16 word_46BD0E;
-
-//----- (0043AE53) --------------------------------------------------------
-// __asm
-int __usercall _43AE53_unused@<eax>(
-        unsigned int a1@<ebx>,
-        unsigned __int8 *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        unsigned __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  unsigned __int8 *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // ebx
-  unsigned __int8 *v20; // esi
-  unsigned int v21; // ecx
-  unsigned int v22; // eax
-  unsigned int v23; // edx
-  unsigned __int8 *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  unsigned __int8 *v29; // esi
-  unsigned __int8 v30; // ah
-  unsigned __int8 v31; // ah
-  unsigned __int8 v32; // ah
-  char v33; // ah
-  unsigned __int8 *v34; // esi
-  bool v35; // cf
-  unsigned __int8 *v37; // [esp-18h] [ebp-20h]
-  int v38; // [esp+4h] [ebp-4h]
-
-  v13 = (unsigned __int8 *)(a9 + a13 * a10 + a8);
-  g_blt_dst_stride_pad = (unsigned __int16)(a13 - a11);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  word_46BD08 = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  dword_46BD0A = 0;
-  v17 = a12;
-  BYTE1(v18) = (a6 << 8) / (unsigned int)a12;
-  LOBYTE(v18) = 0;
-  while ( 1 )
-  {
-    HIWORD(v19) = _byteswap_ulong(v18) >> 16;
-    LOWORD(v19) = 0;
-    v37 = a2;
-    v20 = a2 + 1;
-    HIWORD(v21) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v21) = a11;
-    v22 = 0;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v22) = *v20;
-        v24 = v20 + 1;
-        v25 = v23 == v22;
-        v26 = v23 <= v22;
-        v27 = v23 - v22;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v31 = -(char)v27;
-            goto LABEL_17;
-          }
-          v30 = *v24;
-          v29 = v24 + 1;
-          if ( !v30 )
-            goto LABEL_24;
-          while ( 1 )
-          {
-LABEL_21:
-            LOBYTE(dword_46BD0A) = BYTE1(v19);
-            v29 += dword_46BD0A;
-LABEL_22:
-            *v13++ = *v29;
-            LOWORD(v21) = v21 - 1;
-            if ( !(_WORD)v21 )
-              goto LABEL_26;
-            LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-LABEL_24:
-            v26 = v30 <= BYTE1(v19);
-            v30 -= BYTE1(v19);
-            if ( v26 )
-              goto LABEL_25;
-          }
-        }
-        LOBYTE(v22) = *v24;
-        v20 = &v24[v22 + 1];
-        v28 = v27 == v22;
-        v26 = v27 <= v22;
-        v23 = v27 - v22;
-      }
-      while ( !v26 );
-      if ( !v28 )
-      {
-        v29 = &v20[v23];
-        v30 = -(char)v23;
-        goto LABEL_22;
-      }
-    }
-    v31 = *v20;
-    v24 = v20 + 1;
-    if ( !v31 )
-    {
-LABEL_19:
-      while ( 2 )
-      {
-        v26 = v31 <= BYTE1(v19);
-        v31 -= BYTE1(v19);
-        if ( v26 )
-        {
-          BYTE1(v19) = -v31;
-          v32 = *v24;
-          v29 = v24 + 1;
-          v26 = v32 <= BYTE1(v19);
-          v30 = v32 - BYTE1(v19);
-          if ( !v26 )
-            goto LABEL_21;
-LABEL_25:
-          v33 = BYTE1(v19) + v30;
-          BYTE1(v19) -= v33;
-          LOBYTE(dword_46BD0A) = v33;
-          v34 = &v29[dword_46BD0A];
-          v31 = *v34;
-          v24 = v34 + 1;
-          continue;
-        }
-        break;
-      }
-    }
-LABEL_17:
-    ++v13;
-    LOWORD(v21) = v21 - 1;
-    if ( (_WORD)v21 )
-    {
-      LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-      goto LABEL_19;
-    }
-LABEL_26:
-    a2 = v37;
-    v17 = _byteswap_ulong(v21);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v38;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v19);
-    v35 = __CFADD__(BYTE1(v18), (_BYTE)v18);
-    LOBYTE(v18) = BYTE1(v18) + v18;
-    if ( v35 )
-      a2 = &v37[*v37];
-  }
-}
-// 43AFA7: variable 'v38' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-// 46BD08: using guessed type __int16 word_46BD08;
-// 46BD0A: using guessed type int dword_46BD0A;
-
-//----- (0043AFAA) --------------------------------------------------------
-// __asm
-int __usercall _43AFAA_unused@<eax>(
-        unsigned int a1@<ebx>,
-        _BYTE *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  _BYTE *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // eax
-  unsigned int v20; // ebx
-  char *v21; // esi
-  unsigned int v22; // ecx
-  unsigned int v23; // edx
-  _BYTE *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  char v29; // ah
-  int v30; // eax
-  bool v31; // cf
-  char v32; // al
-  _BYTE *v34; // [esp-18h] [ebp-20h]
-  int v35; // [esp+4h] [ebp-4h]
-
-  v13 = (_BYTE *)((unsigned __int16)(a11 + a9 - 1) + a13 * a10 + a8);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  g_blt_dst_stride_pad = (unsigned __int16)(a11 + a13);
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  BYTE1(a1) = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  v17 = a12;
-  BYTE1(v18) = (a6 << 8) / (unsigned int)a12;
-  LOBYTE(v18) = 0;
-  v19 = 0;
-  while ( 1 )
-  {
-    v20 = _byteswap_ulong(v18);
-    LOBYTE(v20) = 0;
-    v34 = a2;
-    v21 = a2 + 1;
-    HIWORD(v22) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v22) = a11;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v19) = *v21;
-        v24 = v21 + 1;
-        v25 = v23 == v19;
-        v26 = v23 <= v19;
-        v27 = v23 - v19;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v30 = -v27;
-            goto LABEL_15;
-          }
-          goto LABEL_18;
-        }
-        LOBYTE(v19) = *v24;
-        v21 = &v24[v19 + 1];
-        v28 = v27 == v19;
-        v26 = v27 <= v19;
-        v23 = v27 - v19;
-      }
-      while ( !v26 );
-      if ( v28 )
-        goto LABEL_14;
-      v21 += v23;
-      v29 = -(char)v23;
-LABEL_19:
-      v32 = *v21++;
-      while ( 1 )
-      {
-        *v13-- = v32;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          if ( --v29 )
-            goto LABEL_19;
-          goto LABEL_14;
-        }
-      }
-    }
-    else
-    {
-LABEL_14:
-      while ( 1 )
-      {
-        LOBYTE(v30) = *v21;
-        v24 = v21 + 1;
-        if ( (_BYTE)v30 )
-          break;
-LABEL_18:
-        v29 = *v24;
-        v21 = v24 + 1;
-        if ( v29 )
-          goto LABEL_19;
-      }
-LABEL_15:
-      while ( 1 )
-      {
-        --v13;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          LOBYTE(v30) = v30 - 1;
-          if ( !(_BYTE)v30 )
-            goto LABEL_18;
-        }
-      }
-    }
-    v19 = 0;
-    a2 = v34;
-    v17 = _byteswap_ulong(v22);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v35;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v20);
-    v31 = __CFADD__(BYTE1(v18), (_BYTE)v18);
-    LOBYTE(v18) = BYTE1(v18) + v18;
-    if ( v31 )
-    {
-      LOBYTE(v19) = *v34;
-      a2 = &v34[v19];
-    }
-  }
-}
-// 43B0BC: variable 'v35' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-
-//----- (0043B0BF) --------------------------------------------------------
-// __asm
-int __usercall _43B0BF_unused@<eax>(
-        unsigned int a1@<ebx>,
-        _BYTE *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  _BYTE *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // eax
-  unsigned int v20; // ebx
-  char *v21; // esi
-  unsigned int v22; // ecx
-  unsigned int v23; // edx
-  _BYTE *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  char v29; // ah
-  int v30; // eax
-  bool v31; // cf
-  char v32; // al
-  _BYTE *v34; // [esp-18h] [ebp-20h]
-  int v35; // [esp+4h] [ebp-4h]
-
-  v13 = (_BYTE *)((unsigned __int16)(a11 + a9 - 1) + a13 * a10 + a8);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  g_blt_dst_stride_pad = (unsigned __int16)(a11 + a13);
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  BYTE1(a1) = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  v17 = a12;
-  word_46BD0E = (a6 << 8) / (unsigned int)a12;
-  LOWORD(v18) = 0;
-  v19 = 0;
-  while ( 1 )
-  {
-    v20 = _byteswap_ulong(v18);
-    LOBYTE(v20) = 0;
-    v34 = a2;
-    v21 = a2 + 1;
-    HIWORD(v22) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v22) = a11;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v19) = *v21;
-        v24 = v21 + 1;
-        v25 = v23 == v19;
-        v26 = v23 <= v19;
-        v27 = v23 - v19;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v30 = -v27;
-            goto LABEL_15;
-          }
-          goto LABEL_18;
-        }
-        LOBYTE(v19) = *v24;
-        v21 = &v24[v19 + 1];
-        v28 = v27 == v19;
-        v26 = v27 <= v19;
-        v23 = v27 - v19;
-      }
-      while ( !v26 );
-      if ( v28 )
-        goto LABEL_14;
-      v21 += v23;
-      v29 = -(char)v23;
-LABEL_19:
-      v32 = *v21++;
-      while ( 1 )
-      {
-        *v13-- = v32;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          if ( --v29 )
-            goto LABEL_19;
-          goto LABEL_14;
-        }
-      }
-    }
-    else
-    {
-LABEL_14:
-      while ( 1 )
-      {
-        LOBYTE(v30) = *v21;
-        v24 = v21 + 1;
-        if ( (_BYTE)v30 )
-          break;
-LABEL_18:
-        v29 = *v24;
-        v21 = v24 + 1;
-        if ( v29 )
-          goto LABEL_19;
-      }
-LABEL_15:
-      while ( 1 )
-      {
-        --v13;
-        LOWORD(v22) = v22 - 1;
-        if ( !(_WORD)v22 )
-          break;
-        v31 = __CFADD__(BYTE1(v20), (_BYTE)v20);
-        LOBYTE(v20) = BYTE1(v20) + v20;
-        if ( v31 )
-        {
-          LOBYTE(v30) = v30 - 1;
-          if ( !(_BYTE)v30 )
-            goto LABEL_18;
-        }
-      }
-    }
-    v19 = 0;
-    a2 = v34;
-    v17 = _byteswap_ulong(v22);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v35;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v20);
-    LOWORD(v18) = word_46BD0E + v18;
-    do
-    {
-      LOBYTE(v19) = *a2;
-      a2 += v19;
-      --BYTE1(v18);
-    }
-    while ( BYTE1(v18) );
-  }
-}
-// 43B1DD: variable 'v35' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-// 46BD0E: using guessed type __int16 word_46BD0E;
-
-//----- (0043B1E0) --------------------------------------------------------
-// __asm
-int __usercall _43B1E0_unused@<eax>(
-        unsigned int a1@<ebx>,
-        _BYTE *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  unsigned __int8 *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // ebx
-  unsigned __int8 *v20; // esi
-  unsigned int v21; // ecx
-  unsigned int v22; // eax
-  unsigned int v23; // edx
-  unsigned __int8 *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  unsigned __int8 *v29; // esi
-  unsigned __int8 v30; // ah
-  unsigned __int8 v31; // ah
-  unsigned __int8 v32; // ah
-  char v33; // ah
-  unsigned __int8 *v34; // esi
-  int v35; // eax
-  _BYTE *v37; // [esp-18h] [ebp-20h]
-  int v38; // [esp+4h] [ebp-4h]
-
-  v13 = (unsigned __int8 *)((unsigned __int16)(a11 + a9 - 1) + a13 * a10 + a8);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  g_blt_dst_stride_pad = (unsigned __int16)(a11 + a13);
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  word_46BD08 = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  dword_46BD0A = 0;
-  v17 = a12;
-  word_46BD0E = (a6 << 8) / (unsigned int)a12;
-  LOWORD(v18) = 0;
-  while ( 1 )
-  {
-    HIWORD(v19) = _byteswap_ulong(v18) >> 16;
-    LOWORD(v19) = 0;
-    v37 = a2;
-    v20 = a2 + 1;
-    HIWORD(v21) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v21) = a11;
-    v22 = 0;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v22) = *v20;
-        v24 = v20 + 1;
-        v25 = v23 == v22;
-        v26 = v23 <= v22;
-        v27 = v23 - v22;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v31 = -(char)v27;
-            goto LABEL_17;
-          }
-          v30 = *v24;
-          v29 = v24 + 1;
-          if ( !v30 )
-            goto LABEL_24;
-          while ( 1 )
-          {
-LABEL_21:
-            LOBYTE(dword_46BD0A) = BYTE1(v19);
-            v29 += dword_46BD0A;
-LABEL_22:
-            *v13-- = *v29;
-            LOWORD(v21) = v21 - 1;
-            if ( !(_WORD)v21 )
-              goto LABEL_26;
-            LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-LABEL_24:
-            v26 = v30 <= BYTE1(v19);
-            v30 -= BYTE1(v19);
-            if ( v26 )
-              goto LABEL_25;
-          }
-        }
-        LOBYTE(v22) = *v24;
-        v20 = &v24[v22 + 1];
-        v28 = v27 == v22;
-        v26 = v27 <= v22;
-        v23 = v27 - v22;
-      }
-      while ( !v26 );
-      if ( !v28 )
-      {
-        v29 = &v20[v23];
-        v30 = -(char)v23;
-        goto LABEL_22;
-      }
-    }
-    v31 = *v20;
-    v24 = v20 + 1;
-    if ( !v31 )
-    {
-LABEL_19:
-      while ( 2 )
-      {
-        v26 = v31 <= BYTE1(v19);
-        v31 -= BYTE1(v19);
-        if ( v26 )
-        {
-          BYTE1(v19) = -v31;
-          v32 = *v24;
-          v29 = v24 + 1;
-          v26 = v32 <= BYTE1(v19);
-          v30 = v32 - BYTE1(v19);
-          if ( !v26 )
-            goto LABEL_21;
-LABEL_25:
-          v33 = BYTE1(v19) + v30;
-          BYTE1(v19) -= v33;
-          LOBYTE(dword_46BD0A) = v33;
-          v34 = &v29[dword_46BD0A];
-          v31 = *v34;
-          v24 = v34 + 1;
-          continue;
-        }
-        break;
-      }
-    }
-LABEL_17:
-    --v13;
-    LOWORD(v21) = v21 - 1;
-    if ( (_WORD)v21 )
-    {
-      LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-      goto LABEL_19;
-    }
-LABEL_26:
-    v35 = 0;
-    a2 = v37;
-    v17 = _byteswap_ulong(v21);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v38;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v19);
-    LOWORD(v18) = word_46BD0E + v18;
-    do
-    {
-      LOBYTE(v35) = *a2;
-      a2 += v35;
-      --BYTE1(v18);
-    }
-    while ( BYTE1(v18) );
-  }
-}
-// 43B343: variable 'v38' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-// 46BD08: using guessed type __int16 word_46BD08;
-// 46BD0A: using guessed type int dword_46BD0A;
-// 46BD0E: using guessed type __int16 word_46BD0E;
-
-//----- (0043B346) --------------------------------------------------------
-// __asm
-int __usercall _43B346_unused@<eax>(
-        unsigned int a1@<ebx>,
-        unsigned __int8 *a2,
-        unsigned __int16 a3,
-        unsigned __int16 a4,
-        unsigned __int16 a5,
-        unsigned __int16 a6,
-        __int16 a7,
-        int a8,
-        __int16 a9,
-        unsigned __int16 a10,
-        unsigned __int16 a11,
-        unsigned __int16 a12,
-        unsigned __int16 a13)
-{
-  unsigned __int8 *v13; // edi
-  int v15; // ecx
-  int v16; // eax
-  unsigned int v17; // ecx
-  unsigned int v18; // ebx
-  unsigned int v19; // ebx
-  unsigned __int8 *v20; // esi
-  unsigned int v21; // ecx
-  unsigned int v22; // eax
-  unsigned int v23; // edx
-  unsigned __int8 *v24; // esi
-  bool v25; // zf
-  bool v26; // cc
-  unsigned int v27; // edx
-  bool v28; // zf
-  unsigned __int8 *v29; // esi
-  unsigned __int8 v30; // ah
-  unsigned __int8 v31; // ah
-  unsigned __int8 v32; // ah
-  char v33; // ah
-  unsigned __int8 *v34; // esi
-  bool v35; // cf
-  unsigned __int8 *v37; // [esp-18h] [ebp-20h]
-  int v38; // [esp+4h] [ebp-4h]
-
-  v13 = (unsigned __int8 *)((unsigned __int16)(a11 + a9 - 1) + a13 * a10 + a8);
-  g_blt_dst_stride_pad = (unsigned __int16)(a11 + a13);
-  if ( a7 != -1 )
-    __ES__ = a7;
-  v15 = a4;
-  if ( a4 )
-  {
-    v16 = 0;
-    do
-    {
-      LOBYTE(v16) = *a2;
-      a2 += v16;
-      --v15;
-    }
-    while ( v15 );
-  }
-  word_46BD08 = (a5 << 8) / (unsigned int)a11;
-  HIWORD(v18) = _byteswap_ulong(a1) >> 16;
-  dword_46BD0A = 0;
-  v17 = a12;
-  BYTE1(v18) = (a6 << 8) / (unsigned int)a12;
-  LOBYTE(v18) = 0;
-  while ( 1 )
-  {
-    HIWORD(v19) = _byteswap_ulong(v18) >> 16;
-    LOWORD(v19) = 0;
-    v37 = a2;
-    v20 = a2 + 1;
-    HIWORD(v21) = _byteswap_ulong(v17) >> 16;
-    LOWORD(v21) = a11;
-    v22 = 0;
-    v23 = a3;
-    if ( a3 )
-    {
-      do
-      {
-        LOBYTE(v22) = *v20;
-        v24 = v20 + 1;
-        v25 = v23 == v22;
-        v26 = v23 <= v22;
-        v27 = v23 - v22;
-        if ( v26 )
-        {
-          if ( !v25 )
-          {
-            v31 = -(char)v27;
-            goto LABEL_17;
-          }
-          v30 = *v24;
-          v29 = v24 + 1;
-          if ( !v30 )
-            goto LABEL_24;
-          while ( 1 )
-          {
-LABEL_21:
-            LOBYTE(dword_46BD0A) = BYTE1(v19);
-            v29 += dword_46BD0A;
-LABEL_22:
-            *v13-- = *v29;
-            LOWORD(v21) = v21 - 1;
-            if ( !(_WORD)v21 )
-              goto LABEL_26;
-            LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-LABEL_24:
-            v26 = v30 <= BYTE1(v19);
-            v30 -= BYTE1(v19);
-            if ( v26 )
-              goto LABEL_25;
-          }
-        }
-        LOBYTE(v22) = *v24;
-        v20 = &v24[v22 + 1];
-        v28 = v27 == v22;
-        v26 = v27 <= v22;
-        v23 = v27 - v22;
-      }
-      while ( !v26 );
-      if ( !v28 )
-      {
-        v29 = &v20[v23];
-        v30 = -(char)v23;
-        goto LABEL_22;
-      }
-    }
-    v31 = *v20;
-    v24 = v20 + 1;
-    if ( !v31 )
-    {
-LABEL_19:
-      while ( 2 )
-      {
-        v26 = v31 <= BYTE1(v19);
-        v31 -= BYTE1(v19);
-        if ( v26 )
-        {
-          BYTE1(v19) = -v31;
-          v32 = *v24;
-          v29 = v24 + 1;
-          v26 = v32 <= BYTE1(v19);
-          v30 = v32 - BYTE1(v19);
-          if ( !v26 )
-            goto LABEL_21;
-LABEL_25:
-          v33 = BYTE1(v19) + v30;
-          BYTE1(v19) -= v33;
-          LOBYTE(dword_46BD0A) = v33;
-          v34 = &v29[dword_46BD0A];
-          v31 = *v34;
-          v24 = v34 + 1;
-          continue;
-        }
-        break;
-      }
-    }
-LABEL_17:
-    --v13;
-    LOWORD(v21) = v21 - 1;
-    if ( (_WORD)v21 )
-    {
-      LOWORD(v19) = word_46BD08 + (unsigned __int8)v19;
-      goto LABEL_19;
-    }
-LABEL_26:
-    a2 = v37;
-    v17 = _byteswap_ulong(v21);
-    LOWORD(v17) = v17 - 1;
-    if ( !(_WORD)v17 )
-      return v38;
-    v13 += g_blt_dst_stride_pad;
-    v18 = _byteswap_ulong(v19);
-    v35 = __CFADD__(BYTE1(v18), (_BYTE)v18);
-    LOBYTE(v18) = BYTE1(v18) + v18;
-    if ( v35 )
-      a2 = &v37[*v37];
-  }
-}
-// 43B4A3: variable 'v38' is possibly undefined
-// 46BD04: using guessed type int g_blt_dst_stride_pad;
-// 46BD08: using guessed type __int16 word_46BD08;
-// 46BD0A: using guessed type int dword_46BD0A;
-
 //----- (0043B4A6) --------------------------------------------------------
 void __cdecl REND_decode_rle_remapped(
         unsigned __int8 *src,
@@ -56439,7 +55111,7 @@ void __cdecl REND_decode_rle_remapped(
   }
   v14 = &dst[(unsigned __int16)dst_stride * (unsigned __int16)dst_y + (unsigned __int16)dst_x];
   if ( ds != -1 )
-    __ES__ = ds;
+    (void)ds;
   g_blt_dst_stride_pad = (unsigned __int16)dst_stride - (unsigned __int16)width;
   v15 = 0;
   LOWORD(v12) = height;
@@ -56578,7 +55250,7 @@ void __cdecl REND_decode_rle_remapped_mirrored(
   unsigned int v33; // [esp-1Eh] [ebp-26h]
   unsigned __int8 *v34; // [esp-1Ah] [ebp-22h]
 
-  __asm { pushfw }
+  /* __asm { pushfw } (vestigial x86 flags save) */
   v16 = (unsigned __int16)src_y;
   if ( src_y )
   {
@@ -56593,7 +55265,7 @@ void __cdecl REND_decode_rle_remapped_mirrored(
   }
   v18 = &dst[(unsigned __int16)dst_stride * (unsigned __int16)dst_y + (unsigned __int16)(width + dst_x)];
   if ( ds != -1 )
-    __ES__ = ds;
+    (void)ds;
   g_blt_dst_stride_pad = (unsigned __int16)width + (unsigned __int16)dst_stride;
   v19 = 0;
   LOWORD(v16) = height;
@@ -56697,7 +55369,7 @@ LABEL_26:
     LOWORD(v16) = v16 - 1;
   }
   while ( (_WORD)v16 );
-  __asm { popfw }
+  /* __asm { popfw } (vestigial x86 flags restore) */
 }
 // 46BD04: using guessed type int g_blt_dst_stride_pad;
 
@@ -56806,6 +55478,54 @@ BOOL REND_frame()
   return 1;
 }
 
+//----- (0043B770) --------------------------------------------------------
+BOOL REND_frame_draw() {
+  RenderNode *staging; // eax
+  RenderNode *active; // ecx
+  RenderNode *next; // edx
+
+  REND_should_render();
+  REND_batch_transform(&g_draw_list_primary);
+  REND_batch_sort(&g_draw_list_primary);
+  REND_batch_transform(&g_draw_list_staging);
+  REND_batch_sort(&g_draw_list_staging);
+  staging = g_draw_list_staging.next;
+  active = g_draw_list_primary.next;
+  if ( (RenderBatch *)g_draw_list_staging.next != &g_draw_list_staging )// merge
+  {
+    do
+    {
+      if ( active == (RenderNode *)&g_draw_list_primary )
+        break;
+      if ( staging->cmd.z > active->cmd.z )
+      {
+        active = active->next;
+      }
+      else
+      {
+        next = staging->next;
+        staging->prev = active->prev;
+        active->prev->next = staging;
+        active->prev = staging;
+        staging->next = active;
+        staging = next;
+      }
+    }
+    while ( staging != (RenderNode *)&g_draw_list_staging );
+    if ( staging != (RenderNode *)&g_draw_list_staging )
+    {
+      staging->prev = g_draw_list_primary.prev;
+      g_draw_list_primary.prev->next = staging;
+      g_draw_list_primary.prev = g_draw_list_staging.prev;
+      g_draw_list_staging.prev->next = (RenderNode *)&g_draw_list_primary;
+    }
+  }
+  g_draw_list_staging.prev = (RenderNode *)&g_draw_list_staging;
+  g_draw_list_staging.next = (RenderNode *)&g_draw_list_staging;
+  REND_draw_batch(&g_draw_list_primary);
+  return 1;
+}
+
 //----- (0043B836) --------------------------------------------------------
 int REND_43B836()
 {
@@ -56838,7 +55558,7 @@ LABEL_7:
         if ( (i->flags & RenderNode_Deleted) == 0 )
           transform(i->payload, i);
       }
-      i->cmd.flags = i->flags;
+      i->cmd.flags = (RenderCommandFlags)i->flags;
       i = i->next;
       continue;
     }
@@ -56962,7 +55682,7 @@ void REND_flush_and_cleanup()
 }
 
 //----- (0043BA40) --------------------------------------------------------
-int __fastcall UI_button_wait_for_click(Task *task, ptrdiff_t anim, BOOL (*is_enabled)(), ptrdiff_t frame)
+int __fastcall UI_button_wait_for_click(Task *task, ptrdiff_t anim, BOOL (__fastcall *is_enabled)(), ptrdiff_t frame)
 {
   BOOL clickable; // eax
   int result; // eax
@@ -57880,7 +56600,7 @@ void __cdecl UI_main_menu_campaign_surv(Task *task)
     for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
-      switch ( type )
+      switch ( (unsigned int)type )
       {
         case TaskMessage_MouseHover:
           v6 = g_widgets_head;
@@ -57944,7 +56664,7 @@ void __cdecl UI_main_menu_campaign_mute(Task *task)
     for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
     {
       type = i->type;
-      switch ( type )
+      switch ( (unsigned int)type )
       {
         case TaskMessage_MouseHover:
           v6 = g_widgets_head;
@@ -58118,15 +56838,15 @@ void __cdecl UI_main_menu_multi_ipx(Task *task)
 // 46E404: using guessed type int dword_46E404;
 
 //----- (0043D270) --------------------------------------------------------
-void __cdecl UI_main_menu_multi_serial(Task *task)
-{
+void __cdecl UI_main_menu_multi_serial(Task *task) {
+  (void)task;
   ;                                             // BUG there's actually code here but it's hidden behind early return - see asm
                                                 // MAPD 5 [5]
 }
 
 //----- (0043D430) --------------------------------------------------------
-void __cdecl UI_main_menu_multi_modem(Task *task)
-{
+void __cdecl UI_main_menu_multi_modem(Task *task) {
+  (void)task;
   ;                                             // BUG there's actually code here but it's hidden behind early return - see asm
                                                 // MAPD 6 [6]
 }
@@ -58368,7 +57088,7 @@ void __cdecl UI_main_menu_multi_player_name_input(Task *task)
       for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             v9 = g_widgets_head;
@@ -58476,7 +57196,7 @@ void __cdecl UI_main_menu_multi_phone_number_input(Task *task)
   int v19; // [esp+14h] [ebp-Ch]
   int v20; // [esp+18h] [ebp-8h]
   int v21; // [esp+1Ch] [ebp-4h]
-  NetzMobemPhonebook *__shifted(NetzMobemPhonebook,0x14) phonebook_; // [esp+24h] [ebp+4h]
+  NetzMobemPhonebook * phonebook_; // [esp+24h] [ebp+4h]
 
   ctx = (NetzMobemPhonebook *)task->ctx;
   entity = task->entity;
@@ -58498,7 +57218,7 @@ void __cdecl UI_main_menu_multi_phone_number_input(Task *task)
   UI_widget_register(v5, v6, 0, 0, 0);
   ENT_anim_set(v5, 1356);
   phone = ctx->phone;
-  phonebook_ = (NetzMobemPhonebook *__shifted(NetzMobemPhonebook,0x14))phone;
+  phonebook_ = ctx;
   while ( 1 )
   {
     UI_str_clear(g_phone_number_static);
@@ -58511,7 +57231,7 @@ void __cdecl UI_main_menu_multi_phone_number_input(Task *task)
       for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             v10 = g_widgets_head;
@@ -58560,10 +57280,10 @@ LABEL_16:
     while ( (int)&v11[-20 - (int)phonebook] < 12 );
     *((_BYTE *)&v19 + v12) = 0;
     v13 = v20;
-    *(int *)ADJ(phonebook_)->phone = v19;    // BUG memcpy inlined
+    *(int *)phonebook_->phone = v19;    // BUG memcpy inlined
     v14 = v21;
-    *(int *)&ADJ(phonebook_)->phone[4] = v13;
-    *(int *)&ADJ(phonebook_)->phone[8] = v14;
+    *(int *)&phonebook_->phone[4] = v13;
+    *(int *)&phonebook_->phone[8] = v14;
     v15 = g_current_menu_controller->entity;
     v16 = v15->y >> 8;
     v17 = v15->x >> 8;
@@ -58575,7 +57295,7 @@ LABEL_16:
     g_ui_input_cursor_entity->is_collidable = 1;
     g_ui_input_cursor_entity->y = 0xEC00;
     ENT_anim_clear(g_ui_input_cursor_entity);
-    phone = (char *)phonebook_;                 // BUG  it's ->phone
+    phone = (char *)phonebook_ + 0x14;                 // BUG  it's ->phone
     v4 = 0;
   }
 }
@@ -59114,7 +57834,7 @@ void __cdecl UI_main_menu_multi_modem_up(Task *task)
       for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             v6 = g_widgets_head;
@@ -59172,7 +57892,7 @@ void __cdecl UI_main_menu_multi_modem_down(Task *task)
       for ( i = TSK_pop_message(task); i; i = TSK_pop_message(task) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             v6 = g_widgets_head;
@@ -59236,7 +57956,7 @@ void __cdecl UI_main_menu_multi_modem_list_select(Task *task)
       for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             v7 = g_widgets_head;
@@ -59703,7 +58423,7 @@ void __cdecl UI_main_menu_multi_lobby_list(Task *task)
   Coroutine *v6; // et1
   Coroutine *v7; // et1
   int v8; // ebx
-  NetzPlayer *__shifted(NetzPlayer,0x18) player; // esi
+  NetzPlayer * player; // esi
   const char *v10; // edx
   TaskMessage *i; // eax
   int v12; // [esp+0h] [ebp-14h] BYREF
@@ -59757,23 +58477,23 @@ void __cdecl UI_main_menu_multi_lobby_list(Task *task)
       v8 = 0;
       v3->cursor_row = 0;
       g_lobby_ready_player_count = 0;
-      player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+      player = &g_netz_players[1];
       do
       {
-        if ( ADJ(player)->connection_status && ADJ(player)->synced )
+        if ( player->connection_status && player->synced )
         {
           ++v8;
-          UISTR_append_text(v3, ADJ(player)->name, nullptr);
+          UISTR_append_text(v3, player->name, nullptr);
           v10 = "-EVOL-";
-          if ( ADJ(player)->faction == NetzFaction_Surv )
+          if ( player->faction == NetzFaction_Surv )
             v10 = "-SURV-";
           UISTR_append_text(v3, v10, nullptr);
-          UISTR_append_text(v3, g_palette_names[ADJ(player)->palette_idx], nullptr);
+          UISTR_append_text(v3, g_palette_names[(int)player->palette_idx], nullptr);
           UI_str_set_text(v3, "\n", nullptr);
         }
         ++player;
       }
-      while ( (int)player < (int)&g_join_pkt ); // BUG
+      while ( (int)player + 0x18 < (int)&g_join_pkt ); // BUG
       if ( v8 > 1 )
         g_lobby_ready_player_count = v8 - 1;
       v1 = task;
@@ -59820,7 +58540,7 @@ void __cdecl UI_main_menu_multi_session_slot(Task *task)
       for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             v7 = g_widgets_head;
@@ -60122,7 +58842,7 @@ void __cdecl UI_main_menu_multi_join(Task *task)
       v9 = -1;
       v10 = 0;
       g_netz_join_state = NetzJoinState_Connecting;
-      while ( (g_netz_remote_host_slot == -1 || v9 == -1) && v10 < 1800 )
+      while ( (g_netz_remote_host_slot == -1 || v9 == (unsigned int)-1) && v10 < 1800 )
       {
         g_coroutine_eax = TSK_yield(task, TaskWait_Interval, 1);
         v11 = g_coroutine_current;
@@ -60525,7 +59245,7 @@ void __cdecl UI_main_menu_game_player_name(Task *task)
       for ( i = TSK_pop_message(v1); i; i = TSK_pop_message(v1) )
       {
         type = i->type;
-        switch ( type )
+        switch ( (unsigned int)type )
         {
           case TaskMessage_MouseHover:
             v11 = g_widgets_head;
@@ -60632,7 +59352,7 @@ void __cdecl UI_main_menu_game_palette(Task *task)
   Entity *v3; // eax
   char v4; // dl
   int v5; // ecx
-  NetzPlayer *__shifted(NetzPlayer,0x18) player; // eax
+  NetzPlayer * player; // eax
   int v7; // eax
   int v8; // esi
   char v9; // cl
@@ -60660,7 +59380,7 @@ void __cdecl UI_main_menu_game_palette(Task *task)
         UI_str_clear(v1);
         v1->cursor_col = 0;
         v1->cursor_row = 0;
-        UISTR_append_text(v1, g_palette_names[g_current_multi_pal], nullptr);
+        UISTR_append_text(v1, g_palette_names[(int)g_current_multi_pal], nullptr);
         if ( g_current_menu != MenuId_Kaos )
           break;
         while ( !UI_button_tick(task, 2056, 1, 2) )
@@ -60676,7 +59396,7 @@ void __cdecl UI_main_menu_game_palette(Task *task)
         UI_str_clear(v1);
         v1->cursor_col = 0;
         v1->cursor_row = 0;
-        UISTR_append_text(v1, g_palette_names[g_current_multi_pal], nullptr);
+        UISTR_append_text(v1, g_palette_names[(int)g_current_multi_pal], nullptr);
       }
       while ( !v8 );
       if ( v8 == 300 )
@@ -60704,15 +59424,15 @@ void __cdecl UI_main_menu_game_palette(Task *task)
       if ( ++v4 >= 15 )
         v4 = 0;
       v5 = 0;
-      player = (NetzPlayer *__shifted(NetzPlayer,0x18))&g_netz_players[1].synced;
+      player = &g_netz_players[1];
       while ( v5 == g_netz_local_player_slot
-           || ADJ(player)->connection_status == NetzConnection_None
-           || !ADJ(player)->synced
-           || ADJ(player)->palette_idx != v4 )
+           || player->connection_status == NetzConnection_None
+           || !player->synced
+           || player->palette_idx != v4 )
       {
         ++player;
         ++v5;
-        if ( (int)player >= (int)&g_join_pkt )  // BUG
+        if ( (int)player + 0x18 >= (int)&g_join_pkt )  // BUG
         {
           v7 = 0;
           goto LABEL_22;
@@ -60906,7 +59626,7 @@ void __cdecl UI_main_menu_game_tech_bunkers(Task *task)
 
   if ( g_current_menu == MenuId_Kaos )
     BYTE2(g_kaos_game_settings.settings) = 0;
-  v1 = UI_str_create(nullptr, g_mobd[80].layers[0], 340, 156, 10, 3, 9, 14, 16);
+  v1 = UI_str_create(nullptr, (FontMobd *)g_mobd[80].layers[0], 340, 156, 10, 3, 9, 14, 16);
   entity = task->entity;
   v3 = ENT_create(MobdId_MainMenu, nullptr, entity);
   entity->mobd_id = MobdId_MainMenu;
@@ -62095,7 +60815,7 @@ LABEL_16:
             do
             {
               type = v11->type;
-              switch ( type )
+              switch ( (unsigned int)type )
               {
                 case TaskMessage_MouseHover:
                   v13 = g_widgets_head;
@@ -62248,7 +60968,7 @@ LABEL_63:
         do
         {
           v25 = v24->type;
-          switch ( v25 )
+          switch ( (unsigned int)v25 )
           {
             case TaskMessage_MouseHover:
               v26 = g_widgets_head;
@@ -63149,7 +61869,7 @@ void __fastcall UISTR_append_text(UiStr *str, const char *text, GlyphDesc **font
             if ( font_remap_table )
               v15 = font_remap_table[*v3 + 1];
             else
-              v15 = str->font->glyphs[*v3];
+              v15 = str->font->glyphs[(int)*v3];
             glyphs->rn->cmd.image = v15->img;
             glyphs->rn->cmd.y = v12 - v15->y;
             glyphs->rn->cmd.x = x - v15->x;
@@ -63213,7 +61933,7 @@ BOOL GAME_verify_cdrom()
 {
   BOOL result; // eax
   char filename[48]; // [esp+10h] [ebp-34h] BYREF
-  __int16 v2; // [esp+40h] [ebp-4h]
+  [[maybe_unused]] __int16 v2; // [esp+40h] [ebp-4h]
 
   strcpy(filename, "C:\\LEVELS\\MUTE1.WAV");
   memset(&filename[20], 0, 0x1Cu);
@@ -63558,8 +62278,8 @@ void __fastcall UNIT_mode_tanker_align_for_docking_drillrig(Unit *unit)
 }
 
 //----- (004446A0) --------------------------------------------------------
-void __fastcall UNIT_mode_tanker_oil_exhausted(Unit *unit)
-{
+void __fastcall UNIT_mode_tanker_oil_exhausted(Unit *unit) {
+  (void)unit;
   g_dbg_mode_sentinel = 901223;
 }
 // 477358: using guessed type int g_dbg_mode_sentinel;
@@ -63597,7 +62317,7 @@ LABEL_22:
       {
         ++state->oil_loaded;
         amount = next->amount;
-        if ( (amount == 5000 || amount <= 2500 && !(amount % 500)) && unit->player_num == g_player_num )
+        if ( (amount == 5000 || (amount <= 2500 && !(amount % 500))) && unit->player_num == g_player_num )
         {
           if ( !GAME_player_is_evolved() )
           {
@@ -64072,8 +62792,8 @@ void __fastcall MSG_tanker(Task *receiver, Task *sender, TaskMessageType message
             num_destinations = v11->num_destinations;
             if ( num_destinations != 20 )
             {
-              if ( (type = unit2->type, type != UnitType_Mute_Drillrig) && type != UnitType_Surv_Drillrig
-                || (v14 = (BuildingState *)unit2->state) != nullptr && v14->ctx )
+              if ( ((type = unit2->type, type != UnitType_Mute_Drillrig) && type != UnitType_Surv_Drillrig)
+                || ((v14 = (BuildingState *)unit2->state) != nullptr && v14->ctx) )
               {
                 v11->destinations[num_destinations] = unit2;
                 ++v11->num_destinations;
@@ -64378,12 +63098,12 @@ void *__fastcall TSK_alloc(Task *task, size_t size)
 void __fastcall TSK_dealloc(Task *task, void *mem)
 {
   TaskLocal *v2; // eax
-  TaskLocal *__shifted(TaskLocal,4) v3; // edx
+  TaskLocal * v3; // edx
 
   v2 = CONTAINING_RECORD(mem, TaskLocal, data);// BUG idk it's just (TaskLocal *)(mem - 8)
-  v3 = *((TaskLocal *__shifted(TaskLocal,4) *)mem - 1);
+  v3 = *((TaskLocal * *)mem - 1);
   if ( v3 )
-    ADJ(v3)->prev = v2->next;
+    ((TaskLocal *)((char *)v3 - 4))->prev = v2->next;
   else
     task->locals = v2->next;
   if ( v2->next )
@@ -65063,6 +63783,8 @@ BOOL __fastcall GAME_player_is_evolved_and_is_blacksmith(Unit *unit, SidebarFact
 //----- (00445DA0) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_infantry_open(SidebarButton *button)
 {
+  (void)button;
+
   SidebarFactoryProduction *prev; // edi
   int i; // esi
   int v3; // ebp
@@ -65139,6 +63861,8 @@ void __fastcall UI_sidebar_mode_order_unit(SidebarButton *button)
 //----- (00445F00) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_infantry_close(SidebarButton *button)
 {
+  (void)button;
+
   SidebarFactoryProduction *i; // esi
   Entity *icon_entity; // ecx
 
@@ -65162,6 +63886,8 @@ void __fastcall UI_sidebar_mode_infantry_close(SidebarButton *button)
 //----- (00445F50) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_vehicles_open(SidebarButton *button)
 {
+  (void)button;
+
   SidebarFactoryProduction *next; // edi
   int i; // esi
   int v3; // ebp
@@ -65222,6 +63948,8 @@ void __fastcall UI_sidebar_mode_vehicles_open(SidebarButton *button)
 //----- (00446070) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_vehicles_close(SidebarButton *button)
 {
+  (void)button;
+
   SidebarFactoryProduction *i; // esi
   Entity *icon_entity; // ecx
 
@@ -65247,6 +63975,8 @@ void __fastcall UI_sidebar_mode_vehicles_close(SidebarButton *button)
 //----- (004460C0) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_aircraft_open(SidebarButton *button)
 {
+  (void)button;
+
   SidebarFactoryProduction *prev; // ebx
   int i; // esi
   Sidebar *v3; // eax
@@ -65289,6 +64019,8 @@ void __fastcall UI_sidebar_mode_aircraft_open(SidebarButton *button)
 //----- (00446170) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_aircraft_close(SidebarButton *button)
 {
+  (void)button;
+
   if ( g_factory_prod_head[ProductionType_Aircraft].next != &g_factory_prod_head[ProductionType_Aircraft] )
     UI_sidebar_destroy(g_factory_prod_head[ProductionType_Aircraft].next->sidebar);
   g_is_sidebar_open[ProductionType_Aircraft] = 0;
@@ -65297,6 +64029,8 @@ void __fastcall UI_sidebar_mode_aircraft_close(SidebarButton *button)
 //----- (00446190) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_airstrike_open(SidebarButton *button)
 {
+  (void)button;
+
   SidebarButton **v1; // esi
 
   TSK_send_message(nullptr, TaskMessage_AirstrikeSetTargetingMode, nullptr, g_game_update_loop_task);
@@ -65317,12 +64051,16 @@ void __fastcall UI_sidebar_mode_airstrike_open(SidebarButton *button)
 //----- (004461E0) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_airstrike_close(SidebarButton *button)
 {
+  (void)button;
+
   TSK_send_message(nullptr, TaskMessage_AirstrikeClearTargetingMode, nullptr, g_game_update_loop_task);
 }
 
 //----- (00446200) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_buildings_open(SidebarButton *button)
 {
+  (void)button;
+
   SidebarFactoryProduction *prev; // ebx
   int i; // esi
   Sidebar *v3; // eax
@@ -65369,6 +64107,7 @@ void __fastcall UI_sidebar_mode_place_building(SidebarButton *button)
   int footprint_width; // eax
   int footprint_height; // ecx
   UnitType v6; // esi
+  static BuildingPlannerPayload g_building_placement_payload;
 
   unit_type = (UnitType)button->ctx;
   type = g_building_blueprints[0].type;
@@ -65409,16 +64148,18 @@ LABEL_4:
 }
 
 //----- (00446330) --------------------------------------------------------
-void __fastcall UI_sidebar_mode_buildings_close(SidebarButton *button)
-{
+void __fastcall UI_sidebar_mode_buildings_close(SidebarButton *button) {
+  (void)button;
+
   if ( g_factory_prod_head[ProductionType_Buildings].next != &g_factory_prod_head[ProductionType_Buildings] )
     UI_sidebar_destroy(g_factory_prod_head[ProductionType_Buildings].next->sidebar);
   g_is_sidebar_open[ProductionType_Buildings] = 0;
 }
 
 //----- (00446350) --------------------------------------------------------
-void __fastcall UI_sidebar_mode_towers_open(SidebarButton *a1)
-{
+void __fastcall UI_sidebar_mode_towers_open(SidebarButton *button) {
+  (void)button;
+
   SidebarFactoryProduction *prev; // ebx
   int i; // esi
   Sidebar *v3; // eax
@@ -65457,8 +64198,9 @@ void __fastcall UI_sidebar_mode_towers_open(SidebarButton *a1)
 }
 
 //----- (00446400) --------------------------------------------------------
-void __fastcall UI_sidebar_mode_towers_close(SidebarButton *button)
-{
+void __fastcall UI_sidebar_mode_towers_close(SidebarButton *button) {
+  (void)button;
+
   if ( g_factory_prod_head[ProductionType_Towers].next != &g_factory_prod_head[ProductionType_Towers] )
     UI_sidebar_destroy(g_factory_prod_head[ProductionType_Towers].next->sidebar);
   g_is_sidebar_open[ProductionType_Towers] = 0;
@@ -65826,8 +64568,9 @@ LABEL_12:
 }
 
 //----- (004469D0) --------------------------------------------------------
-void __fastcall UI_sidebar_mode_options_open(SidebarButton *button)
-{
+void __fastcall UI_sidebar_mode_options_open(SidebarButton *button) {
+  (void)button;
+
   TSK_send_message(nullptr, TaskMessage_ToggleIngameMenu, nullptr, g_ui_ingame_controller_task);
 }
 
@@ -66051,6 +64794,8 @@ void __fastcall UI_sidebar_mode_cash_close(SidebarButton *button)
 //----- (00446E00) --------------------------------------------------------
 void __fastcall UI_sidebar_mode_help_open(SidebarButton *button)
 {
+  (void)button;
+
   SidebarButton **v1; // esi
 
   v1 = &g_help_button;
@@ -66069,9 +64814,21 @@ void __fastcall UI_sidebar_mode_help_open(SidebarButton *button)
 }
 
 //----- (00446E50) --------------------------------------------------------
-void __fastcall UI_sidebar_mode_help_close(SidebarButton *button)
-{
+void __fastcall UI_sidebar_mode_help_close(SidebarButton *button) {
+  (void)button;
   TSK_send_message(nullptr, TaskMessage_HideHint, nullptr, g_game_update_loop_task);
+}
+
+//----- (00446E70) --------------------------------------------------------
+void __fastcall UI_sidebar_mode_minimap_open(SidebarButton *button) {
+  (void)button;
+  MINI_open();
+}
+
+//----- (00446E80) --------------------------------------------------------
+void __fastcall UI_sidebar_mode_minimap_close(SidebarButton *button) {
+  (void)button;
+  MINI_close();
 }
 
 //----- (00446E90) --------------------------------------------------------
@@ -66373,15 +65130,15 @@ LABEL_15:
 }
 
 //----- (004474D0) --------------------------------------------------------
-void __fastcall UNIT_mode_tower_complete(Unit *unit)
-{
+void __fastcall UNIT_mode_tower_complete(Unit *unit) {
+  (void)unit;
   g_dbg_mode_sentinel = 1123344;
 }
 // 477358: using guessed type int g_dbg_mode_sentinel;
 
 //----- (004474E0) --------------------------------------------------------
-void __fastcall UNIT_mode_tower_advance_construction(Unit *unit)
-{
+void __fastcall UNIT_mode_tower_advance_construction(Unit *unit) {
+  (void)unit;
   g_dbg_mode_sentinel = 908793;
 }
 // 477358: using guessed type int g_dbg_mode_sentinel;
@@ -66447,6 +65204,8 @@ void __fastcall UNIT_mode_tower_finalize(Unit *unit)
 // BUG - void* payload but it's unit here to make the decompilation cleaner
 void __fastcall MSG_tower(Task *receiver, Task *sender, TaskMessageType message, Unit *payload)
 {
+  (void)sender;
+
   Unit *unit; // esi
   Unit *order_target; // eax
   int unit_id; // eax
@@ -66832,7 +65591,7 @@ void __fastcall TURRET_mode_tower_attack_target(Turret *turret)
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[turret->current_mobd_frame]);
-  if ( turret->current_mobd_frame != v5 )
+  if ( (unsigned int)turret->current_mobd_frame != v5 )
     return;
   v6 = turret->target;
   if ( !v6->destroyed
@@ -67138,6 +65897,9 @@ void __fastcall MSG_turret_tower(
         TaskMessageType message,
         void *payload)
 {
+  (void)sender;
+  (void)payload;
+
   Turret *turret; // eax
   Unit *parent; // ecx
 
@@ -67342,17 +66104,17 @@ void __fastcall REND_transform_building_overlay(Unit *unit, RenderNode *node)
 void __fastcall REND_transform_infantry_overlay(Unit *unit, RenderNode *node)
 {
   Entity *entity; // eax
-  Unit *__shifted(Unit,0x284) unit_; // ecx
+  Unit * unit_; // ecx
   int y; // esi
   int v5; // eax
 
   entity = unit->entity;
-  unit_ = (Unit *__shifted(Unit,0x284))&unit->overlay_sprt;
+  unit_ = unit;
   node->cmd.x = (entity->x - g_mapd_camera.x - 2048) >> 8;
   y = g_mapd_camera.y;
-  v5 = ADJ(unit_)->entity->y;
+  v5 = unit_->entity->y;
   node->cmd.z = 0x200000;
-  node->cmd.image = (RenderImage *)unit_;
+  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284);
   node->cmd.y = (v5 - y - 6400) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
@@ -67362,18 +66124,18 @@ void __fastcall REND_transform_vehicle_overlay(Unit *unit, RenderNode *node)
 {
   MobdPoint *pt; // esi
   int x; // eax
-  Unit *__shifted(Unit,0x284) unit_; // ecx
+  Unit * unit_; // ecx
   int y; // esi
   int v6; // eax
 
   pt = unit->mobd_anchors.render;
   x = unit->entity->x;
-  unit_ = (Unit *__shifted(Unit,0x284))&unit->overlay_sprt;
+  unit_ = unit;
   node->cmd.x = (pt->x + x - g_mapd_camera.x - 4096) >> 8;
   y = g_mapd_camera.y;
-  v6 = ADJ(unit_)->mobd_anchors.render->y + ADJ(unit_)->entity->y;
+  v6 = unit_->mobd_anchors.render->y + unit_->entity->y;
   node->cmd.z = 0x200000;
-  node->cmd.image = (RenderImage *)unit_;
+  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284);
   node->cmd.y = (v6 - y - 1024) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
@@ -67382,17 +66144,17 @@ void __fastcall REND_transform_vehicle_overlay(Unit *unit, RenderNode *node)
 void __fastcall REND_transform_tanker_overlay(Unit *unit, RenderNode *node)
 {
   Entity *entity; // eax
-  Unit *__shifted(Unit,0x284) unit_; // ecx
+  Unit * unit_; // ecx
   int y; // esi
   int v5; // eax
 
   entity = unit->entity;
-  unit_ = (Unit *__shifted(Unit,0x284))&unit->overlay_sprt;
+  unit_ = unit;
   node->cmd.x = (entity->x - g_mapd_camera.x - 4096) >> 8;
   y = g_mapd_camera.y;
-  v5 = ADJ(unit_)->entity->y;
+  v5 = unit_->entity->y;
   node->cmd.z = 0x200000;
-  node->cmd.image = (RenderImage *)unit_;
+  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284);
   node->cmd.y = (v5 - y - 6400) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
@@ -67402,16 +66164,16 @@ void __fastcall REND_transform_aircraft_overlay(Unit *unit, RenderNode *node)
 {
   Entity *entity; // esi
   int x; // eax
-  Unit *__shifted(Unit,0x284) unit_; // ecx
+  Unit * unit_; // ecx
   int v5; // eax
 
   entity = unit->entity;
   x = unit->mobd_anchors.render->x;
-  unit_ = (Unit *__shifted(Unit,0x284))&unit->overlay_sprt;
+  unit_ = unit;
   node->cmd.x = (entity->x + x - g_mapd_camera.x - 4096) >> 8;
-  v5 = ADJ(unit_)->entity->y - (ADJ(unit_)->entity->z >> 1) - g_mapd_camera.y;
+  v5 = unit_->entity->y - (unit_->entity->z >> 1) - g_mapd_camera.y;
   node->cmd.z = 0x400000;
-  node->cmd.image = (RenderImage *)unit_; // BUG it's actally ->overlay_sprt
+  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284); // BUG it's actally ->overlay_sprt
   node->cmd.y = (v5 - 1024) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
@@ -67499,7 +66261,7 @@ LABEL_9:
       turret->entity,
       turret->attachment->mobd_lookup_offset_idle,
       g_angle_to_orientation[turret->current_mobd_frame]);
-    if ( turret->current_mobd_frame == v9 )
+    if ( (unsigned int)turret->current_mobd_frame == v9 )
     {
       MATH_direction_to_orientation(            // 448BF0 TURRET_mode_vehicle_fire_init
         turret->target->entity->x - turret->entity->x,
@@ -67540,7 +66302,7 @@ void __fastcall TURRET_mode_vehicle_rotate_to_target(Turret *turret)
     turret->entity,
     turret->attachment->mobd_lookup_offset_idle,
     g_angle_to_orientation[turret->current_mobd_frame]);
-  if ( turret->current_mobd_frame == v4 )
+  if ( (unsigned int)turret->current_mobd_frame == v4 )
   {
     MATH_direction_to_orientation(              // INLINED 448BF0 TURRET_mode_vehicle_fire_init
       turret->target->entity->x - turret->entity->x,
@@ -67674,6 +66436,9 @@ void __fastcall MSG_turret_vehicle(
         TaskMessageType message,
         void *payload)
 {
+  (void)receiver;
+  (void)payload;
+
   Turret *turret; // esi
 
   turret = (Turret *)sender->ctx;
@@ -67690,7 +66455,7 @@ void __fastcall MSG_unit_order_dispatcher(
         Task *receiver,
         Task *sender,
         TaskMessageType message,
-        void *payload)
+        [[maybe_unused]] void *payload)
 {
   UnitOrderCtx *ctx; // ecx
   SelectionNode *next; // eax
@@ -67769,7 +66534,7 @@ void __cdecl UNIT_order_dispatcher(Task *task)
     event = &g_currently_processed_event;
   else {
     // NetzGameEvent and GameEvetn are binary compatible in the first 13 bytes so the pointer cast is ok - but should be refactored
-    event = (GameEvent *)&g_netz_game_events[player_num -1];
+    event = (GameEvent *)&g_netz_game_events[ctx->player_num - 1];
   }
 
   switch ( event->type )
@@ -68113,7 +66878,7 @@ BOOL UNIT_order_dispatcher_init()
 {
   BOOL v0; // eax
   int v1; // edi
-  NetzPlayer *__shifted(NetzPlayer,0x1A) p; // ebp
+  NetzPlayer * p; // ebp
   Task *task; // eax
   UnitOrderCtx *v4; // esi
   SelectionNode *v5; // eax
@@ -68131,7 +66896,7 @@ BOOL UNIT_order_dispatcher_init()
   p = &g_netz_players[1];
   do
   {
-    if ( !v0 && p[-1].connection_status != NetzConnection_None || v0 && v1 == g_player_num )// BUG [-1].factions is wrong - in the assembly it goes -1C (-1 while sizeof of netz player) - meaning it's players[i-1].connection_status
+    if ( (!v0 && p[-1].connection_status != NetzConnection_None) || (v0 && v1 == g_player_num) )// BUG [-1].factions is wrong - in the assembly it goes -1C (-1 while sizeof of netz player) - meaning it's players[i-1].connection_status
                                                 //
                                                 // which is a bug in itself because on the first iteration it's [0-1] -> [-1] - out of bounds
     {
@@ -68203,13 +66968,13 @@ void UNIT_order_dispatcher_terminate()
 void __cdecl NETZ_sync_loop(Task *task)
 {
   UINT v1; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x14) player; // eax
+  NetzPlayer * player; // eax
   DWORD Time; // ebx
   DWORD v4; // edi
   UINT v5; // eax
   Coroutine *v6; // et1
   Coroutine *v7; // et1
-  NetzPlayer *__shifted(NetzPlayer,0x14) player_; // eax
+  NetzPlayer * player_; // eax
   GameEvent *v9; // eax
   int v10; // edx
   NetzGameEvent *v11; // ecx
@@ -68218,10 +66983,10 @@ void __cdecl NETZ_sync_loop(Task *task)
   NetzPlayer *v14; // ecx
   _BYTE *v15; // edi
   int v16; // ebx
-  NetzPlayer *__shifted(NetzPlayer,0x10) _player; // edi
+  NetzPlayer * _player; // edi
   Coroutine *v18; // et1
   Coroutine *v19; // et1
-  NetzPlayer *__shifted(NetzPlayer,0x14) __player; // eax
+  NetzPlayer * __player; // eax
   int v21; // edx
   int v22; // esi
   NetzGameEvent *v23; // eax
@@ -68250,10 +67015,10 @@ void __cdecl NETZ_sync_loop(Task *task)
   {
     g_netz_is_game_started_2_unused = 1;
     g_netz_num_pending_acks = g_num_multi_players - 1;
-    player = (NetzPlayer *__shifted(NetzPlayer,0x14))&g_netz_players[1].event_received_this_tick;
+    player = &g_netz_players[1];
     do
-      ADJ(player++)->event_received_this_tick = 0;
-    while ( (int)player < (int)&dword_47A83C ); // BUG
+      (player++)->event_received_this_tick = 0;
+    while ( (int)player + 0x14 < (int)&dword_47A83C ); // BUG
     NETZ_broadcast_roster_on_game_start(NETZ_PKT_GAME_START_LOBBY_STATE_BROADCAST);
     Time = timeGetTime();
     v4 = timeGetTime();
@@ -68307,11 +67072,11 @@ void __cdecl NETZ_sync_loop(Task *task)
           --g_coroutine_nesting_depth;
         if ( timeGetTime() - v4 > 30000 )
         {
-          player_ = (NetzPlayer *__shifted(NetzPlayer,0x14))&g_netz_players[1].event_received_this_tick;
+          player_ = &g_netz_players[1];
           g_netz_num_pending_acks = g_num_multi_players - 1;
           do
-            ADJ(player_++)->event_received_this_tick = 0;
-          while ( (int)player_ < (int)&dword_47A83C );// BUG
+            (player_++)->event_received_this_tick = 0;
+          while ( (int)player_ + 0x14 < (int)&dword_47A83C );// BUG
           NETZ_broadcast_roster_on_game_start(NETZ_PKT_GAME_START_LOBBY_STATE_BROADCAST);
           v4 = timeGetTime();
         }
@@ -68360,7 +67125,7 @@ LABEL_18:
           if ( v14->connection_status && v13->type )
           {
             *v12 = v37;
-            v15 = v12 + 1;
+            v15 = (_BYTE *)(v12 + 1);
             v12 += 14;
             *(int *)v15 = *(int *)&v13->type;
             *((int *)v15 + 1) = *(int *)&v13->payload[3];
@@ -68377,16 +67142,16 @@ LABEL_18:
         LOBYTE(v13) = v36;
         v16 = 0;
         a3 = v36;
-        _player = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+        _player = &g_netz_players[1];
         do
         {
-          if ( ADJ(_player)->connection_status == NetzConnection_Joined && v16 != v10 )
+          if ( _player->connection_status == NetzConnection_Joined && v16 != v10 )
           {
             g_coroutine_eax = (UINT)v13;
             v18 = g_coroutine_current;
             if ( g_coroutine_list_head != v18 && ++g_coroutine_nesting_depth == 1 )
               g_coroutine_esp = v33;
-            g_coroutine_eax = NETZ_send(ADJ(_player)->slot, NETZ_PKT_EVENT_BROADCAST, &a3, v12 - &a3, 0);
+            g_coroutine_eax = NETZ_send(_player->slot, NETZ_PKT_EVENT_BROADCAST, &a3, v12 - &a3, 0);
             v19 = g_coroutine_current;
             if ( g_coroutine_list_head != v19 )
               --g_coroutine_nesting_depth;
@@ -68396,7 +67161,7 @@ LABEL_18:
           ++_player;
           ++v16;
         }
-        while ( (int)_player < (int)&g_netz_msg_loop );// BUG
+        while ( (int)_player + 0x10 < (int)&g_netz_msg_loop );// BUG
         if ( g_netz_new_game_events )
           TSK_yield(task, TaskWait_Interval, 4);
         else
@@ -68404,10 +67169,10 @@ LABEL_18:
         if ( !g_netz_continue_loop )
           break;
         g_netz_num_pending_packets = g_num_multi_players - 1;
-        __player = (NetzPlayer *__shifted(NetzPlayer,0x14))&g_netz_players[1].event_received_this_tick;
+        __player = &g_netz_players[1];
         do
-          ADJ(__player++)->event_received_this_tick = 0;
-        while ( (int)__player < (int)&dword_47A83C );// BUG
+          (__player++)->event_received_this_tick = 0;
+        while ( (int)__player + 0x14 < (int)&dword_47A83C );// BUG
         if ( NETZ_wait_for_packets(&g_netz_num_pending_packets, 40000, "waiting for player packet") )
           goto LABEL_56;
         if ( !g_netz_continue_loop )
@@ -68539,6 +67304,8 @@ LABEL_57:
 //----- (00449E00) --------------------------------------------------------
 BOOL __fastcall NETZ_wait_for_packets(int *pending_count, int timeout_ms, const char *debug_message)
 {
+  (void)debug_message;
+
   DWORD time_; // esi
   UINT v5; // eax
   Coroutine *v6; // et1
@@ -68624,7 +67391,7 @@ BOOL __fastcall NETZ_wait_for_packets(int *pending_count, int timeout_ms, const 
 void NETZ_signal_game_over()
 {
   UINT v0; // eax
-  NetzPlayer *__shifted(NetzPlayer,0x10) player; // esi
+  NetzPlayer * player; // esi
   Coroutine *v2; // et1
   Coroutine *v3; // et1
   UINT v4; // eax
@@ -68636,16 +67403,16 @@ void NETZ_signal_game_over()
   if ( g_netz_is_game_host )
   {
     g_netz_players[0].event_received_this_tick = 1;
-    player = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+    player = &g_netz_players[1];
     do
     {
-      if ( ADJ(player)->connection_status == NetzConnection_Joined )
+      if ( player->connection_status == NetzConnection_Joined )
       {
         g_coroutine_eax = v0;
         v2 = g_coroutine_current;
         if ( g_coroutine_list_head != v2 && ++g_coroutine_nesting_depth == 1 )
           g_coroutine_esp = v7;
-        NETZ_send(ADJ(player)->slot, NETZ_PKT_GAME_OVER_BROADCAST_2, nullptr, 0, 1);
+        NETZ_send(player->slot, NETZ_PKT_GAME_OVER_BROADCAST_2, nullptr, 0, 1);
         g_coroutine_eax = NETZ_poll(0, 0);
         v3 = g_coroutine_current;
         if ( g_coroutine_list_head != v3 )
@@ -68654,7 +67421,7 @@ void NETZ_signal_game_over()
       }
       ++player;
     }
-    while ( (int)player < (int)&g_netz_msg_loop );// BUG
+    while ( (int)player + 0x10 < (int)&g_netz_msg_loop );// BUG
   }
   else
   {
@@ -68695,7 +67462,7 @@ void __fastcall NETZ_broadcast(NetzPacketType pkt, const void *data, const size_
 {
   UINT v3; // eax
   int v4; // edi
-  NetzPlayer *__shifted(NetzPlayer,0x10) player; // esi
+  NetzPlayer * player; // esi
   Coroutine *v6; // et1
   Coroutine *v7; // et1
   int v8; // [esp-Ch] [ebp-14h] BYREF
@@ -68708,17 +67475,17 @@ void __fastcall NETZ_broadcast(NetzPacketType pkt, const void *data, const size_
   if ( g_netz_is_game_host )
   {
     v4 = 0;
-    player = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+    player = &g_netz_players[1];
     do
     {
-      LOBYTE(v3) = ADJ(player)->connection_status;
+      LOBYTE(v3) = player->connection_status;
       if ( (_BYTE)v3 && v4 != g_netz_local_player_slot )
       {
         g_coroutine_eax = v3;
         v6 = g_coroutine_current;
         if ( g_coroutine_list_head != v6 && ++g_coroutine_nesting_depth == 1 )
           g_coroutine_esp = &v8;
-        g_coroutine_eax = NETZ_send(ADJ(player)->slot, (NetzPacketType)a2, data_, data_size, 1);
+        g_coroutine_eax = NETZ_send(player->slot, (NetzPacketType)a2, data_, data_size, 1);
         v7 = g_coroutine_current;
         if ( g_coroutine_list_head != v7 )
           --g_coroutine_nesting_depth;
@@ -68727,7 +67494,7 @@ void __fastcall NETZ_broadcast(NetzPacketType pkt, const void *data, const size_
       ++player;
       ++v4;
     }
-    while ( (int)player < (int)&g_netz_msg_loop );// BUG
+    while ( (int)player + 0x10 < (int)&g_netz_msg_loop );// BUG
   }
 }
 // 468B58: using guessed type int g_netz_local_player_slot;
@@ -68763,19 +67530,19 @@ void __fastcall NETZ_broadcast_mandatory_response(NetzPacketType pkt, void *data
 {
   DWORD (__stdcall *v3)(); // esi
   DWORD t; // ebx
-  NetzPlayer *__shifted(NetzPlayer,0x14) player; // eax
+  NetzPlayer * player; // eax
   UINT v6; // eax
   int v7; // edi
-  NetzPlayer *__shifted(NetzPlayer,0x10) player_; // esi
+  NetzPlayer * player_; // esi
   Coroutine *v9; // et1
   Coroutine *v10; // et1
   UINT v11; // eax
   Coroutine *v12; // et1
   Coroutine *v13; // et1
-  NetzPlayer *__shifted(NetzPlayer,0x14) _player; // eax
+  NetzPlayer * _player; // eax
   UINT v15; // eax
   int v16; // edi
-  NetzPlayer *__shifted(NetzPlayer,0x10) _player_; // esi
+  NetzPlayer * _player_; // esi
   Coroutine *v18; // et1
   Coroutine *v19; // et1
   _BYTE v20[12]; // [esp+0h] [ebp-18h] BYREF
@@ -68790,25 +67557,25 @@ void __fastcall NETZ_broadcast_mandatory_response(NetzPacketType pkt, void *data
   Time = timeGetTime();
   g_netz_is_lobby_locked = 1;
   g_netz_num_pending_acks = g_num_multi_players - 1;
-  player = (NetzPlayer *__shifted(NetzPlayer,0x14))&g_netz_players[1].event_received_this_tick;
+  player = &g_netz_players[1];
   do
-    ADJ(player++)->event_received_this_tick = 0;
-  while ( (int)player < (int)&dword_47A83C );   // BUG
+    (player++)->event_received_this_tick = 0;
+  while ( (int)player + 0x14 < (int)&dword_47A83C );   // BUG
   v6 = g_netz_is_game_host;
   if ( g_netz_is_game_host )
   {
     v7 = 0;
-    player_ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+    player_ = &g_netz_players[1];
     do
     {
-      LOBYTE(v6) = ADJ(player_)->connection_status;
+      LOBYTE(v6) = player_->connection_status;
       if ( (_BYTE)v6 && v7 != g_netz_local_player_slot )
       {
         g_coroutine_eax = v6;
         v9 = g_coroutine_current;
         if ( g_coroutine_list_head != v9 && ++g_coroutine_nesting_depth == 1 )
           g_coroutine_esp = v20;
-        g_coroutine_eax = NETZ_send(ADJ(player_)->slot, pkt_, data_, data_size, 1);
+        g_coroutine_eax = NETZ_send(player_->slot, pkt_, data_, data_size, 1);
         v10 = g_coroutine_current;
         if ( g_coroutine_list_head != v10 )
           --g_coroutine_nesting_depth;
@@ -68817,7 +67584,7 @@ void __fastcall NETZ_broadcast_mandatory_response(NetzPacketType pkt, void *data
       ++player_;
       ++v7;
     }
-    while ( (int)player_ < (int)&g_netz_msg_loop );// BUG
+    while ( (int)player_ + 0x10 < (int)&g_netz_msg_loop );// BUG
     v3 = timeGetTime;
   }
   while ( g_netz_num_pending_acks > 0 )
@@ -68836,25 +67603,25 @@ void __fastcall NETZ_broadcast_mandatory_response(NetzPacketType pkt, void *data
     if ( v3() - t > 500 )
     {
       g_netz_num_pending_acks = g_num_multi_players - 1;
-      _player = (NetzPlayer *__shifted(NetzPlayer,0x14))&g_netz_players[1].event_received_this_tick;
+      _player = &g_netz_players[1];
       do
-        ADJ(_player++)->event_received_this_tick = 0;
-      while ( (int)_player < (int)&dword_47A83C );// BUG
+        (_player++)->event_received_this_tick = 0;
+      while ( (int)_player + 0x14 < (int)&dword_47A83C );// BUG
       v15 = g_netz_is_game_host;
       if ( g_netz_is_game_host )
       {
         v16 = 0;
-        _player_ = (NetzPlayer *__shifted(NetzPlayer,0x10))&g_netz_players[1].slot;
+        _player_ = &g_netz_players[1];
         do
         {
-          LOBYTE(v15) = ADJ(_player_)->connection_status;
+          LOBYTE(v15) = _player_->connection_status;
           if ( (_BYTE)v15 && v16 != g_netz_local_player_slot )
           {
             g_coroutine_eax = v15;
             v18 = g_coroutine_current;
             if ( g_coroutine_list_head != v18 && ++g_coroutine_nesting_depth == 1 )
               g_coroutine_esp = v20;
-            g_coroutine_eax = NETZ_send(ADJ(_player_)->slot, pkt_, data_, data_size, 1);
+            g_coroutine_eax = NETZ_send(_player_->slot, pkt_, data_, data_size, 1);
             v19 = g_coroutine_current;
             if ( g_coroutine_list_head != v19 )
               --g_coroutine_nesting_depth;
@@ -68863,7 +67630,7 @@ void __fastcall NETZ_broadcast_mandatory_response(NetzPacketType pkt, void *data
           ++_player_;
           ++v16;
         }
-        while ( (int)_player_ < (int)&g_netz_msg_loop );// BUG
+        while ( (int)_player_ + 0x10 < (int)&g_netz_msg_loop );// BUG
         v3 = timeGetTime;
       }
       t = v3();
@@ -69050,7 +67817,7 @@ BOOL MINI_init()
   int v1; // edi
   int v2; // eax
   size_t v3; // ebp
-  int v4; // ebx
+  int v4;
   int v5; // esi
   int v6; // eax
   _BYTE *v7; // edi
@@ -69066,8 +67833,6 @@ BOOL MINI_init()
   char v17; // dl
   char v18; // cl
   int *v19; // eax
-  char *v20; // edi
-  int v21; // eax
   int v22; // edx
   int v23; // esi
   unsigned __int8 *v24; // eax
@@ -69101,7 +67866,7 @@ BOOL MINI_init()
     g_fog_of_war = (MapdRenderNode *)result;
     if ( result )
     {
-      *(int *)(*(int *)(result + 8) + 16) = REND_transform_minimap;// BUG - heavy result reuse
+      *(int *)(*(int *)(result + 8) + 16) = (int)REND_transform_minimap;// BUG - heavy result reuse
       g_shroud_backup = (MapdScrlImage *)g_fog_of_war->rn->cmd.image;
       g_fog_of_war_num_tiles_x = g_map_num_tiles_x + 4;
       g_fog_of_war_num_tiles_y = g_map_num_tiles_y + 4;
@@ -69109,7 +67874,7 @@ BOOL MINI_init()
       g_shroud = (MapdScrlImage *)result;
       if ( result )
       {
-        *(int *)result = g_shroud_backup->renderer;
+        *(int *)result = (int)g_shroud_backup->renderer;
         g_shroud->tile_x_size = g_shroud_backup->tile_x_size;
         g_shroud->tile_y_size = g_shroud_backup->tile_y_size;
         g_shroud->num_x_tiles = g_fog_of_war_num_tiles_x;
@@ -69244,13 +68009,7 @@ BOOL MINI_init()
                 while ( v8 < g_minimap_height );
                 v3 = v45;
               }
-              v20 = (char *)g_minimap_unrevealed_pixels;
-              LOBYTE(v4) = g_shroud_color;
-              BYTE1(v4) = g_shroud_color;
-              v21 = v4 << 16;
-              LOWORD(v21) = v4;
-              memset32(g_minimap_unrevealed_pixels, v21, v3 >> 2);
-              memset(&v20[4 * (v3 >> 2)], v4, v3 & 3);
+              memset(g_minimap_unrevealed_pixels, g_shroud_color, v3);
               v22 = g_minimap_width + 4;
               v23 = g_minimap_height + 4;
               if ( g_minimap_width + 4 > 2 )
@@ -69502,7 +68261,7 @@ void MINI_draw()
         v22 = v30;
         if ( g_minimap_camera_tile_y <= g_minimap_height - v30 )
         {
-          v23 = (char *)g_minimap_dst_pixels + g_minimap_camera_tile_x + g_minimap_camera_tile_y * i;
+          v23 = (_BYTE *)((char *)g_minimap_dst_pixels + g_minimap_camera_tile_x + g_minimap_camera_tile_y * i);
           if ( v29 > 1 )
           {
             v24 = (unsigned int)(v29 - 1) >> 2;
@@ -69851,7 +68610,7 @@ LABEL_79:
       || v34 == g_fog_of_war_tile8 )
     {
       v39 = v29[1];
-      v36 = v29 + 1;
+      v36 = (int *)(v29 + 1);
       if ( v39 == g_shroud_full_opaque
         || v39 == g_fog_of_war_tile5
         || v39 == g_fog_of_war_tile9
@@ -69880,7 +68639,7 @@ LABEL_79:
            || v34 == g_fog_of_war_tile15 )
     {
       v38 = v29[1];
-      v36 = v29 + 1;
+      v36 = (int *)(v29 + 1);
       if ( v38 == g_shroud_full_opaque
         || v38 == g_fog_of_war_tile5
         || v38 == g_fog_of_war_tile9
@@ -69909,7 +68668,7 @@ LABEL_79:
            || v34 == g_fog_of_war_tile14 )
     {
       v37 = v29[1];
-      v36 = v29 + 1;
+      v36 = (int *)(v29 + 1);
       if ( v37 == g_fog_of_war_tile8
         || v37 == g_fog_of_war_tile4
         || v37 == g_fog_of_war_tile13
@@ -69927,7 +68686,7 @@ LABEL_79:
     else
     {
       v35 = v29[1];
-      v36 = v29 + 1;
+      v36 = (int *)(v29 + 1);
       if ( v35 == g_fog_of_war_tile8
         || v35 == g_fog_of_war_tile4
         || v35 == g_fog_of_war_tile13
@@ -70452,6 +69211,9 @@ void __fastcall MSG_turret_cosmetic(
         TaskMessageType type,
         void *payload)
 {
+  (void)sender;
+  (void)payload;
+
   Turret *ctx; // ecx
 
   ctx = (Turret *)receiver->ctx;
@@ -70480,7 +69242,7 @@ BOOL PAL_multi_init()
   int v15; // ecx
   int *v16; // eax
   int v17; // edx
-  NetzPlayer *__shifted(NetzPlayer,1) player; // ecx
+  NetzPlayer * player; // ecx
   int *v19; // eax
   MissionDiplomacyTable *i; // [esp+10h] [ebp-4h]
 
@@ -70558,12 +69320,12 @@ BOOL PAL_multi_init()
   g_palette_idx_per_player[0] = 3;
   if ( !g_is_single_player )
   {
-    player = (NetzPlayer *__shifted(NetzPlayer,1))&g_netz_players[1].palette_idx;
+    player = &g_netz_players[1];
     v19 = &g_palette_idx_per_player[1];
     do
     {
-      if ( ADJ(player)->connection_status )
-        *v19 = ADJ(player)->palette_idx;
+      if ( player->connection_status )
+        *v19 = player->palette_idx;
       ++v19;
       ++player;
     }
@@ -70593,7 +69355,7 @@ BOOL GAME_mission_init()
   int i; // ecx
   UnitEscortNode *v2; // eax
   int j; // ecx
-  UnitStats *__shifted(UnitStats,0x44) stat; // ecx
+  UnitStats * stat; // ecx
   UnitProjectileType *projectile; // eax
   int v6; // edx
   int reload2_time; // esi
@@ -70644,19 +69406,19 @@ BOOL GAME_mission_init()
   g_show_notification_box_task = TSK_async(TaskChannel_None, UI_show_notification_box_task, 0);
   g_show_message_multi_chat = TSK_async(TaskChannel_None, UI_show_message_multi_chat_task, 0);
   REND_default_entity_transofrm = REND_project_isometric;
-  stat = (UnitStats *__shifted(UnitStats,0x44))&g_unit_stats[0].attachment;
+  stat = g_unit_stats;
   do
   {
-    projectile = ADJ(stat)->projectile;
+    projectile = stat->projectile;
     if ( projectile )
     {
       v6 = projectile->damage_to_buildings + projectile->damage_to_infantry;
-      reload2_time = ADJ(stat)->reload2_time;
+      reload2_time = stat->reload2_time;
     }
     else
     {
-      attachment = ADJ(stat)->attachment;
-      if ( !ADJ(stat)->attachment )
+      attachment = stat->attachment;
+      if ( !stat->attachment )
         goto LABEL_18;
       projectile_type = attachment->projectile_type;
       if ( !projectile_type )
@@ -70666,16 +69428,16 @@ BOOL GAME_mission_init()
     }
     if ( !reload2_time )
       goto LABEL_18;
-    v10 = (v6 * (ADJ(stat)->accuracy - 40) * ADJ(stat)->hitpoints / reload2_time) >> 8;
-    ADJ(stat)->ai_threat_weight = v10;
+    v10 = (v6 * (stat->accuracy - 40) * stat->hitpoints / reload2_time) >> 8;
+    stat->ai_threat_weight = v10;
     if ( v10 < 1 )
-      ADJ(stat)->ai_threat_weight = 1;
-    if ( (int)stat >= (int)&g_unit_stats[74].attachment && ADJ(stat)->ai_threat_weight > 0 )// BUG - should be i>=74
+      stat->ai_threat_weight = 1;
+    if ( (int)stat + 0x44 >= (int)&g_unit_stats[74].attachment && stat->ai_threat_weight > 0 )// BUG - should be i>=74
 LABEL_18:
-      ADJ(stat)->ai_threat_weight = 0;
+      stat->ai_threat_weight = 0;
     ++stat;
   }
-  while ( (int)stat <= (int)&g_unit_stats[78].attachment );// BUG
+  while ( (int)stat + 0x44 <= (int)&g_unit_stats[78].attachment );// BUG
   g_game_update_loop_task = nullptr;
   SCHRAP_init();
   g_scout = nullptr;
@@ -70749,7 +69511,7 @@ void GAME_update_anim_anchors_and_minimap()
     for ( i = g_unit_list_head; i != (Unit *)&g_unit_list_head; i = i->next )
     {
       p_mobd_anchors = &i->mobd_anchors;
-      memset32(&i->mobd_anchors, (int)g_mobd_anchors_default, 6u);// BUG only 4, 6 would corrupt memory
+      memcpy(&i->mobd_anchors, g_mobd_anchors_default, 6*4);// BUG only 4, 6 would corrupt memory
       anim_current_frame = i->entity->anim_current_frame;
       if ( anim_current_frame )
       {
@@ -70759,7 +69521,7 @@ void GAME_update_anim_anchors_and_minimap()
           for ( j = id->id; j != -1; ++id )
           {
             if ( j < 6 )
-              *((int *)&i->mobd_anchors.turret + j) = id;// BUG
+              *((MobdPoint **)&i->mobd_anchors.turret + j) = id;// BUG
             j = id[1].id;                       // BUG
           }
         }
@@ -70869,7 +69631,7 @@ Unit *__fastcall UNIT_create(Task *task)
         v1->path_flags |= UnitPathFlags_AiWanderer;
       goto LABEL_18;
     }
-    v1->type = g_scripts[task_type][1].kind;    // BUG casting to ScriptType4* would yield ->unit_type
+    v1->type = (UnitType)g_scripts[task_type][1].kind;    // BUG casting to ScriptType4* would yield ->unit_type
     player_num_ = entity->cplc_spawn_params->player_num;
   }
   else
@@ -70913,11 +69675,10 @@ LABEL_18:
   v10 = &g_unit_stats[v1->type];
   v1->stats = v10;
   hitpoints = v10->hitpoints;
-  v1->orientation = UnitPathFlags_AiWanderer;   // BUG - 0x80 not the enum
+  v1->orientation = 0x80;
   v1->hitpoints = hitpoints;
   v1->_unit_field_78_unused = 0;
-  memset32(&v1->mobd_anchors, (int)g_mobd_anchors_default, 6u);// BUG - there's just 4 - 2 are corrupted mem
-                                                // BUG it's memcpy
+  memcpy(&v1->mobd_anchors, g_mobd_anchors_default, 6*4);// BUG - there's just 4 - 2 are corrupted mem
   entity->rn->cmd.palette_override = g_tint_palettes_per_player[g_palette_idx_per_player[v1->player_num]];
   entity->rn->flags |= RenderNode_PaletteOverride;
   TSK_broadcast_message(task, TaskMessage_UnitCreated, v1, TaskChannel_UnitEvents);
@@ -71138,7 +69899,7 @@ ptrdiff_t __fastcall ENT_anim_advance_rotation(
   ptrdiff_t result; // eax
 
   v3 = *src_orientation;
-  if ( dst_orientation == *src_orientation )
+  if ( dst_orientation == (unsigned int)*src_orientation )
     return 0;
   if ( v3 <= (int)dst_orientation )
   {
@@ -71230,11 +69991,11 @@ void __cdecl UI_show_notification_box_task(Task *task)
         v8 = (y - g_mapd_camera.y) >> 8;
         if ( v7 < 0x80 )
           v7 = 128;
-        if ( v7 > g_rend_screen_width - 128 )
+        if ( v7 > (unsigned int)(g_rend_screen_width - 128) )
           v7 = g_rend_screen_width - 128;
         if ( v8 < 0x20 )
           v8 = 32;
-        if ( v8 > g_rend_screen_height - 32 )
+        if ( v8 > (unsigned int)(g_rend_screen_height - 32) )
           v8 = g_rend_screen_height - 32;
       }
       else
@@ -71654,11 +70415,11 @@ LABEL_21:
   {
     v15 = cw;
 LABEL_32:
-    if ( v14 || (v7 || !v15) && (v7 != Direction_S || v15) )
+    if ( v14 || ((v7 || !v15) && (v7 != Direction_S || v15)) )
     {
       v17 = g_direction_y_deltas[v7] + *scan_y;
-      if ( (v17 != g_map_num_tiles_y - 1 || (v7 != Direction_E || v15) && (v7 != Direction_W || !v15))
-        && (v17 || (v7 != Direction_E || !v15) && (v7 != Direction_W || v15)) )
+      if ( (v17 != g_map_num_tiles_y - 1 || ((v7 != Direction_E || v15) && (v7 != Direction_W || !v15)))
+        && (v17 || ((v7 != Direction_E || !v15) && (v7 != Direction_W || v15))) )
       {
         *heading = v7;
         *v20 += g_direction_x_deltas[v7];
@@ -71688,6 +70449,9 @@ void OS_message_pump()
 //----- (0044D5D0) --------------------------------------------------------
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
+  (void)hPrevInstance;
+  (void)lpCmdLine;
+
   unsigned int v4; // edi
   void *v5; // eax
   void *v6; // esi
@@ -71705,7 +70469,7 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
   if ( v5 )
   {
     GetFileVersionInfoA("ddraw.dll", 0, dwLen, v5);
-    VerQueryValueA(v6, "\\", &lpBuffer, &dwLen);
+    VerQueryValueA(v6, "\\", &lpBuffer, (PUINT)&dwLen);
     v4 = *((int *)lpBuffer + 2);
     free(v6);
   }
@@ -71800,7 +70564,7 @@ Movie *__cdecl MOVIE_read_file(const char *filename)
         do
         {
           v12 = (v3->header.bpp & 0xF) * (v11 + v3->header.width * v10);
-          v13 = (16 * (v10 & 0xF)) | v11++ & 0xF;
+          v13 = (16 * (v10 & 0xF)) | (v11++ & 0xF);
           v3->block_offset_lut[v13] = v12;
         }
         while ( v11 < 8 );
@@ -71892,11 +70656,11 @@ MovieFlags __cdecl VBC_parse_frame_chunks(Movie *movie, MovieFrame *frame)
   movie->frame_flags = flags;
   movie->header.subtitles_len = 0;
   flags_ = frame->flags;
-  read_ptr = &frame->x;
+  read_ptr = (__int16 *)((char *)frame + offsetof(MovieFrame, x));
   if ( (flags_ & Movie_HasPosition) != 0 )
   {
     v3 = *read_ptr + frame->y * movie->header.width;
-    read_ptr = &frame->_movie_frame_A;
+    read_ptr = (__int16 *)((char *)frame + offsetof(MovieFrame, _movie_frame_A));
   }
   if ( (flags_ & Movie_HasAudio) != 0 )
   {
@@ -71932,28 +70696,30 @@ MovieFlags __cdecl VBC_parse_frame_chunks(Movie *movie, MovieFrame *frame)
       {
         v8 = 2;
       }
-      VBC_decode_16bpp(
-        movie->header.width / 4,
-        movie->header.height / 4,
-        (unsigned __int8 *)read_ptr + 4,
-        (int)movie->decode_buffers[movie->active_decode_buffer],
-        (int)movie->decode_buffers[movie->active_decode_buffer ^ 1],
-        v3,
-        movie->header.width,
-        (int)movie->block_offset_lut,
-        v8);
+      // it's in pure asm
+      // VBC_decode_16bpp(
+      //   movie->header.width / 4,
+      //   movie->header.height / 4,
+      //   (unsigned __int8 *)read_ptr + 4,
+      //   (int)movie->decode_buffers[movie->active_decode_buffer],
+      //   (int)movie->decode_buffers[movie->active_decode_buffer ^ 1],
+      //   v3,
+      //   movie->header.width,
+      //   (int)movie->block_offset_lut,
+      //   v8);
     }
     else
     {
-      VBC_decode_8bpp(
-        movie->header.width / 4,
-        movie->header.height / 4,
-        (unsigned __int8 *)read_ptr + 4,
-        (int)movie->decode_buffers[movie->active_decode_buffer],
-        (int)movie->decode_buffers[movie->active_decode_buffer ^ 1],
-        v3,
-        movie->header.width,
-        (int)movie->block_offset_lut);
+      // it's in pure asm
+      // VBC_decode_8bpp(
+      //   movie->header.width / 4,
+      //   movie->header.height / 4,
+      //   (unsigned __int8 *)read_ptr + 4,
+      //   (int)movie->decode_buffers[movie->active_decode_buffer],
+      //   (int)movie->decode_buffers[movie->active_decode_buffer ^ 1],
+      //   v3,
+      //   movie->header.width,
+      //   (int)movie->block_offset_lut);
     }
     active_decode_buffer = movie->active_decode_buffer;
     v13 = movie->decode_buffers[active_decode_buffer];

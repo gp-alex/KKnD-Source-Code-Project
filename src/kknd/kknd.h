@@ -9,6 +9,8 @@
 #include <stdint.h>
 #include <stdio.h> // File
 #include <assert.h>
+#include <time.h> // clock_t, clock
+#include <process.h> // _beginthread, _endthread
 
 #include <windows.h>
 #include <math.h>
@@ -20,6 +22,52 @@
 #ifndef nullptr
   #define nullptr NULL
 #endif
+
+/* --- Hex-Rays / IDA defs.h compatibility (little-endian, x86) ---
+ * windows.h defines LOBYTE/LOWORD/HIBYTE/HIWORD as rvalue-only macros;
+ * the decompiled code also uses them as lvalues, so redefine them (and the
+ * missing accessors) in IDA's lvalue-capable form. On little-endian x86 the
+ * lvalue forms are bit-identical to the windows.h rvalue forms for reads. */
+typedef uint8_t  _BYTE;
+typedef uint16_t _WORD;
+typedef uint32_t _DWORD;
+typedef uint64_t _QWORD;
+
+#undef  LOBYTE
+#undef  LOWORD
+#undef  HIBYTE
+#undef  HIWORD
+#define LOBYTE(x)   (*((_BYTE  *)&(x)))
+#define LOWORD(x)   (*((_WORD  *)&(x)))
+#define LODWORD(x)  (*((_DWORD *)&(x)))
+#define HIBYTE(x)   (*((_BYTE  *)&(x) + 1))
+#define HIWORD(x)   (*((_WORD  *)&(x) + 1))
+#define HIDWORD(x)  (*((_DWORD *)&(x) + 1))
+#define BYTE0(x)    (*((_BYTE  *)&(x)))
+#define BYTE1(x)    (*((_BYTE  *)&(x) + 1))
+#define BYTE2(x)    (*((_BYTE  *)&(x) + 2))
+#define BYTE3(x)    (*((_BYTE  *)&(x) + 3))
+#define WORD1(x)    (*((_WORD  *)&(x) + 1))
+#define WORD2(x)    (*((_WORD  *)&(x) + 2))
+#define SLOBYTE(x)  (*((int8_t  *)&(x)))
+#define SBYTE1(x)   (*((int8_t  *)&(x) + 1))
+#define SBYTE2(x)   (*((int8_t  *)&(x) + 2))
+#define SHIBYTE(x)  (*((int8_t  *)&(x) + 1))
+#define SLOWORD(x)  (*((int16_t *)&(x)))
+#define SHIWORD(x)  (*((int16_t *)&(x) + 1))
+
+/* windows.h defines Get{R,G,B}Value via LOBYTE(rvalue), which the lvalue-form
+ * LOBYTE above cannot take the address of; redefine with explicit masks
+ * (identical: R=bits0-7, G=8-15, B=16-23). */
+#undef  GetRValue
+#undef  GetGValue
+#undef  GetBValue
+#define GetRValue(rgb) ((BYTE)((COLORREF)(rgb)))
+#define GetGValue(rgb) ((BYTE)(((COLORREF)(rgb)) >> 8))
+#define GetBValue(rgb) ((BYTE)(((COLORREF)(rgb)) >> 16))
+
+/* IDA integer-coercion pseudo (used here only on an integer/enum value). */
+#define COERCE_UNSIGNED_INT(x) ((unsigned int)(x))
 
 typedef struct Entity Entity;
 typedef struct Unit Unit;
@@ -575,12 +623,12 @@ typedef void (__fastcall *MessageHandler)(Task *receiver, Task *sender, TaskMess
 
 typedef void (__cdecl *TaskFn)(Task *task);
 
-typedef struct
-{
-  struct TaskLocal *next;
-  struct TaskLocal *prev;
+typedef struct TaskLocal TaskLocal;
+struct TaskLocal {
+  TaskLocal *next;
+  TaskLocal *prev;
   char data[];
-} TaskLocal;
+};
 
 struct Task {
   Task *next;
@@ -612,12 +660,14 @@ typedef struct {
   int attacker_unit_id;
 } EntityProjectileContext;
 
-typedef struct {
-  struct MenuWidget *next;
-  struct MenuWidget *prev;
+typedef struct MenuWidget MenuWidget;
+
+struct MenuWidget {
+  MenuWidget *next;
+  MenuWidget *prev;
   Entity *entity;
   int flags;
-} MenuWidget;
+};
 
 typedef enum : unsigned int {
   BlitterMode_Render = 0,
@@ -1454,13 +1504,15 @@ typedef struct {
   LevelMapdSurface *layers;
 } LevelMapd;
 
-typedef struct {
-  struct MapdRenderNode *next;
-  struct MapdRenderNode *prev;
+typedef struct MapdRenderNode MapdRenderNode;
+
+struct MapdRenderNode {
+  MapdRenderNode *next;
+  MapdRenderNode *prev;
   RenderNode *rn;
   MapdScrlImage *scrl;
   int z;
-} MapdRenderNode;
+};
 
 typedef struct {
   MobdAnimFrame frames[];
@@ -1719,12 +1771,14 @@ typedef struct {
                                         ///< when NETZ consumes the event, is set to false
 } __attribute__((packed)) GameEvent;
 
-typedef struct {
+typedef struct GameEventNode GameEventNode;
+
+struct __attribute__((packed)) GameEventNode {
   struct GameEventNode *next;
   GameEvent evt;
   char field_12;
   char field_13;
-} __attribute__((packed)) GameEventNode;
+};
 
 typedef enum : unsigned int {
   UnitCommandArchetype_None = 0,
@@ -1739,11 +1793,13 @@ typedef enum : unsigned int {
   UnitCommandArchetype_CombatInfantry = 9,
 } UnitCommandArchetype;
 
-typedef struct {
-  struct CursorUnitSelection *next;
-  struct CursorUnitSelection *prev;
+typedef struct CursorUnitSelection CursorUnitSelection;
+
+struct CursorUnitSelection{
+  CursorUnitSelection *next;
+  CursorUnitSelection *prev;
   Task *unit_task;
-} CursorUnitSelection;
+};
 
 typedef struct {
   UnitType type;
@@ -1810,16 +1866,17 @@ typedef enum : unsigned int {
   BuildingConstructionStage_Complete = 3,
 } ConstructStage;
 
-typedef struct {
-  struct Construct *next;
-  struct Construct *prev;
+typedef struct Construct Construct;
+struct Construct {
+  Construct *next;
+  Construct *prev;
   int unit_id;
   int player_num;
   ConstructStage stage;
   int cost;
   int remaining_cost;
   int cost_per_tick;                    ///< (cost << 8) / (60 * build_time) -- 60 is the global FPS constant (or rather ticks per second)
-} Construct;
+};
 
 typedef enum : unsigned int {
   Mouse_MoveUp    =  0x1,
@@ -2075,12 +2132,14 @@ typedef struct {
 typedef struct {
 } DrillrigState;
 
-typedef struct {
-  struct Scar *next;
-  struct Scar *prev;
+typedef struct Scar Scar;
+
+struct Scar {
+  Scar *next;
+  Scar *prev;
   ptrdiff_t mobd_frame;
   Entity *entity;
-} Scar;
+};
 
 typedef struct Nuke Nuke;
 
@@ -2181,23 +2240,26 @@ typedef struct {
   GlyphDesc *glyphs[];
 } FontMobd;
 
-typedef struct {
-  struct UiStr *next;
-  struct UiStr *prev;
+typedef struct UiStr UiStr;
+struct UiStr {
+  UiStr *next;
+  UiStr *prev;
   Glyph *glyphs;
   int cols;
   int rows;
   FontMobd *font;
   int cursor_col;
   int cursor_row;
-} UiStr;
+};
+
 
 /// formerly _stru9_unit_order_2
-typedef struct {
-  struct SelectionNode *next;
-  struct SelectionNode *prev;
+typedef struct SelectionNode SelectionNode;
+struct SelectionNode {
+  SelectionNode *next;
+  SelectionNode *prev;
   Task *unit_task;
-} SelectionNode;
+};
 
 typedef struct {
   int player_num;
@@ -2765,7 +2827,9 @@ typedef enum : unsigned int
   SoundPlayback_Streaming = (unsigned int)-3,
 } SoundPlaybackMode;
 
-typedef struct {
+typedef struct SoundStream SoundStream;
+
+struct SoundStream {
   int id;
   IDirectSoundBuffer *dsb;
   Task *task;
@@ -2780,15 +2844,15 @@ typedef struct {
   int pan_transition_remaining_ticks;
   int pan_transition_per_tick;
   int flags;
-  struct SoundStream *next;
-  struct SoundStream *prev;
+  SoundStream *next;
+  SoundStream *prev;
   int streaming_bytes_remaining;
   char filename[32];
   char _stru7_sound_64[42];
   char _stru7_sound_8E[100];
   char _stru7_sound_F2[82];
   int _stru7_sound_144;
-} SoundStream;
+};
 
 typedef enum : unsigned __int16
 {
@@ -2869,9 +2933,14 @@ typedef struct {
 
 typedef struct {
   MovieHeader header;
-  uint16_t num_palette_entries;
-  uint16_t palette_starting_idx;
-  uint8_t palette[256][3];
+  union {                                // IDA views this region as a raw byte
+    struct {                            // array `_movie_2C` (offset 0x2C).
+      uint16_t num_palette_entries;
+      uint16_t palette_starting_idx;
+      uint8_t palette[256][3];
+    };
+    char _movie_2C[772];                // 2 + 2 + 256*3
+  };
   MovieFlags frame_flags;
   int16_t active_decode_buffer;
   FILE *file;
@@ -2889,15 +2958,17 @@ typedef enum : unsigned __int32
   NetzProtocol_IPX     = 1,
   NetzProtocol_Serial  = 2,
   NetzProtocol_Count   = 3,
-  NetzProtocol_Invalid = -1,
+  NetzProtocol_Invalid = (unsigned int)-1,
 } NetzProtocol;
 
-typedef struct {
+typedef struct DpProvider DpProvider;
+
+struct DpProvider {
   BOOL active;
   GUID guid;
   const char *name;
-  struct DpProvider *next;
-} DpProvider;
+  DpProvider *next;
+};
 
 typedef enum : unsigned int
 {
@@ -3229,14 +3300,15 @@ typedef struct {
   Unit *target;
 } FollowOrderPayload;
 
-typedef struct {
+typedef struct DplaySession DplaySession;
+struct DplaySession {
   GUID session_guid;
   int num_current_players;
   int max_players;
   int flags;
   char session_name[16];
-  struct DplaySession *next;
-} DplaySession;
+  DplaySession *next;
+};
 
 typedef struct {
   uint8_t present;
@@ -3267,7 +3339,7 @@ typedef struct {
   void *vtbl[19];
 } NetzProvider;
 
-typedef struct {
+typedef struct NetzTimer {
   BOOL active;
   struct NetzTimer *next;
   int _netz_timer_field_8[2];
@@ -3284,25 +3356,28 @@ typedef struct {
   uint8_t build_time[9];
 } __attribute__((packed)) NetzJoinPkt;
 
-typedef struct {
+typedef struct DplayPlayer DplayPlayer;
+struct DplayPlayer {
   char short_name[16];
   char long_name[16];
   DPID player_id;
-  struct DplayPlayer *next;
-} DplayPlayer;
+  DplayPlayer *next;
+};
 
 typedef struct {
   char name[20];
   LevelId level_id;
 } SaveSlot;
 
-typedef struct {
-  struct NetzMobemPhonebook *next;
-  struct NetzMobemPhonebook *prev;
+typedef struct NetzMobemPhonebook NetzMobemPhonebook;
+
+struct NetzMobemPhonebook {
+  NetzMobemPhonebook *next;
+  NetzMobemPhonebook *prev;
   char name[12];
   char phone[12];
   int baud_index;
-} NetzMobemPhonebook;
+};
 
 typedef struct {
     UnitType type;
