@@ -683,9 +683,13 @@ typedef struct RenderNode RenderNode;
 
 typedef void (__fastcall *RenderTransform)(void *renderable, RenderNode *node);
 
+// Polymorphic view of Scrl/Sprt image objects, which live in packed game-data
+// hunks and can sit at unaligned addresses. Packed (align 1) matches those
+// targets (MobdSprtImage/MapdScrlImage are packed) so image->blitter doesn't
+// assume 4-byte alignment.
 typedef struct {
   Blitter blitter;                ///< It's actually polymorphic - Scrl and Sprt image objects are assigned to this, both having blitter as the first field so in terms of binary they're compatible
-} RenderImage;
+} __attribute__((packed)) RenderImage;
 
 typedef enum : unsigned int {
   RenderCommand_PaletteOverride = 0x10000000,
@@ -750,7 +754,7 @@ typedef struct {
   Blitter blitter;
   int flags;                            ///< &1 = flip horizontally
   MobdImageData *bitmap;
-} MobdSprtImage;
+} __attribute__((packed)) MobdSprtImage;
 
 typedef enum : unsigned int {
   BoxdCollisionAxis_NegX = 0,
@@ -790,11 +794,11 @@ typedef struct {
   int min_z;
   int max_x;
   int max_y;
-} BoxdAabb;
+} __attribute__((packed)) BoxdAabb;
 
 typedef struct {
   BoxdAabb *box;
-} BoxdCollisionShape;
+} __attribute__((packed)) BoxdCollisionShape;
 
 typedef struct {
   int collides_with_categories;         ///< The collision only proceeds if there is any bit in common between the mover's collides_with_categories (outgoing) and the target shape's category (incoming).
@@ -831,7 +835,7 @@ typedef struct {
   int player_num;
   int _cplc_spawn_params_field_28;
   int _cplc_spawn_params_field_2c;
-} CplcSpawnParams;
+} __attribute__((packed)) CplcSpawnParams;
 
 typedef enum : unsigned int {
   TaskType_DetentionCenter = 2,
@@ -859,7 +863,7 @@ typedef enum : unsigned int {
 
 typedef struct CplcEntity CplcEntity;
 
-struct CplcEntity {
+struct __attribute__((packed)) CplcEntity {
   TaskType task_type;
   int x;
   int y;
@@ -881,7 +885,7 @@ struct CplcEntityInViewport{
 
 typedef struct LevelCplcSurface LevelCplcSurface;
 
-struct LevelCplcSurface {
+struct __attribute__((packed)) LevelCplcSurface {
   int size;
   CplcEntity *next_x_sorted;
   CplcEntity *prev_x_sorted;
@@ -891,14 +895,14 @@ struct LevelCplcSurface {
 
 typedef struct {
   LevelCplcSurface *layers;
-} LevelCplc;
+} __attribute__((packed)) LevelCplc;
 
 typedef struct {
   int id;
   int x;
   int y;
   int z;
-} MobdPoint;
+} __attribute__((packed)) MobdPoint;
 
 typedef struct {
   int x;
@@ -908,12 +912,12 @@ typedef struct {
   BoxdCollisionShape *shape;
   SoundId sound_id;
   MobdPoint points[];
-} MobdAnimFrame;
+} __attribute__((packed)) MobdAnimFrame;
 
 typedef struct {
   int anim_speed;
   MobdAnimFrame *frames[1];
-} MobdAnimation;
+} __attribute__((packed)) MobdAnimation;
 
 struct Entity {
   Entity *next;
@@ -1421,19 +1425,23 @@ struct LevelHunkHeader {
     uint32_t size;
 };
 
+// On-disk/serialized structures: they live inside the loaded level buffer at
+// arbitrary (possibly unaligned) offsets, and their pointer members are patched
+// in place by HUNK_fix_pointers. Packing drops the required alignment to 1 so
+// unaligned access is well-defined (layout is unchanged on this 32-bit target).
 typedef struct {
   char name[4];
   void *data;
-} LevelHunkSection;
+} __attribute__((packed)) LevelHunkSection;
 
 typedef struct {
   LevelHunkSection *sections;  // section with data=NULL serves as the terminator
-} LevelHunk;
+} __attribute__((packed)) LevelHunk;
 
 typedef struct {
   uint32_t num_fixups;
   uint32_t fixups[];
-} RllcHunk;
+} __attribute__((packed)) RllcHunk;
 
 typedef enum
 {
@@ -1456,11 +1464,11 @@ typedef struct {
   int num_tiles_x;
   int num_tiles_y;
   BoxdAabb *tiles[1];
-} BoxdGrid;
+} __attribute__((packed)) BoxdGrid;
 
 typedef struct {
   BoxdGrid *grid[1];
-} LevelBoxd;
+} __attribute__((packed)) LevelBoxd;
 
 typedef struct {
   int x;
@@ -1471,7 +1479,7 @@ typedef struct {
 typedef struct {
   int flags;
   unsigned __int8 pixels[];
-} MapdScrlImageTile;
+} __attribute__((packed)) MapdScrlImageTile;
 
 typedef struct {
   Blitter renderer;
@@ -1480,14 +1488,14 @@ typedef struct {
   int num_x_tiles;
   int num_y_tiles;
   MapdScrlImageTile *tiles[16];
-} MapdScrlImage;
+} __attribute__((packed)) MapdScrlImage;
 
 typedef struct {
   unsigned __int8 r;
   unsigned __int8 g;
   unsigned __int8 b;
   unsigned __int8 flags;
-} PaletteEntry;
+} __attribute__((packed)) PaletteEntry;
 
 typedef struct {
   PaletteEntry entries[256];
@@ -1495,14 +1503,14 @@ typedef struct {
 
 typedef struct {
   int num_images;
-  MapdScrlImage **images; // pointer to dynamic-sized array
+  MapdScrlImage *images; // pointer to dynamic-sized array
   int num_palette_entries;
   PaletteEntry palette[];
-} LevelMapdSurface;
+} __attribute__((packed)) LevelMapdSurface;
 
 typedef struct {
   LevelMapdSurface *layers;
-} LevelMapd;
+} __attribute__((packed)) LevelMapd;
 
 typedef struct MapdRenderNode MapdRenderNode;
 
@@ -1516,11 +1524,14 @@ struct MapdRenderNode {
 
 typedef struct {
   MobdAnimFrame frames[];
-} LevelMobdSurface;
+} __attribute__((packed)) LevelMobdSurface;
 
+// One surface pointer per entry; g_mobd is an array of these indexed by mobd id,
+// so the struct must be exactly pointer-sized. A flexible array member ([]) has
+// zero size, which collapses g_mobd[id] to g_mobd[0] — use [1] for a real stride.
 typedef struct {
-  LevelMobdSurface *layers[];
-} LevelMobd;
+  LevelMobdSurface *layers[1];
+} __attribute__((packed)) LevelMobd;
 
 typedef enum : unsigned int {
   MenuId_Main = 0,

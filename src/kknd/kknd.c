@@ -4183,7 +4183,8 @@ int g_468B60_unused = 1; // weak
 NetzProtocol g_netz_protocol = NetzProtocol_Invalid;
 void nullsub_456560() {}
 int nullsub_42F820(int, int) { return 0; }
-NetzProvider g_netz_providers[3] =
+#define NETZ_PROVIDERS_MAX 3
+NetzProvider g_netz_providers[NETZ_PROVIDERS_MAX] =
 {
   {
     0,
@@ -5225,10 +5226,13 @@ BOOL g_fade_lock;
 PaletteEntry *g_level_palette;
 BOOL g_is_level_pal_dimmed;
 BOOL g_fade_is_in_progress;
-int g_fade_length;
-int g_fade_start;
+// Brightness is unsigned 8.23 fixed-point (0x80000000 == 1.0), so these must be
+// unsigned: FADE_update compares/subtracts them, and a signed 0 - 0x80000000
+// both overflows and mis-selects the fade branch.
+unsigned int g_fade_length;
+unsigned int g_fade_start;
 bool g_fade_in_progress;
-int g_fade_end;
+unsigned int g_fade_end;
 RenderViewport *g_fade_draw_ctx;
 int g_fade_timer;
 int g_num_ai_players;
@@ -5328,9 +5332,10 @@ MobdImageData *g_healthbar_by_veterancy_wide[MAX_VETERANCY_LEVELS][NUM_VEHICLES_
 MobdImageData *g_healthbar_by_veterancy_short[MAX_VETERANCY_LEVELS][NUM_INFANTRY_HP_BAR_FRAMES];
 struct tagRECT g_window_rect; // idb
 void *g_dd_pixels;
+uint8_t *g_dd_index_buffer; // 8bpp scratch: blitters render here at >8bpp, converted to the real surface format on present
 DWORD g_window_style; // idb
 int g_window_bpp; // weak
-__int16 g_dd_stride; // idb
+int g_dd_stride; // idb
 DDSURFACEDESC g_dd_backbuffer_desc;
 BOOL g_fullscreen;
 BOOL g_rend_limit_rate;
@@ -5440,8 +5445,13 @@ Entity *g_entity_free_pool_head;
 Entity g_default_entity;
 void (__fastcall *REND_default_entity_transofrm)(Entity *entity, RenderNode *node);
 BOOL g_mobd_active;
-Entity *g_entity_head;
-Entity *g_entity_tail;
+// Active entity list sentinel. The list is circular and uses a dummy node whose
+// .next is the head and .prev is the tail. It must be a real full Entity (not two
+// bare pointers): code treats (Entity *)&g_entity_head as a node, and keeping head
+// and tail as separate globals let the layout drift / get clobbered.
+Entity g_entity_list;
+#define g_entity_head (g_entity_list.next)
+#define g_entity_tail (g_entity_list.prev)
 Entity *g_entity_pool;
 FactoryProd *g_prod_head;
 FactoryProd *g_prod_tail;
@@ -5540,8 +5550,12 @@ Scar *g_scar_free_head;
 int g_num_gore_and_debris; // weak
 int g_num_explosions; // weak
 MapdRenderNode *g_mapd_render_node_pool;
-MapdRenderNode *g_mapd_render_node_head;
-MapdRenderNode *g_mapd_render_node_tail;
+// Active MAPD render-node list sentinel. Same rationale as g_entity_list: a real
+// dummy node (.next == head, .prev == tail) instead of two bare pointer globals,
+// so (MapdRenderNode *)&g_mapd_render_node_head is a valid, correctly-laid-out node.
+MapdRenderNode g_mapd_render_node_list;
+#define g_mapd_render_node_head (g_mapd_render_node_list.next)
+#define g_mapd_render_node_tail (g_mapd_render_node_list.prev)
 void (__fastcall *MAPD_camera_controller)(MapdCamera *camera, struct Entity *target);
 MapdRenderNode *g_mapd_render_node_next_free;
 void (__fastcall *MAPD_render)(void *, RenderNode *n);
@@ -7257,7 +7271,7 @@ void TSK_execute_async(Coroutine *next)
     "pushl %esi\n\t"
     "pushl %edi\n\t"
 
-    "movl " ASM_SYM("g_coroutine_current_stack") ", %esp\n\t"
+    "movl %esp, " ASM_SYM("g_coroutine_current_stack") "\n\t"
 
     // g_coroutine_current = eax
     // g_coroutine_current->stack (eax[8]) = g_coroutine_current_stack (esp)
@@ -10905,13 +10919,13 @@ void __fastcall CPLC_exec_without_objects(TaskType type)
 //----- (004069B0) --------------------------------------------------------
 void CPLC_cleanup()
 {
-  if ( g_cplc_active )
-  {
-    if ( g_cplc_viewport_pool )
-    {
+  if (g_cplc_active) {
+    if (g_cplc_viewport_pool) {
       free(g_cplc_viewport_pool);
-      if ( g_current_lvl_cplc_backup )
+      if (g_current_lvl_cplc_backup) {
         free(g_current_lvl_cplc_backup);
+        g_current_lvl_cplc_backup = nullptr;
+      }
     }
   }
   g_cplc_active = 0;
@@ -20321,122 +20335,108 @@ LRESULT __stdcall WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 //----- (00411760) --------------------------------------------------------
 BOOL __fastcall REND_create_window(int width, int height, int bpp, BOOL limit_render_rate, BOOL fullscreen)
 {
-  int v8; // eax
-  HWND WindowA; // eax
-  BOOL v10; // eax
-  DWORD v11; // eax
-  int v12; // eax
-  HWND Window; // eax
-  RenderViewport *v14; // eax
-  int i; // ecx
-  int v16; // [esp-18h] [ebp-58h]
-  WNDCLASSEXA v17; // [esp+10h] [ebp-30h] BYREF
+  if (g_render_window_initialized)
+    return FALSE;
 
-  if ( g_render_window_initialized )
-    return 0;
-  v8 = bpp;
-  if ( bpp == 15 )
-  {
-    v8 = 16;
-  }
-  else if ( bpp != 8 && bpp != 16 && bpp != 24 )
-  {
-    return 0;
-  }
-  g_window_bpp = v8;
+  int normalized_bpp = bpp;
+  if (15 == bpp)
+    normalized_bpp = 16;
+  else if (normalized_bpp != 8 && normalized_bpp != 16 && normalized_bpp != 24 && normalized_bpp != 32)
+    return FALSE;
+
+  g_window_bpp = normalized_bpp;
   g_window_width = width;
   g_window_height = height;
   g_rend_limit_rate = limit_render_rate;
   g_fullscreen = fullscreen;
-  WindowA = FindWindowA("KKNDXtremeMainWindowClass", "KKND Xtreme");
-  if ( WindowA )
-  {
-    SetForegroundWindow(WindowA);
-    v10 = 0;
-    goto LABEL_17;
+
+  // If an instance is already running, focus it and bail out.
+  HWND existing_window = FindWindowA("KKNDXtremeMainWindowClass", "KKND Xtreme");
+  if (existing_window) {
+    SetForegroundWindow(existing_window);
+    return FALSE;
   }
-  ShowCursor(0);
-  if ( !g_hwnd )
-  {
-    v17.style = 8;
-    v17.hInstance = g_hinstance;
-    v17.lpszClassName = "KKNDXtremeMainWindowClass";
-    v17.lpfnWndProc = WndProc;
-    v17.cbSize = 48;
-    v17.hIcon = LoadIconA(g_hinstance, (LPCSTR)0x65);
-    v17.cbClsExtra = 0;
-    v17.cbWndExtra = 0;
-    v17.hIconSm = LoadIconA(g_hinstance, (LPCSTR)0x65);
-    v17.hCursor = nullptr;
-    v17.lpszMenuName = nullptr;
-    v17.hbrBackground = (HBRUSH)GetStockObject(5);
-    if ( !RegisterClassExA(&v17) )
-    {
-      v10 = 0;
-      goto LABEL_17;
+
+  ShowCursor(FALSE);
+  if (!g_hwnd) {
+    WNDCLASSEXA wc;
+    wc.cbSize = sizeof(WNDCLASSEXA);
+    wc.style = CS_DBLCLKS;
+    wc.lpfnWndProc = WndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = g_hinstance;
+    wc.hIcon = LoadIconA(g_hinstance, MAKEINTRESOURCEA(101));
+    wc.hCursor = nullptr;
+    wc.hbrBackground = (HBRUSH)GetStockObject(NULL_BRUSH);
+    wc.lpszMenuName = nullptr;
+    wc.lpszClassName = "KKNDXtremeMainWindowClass";
+    wc.hIconSm = LoadIconA(g_hinstance, MAKEINTRESOURCEA(101));
+    if ( !RegisterClassExA(&wc) )
+      return FALSE;
+
+    DWORD adjust_style;
+    if (g_fullscreen) {
+      adjust_style = WS_POPUP | WS_VISIBLE | WS_SYSMENU;
+      g_window_ex_style = WS_EX_APPWINDOW | WS_EX_TOPMOST;
+      g_window_style = WS_POPUP | WS_VISIBLE | WS_SYSMENU;
+    } else {
+      adjust_style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+      g_window_ex_style = WS_EX_APPWINDOW;
+      g_window_style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
     }
-    if ( g_fullscreen )
-    {
-      v11 = 0x90080000;
-      g_window_ex_style = 0x40008;
-      g_window_style = 0x90080000;
-    }
-    else
-    {
-      v11 = 0x90CA0000;
-      g_window_ex_style = 0x40000;
-      g_window_style = 0x90CA0000;
-    }
+
     g_window_rect.left = 0;
-    g_window_rect.right = g_window_width;
     g_window_rect.top = 0;
+    g_window_rect.right = g_window_width;
     g_window_rect.bottom = g_window_height;
-    AdjustWindowRect(&g_window_rect, v11, 0);
+    AdjustWindowRect(&g_window_rect, adjust_style, FALSE);
+
+    // Re-base the adjusted rect to a 0,0 origin (drops the non-client insets).
     g_window_rect.bottom -= g_window_rect.top;
     g_window_rect.right -= g_window_rect.left;
     g_window_rect.top = 0;
     g_window_rect.left = 0;
-    v12 = GetSystemMetrics(0) - g_window_rect.right;
-    g_window_rect.right += v12;
-    v16 = g_window_rect.right - (v12 + g_window_rect.left);
-    g_window_rect.left += v12;
-    Window = CreateWindowExA(
-               g_window_ex_style,
-               "KKNDXtremeMainWindowClass",
-               "KKND Xtreme",
-               g_window_style,
-               g_window_rect.left,
-               g_window_rect.top,
-               v16,
-               g_window_rect.bottom - g_window_rect.top,
-               nullptr,
-               nullptr,
-               g_hinstance,
-               nullptr);
-    g_hwnd = Window;
-    if ( !Window )
-    {
-      v10 = 0;
-      goto LABEL_17;
-    }
-    UpdateWindow(Window);
+
+    // Right-align the window against the screen's right edge.
+    int window_x = GetSystemMetrics(SM_CXSCREEN) - g_window_rect.right;
+    g_window_rect.right += window_x;
+    int window_width = g_window_rect.right - (window_x + g_window_rect.left);
+    g_window_rect.left += window_x;
+
+    g_hwnd = CreateWindowExA(
+      g_window_ex_style,
+      "KKNDXtremeMainWindowClass",
+      "KKND Xtreme",
+      g_window_style,
+      g_window_rect.left,
+      g_window_rect.top,
+      window_width,
+      g_window_rect.bottom - g_window_rect.top,
+      nullptr,
+      nullptr,
+      g_hinstance,
+      nullptr);
+    if (!g_hwnd)
+      return FALSE;
+
+    UpdateWindow(g_hwnd);
   }
+
   REND_hdc_init();
-  v10 = REND_direct_draw_init();
-LABEL_17:
-  if ( !v10 )
-    return 0;
-  v14 = (RenderViewport *)malloc(0xFCu);
-  g_viewports_pool = v14;
-  if ( !v14 )
-    return 0;
-  for ( i = 0; i < 6; ++i )
-  {
-    v14[i].next = &v14[i + 1];
-    v14 = g_viewports_pool;
+  if (!REND_direct_draw_init())
+    return FALSE;
+
+  g_viewports_pool = malloc(7 * sizeof(RenderViewport));
+  if (!g_viewports_pool)
+    return FALSE;
+
+  for (int i = 0; i < 6; ++i) {
+    g_viewports_pool[i].next = &g_viewports_pool[i + 1];
   }
   g_viewports_pool[6].next = nullptr;
   g_viewports_free_head = g_viewports_pool;
+
   g_default_viewport.prev = &g_default_viewport;
   g_default_viewport.next = &g_default_viewport;
   g_default_viewport.flags = 0;
@@ -20446,200 +20446,199 @@ LABEL_17:
   g_default_viewport.clip_w = width;
   g_default_viewport.clip_h = height;
   g_default_viewport._render_viewport_20 = 0;
+
   g_render_window_initialized = 1;
-  return 1;
+  return TRUE;
 }
-// 47980C: using guessed type int g_window_bpp;
 
 //----- (00411A50) --------------------------------------------------------
-BOOL REND_direct_draw_init()
-{
-  BOOL v0; // eax
-  BOOL v1; // eax
-  BOOL v2; // eax
-  BOOL v3; // eax
-  BOOL v4; // eax
-  BOOL v5; // eax
-  HWND ActiveWindow; // eax
-  IDirectDrawSurface *v8; // [esp+68h] [ebp-280h] BYREF
-  LPDIRECTDRAW lpDD; // [esp+6Ch] [ebp-27Ch] BYREF
-  DDCAPS_DX3 v10; // [esp+70h] [ebp-278h] BYREF
-  DDCAPS_DX3 v11; // [esp+1ACh] [ebp-13Ch] BYREF
+// Sets up the DirectDraw surfaces, palette and clipper for the current window.
+// Returns TRUE only when the whole chain succeeds; REND_direct_draw_init owns
+// the shared success/failure epilogue. DirectDraw methods return DD_OK (0) on
+// success, so a non-zero HRESULT means the call failed.
+static BOOL REND_direct_draw_setup() {
+  DDCAPS_DX3 hal_caps; // hardware (HAL) capabilities
+  DDCAPS_DX3 hel_caps; // emulation (HEL) capabilities
+  hal_caps.dwSize = sizeof(hal_caps);
+  memset(&hal_caps.dwCaps, 0, sizeof(hal_caps) - sizeof(hal_caps.dwSize));
+  hel_caps.dwSize = sizeof(hel_caps);
+  memset(&hel_caps.dwCaps, 0, sizeof(hel_caps) - sizeof(hel_caps.dwSize));
+  g_pdd->lpVtbl->GetCaps(g_pdd, (LPDDCAPS)&hal_caps, (LPDDCAPS)&hel_caps);
+  if (!(hal_caps.dwCaps & DDCAPS_CANBLTSYSMEM) && !(hel_caps.dwCaps & DDCAPS_CANBLTSYSMEM))
+    return FALSE;
 
-  if ( !g_ddraw_initialized && !g_pdd )
-  {
-    g_ddraw_initialized = 1;
-    lpDD = nullptr;
-    if ( !DirectDrawCreate(nullptr, &lpDD, nullptr) )
-    {
-      g_pdd = lpDD;
-      if ( lpDD )
-      {
-        v10.dwSize = 316;
-        memset(&v10.dwCaps, 0, 0x138u);
-        v11.dwSize = 316;
-        memset(&v11.dwCaps, 0, 0x138u);
-        lpDD->lpVtbl->GetCaps(lpDD, (LPDDCAPS)&v10, (LPDDCAPS)&v11);
-        if ( (v10.dwCaps & 0x80000000) != 0 || (v11.dwCaps & 0x80000000) != 0 )
-        {
-          if ( g_fullscreen )
-          {
-            g_window_style = 0x90080000;
-            g_window_ex_style = 0x40008;
-            SetWindowLongA(g_hwnd, GWL_STYLE, 0x90080000);
-            SetWindowLongA(g_hwnd, GWL_EXSTYLE, g_window_ex_style);
-            SetWindowPos(g_hwnd, HWND_TOPMOST, 0, 0, g_window_width, g_window_height, 0x60u);
-            InvalidateRect(g_hwnd, nullptr, 1);
-            UpdateWindow(g_hwnd);
-            if ( !g_pdd->lpVtbl->SetCooperativeLevel(g_pdd, g_hwnd, 0x17)
-              && !g_pdd->lpVtbl->SetDisplayMode(g_pdd, g_window_width, g_window_height, g_window_bpp) )
-            {
-              g_pdds2 = nullptr;
-              g_dd_backbuffer_desc.dwSize = 108;
-              g_dd_backbuffer_desc.dwFlags = 33;
-              g_dd_backbuffer_desc.ddsCaps.dwCaps = 536;
-              g_dd_backbuffer_desc.dwBackBufferCount = 2;
-              g_dd_has_flip_chain = 1;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &v8, nullptr) )
-              {
-                v0 = 0;
-              }
-              else
-              {
-                g_pdds = v8;
-                v0 = v8 != nullptr;
-              }
-              if ( v0 )
-                goto LABEL_50;
-              g_dd_backbuffer_desc.ddsCaps.dwCaps = 536;
-              g_dd_backbuffer_desc.dwBackBufferCount = 1;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &v8, nullptr) )
-              {
-                v1 = 0;
-              }
-              else
-              {
-                g_pdds = v8;
-                v1 = v8 != nullptr;
-              }
-              if ( v1 )
-                goto LABEL_50;
-              g_dd_has_flip_chain = 0;
-              g_dd_backbuffer_desc.dwFlags = 1;
-              g_dd_backbuffer_desc.ddsCaps.dwCaps = 512;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &v8, nullptr) )
-              {
-                v2 = 0;
-              }
-              else
-              {
-                g_pdds = v8;
-                v2 = v8 != nullptr;
-              }
-              if ( v2 )
-              {
-                g_dd_backbuffer_desc.dwHeight = g_window_height;
-                g_dd_backbuffer_desc.dwWidth = g_window_width;
-                g_dd_backbuffer_desc.dwFlags = 7;
-                g_dd_backbuffer_desc.ddsCaps.dwCaps = 2112;
-                if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &v8, nullptr) )
-                {
-                  v3 = 0;
-                }
-                else
-                {
-                  g_pdds2 = v8;
-                  v3 = v8 != nullptr;
-                }
-                if ( v3 )
-                {
-LABEL_50:
-                  DDSCAPS caps;
-                  if ( g_pdds2
-                    || (caps.dwCaps = DDSCAPS_BACKBUFFER,
-                        !g_pdds->lpVtbl->GetAttachedSurface(g_pdds, &caps, &g_pdds2)) )
-                  {
-LABEL_38:
-                    if ( (!g_fullscreen
-                       || (!g_pdd->lpVtbl->CreatePalette(g_pdd, 68, g_dd_palette, &g_ddpal, nullptr)
-                       && !g_pdds->lpVtbl->SetPalette(g_pdds, g_ddpal)))
-                      && !g_pdd->lpVtbl->CreateClipper(g_pdd, 0, &g_clipper, nullptr)
-                      && !g_clipper->lpVtbl->SetHWnd(g_clipper, 0, g_hwnd)
-                      && !g_pdds->lpVtbl->SetClipper(g_pdds, g_clipper)
-                      && !g_pdds->lpVtbl->GetSurfaceDesc(g_pdds, &g_dd_backbuffer_desc) )
-                    {
-                      memcpy(&g_4797E8, &g_dd_backbuffer_desc.ddpfPixelFormat, sizeof(DDPIXELFORMAT));
-                      ShowWindow(g_hwnd, g_cmd_show);
-                      g_ddraw_initialized = 0;
-                      REND_clear_impl(1);
-                      return 1;
-                    }
-                  }
-                }
-              }
-            }
-          }
-          else
-          {
-            g_window_style = 0x90CA0000;
-            g_window_ex_style = 0x40000;
-            SetWindowLongA(g_hwnd, -16, 0x90CA0000);
-            SetWindowLongA(g_hwnd, -20, g_window_ex_style);
-            SetWindowPos(
-              g_hwnd,
-              (HWND)0xFFFFFFFE,
-              g_window_rect.left,
-              g_window_rect.top,
-              g_window_rect.right - g_window_rect.left,
-              g_window_rect.bottom - g_window_rect.top,
-              0x60u);
-            InvalidateRect(g_hwnd, nullptr, 1);
-            UpdateWindow(g_hwnd);
-            if ( !g_pdd->lpVtbl->SetCooperativeLevel(g_pdd, g_hwnd, 8) )
-            {
-              memset(&g_dd_backbuffer_desc, 0, sizeof(g_dd_backbuffer_desc));
-              g_dd_backbuffer_desc.dwSize = 108;
-              g_dd_backbuffer_desc.dwFlags = 1;
-              g_dd_backbuffer_desc.ddsCaps.dwCaps = 512;
-              if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &v8, nullptr) )
-              {
-                v4 = 0;
-              }
-              else
-              {
-                g_pdds = v8;
-                v4 = v8 != nullptr;
-              }
-              if ( v4 )
-              {
-                g_dd_backbuffer_desc.dwHeight = g_window_height;
-                g_dd_backbuffer_desc.dwWidth = g_window_width;
-                g_dd_backbuffer_desc.dwFlags = 7;
-                g_dd_backbuffer_desc.ddsCaps.dwCaps = 16448;
-                if ( g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &v8, nullptr) )
-                {
-                  v5 = 0;
-                }
-                else
-                {
-                  g_pdds2 = v8;
-                  v5 = v8 != nullptr;
-                }
-                if ( v5 )
-                  goto LABEL_38;
-              }
-            }
-          }
-        }
+  IDirectDrawSurface *surface = nullptr;
+
+  if (g_fullscreen) {
+    g_window_style = WS_POPUP | WS_VISIBLE | WS_SYSMENU;
+    g_window_ex_style = WS_EX_APPWINDOW | WS_EX_TOPMOST;
+    SetWindowLongA(g_hwnd, GWL_STYLE, g_window_style);
+    SetWindowLongA(g_hwnd, GWL_EXSTYLE, g_window_ex_style);
+    SetWindowPos(g_hwnd, HWND_TOPMOST, 0, 0, g_window_width, g_window_height,
+                 SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+    InvalidateRect(g_hwnd, nullptr, TRUE);
+    UpdateWindow(g_hwnd);
+    if (g_pdd->lpVtbl->SetCooperativeLevel(g_pdd, g_hwnd,
+            DDSCL_EXCLUSIVE | DDSCL_NOWINDOWCHANGES | DDSCL_ALLOWREBOOT | DDSCL_FULLSCREEN))
+      return FALSE;
+    if (g_pdd->lpVtbl->SetDisplayMode(g_pdd, g_window_width, g_window_height, g_window_bpp))
+      return FALSE;
+
+    // Preferred path: a flippable primary surface with a hardware back buffer.
+    g_pdds2 = nullptr;
+    g_dd_backbuffer_desc.dwSize = sizeof(DDSURFACEDESC);
+    g_dd_backbuffer_desc.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
+    g_dd_backbuffer_desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
+    g_dd_backbuffer_desc.dwBackBufferCount = 2;
+    g_dd_has_flip_chain = 1;
+
+    BOOL have_primary = FALSE;
+    if (!g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &surface, nullptr)) {
+      g_pdds = surface;
+      have_primary = surface != nullptr;
+    }
+    if (!have_primary) {
+      // Retry with a single back buffer.
+      g_dd_backbuffer_desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_FLIP | DDSCAPS_COMPLEX;
+      g_dd_backbuffer_desc.dwBackBufferCount = 1;
+      if (!g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &surface, nullptr)) {
+        g_pdds = surface;
+        have_primary = surface != nullptr;
       }
     }
-    g_ddraw_initialized = 0;
-    REND_direct_draw_cleanup();
-    ActiveWindow = GetActiveWindow();
-    MessageBoxA(ActiveWindow, "Failed to setup DirectDraw", "Error", 0);
-    return 0;
+    if (!have_primary) {
+      // Fall back to a plain primary plus a system-memory offscreen back buffer.
+      g_dd_has_flip_chain = 0;
+      g_dd_backbuffer_desc.dwFlags = DDSD_CAPS;
+      g_dd_backbuffer_desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+      BOOL primary_ok = FALSE;
+      if (!g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &surface, nullptr)) {
+        g_pdds = surface;
+        primary_ok = surface != nullptr;
+      }
+      if (!primary_ok)
+        return FALSE;
+
+      g_dd_backbuffer_desc.dwHeight = g_window_height;
+      g_dd_backbuffer_desc.dwWidth = g_window_width;
+      g_dd_backbuffer_desc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
+      g_dd_backbuffer_desc.ddsCaps.dwCaps = DDSCAPS_SYSTEMMEMORY | DDSCAPS_OFFSCREENPLAIN;
+      BOOL backbuffer_ok = FALSE;
+      if (!g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &surface, nullptr)) {
+        g_pdds2 = surface;
+        backbuffer_ok = surface != nullptr;
+      }
+      if (!backbuffer_ok)
+        return FALSE;
+    }
+  } else {
+    g_window_style = WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+    g_window_ex_style = WS_EX_APPWINDOW;
+    SetWindowLongA(g_hwnd, GWL_STYLE, g_window_style);
+    SetWindowLongA(g_hwnd, GWL_EXSTYLE, g_window_ex_style);
+    SetWindowPos(g_hwnd, HWND_NOTOPMOST, g_window_rect.left, g_window_rect.top,
+                 g_window_rect.right - g_window_rect.left,
+                 g_window_rect.bottom - g_window_rect.top,
+                 SWP_SHOWWINDOW | SWP_FRAMECHANGED);
+    InvalidateRect(g_hwnd, nullptr, TRUE);
+    UpdateWindow(g_hwnd);
+    if (g_pdd->lpVtbl->SetCooperativeLevel(g_pdd, g_hwnd, DDSCL_NORMAL))
+      return FALSE;
+
+    // Windowed: a plain primary plus a video-memory offscreen back buffer.
+    memset(&g_dd_backbuffer_desc, 0, sizeof(g_dd_backbuffer_desc));
+    g_dd_backbuffer_desc.dwSize = sizeof(DDSURFACEDESC);
+    g_dd_backbuffer_desc.dwFlags = DDSD_CAPS;
+    g_dd_backbuffer_desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+    BOOL primary_ok = FALSE;
+    if (!g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &surface, nullptr)) {
+      g_pdds = surface;
+      primary_ok = surface != nullptr;
+    }
+    if (!primary_ok)
+      return FALSE;
+
+    g_dd_backbuffer_desc.dwHeight = g_window_height;
+    g_dd_backbuffer_desc.dwWidth = g_window_width;
+    g_dd_backbuffer_desc.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
+    g_dd_backbuffer_desc.ddsCaps.dwCaps = DDSCAPS_VIDEOMEMORY | DDSCAPS_OFFSCREENPLAIN;
+    BOOL backbuffer_ok = FALSE;
+    if (!g_pdd->lpVtbl->CreateSurface(g_pdd, &g_dd_backbuffer_desc, &surface, nullptr)) {
+      g_pdds2 = surface;
+      backbuffer_ok = surface != nullptr;
+    }
+    if (!backbuffer_ok)
+      return FALSE;
   }
-  return 1;
+
+  // The flip-chain paths leave g_pdds2 null; grab the attached back buffer.
+  if (!g_pdds2) {
+    DDSCAPS caps;
+    caps.dwCaps = DDSCAPS_BACKBUFFER;
+    if (g_pdds->lpVtbl->GetAttachedSurface(g_pdds, &caps, &g_pdds2))
+      return FALSE;
+  }
+
+  // The DirectDraw palette only applies to an 8bpp primary surface; at higher
+  // bit depths the pixels already carry color (see write_color).
+  if (g_fullscreen && g_window_bpp == 8) {
+    if (g_pdd->lpVtbl->CreatePalette(g_pdd, DDPCAPS_ALLOW256 | DDPCAPS_8BIT, g_dd_palette, &g_ddpal, nullptr))
+      return FALSE;
+    if (g_pdds->lpVtbl->SetPalette(g_pdds, g_ddpal))
+      return FALSE;
+  }
+  if (g_pdd->lpVtbl->CreateClipper(g_pdd, 0, &g_clipper, nullptr))
+    return FALSE;
+  if (g_clipper->lpVtbl->SetHWnd(g_clipper, 0, g_hwnd))
+    return FALSE;
+  if (g_pdds->lpVtbl->SetClipper(g_pdds, g_clipper))
+    return FALSE;
+  if (g_pdds->lpVtbl->GetSurfaceDesc(g_pdds, &g_dd_backbuffer_desc))
+    return FALSE;
+
+  memcpy(&g_4797E8, &g_dd_backbuffer_desc.ddpfPixelFormat, sizeof(DDPIXELFORMAT));
+
+  // Adopt the surface's real pixel size. Windowed surfaces inherit the desktop
+  // format, which may differ from the requested bpp; keying write_color off the
+  // actual bit count keeps the packed pixel size in sync with the surface.
+  if (g_dd_backbuffer_desc.ddpfPixelFormat.dwRGBBitCount)
+    g_window_bpp = g_dd_backbuffer_desc.ddpfPixelFormat.dwRGBBitCount;
+
+  ShowWindow(g_hwnd, g_cmd_show);
+  return TRUE;
+}
+
+BOOL REND_direct_draw_init() {
+  if (g_ddraw_initialized || g_pdd)
+    return TRUE;
+
+  // g_ddraw_initialized acts as an "init in progress" guard so that a failed
+  // setup can call REND_direct_draw_cleanup() only after clearing it again.
+  g_ddraw_initialized = 1;
+
+  LPDIRECTDRAW lpDD = nullptr;
+  if (!DirectDrawCreate(nullptr, &lpDD, nullptr))
+    g_pdd = lpDD;
+
+  if (g_pdd && REND_direct_draw_setup()) {
+    g_ddraw_initialized = 0;
+    // >8bpp renders through an 8bpp scratch buffer that write_color converts.
+    if (g_window_bpp != 8 && !g_dd_index_buffer) {
+      g_dd_index_buffer = (uint8_t *)malloc((size_t)g_window_width * g_window_height);
+      if (!g_dd_index_buffer) {
+        REND_direct_draw_cleanup();
+        MessageBoxA(GetActiveWindow(), "Failed to allocate render buffer", "Error", MB_OK);
+        return FALSE;
+      }
+    }
+    REND_clear_impl(1);
+    return TRUE;
+  }
+
+  g_ddraw_initialized = 0;
+  REND_direct_draw_cleanup();
+  MessageBoxA(GetActiveWindow(), "Failed to setup DirectDraw", "Error", MB_OK);
+  return FALSE;
 }
 // 47980C: using guessed type int g_window_bpp;
 
@@ -20733,6 +20732,11 @@ void REND_direct_draw_cleanup()
       g_pdd->lpVtbl->Release(g_pdd);
       g_pdd = nullptr;
     }
+    if ( g_dd_index_buffer )
+    {
+      free(g_dd_index_buffer);
+      g_dd_index_buffer = nullptr;
+    }
   }
 }
 
@@ -20820,6 +20824,54 @@ BOOL REND_is_primary_surface_lost()
   return result;
 }
 
+// Writes palette index `c` at `dst` in the current surface pixel format and
+// returns dst advanced by one pixel (g_window_bpp / 8 bytes). At 8bpp this is a
+// raw index write (the DirectDraw palette does the coloring); at 15/16/24/32bpp
+// the index is looked up in the live brightness-adjusted palette and packed into
+// the target format. This is the single place that knows about target bitness.
+static inline uint8_t *write_color(uint8_t *dst, uint8_t c)
+{
+  if ( g_window_bpp == 8 )
+  {
+    *dst = c;
+    return dst + 1;
+  }
+
+  const PaletteEntry e = g_brightness_adjusted_pal[c];
+  switch ( g_window_bpp )
+  {
+    case 16: // RGB565
+      *(uint16_t *)dst = (uint16_t)(((e.r >> 3) << 11) | ((e.g >> 2) << 5) | (e.b >> 3));
+      return dst + 2;
+    case 24: // BGR888
+      dst[0] = e.b;
+      dst[1] = e.g;
+      dst[2] = e.r;
+      return dst + 3;
+    default: // 32bpp XRGB8888
+      *(uint32_t *)dst = ((uint32_t)e.r << 16) | ((uint32_t)e.g << 8) | e.b;
+      return dst + 4;
+  }
+}
+
+// Converts the 8bpp scratch buffer (g_dd_index_buffer, packed g_window_width per
+// row) into a locked >8bpp surface using write_color, honoring the surface pitch.
+static void REND_present_indices(void *surface, int pitch)
+{
+  if ( !g_brightness_adjusted_pal )
+    return; // no palette applied yet; nothing to convert
+  const uint8_t *src = g_dd_index_buffer;
+  uint8_t *row = (uint8_t *)surface;
+  for ( int y = 0; y < g_window_height; ++y )
+  {
+    uint8_t *dst = row;
+    for ( int x = 0; x < g_window_width; ++x )
+      dst = write_color(dst, src[x]);
+    src += g_window_width;
+    row += pitch;
+  }
+}
+
 //----- (004122D0) --------------------------------------------------------
 void __fastcall REND_draw_batch(RenderBatch *batch)
 {
@@ -20867,7 +20919,7 @@ void __fastcall REND_draw_batch(RenderBatch *batch)
           : (v7 = 0),
             v7) )
       {
-        if ( v2 )
+        if ( v2 && g_ddpal )
         {
           g_pdds->lpVtbl->SetPalette(g_pdds, g_ddpal);
           g_ddpal->lpVtbl->SetEntries(g_ddpal, 0, 0, 256, g_dd_palette);
@@ -20875,12 +20927,22 @@ void __fastcall REND_draw_batch(RenderBatch *batch)
         PAL_adjust_brightness(g_rend_default_viewport->brightness);
         if ( !g_pdds2->lpVtbl->Lock(g_pdds2, &g_dd_rect, &g_dd_backbuffer_desc, 1, nullptr) )
         {
-          *(int *)&g_dd_stride = g_dd_backbuffer_desc.lPitch;
-          if ( g_window_bpp == 16 )
-            *(int *)&g_dd_stride = g_dd_backbuffer_desc.lPitch >> 1;
           g_dd_4798E4_unused = 0;
-          g_dd_pixels = g_dd_backbuffer_desc.lpSurface;
           g_is_first_blt = 1;
+          if ( g_window_bpp == 8 )
+          {
+            // 8bpp: blitters write palette indices straight into the surface.
+            g_dd_stride = g_dd_backbuffer_desc.lPitch;
+            g_dd_pixels = g_dd_backbuffer_desc.lpSurface;
+          }
+          else
+          {
+            // 15/16/24/32bpp: blitters render 8bpp indices into the scratch
+            // buffer; REND_present_indices converts them to the surface format.
+            g_dd_stride = g_window_width;
+            g_dd_pixels = g_dd_index_buffer;
+            memset(g_dd_index_buffer, 0, (size_t)g_window_width * g_window_height);
+          }
           for ( i = batch->next; i != (RenderNode *)batch; i = i->next )
           {
             image = i->cmd.image;
@@ -20891,6 +20953,8 @@ void __fastcall REND_draw_batch(RenderBatch *batch)
                 blitter(&i->cmd, BlitterMode_Render);
             }
           }
+          if ( g_window_bpp != 8 )
+            REND_present_indices(g_dd_backbuffer_desc.lpSurface, g_dd_backbuffer_desc.lPitch);
           if ( !g_pdds2->lpVtbl->Unlock(g_pdds2, g_dd_backbuffer_desc.lpSurface) )
           {
             if ( g_fullscreen )
@@ -21117,9 +21181,9 @@ int __fastcall REND_mode_scrl_draw(RenderCommand *cmd, BlitterMode mode)
       if ( !viewport )
         viewport = g_rend_default_viewport;
       if ( v6 >= viewport->clip_w
-        || v6 <= -(__int16)(LOWORD(image->tile_x_size) * LOWORD(image->num_x_tiles))
+        || v6 <= -(__int16)(image->tile_x_size * image->num_x_tiles)
         || y >= viewport->clip_h
-        || y <= -(__int16)(LOWORD(image->tile_y_size) * LOWORD(image->num_y_tiles)) )
+        || y <= -(__int16)(image->tile_y_size * image->num_y_tiles) )
       {
         return 0;
       }
@@ -27695,7 +27759,7 @@ BOOL SYS_init()
     result = FILE_init();
     if ( result )
     {
-      result = REND_create_window(640, 480, 8, 1, false);
+      result = REND_create_window(640, 480, 32, 1, false);
       if ( result )
       {
         g_window_initialized = 1;
@@ -27891,7 +27955,7 @@ void SYS_shutdown()
 //----- (0041B420) --------------------------------------------------------
 void *__fastcall LVL_find_section(const char *name)
 {
-  for (LevelHunkSection *s = g_current_lvl_sections; g_current_lvl_sections->data; ++s) {
+  for (LevelHunkSection *s = g_current_lvl_sections; s->data; ++s) {
     if (!strncmp(name, s->name, 4)) {
       return s->data;
     }
@@ -34206,7 +34270,7 @@ void __cdecl GAME_save_failed_task(Task *task)
   v4 = UI_str_calc_width(static_479F38, 128);
   v5 = UI_str_create(
          nullptr,
-         (FontMobd *)g_mobd[MobdId_Font_Main].layers[MobdId_Mute_AlchemyHall],
+         (FontMobd *)g_mobd[MobdId_Font_Main].layers[0],
          v1 - ((8 * (v4 + 2)) >> 1),
          v2 - 32,
          v4 + 2,
@@ -34665,7 +34729,7 @@ BOOL GAME_splash()
     exit(0);
   }
   mapd = (LevelMapd *)LVL_find_section("MAPD");
-  PAL_apply(mapd->layers->palette);
+  PAL_apply(mapd[MenuId_Main].layers[0].palette);
   g_mapd_layers_rns[0] = LVL_get_mapd(MenuId_Main, 0, 0);
   g_mapd_camera.y = 0x1EA00;
   splash_ticks = 180;
@@ -34949,7 +35013,7 @@ LABEL_42:
       v10 = REND_viewport_create(0, 240, 313, 160, 128);
       v11 = UI_str_create(
               nullptr,
-              (FontMobd *)g_mobd[MobdId_Font_Briefing].layers[MobdId_Mute_AlchemyHall],
+              (FontMobd *)g_mobd[MobdId_Font_Briefing].layers[0],
               400,
               40,
               25,
@@ -35598,7 +35662,7 @@ void __cdecl GAME_mission_briefing(Task *task)
   FADE_out(task);
   g_work_ui_str = UI_str_create(
                     nullptr,
-                    (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+                    (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
                     84,
                     84,
                     39,
@@ -38330,8 +38394,8 @@ BOOL LVL_mobd_init()
       }
       while ( v1 );
       result->next = (Entity *)&g_entity_free_pool_head;
-      g_entity_tail = (Entity *)&g_entity_head;
-      g_entity_head = (Entity *)&g_entity_head;
+      g_entity_tail = &g_entity_list;
+      g_entity_head = &g_entity_list;
       ENT_init_default_template();
       REND_default_entity_transofrm = REND_transform_basic;
       return 1;
@@ -38779,20 +38843,22 @@ void __fastcall ENT_anim_set(Entity *entity, ptrdiff_t anim)
 //----- (004272E0) --------------------------------------------------------
 void __fastcall ENT_anim_set_frame(Entity *entity, ptrdiff_t anim, ptrdiff_t frame)
 {
-  MobdAnimation *anim_; // eax
-  int anim_speed; // eax
-  MobdAnimation *anim__; // edx
-
-  anim_ = *(MobdAnimation **)((char *)&g_mobd[entity->mobd_id].layers[0]->frames[0].x + 4 * frame + anim);
+  // Here `anim` is a byte offset into the mobd surface to a TABLE of
+  // MobdAnimation pointers (one per orientation/frame); `frame` indexes it.
+  // (Contrast ENT_anim_set, where `anim` points straight at one MobdAnimation.)
+  // The table lives in packed mobd data at an unaligned address, so load the
+  // pointer with memcpy rather than a (4-byte-aligned) MobdAnimation** deref.
+  uint8_t *slot = (uint8_t *)g_mobd[entity->mobd_id].layers[0] + anim + frame * (ptrdiff_t)sizeof(MobdAnimation *);
+  MobdAnimation *anim_;
+  memcpy(&anim_, slot, sizeof(anim_));
   entity->anim = anim_;
   if ( anim_ )
   {
-    anim_speed = anim_->anim_speed;
+    int anim_speed = anim_->anim_speed;
     if ( anim_speed )
       entity->anim_speed = anim_speed;
-    anim__ = entity->anim;
     entity->anim_timer = -1;
-    entity->anim_cursor = anim__;
+    entity->anim_cursor = anim_;
     ENT_anim_tick(entity);
   }
 }
@@ -38938,7 +39004,7 @@ void __fastcall ENT_anim_tick(Entity *entity)
         {
           v7 = entity->anim->frames;
           entity->anim_cursor = (MobdAnimation *)v7;
-          v8 = *v7;
+          v8 = entity->anim->frames[0];         // *v7, but via packed MobdAnimation (frames sits at an unaligned address)
           entity->anim_current_frame = v8;
           shape = v8->shape;
           task = entity->task;
@@ -39919,11 +39985,13 @@ BOOL INPUT_mouse_update()
     ScreenToClient(g_hwnd, &Point);
     cursor_x = g_mouse_state.cursor_x;
     g_mouse_state.direction = Direction_N;
-    g_mouse_state.cursor_x = Point.x << 8;
-    g_mouse_state.cursor_dx = (Point.x << 8) - cursor_x;
-    dy = (Point.y << 8) - g_mouse_state.cursor_y;
-    v3 = Point.y << 8 == g_mouse_state.cursor_y;
-    g_mouse_state.cursor_y = Point.y << 8;
+    // Fixed-point 8.8; Point.x/y can be negative (cursor outside the client
+    // area), so multiply instead of left-shifting (UB on negative values).
+    g_mouse_state.cursor_x = Point.x * 256;
+    g_mouse_state.cursor_dx = (Point.x * 256) - cursor_x;
+    dy = (Point.y * 256) - g_mouse_state.cursor_y;
+    v3 = Point.y * 256 == g_mouse_state.cursor_y;
+    g_mouse_state.cursor_y = Point.y * 256;
     g_mouse_state.cursor_dy = dy;
     if ( !v3 )
     {
@@ -43773,7 +43841,7 @@ void __cdecl UI_sidebar_tooltip(Task *task)
       payload->entity->is_collidable = 1;
       v11 = UI_str_create(
               nullptr,
-              (FontMobd *)g_mobd[MobdId_Font_Main].layers[MobdId_Mute_AlchemyHall],
+              (FontMobd *)g_mobd[MobdId_Font_Main].layers[0],
               (payload->entity->x >> 8) - (8 * v10 + 8),
               (payload->entity->y >> 8) + 22,
               v10 + 2,
@@ -43910,7 +43978,7 @@ void __cdecl NETZ_multi_chat(Task *task)
   memset(g_netz_chat_input_buf_static, 0, sizeof(g_netz_chat_input_buf_static));
   v1 = UI_str_create(
          nullptr,
-         (FontMobd *)g_mobd[MobdId_Font_Main].layers[MobdId_Mute_AlchemyHall],
+         (FontMobd *)g_mobd[MobdId_Font_Main].layers[0],
          144,
          304,
          42,
@@ -46121,17 +46189,14 @@ NetzError __fastcall NETZ_init(
         void (__fastcall *msg_loop)(NetzMessage *))
 {
   NetzError result; // eax
-  int v5; // edi
-  NetzProvider * i; // esi
 
   if ( !msg_loop )
     return NetzError_Failed;
   g_netz_msg_loop = msg_loop;
-  v5 = 0;
-  i = &g_netz_providers[0];
-  do
-    (i++)->_netz_provider_field_10 = DP_providers_init(v5++) >= 0;
-  while ( (int)i + 0x10 < (int)"m" );                  // BUG
+
+  for (int i = 0; i < NETZ_PROVIDERS_MAX; ++i) {
+    g_netz_providers[i]._netz_provider_field_10 = DP_providers_init(i) >= 0;
+  }
   if ( (int)protocol < (int)NetzProtocol_TCP )
     return NetzError_Ok;
   if ( (int)protocol < (int)NetzProtocol_Count && g_netz_providers[protocol]._netz_provider_field_10 )
@@ -46317,30 +46382,13 @@ NetzError __fastcall NETZ_send(
 //----- (0042FAC0) --------------------------------------------------------
 NetzProtocol __fastcall NETZ_provider_find(const char *name)
 {
-  NetzProtocol i; // ebp
-  NetzProvider * v2; // ebx
-  int v3; // esi
-  const char **v4; // edi
-
-  i = NetzProtocol_TCP;
-  v2 = (NetzProvider *)&g_netz_providers[0].names[1];// BUG
-  while ( 2 )
-  {
-    v3 = 0;
-    v4 = (const char **)v2;
-    do
-    {
-      if ( !_strcmpi(name, *v4) )
-        return i;
-      ++v3;
-      ++v4;
+  for (int i = 0; i < NETZ_PROVIDERS_MAX; ++i) {
+    const char **names = g_netz_providers[i].names;
+    for (size_t j = 0; j < sizeof(g_netz_providers[i].names) / sizeof(names[0]); ++j) {
+      if (!_strcmpi(name, names[j])) {
+        return (NetzProtocol)i;
+      }
     }
-    while ( v3 < 2 );
-    ++v2;
-    ++i;
-    if ( (int)v2 < (int)"ctX modem" )           // BUG
-      continue;
-    break;
   }
   return NetzProtocol_Invalid;
 }
@@ -48445,7 +48493,7 @@ void __fastcall UI_ingame_sound_settings(Task *task)
   TSK_broadcast_message(task, TaskMessage_Retreat_or_CancelUi, nullptr, TaskChannel_IngameMenuButton);
   g_work_ui_str = UI_str_create(
                     nullptr,
-                    (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+                    (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
                     248,
                     88,
                     22,
@@ -48832,7 +48880,7 @@ void __fastcall UI_save_load_dialog(Task *task, BOOL is_main_menu_mode, BOOL is_
   g_ui_save_load_dialog_task = task;
   v5 = UI_str_create(
          nullptr,
-         (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+         (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
          216,
          is_main_menu_mode ? 240 : 80,
          22,
@@ -49264,7 +49312,7 @@ LABEL_27:
                 TSK_broadcast_message(task, TaskMessage_Retreat_or_CancelUi, nullptr, TaskChannel_IngameMenuButton);
                 g_work_ui_str = UI_str_create(
                                   nullptr,
-                                  (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+                                  (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
                                   256,
                                   96,
                                   22,
@@ -49312,7 +49360,7 @@ LABEL_27:
                 TSK_broadcast_message(task, TaskMessage_Retreat_or_CancelUi, nullptr, TaskChannel_IngameMenuButton);
                 g_work_ui_str = UI_str_create(
                                   nullptr,
-                                  (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+                                  (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
                                   256,
                                   96,
                                   22,
@@ -50505,7 +50553,7 @@ void __fastcall REND_blt_opaque_impl(unsigned __int8 *pixels, int x, int y, int 
       return;
     v17 = height + y;
     v15 = &pixels[width * -y];
-    v19 = *(int *)&g_dd_stride * g_rend_clip_y;
+    v19 = g_dd_stride * g_rend_clip_y;
   }
   else
   {
@@ -50519,7 +50567,7 @@ void __fastcall REND_blt_opaque_impl(unsigned __int8 *pixels, int x, int y, int 
         return;
       v17 = g_rend_clip_w - y;
     }
-    v19 = *(int *)&g_dd_stride * (g_rend_clip_y + y);
+    v19 = g_dd_stride * (g_rend_clip_y + y);
   }
   if ( x < 0 )
   {
@@ -50547,7 +50595,7 @@ void __fastcall REND_blt_opaque_impl(unsigned __int8 *pixels, int x, int y, int 
 LABEL_14:
       v20 = g_rend_clip_x + x + v19;
 LABEL_17:
-      v21 = *(int *)&g_dd_stride - v16;
+      v21 = g_dd_stride - v16;
       v5 = (char *)v15;
       v6 = (char *)g_dd_pixels + v20;
       v7 = v17;
@@ -50613,7 +50661,7 @@ void __fastcall REND_blt_opaque_interlaced_impl(unsigned __int8 *pixels, int x, 
       return;
     v10 = height + y;
     v5 = &pixels[width * -y];
-    v12 = *(int *)&g_dd_stride * g_rend_clip_y;
+    v12 = g_dd_stride * g_rend_clip_y;
   }
   else
   {
@@ -50627,7 +50675,7 @@ void __fastcall REND_blt_opaque_interlaced_impl(unsigned __int8 *pixels, int x, 
         return;
       v10 = g_rend_clip_w - y;
     }
-    v12 = *(int *)&g_dd_stride * (g_rend_clip_y + y);
+    v12 = g_dd_stride * (g_rend_clip_y + y);
   }
   if ( x < 0 )
   {
@@ -50654,7 +50702,7 @@ void __fastcall REND_blt_opaque_interlaced_impl(unsigned __int8 *pixels, int x, 
     }
     v13 = g_rend_clip_x + x + v12;
   }
-  v14 = *(int *)&g_dd_stride - v7;
+  v14 = g_dd_stride - v7;
   v6 = v5;
   v8 = (unsigned __int8 *)g_dd_pixels + v13;
   while ( v10 )
@@ -50741,7 +50789,7 @@ void __fastcall REND_blt_colorkey_impl(unsigned __int8 *pixels, int x, int y, in
   if ( v14 > 0 && v13 > 0 )
   {
     v5 = v15;
-    v6 = (char *)g_dd_pixels + v12 + v11 * *(int *)&g_dd_stride;
+    v6 = (char *)g_dd_pixels + v12 + v11 * g_dd_stride;
     v7 = v13;
     do
     {
@@ -50755,7 +50803,7 @@ void __fastcall REND_blt_colorkey_impl(unsigned __int8 *pixels, int x, int y, in
       }
       while ( v8 );
       v5 += width;
-      v6 += *(int *)&g_dd_stride;
+      v6 += g_dd_stride;
       --v7;
     }
     while ( v7 );
@@ -50815,7 +50863,7 @@ void __fastcall REND_blt_colorkey_mirrored_impl(unsigned __int8 *pixels, int x, 
   if ( v15 > 0 && v14 > 0 )
   {
     v5 = v16;
-    v6 = (char *)g_dd_pixels + v13 + v12 * *(int *)&g_dd_stride;
+    v6 = (char *)g_dd_pixels + v13 + v12 * g_dd_stride;
     v7 = v14;
     do
     {
@@ -50831,16 +50879,12 @@ void __fastcall REND_blt_colorkey_mirrored_impl(unsigned __int8 *pixels, int x, 
       }
       while ( v8 );
       v5 += width;
-      v6 += *(int *)&g_dd_stride;
+      v6 += g_dd_stride;
       --v7;
     }
     while ( v7 );
   }
 }
-// 47C034: using guessed type int g_rend_clip_w;
-// 47C038: using guessed type int g_rend_clip_z;
-// 47C03C: using guessed type int g_rend_clip_x;
-// 47C040: using guessed type int g_rend_clip_y;
 
 //----- (004354A0) --------------------------------------------------------
 // fast (?) dword version - 4 byte transparent checks per iteration
@@ -50866,7 +50910,7 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
       return;
     v11 = height + y;
     v5 = &pixels[width * -y];
-    v14 = *(int *)&g_dd_stride * g_rend_clip_y;
+    v14 = g_dd_stride * g_rend_clip_y;
   }
   else
   {
@@ -50880,7 +50924,7 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
         return;
       v11 = g_rend_clip_w - y;
     }
-    v14 = *(int *)&g_dd_stride * (g_rend_clip_y + y);
+    v14 = g_dd_stride * (g_rend_clip_y + y);
   }
   if ( x < 0 )
   {
@@ -50907,7 +50951,7 @@ void __fastcall REND_blt_colorkey_fast_impl(unsigned __int8 *pixels, int x, int 
     }
     v15 = g_rend_clip_x + x + v14;
   }
-  v16 = *(int *)&g_dd_stride - v9;
+  v16 = g_dd_stride - v9;
   v8 = v5;
   v10 = (unsigned __int8 *)g_dd_pixels + v15;
   while ( v11 )
@@ -52519,6 +52563,20 @@ void __cdecl PROJ_mode_generic(Task *task)
   --g_num_active_projectiles;
 }
 
+// Unaligned 32-bit load/store helpers. The hunk patch offsets aren't
+// guaranteed 4-byte aligned, so we must never form a `uint32_t *` (that type
+// promises alignment, which lets clang emit aligned loads and trips UBSan on
+// clang/zig). Going through void*/memcpy keeps the access alignment-agnostic;
+// on x86 it lowers to a plain mov, matching the original MSVC behaviour.
+static inline uint32_t HUNK_read32u(const void *p) {
+  uint32_t v;
+  memcpy(&v, p, sizeof v);
+  return v;
+}
+static inline void HUNK_write32u(void *p, uint32_t v) {
+  memcpy(p, &v, sizeof v);
+}
+
 //----- (00437DA0) --------------------------------------------------------
 bool __fastcall HUNK_fix_pointers(void *data, RllcHunk *rllc)
 {
@@ -52535,8 +52593,8 @@ bool __fastcall HUNK_fix_pointers(void *data, RllcHunk *rllc)
 
     if (entry & HunkFixup_Renderer) {
       uintptr_t offset = entry & 0x3FFFFFFF;
-      uint32_t *patch = (uint32_t *)((uint8_t *)data + offset);
-      unsigned int blitter_id = *patch;
+      uint8_t *patch = (uint8_t *)data + offset;
+      unsigned int blitter_id = HUNK_read32u(patch);
 
       if (blitter_id != cached_blitter_id) {
         cached_blitter_id = blitter_id;
@@ -52546,22 +52604,24 @@ bool __fastcall HUNK_fix_pointers(void *data, RllcHunk *rllc)
         }
       }
       // x64 concern
-      *patch = (uint32_t)cached_blitter->mode_render;
+      HUNK_write32u(patch, (uint32_t)cached_blitter->mode_render);
     } else if (entry & HunkFixup_PointerArray) {
       uintptr_t offset = entry & 0x3FFFFFFF;
-      unsigned int count = rllc->fixups[++i];
-      uint32_t *ptrs = (uint32_t *)((uint8_t *)data + offset);
+      // The RLLC stores the array length minus one, so relocate count + 1 pointers.
+      unsigned int count = rllc->fixups[++i] + 1;
+      uint8_t *ptrs = (uint8_t *)data + offset;
 
       for (unsigned int j = 0; j < count; ++j) {
         // x64 concern
-        ptrs[j] += (uint32_t)data;
+        uint8_t *slot = ptrs + (size_t)j * sizeof(uint32_t);
+        HUNK_write32u(slot, HUNK_read32u(slot) + (uint32_t)data);
       }
     } else {
       // single pointer
       uintptr_t offset = entry;  // no flags so the entire value is offset
-      uint32_t *patch = (uint32_t *)((uint8_t *)data + offset);
+      uint8_t *patch = (uint8_t *)data + offset;
       // x64 concern
-      *patch += (uint32_t)data;
+      HUNK_write32u(patch, HUNK_read32u(patch) + (uint32_t)data);
     }
   }
 
@@ -53539,8 +53599,8 @@ BOOL LVL_mapd_init()
       }
       while ( v4 );
       v3->next = (MapdRenderNode *)&g_mapd_render_node_next_free;
-      g_mapd_render_node_tail = (MapdRenderNode *)&g_mapd_render_node_head;
-      g_mapd_render_node_head = (MapdRenderNode *)&g_mapd_render_node_head;
+      g_mapd_render_node_tail = g_mapd_render_node_list;
+      g_mapd_render_node_head = g_mapd_render_node_list;
       g_mapd_camera_target = nullptr;
       g_mapd_camera.z = 0;
       g_mapd_camera.y = 0;
@@ -53593,7 +53653,7 @@ MapdRenderNode *__fastcall LVL_get_mapd(MenuId mapd_id, int image_id, int z)
     g_mapd_render_node_tail->next = v7;
     g_mapd_render_node_tail = v7;
     rn = v7->rn;
-    v9 = g_mapd[v5].layers->images[image_id];
+    v9 = &g_mapd[v5].layers[0].images[image_id];
     v7->scrl = v9;
     rn->cmd.image = (RenderImage *)v9;
     v7->z = z;
@@ -58437,7 +58497,7 @@ void __cdecl UI_main_menu_multi_lobby_list(Task *task)
     TSK_schedule_self_destruct(task);
   v3 = UI_str_create(
          nullptr,
-         (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+         (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
          69,
          219,
          27,
@@ -58621,7 +58681,7 @@ void __cdecl UI_main_menu_multi_session_list(Task *task)
       v5 = entity;
       v6 = UI_str_create(
              nullptr,
-             (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+             (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
              183,
              136,
              20,
@@ -60235,7 +60295,7 @@ void __cdecl UI_main_menu_game_allies_count_and_lobby_watch(Task *task)
   {
     v1 = UI_str_create(
            nullptr,
-           (FontMobd *)g_mobd[MobdId_Font_Menu].layers[MobdId_Mute_AlchemyHall],
+           (FontMobd *)g_mobd[MobdId_Font_Menu].layers[0],
            150,
            252,
            10,
@@ -62903,7 +62963,7 @@ BOOL __fastcall TSK_init(int default_coroutine_stack_size)
 
   v1 = default_coroutine_stack_size;
   if ( !default_coroutine_stack_size )
-    v1 = 2048;
+    v1 = 4096;
   result = TSK_message_pool_init();
   if ( result )
   {
@@ -63270,7 +63330,7 @@ void TSK_coroutine_starter()
 {
   Coroutine *volatile v0; // edx
   TaskFn v1; // [esp+0h] [ebp-8h]
-  Task *task; // [esp+4h] [ebp-4h]
+  Task *volatile task; // [esp+4h] [ebp-4h]
 
   task = g_task_creation_arg;
   v1 = g_task_creation_main;
@@ -64773,7 +64833,7 @@ void __fastcall UI_sidebar_mode_cash_open(SidebarButton *button)
   button->entity->is_collidable = 1;
   g_sidebar_cash_string = UI_str_create(
                             nullptr,
-                            (FontMobd *)g_mobd[MobdId_Font_Main].layers[MobdId_Mute_AlchemyHall],
+                            (FontMobd *)g_mobd[MobdId_Font_Main].layers[0],
                             (button->entity->x >> 8) - (8 * v3 + 24),
                             button->entity->y >> 8,
                             v3 + 2,
@@ -66114,7 +66174,7 @@ void __fastcall REND_transform_infantry_overlay(Unit *unit, RenderNode *node)
   y = g_mapd_camera.y;
   v5 = unit_->entity->y;
   node->cmd.z = 0x200000;
-  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284);
+  node->cmd.image = (RenderImage *)&unit->overlay_sprt;
   node->cmd.y = (v5 - y - 6400) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
@@ -66135,7 +66195,7 @@ void __fastcall REND_transform_vehicle_overlay(Unit *unit, RenderNode *node)
   y = g_mapd_camera.y;
   v6 = unit_->mobd_anchors.render->y + unit_->entity->y;
   node->cmd.z = 0x200000;
-  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284);
+  node->cmd.image = (RenderImage *)&unit->overlay_sprt;
   node->cmd.y = (v6 - y - 1024) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
@@ -66154,27 +66214,20 @@ void __fastcall REND_transform_tanker_overlay(Unit *unit, RenderNode *node)
   y = g_mapd_camera.y;
   v5 = unit_->entity->y;
   node->cmd.z = 0x200000;
-  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284);
+  node->cmd.image = (RenderImage *)&unit->overlay_sprt;
   node->cmd.y = (v5 - y - 6400) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
 
 //----- (00448880) --------------------------------------------------------
-void __fastcall REND_transform_aircraft_overlay(Unit *unit, RenderNode *node)
-{
+void __fastcall REND_transform_aircraft_overlay(Unit *unit, RenderNode *node) {
   Entity *entity; // esi
-  int x; // eax
-  Unit * unit_; // ecx
-  int v5; // eax
 
   entity = unit->entity;
-  x = unit->mobd_anchors.render->x;
-  unit_ = unit;
-  node->cmd.x = (entity->x + x - g_mapd_camera.x - 4096) >> 8;
-  v5 = unit_->entity->y - (unit_->entity->z >> 1) - g_mapd_camera.y;
+  node->cmd.x = (entity->x + unit->mobd_anchors.render->x - g_mapd_camera.x - 4096) >> 8;
   node->cmd.z = 0x400000;
-  node->cmd.image = (RenderImage *)((char *)unit_ + 0x284); // BUG it's actally ->overlay_sprt
-  node->cmd.y = (v5 - 1024) >> 8;
+  node->cmd.image = (RenderImage *)&unit->overlay_sprt;
+  node->cmd.y = (unit->entity->y - (unit->entity->z >> 1) - g_mapd_camera.y - 1024) >> 8;
   node->cmd.viewport = g_rend_default_viewport;
 }
 
@@ -70007,7 +70060,7 @@ void __cdecl UI_show_notification_box_task(Task *task)
       v10 = UI_str_calc_width(text, 128);
       v11 = UI_str_create(
               nullptr,
-              (FontMobd *)g_mobd[MobdId_Font_Main].layers[MobdId_Mute_AlchemyHall],
+              (FontMobd *)g_mobd[MobdId_Font_Main].layers[0],
               v7 - ((8 * (v10 + 2)) >> 1),
               v8 - 32,
               v10 + 2,
@@ -70131,7 +70184,7 @@ void __cdecl UI_show_message_multi_chat_task(Task *task)
       v10 = UI_str_calc_width(text, 128);
       v11 = UI_str_create(
               nullptr,
-              (FontMobd *)g_mobd[MobdId_Font_Main].layers[MobdId_Mute_AlchemyHall],
+              (FontMobd *)g_mobd[MobdId_Font_Main].layers[0],
               v7 - ((8 * (v10 + 2)) >> 1),
               v8 - 32,
               v10 + 2,
